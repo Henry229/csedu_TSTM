@@ -1,0 +1,51 @@
+{
+	"name": "qtism/qtism",
+	"description": "OAT QTI-SDK",
+	"type": "library",
+	"authors": [
+		{
+			"name": "Open Assessment Technologies S.A.",
+			"homepage": "http://www.taotesting.com"
+		},
+		{
+			"name": "Jérôme Bogaerts",
+			"email": "jerome@taotesting.com",
+			"homepage": "http://www.taotesting.com",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"forum": "http://forge.taotesting.com",
+		"issues": "http://forge.taotesting.com"
+	},
+	"keywords" : ["QTI", "IMS", "OAT", "TAO", "CBA", "Computer-Based Assessment", "Computer-Aided Assessment", "Computer-Assisted Assessment"],
+	"homepage" : "http://www.taotesting.com",
+	"license" : [
+		"GPL-2.0-only"
+	],
+	"require" : {
+		"php" : ">=5.5",
+		"ext-dom": "*",
+		"ext-mbstring": "*",
+		"ext-json": "*",
+		"ext-date": "*",
+		"wp-cli/php-cli-tools": "0.10.3"
+	},
+	"require-dev": {
+		"phpunit/PHPUnit": "~5.0",
+		"satooshi/php-coveralls": "~v2.0.0"
+	},
+	"bin": [
+	   "bin/qtisdk"
+	],
+	"autoload": {
+		"psr-0": {
+			"qtism": "src"
+		}
+	},
+	"autoload-dev": {
+		"psr-0": {
+			"qtismtest": "test"
+		}
+	}
+}

@@ -1,0 +1,258 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}
+{% block app_content %}
+
+
+    <h3><i class="fas fa-calendar-alt font-2xl" style="color: #339af0;"></i> Testset Manage </h3>
+    If you plan to create [New] testset, please simply click on the New button.<br><br>
+
+    Please follow these steps for [Clone], [Edit] testset:<br>
+    Step1- To Edit or Clone the existing testset, please search testset first and click on the Save button.<br>
+    Step2- Choose testset you plan to manage. Click on the Clone or Edit button. <br>
+    <br>
+
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Testset Search
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        {# testset Search #}
+                        <p id="search_panel">
+                        <h5>Choose you search condition. Click on the Search button.</h5>
+                        <small class="text-muted">Testset Search </small>
+                        <br>
+
+                        <form method="GET" class="form inline" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ form.testset_name.label }}
+                            {{ form.testset_name }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.grade.label }}
+                            {{ form.grade }}
+                            {{ form.subject.label }}
+                            {{ form.subject }}
+                            {{ form.completed }}
+                            {{ form.completed.label }}
+                            {{ form.submit(class="btn btn-success btn-sm", id="search") }}
+                        </form>
+                        <p/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card card-accent-info">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <i class="icons cui-list"></i> Testset List
+                        </div>
+                        <div class="col">
+                        </div>
+                        <div class="col-md-auto">
+                            <form method="POST" class="form inline" role="form" id="clone_form" action="">
+                                <button class="btn btn-warning btn-square btn-sm" type="button"
+                                        onclick="redirectTestsetCreate(this)"
+                                        value="create"> New
+                                </button>
+                                {% if is_rows %}
+                                    <button class="btn btn-danger btn-square btn-sm" type="button"
+                                            name="modalButtonClone"
+                                            value="manage/clone" data-toggle="modal" data-target="#confirm-clone"> Clone
+                                    </button>
+                                    <button class="btn btn-primary btn-square btn-sm" type="button"
+                                            onclick="redirectTestsetCreate(this,'edit')"
+                                            value="manage/update"> Edit
+                                    </button>
+                                    <button class="btn btn-outline-success btn-square btn-sm" type="button"
+                                            name="modalButtonDelete"
+                                            value="manage/delete" data-toggle="modal" data-target="#confirm-delete">
+                                        Delete
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">Click a testset to list up ... To view the details of testset, click on <i
+                            class="icons cui-info"></i>.</small>
+                    <table id="testsets" class="display table table-hover" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Testset Name</th>
+                            <th>Version</th>
+                            <th>Grade</th>
+                            <th>Subject</th>
+                            <th>Test Type</th>
+                            <th># of stages</th>
+                            <th>Completed?</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if testsets %}
+                            {% for testset in testsets %}
+                                <tr>
+                                    {% if testset.delete is sameas True %}
+                                        <td>
+                                            <a name="modalButton" onclick="invokeModalTestset({{ testset.id }})"
+                                               data-toggle="modal" data-target="#dataModal">
+                                                <i class="icons cui-info"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <del>{{ testset.id }}</del>
+                                        </td>
+                                        <td>
+                                            <del>{{ testset.name }}</del>
+                                            <br/>
+                                            <a href="#" data-href="{{ url_for('testset.recover', id=testset.id) }}"
+                                               data-toggle="modal" data-target="#confirm-recover{{ testset.id }}">Recover</a>
+                                        </td>
+                                        <td>
+                                            <del>v{{ testset.version }}</del>
+                                        </td>
+                                        <td>
+                                            <del>{{ Codebook.get_code_name(testset.grade) }}</del>
+                                        </td>
+                                        <td>
+                                            <del>{{ Codebook.get_code_name(testset.subject) }}</del>
+                                        </td>
+                                        <td>
+                                            <del>{{ Codebook.get_code_name(testset.test_type) }}</del>
+                                        </td>
+                                        <td>
+                                            <del>{{ testset.no_of_stages }}</del>
+                                        </td>
+                                        <td> {% if testset.completed %}
+                                            <i class="fa fa-check" style="color:#67b168"></i>{% else %}
+                                            <i class="fa fa-times" style="color:#f75d5c"></i>{% endif %}</td>
+                                    {% else %}
+                                        <td><input type="radio" name="r_tl" id="testset_{{ testset.id }}"
+                                                   value="{{ testset.id }}">
+                                            <a name="modalButton" onclick="invokeModalTestset({{ testset.id }})"
+                                               data-toggle="modal" data-target="#dataModal">
+                                                <i class="icons cui-info"></i>
+                                            </a>
+                                        </td>
+                                        <td> {{ testset.id }}</td>
+                                        <td> {{ testset.name }}</td>
+                                        <td> v{{ testset.version }}</td>
+                                        <td> {{ Codebook.get_code_name(testset.grade) }}</td>
+                                        <td> {{ Codebook.get_code_name(testset.subject) }}</td>
+                                        <td> {{ Codebook.get_code_name(testset.test_type) }}</td>
+                                        <td> {{ testset.no_of_stages }}</td>
+                                        <td> {% if testset.completed %}
+                                            <i class="fa fa-check" style="color:#67b168"></i>{% else %}
+                                            <i class="fa fa-times" style="color:#f75d5c"></i>{% endif %}</td>
+                                    {% endif %}
+                                </tr>
+                                <div class="modal fade" id="confirm-recover{{ testset.id }}" tabindex="-1"
+                                     role="dialog">
+                                    <div class="modal-dialog modal-sm">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="myModalLabel">
+                                                    Recover
+                                                </h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="modal-text">
+                                                    Are you sure to recover {{ testset.name }}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form method="POST" action="{{ url_for('testset.recover') }}">
+                                                    <input type="hidden" name="id" value="{{ testset.id }}">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                        Cancel
+                                                    </button>
+                                                    <input type="submit" class="btn btn-danger danger" value="Recover"
+                                                           name="Recover" id="Recover"/>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% if is_rows %}
+        <div class="modal fade" id="confirm-clone" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Clone
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to clone ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger danger" onclick="redirectTestsetCreate(this,'clone')"
+                                value="manage/clone">Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Delete
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to delete ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form method="POST" action="manage/delete">
+                            <input type="hidden" name="testset_id">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <input type="submit" class="btn btn-danger danger" value="delete" name="Delete"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% include "_modal.html" %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/testset/js/manage.js"></script>
+{% endblock scripts %}

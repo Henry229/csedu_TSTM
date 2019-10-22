@@ -1,0 +1,22 @@
+from flask import Blueprint
+
+plan = Blueprint('plan', __name__)
+
+from . import views, forms
+from ..models import Permission, Codebook, Weights
+
+
+# Context Processor에 등록. 모든 template에 global하게 사용가능한 변수로 만든다.
+@plan.app_context_processor
+def inject_permission():
+    return dict(Permission=Permission)
+
+
+@plan.app_context_processor
+def inject_code():
+    return dict(Codebook=Codebook)
+
+
+@plan.app_context_processor
+def inject_weight():
+    return dict(Weights=Weights)

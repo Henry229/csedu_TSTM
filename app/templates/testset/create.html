@@ -1,0 +1,164 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link href="/static/testset/css/testlet_stages.css" rel="stylesheet">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-map font-2xl" style="color: #339af0;"></i> Testset {% if mode=='edit' %}
+        Modification{% else %}Creation{% endif %} </h3>
+    Please follow these steps:<br>
+    Step1- Enter your values on each field. Click on the Save button.<br>
+    Step2- Choose testlet on each stage and enter the value into threashold for branching. Click on the Apply button.
+    <br> <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icon-cloud-upload"></i>Step 1: Testset Information {% if mode=='edit' %}Modification{% else %}
+                Creation{% endif %}
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <h5>Enter your values on each field. Click on the Save button.</h5>
+                    <br>
+                    <form action="create/testset"
+                          method="post" class="form inline" role="form">
+                        {% if (testset_form.testset_id.data!='' and mode!='edit') %}
+                            {{ testset_form.testset_name.label }}
+                            {{ testset_form.testset_name(disabled=True) }}
+                            {{ testset_form.test_type.label }}
+                            {{ testset_form.test_type(disabled=True) }}
+                            {{ testset_form.grade.label }}
+                            {{ testset_form.grade(disabled=True) }}
+                            {{ testset_form.subject.label }}
+                            {{ testset_form.subject(disabled=True) }}<br>
+                            {{ testset_form.no_stages.label }}
+                            {{ testset_form.no_stages(disabled=True) }}
+                            {{ testset_form.test_duration.label }}(min)
+                            {{ testset_form.test_duration(disabled=True) }}
+                            {{ testset_form.total_score.label }}
+                            {{ testset_form.total_score(disabled=True) }} &nbsp;&nbsp;
+                            {{ testset_form.submit(class="btn btn-success btn-sm", id="Save",disabled=True) }}
+                        {% else %}
+                            {{ testset_form.hidden_tag() }}
+                            {{ testset_form.testset_name.label }}
+                            {{ testset_form.testset_name }}
+                            {% for error in testset_form.testset_name.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            {{ testset_form.test_type.label }}
+                            {{ testset_form.test_type }}
+                            {{ testset_form.grade.label }}
+                            {{ testset_form.grade }}
+                            {% for error in testset_form.grade.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            {{ testset_form.subject.label }}
+                            {{ testset_form.subject }}
+                            {% for error in testset_form.subject.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            <br>
+                            {{ testset_form.no_stages.label }}
+                            {{ testset_form.no_stages(type="number",min="1",max="10") }}
+                            {{ testset_form.test_duration.label }}(min)
+                            {{ testset_form.test_duration(type="number",min="5",max="300",step="5") }}
+                            {{ testset_form.total_score.label }}
+                            {{ testset_form.total_score(size="4", pattern="[0-9.]{1,}") }} &nbsp;&nbsp;
+                            {{ testset_form.submit(class="btn btn-success btn-sm", id="Save") }}
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% if testlets %}
+            <div class="card card-accent-success">
+                <div class="card-header" id="headingTwo">
+                    <i class="icon-basket-loaded"></i>Step 2: Testset - Testlets Branching
+                    <div class="card-header-actions">
+                        <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                           aria-expanded="false" aria-controls="collapseTwo">
+                            <i class="icon-arrow-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <h5>Choose testlet on each stage and enter the value into threashold for branching.</h5>
+                        <div class="testset_stages_table"></div>
+
+                        {#                        <form action="{{url_for('testset.testlet_branching',id=testset_form.testset_id.data)}}"#}
+                        <form action="create/branching/{{ testset_form.testset_id.data }}"
+                              method="post" id="branching_form" class="form inline" role="form">
+                            <div class="row">
+                                <div class="col-6"></div>
+                                <div class="col-2">
+                                    <button type="button" id="testset-save-btn" class="btn btn-success btn-sm">Save
+                                    </button>
+                                </div>
+                                <div class="col-6"></div>
+                            </div>
+                            <br>
+                            <div id="status" class="alert alert-success" role="alert"></div>
+                            <br>
+                            <button type="submit" id="testset-submit-btn" class="btn btn-danger btn-sm"
+                                    value="finish_testset">Finish
+                            </button>
+                            <a href="{{ url_for('testset.manage') }}"
+                               class="btn btn-outline-danger btn-sm">Cancel</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/testset/js/testset_stages.js"></script>
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/testset/js/create.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var stageData = {{ stageData|tojson }};
+            var options = {
+                'styles': {tableClass: 'stage-table'},
+                'testlets': {{ testlets|tojson }}
+            };
+            TestsetStageTable.init('.testset_stages_table', stageData, options);
+            $('#testset-save-btn').on('click', function () {
+                save_testset();
+            });
+            $("#status").hide();
+        });
+    </script>
+{% endblock scripts %}

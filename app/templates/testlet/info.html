@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="card card-accent-success">
+    <div class="card-header" id="headingOne">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    {% if testlet.active %}
+                        <h1><span class="badge badge-success"><i
+                                class="fas fa-sun"></i> {{ testlet.name }}.{{ testlet.version }}</span></h1>
+                    {% else %}
+                        <h1><span class="badge badge-danger"><i
+                                class="fas fa-moon"></i> {{ testlet.name }}.{{ testlet.version }}</span></h1>
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <span class="badge badge-pill badge-secondary">GUID</span>
+                        <span class="badge ml-2">{{ testlet.GUID }}</span>
+                        <span class="badge badge-pill badge-secondary">Ver.</span>
+                        <span class="badge ml-2">{{ testlet.version }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Grade</span>
+                        <span class="badge ml-2">{{ Codebook.get_code_name(testlet.grade) }}</span>
+                        <span class="badge badge-pill badge-secondary">Subject</span>
+                        <span class="badge ml-2">{{ Codebook.get_code_name(testlet.subject) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Test Type</span>
+                        <span class="badge ml-2">{{ Codebook.get_code_name(testlet.test_type) }}</span>
+                        <span class="badge badge-pill badge-secondary">No of Items</span>
+                        <span class="badge ml-2">{{ testlet.no_of_items }}</span>
+                        {% if testlet.completed %}
+                            <span class="badge badge-primary">Completed</span>
+                        {% else %}
+                            <span class="badge badge-danger">Incomplete</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover" style="width:100%">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Item Name</th>
+                <th>Interaction Type</th>
+                <th>Level</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in testlet.items %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.interaction_type }}</td>
+                    <td>{{ item.level }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

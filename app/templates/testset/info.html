@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <link href="/static/ui/vendors/vis/vis.min.css" rel="stylesheet" type="text/css">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <!-- js -->
+    <script type="text/javascript" src="/static/ui/vendors/vis/vis.min.js"></script>
+    <style type="text/css">
+        #routing {
+            height: 500px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div class="card card-accent-success">
+    <div class="card-header" id="headingOne">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-5">
+                    {% if testset.active %}
+                        <h3><span class="badge badge-success"><i
+                                class="fas fa-sun"></i> {{ testset.name }}.{{ testset.version }}</span></h3>
+                    {% else %}
+                        <h3><span class="badge badge-danger"><i
+                                class="fas fa-moon"></i> {{ testset.name }}.{{ testset.version }}</span></h3>
+                    {% endif %}
+                </div>
+                <div class="col-xl-5">
+                    <div class="row">
+                        <span class="badge badge-pill badge-secondary">GUID</span>
+                        <span class="badge ml-2">{{ testset.GUID }}</span>
+                        <span class="badge badge-pill badge-secondary">Ver.</span>
+                        <span class="badge ml-2">{{ testset.version }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Grade</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(testset.grade) }}</span>
+                        <span class="badge badge-pill badge-secondary">Subject</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(testset.subject) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Test Type</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(testset.test_type) }}</span>
+                        {% if testset.completed %}
+                            <span class="badge badge-primary">Completed</span>
+                        {% else %}
+                            <span class="badge badge-danger">Incomplete</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="routing"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var nodes = new vis.DataSet({{ nodes|tojson }});
+    var edges = new vis.DataSet({{ edges|tojson }});
+
+    // create a network
+    var container = document.getElementById('routing');
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {
+        layout: {
+            hierarchical: {
+                direction: "LR",
+                sortMethod: "directed"
+            }
+        },
+        interaction: {dragNodes: false},
+        physics: {
+            enabled: false
+        }
+    };
+    var network = new vis.Network(container, data, options);
+</script>
+</body>
+</html>

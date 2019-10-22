@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+<body>
+
+{% set testlet_id = testlet_form.testlet_id.data %}
+
+{#<form name="modalForm" action="manage/{% if testlet_id %}update/{{ testlet_id }}{% else %}new{% endif %}"#}
+<form name="modalForm" action="manage/{% if testlet_id %}update{% else %}new{% endif %}"
+      id="testlet_form" method="POST" class="form" role="form">
+    <div class="card-accent-{% if testlet_id %}info{% else %}warning{% endif %}">
+        <div class="card-header"><i class="fas fa-calendar-plus" style="color: #339af0;"></i><strong>Testlet
+            {% if testlet_id %}Update{% else %}Creation{% endif %}</strong>
+            <span class="badge badge-{% if testlet_id %}info{% else %}warning{% endif %} float-right">{% if testlet_id %}
+                Update Testlet<{{ testlet_id }}>{% else %}New{% endif %}</span></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <table>
+                        {{ testlet_form.hidden_tag() }}
+                        <tr>
+                            <td> &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{{ testlet_form.testlet_name.label }}</th>
+                            <td>{{ testlet_form.testlet_name }}   </td>
+                        </tr>
+                        <tr>
+                            <th>{{ testlet_form.grade.label }}</th>
+                            <td>{{ testlet_form.grade }}   </td>
+                        </tr>
+                        <tr>
+                            <th>{{ testlet_form.subject.label }}</th>
+                            <td>{{ testlet_form.subject }}   </td>
+                        </tr>
+                        <tr>
+                            <th>{{ testlet_form.test_type.label }}</th>
+                            <td>{{ testlet_form.test_type }}   </td>
+                        </tr>
+                        <tr>
+                            <th>{{ testlet_form.no_items.label }}</th>
+                            <td>{{ testlet_form.no_items(type="number",min="1", max="300") }}   </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col">
+                    <table id="weight_mapping">
+                        <tbody>
+                        <tr>
+                            <th>Level</th>
+                            <th>Weight</th>
+                        </tr>
+                        {% for weightform in testlet_form.weights %}
+                            <tr>
+                                <td> {{ weightform.level(size="3", readonly=True) }}</td>
+                                <td> {% if item_form %}{{ weightform.weight(size="5", readonly=True) }}
+                                {% else %}{{ weightform.weight(size="4", pattern="[0-9].[0-9]") }}{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <small class="text-muted">Default Weight: 1.0</small>
+                </div>
+            </div>
+            <div>{{ testlet_form.submit(class="btn btn-danger btn-sm", id="basic_info", value="Submit") }}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>

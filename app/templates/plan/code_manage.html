@@ -1,0 +1,92 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - {{ user.username }}{% endblock %}
+
+{% block app_content %}
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-user-cog"></i> Codebook Manage - New, Update
+        </div>
+        <div class="card-body">
+            <div id="status" class="alert alert-success" role="alert"></div>
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <th>Code Type</th>
+                    <th>Code List</th>
+                    <th>Add New Code</th>
+                    <th>Update Code Name</th>
+                </tr>
+                <tr>
+                    <th>{{ form.subject.label }}</th>
+                    <td> {{ form.subject(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""><i class="icon-check icons add-icon"
+                                                                        style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                <tr>
+                    <th>&nbsp; - {{ form.category.label }}</th>
+                    <td> {{ form.category(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                <tr>
+                    <th>&nbsp; &nbsp; - {{ form.subcategory.label }}</th>
+                    <td> {{ form.subcategory(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                <tr>
+                    <th>{{ form.grade.label }}</th>
+                    <td> {{ form.grade(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                <tr>
+                    <th>{{ form.test_type.label }}</th>
+                    <td> {{ form.test_type(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                <tr>
+                    <th>&nbsp; - {{ form.level.label }}</th>
+                    <td> {{ form.level(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                <tr>
+                    <th>{{ form.test_center.label }}</th>
+                    <td> {{ form.test_center(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/plan/js/manage_codebook.js"></script>
+{% endblock scripts %}

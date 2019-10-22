@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1  http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+                identifier="{{ resource.identifier }}" title="{{ resource.title }}" adaptive="false" timeDependent="false" label=""
+                xml:lang="en-US" toolName="CSE" toolVersion="1.0">
+    <responseDeclaration identifier="RESPONSE" cardinality="{{ resource.cardinality }}" baseType="{{ resource.baseType }}">
+        <correctResponse>
+            <value>
+                <![CDATA[{{ resource.correctResponse }}]]>
+            </value>
+        </correctResponse>
+    </responseDeclaration>
+    <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+    <itemBody>
+        <div class="grid-row">
+            <div class="col-12">
+                {% if resource.body %}{{ resource.body|safe }}{% endif %}
+                <choiceInteraction responseIdentifier="RESPONSE" {% if resource.shuffle %}shuffle="{{ resource.shuffle }}"{% endif %} {% if resource.maxChoices %}maxChoices="{{ resource.maxChoices }}"{% endif %} {% if resource.minChoices %}minChoices="{{ resource.minChoices }}"{% endif %}
+                                   orientation="{{ resource.orientation }}">
+                    {% if resource.prompt %}<prompt>{{ resource.prompt|safe }}</prompt>{% endif %}
+                    {% for choice in resource.choices %}
+                        <simpleChoice identifier="{{ choice.identifier }}" fixed="false" showHide="show">
+                            <p>{{ choice.text|safe }}</p>
+                        </simpleChoice>
+                    {% endfor %}
+                </choiceInteraction>
+            </div>
+        </div>
+    </itemBody>
+    <responseProcessing template="http://www.imsglobal.org/question/qti_v2p1/rptemplates/match_correct"/>
+</assessmentItem>

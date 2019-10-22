@@ -1,0 +1,205 @@
+{% extends "ui/ui_base.html" %}
+
+{%- block styles %}
+    {{ super() }}
+    <link href="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-layers"></i> Item Manage </h3>
+    Please follow these steps:<br>
+    Step1- Search your items to edit. Click on the Search button.<br>
+    Step2- Select items then set up correct properties to edit. Click on the Edit button. <br> <br>
+
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Step 1: Search
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <h5>Choose you search condition. Click on the Search button.</h5>
+                    <small class="text-muted">Item Search</small>
+                    <br>
+
+                    <form action="edit/search" method="post" class="form inline" role="form">
+                        {{ search_form.hidden_tag() }}
+                        {{ search_form.csrf_token }}
+                        {{ search_form.grade.label }}
+                        {{ search_form.grade }}
+                        {% for error in search_form.grade.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ search_form.subject.label }}
+                        {{ search_form.subject }}
+                        {% for error in search_form.subject.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ search_form.level.label }}
+                        {{ search_form.level }}
+                        {{ search_form.category.label }}
+                        {{ search_form.category }}
+                        {{ search_form.subcategory.label }}
+                        {{ search_form.subcategory }}
+                        {{ search_form.byme }}
+                        {{ search_form.byme.label }}
+                        {{ search_form.active }}
+                        {{ search_form.active.label }}
+                        {{ search_form.submit(class="btn btn-success btn-sm", id="search") }}
+                    </form>
+                    <p/>
+                </div>
+            </div>
+        </div>
+        {% if item_form %}
+            <div class="card card-accent-success">
+                <div class="card-header" id="headingTwo">
+                    <i class="icon-basket-loaded"></i> Step 2: Edit
+                    <div class="card-header-actions">
+                        <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                           aria-expanded="false" aria-controls="collapseTwo">
+                            <i class="icon-arrow-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <h5>Edit individual values on each item or use the Bulk Property Edit to edit multiple items
+                            with
+                            multiple values</h5>
+                        <form action="edit/edit" method="post" class="form inline" role="form">
+                            {{ item_form.hidden_tag() }}
+                            <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                                <small class="text-muted">Bulk Property Edit</small>
+                                <br>
+                                {{ item_form.grade.label }}
+                                {{ item_form.grade }}
+                                {{ item_form.subject.label }}
+                                {{ item_form.subject }}
+                                {{ item_form.level.label }}
+                                {{ item_form.level }}
+                                {{ item_form.category.label }}
+                                {{ item_form.category }}
+                                {{ item_form.subcategory.label }}
+                                {{ item_form.subcategory }}
+                                {{ item_form.active }}
+                                {{ item_form.active.label }}
+                                <p class="btn btn-success btn-sm" id="checkout">Apply</p>
+                            </div>
+                            <hr/>
+
+                            <table id="items_edit" class="table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selecctall" checked/>
+                                        <a id="reverse"><i class="icon-loop icons"></i></a>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Item Name</th>
+                                    <th>Correct Answers</th>
+                                    <th>Year</th>
+                                    <th>Subject</th>
+                                    <th>Level</th>
+                                    <th>Category</th>
+                                    <th>Sub Category</th>
+                                    <th>Active<br>
+                                        <input type="checkbox" id="selecctall_active" checked/>
+                                        <a id="reverse_active"><i class="icon-loop icons"></i></a>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if not item_form.items %}
+                                    <tr>
+                                        <td colspan="8">Items will be listed up when a file is imported.</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% for itemform in item_form.items %}
+                                    <tr>
+                                        <td>
+                                            {{ itemform.check(class="item_checkbox") }}
+                                            <button class="btn btn-sm btn-outline-info" type="button"
+                                                    name="previewButton"
+                                                    value="{{ url_for('item.rendered', item_id=itemform.item_id.data) }}"
+                                                    data-toggle="modal" data-target="#dataModal"
+                                                    data-item-id="{{ itemform.item_id.data }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                        <td> {{ itemform.item_id(size="3", readonly=True) }}</td>
+                                        <td> {{ itemform.item_name }}</td>
+                                        <td> {{ itemform.correct_answer(size="5") }}</td>
+                                        <td> {{ itemform.grade(class="item_grade") }}</td>
+                                        <td> {{ itemform.subject(class="item_subjects") }}</td>
+                                        <td> {{ itemform.level(class="item_levels") }}</td>
+                                        <td> {{ itemform.category(class="item_categories") }}</td>
+                                        <td> {{ itemform.subcategory(class="item_subcategories") }}</td>
+                                        <td> {{ itemform.active(class="item_actives") }}
+                                            <span onclick="invokeItemExplanation(this)"
+                                                  value="{{ url_for('item.extended_edit', item_id=itemform.item_id.data) }}"
+                                                  data-toggle="modal" data-target="#dataModal"
+                                                  data-item-id="{{ itemform.item_id.data }}">
+                                                <i class="icons cui-underline" style="color: #339af0;"></i>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <p>
+                                {{ item_form.submit(class="btn btn-danger btn-sm", id="save", value="Save") }}
+                                <a href="{{ url_for('item.item_edit') }}"
+                                   class="btn btn-outline-danger btn-sm">Cancel</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/item/js/item_edit.js"></script>
+    <script src="/static/runner/js/item_runner.js"></script>
+    <script src="/static/runner/js/item_handlers.js"></script>
+    <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+        });
+    </script>
+{% endblock scripts %}

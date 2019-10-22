@@ -1,0 +1,120 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link href="/static/testset/css/testlet_stages.css" rel="stylesheet">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-map font-2xl" style="color: #339af0;"></i> Testset Clone</h3>
+    Please follow these steps:<br>
+    Step1- Enter your values on each field. Click on the Save button.<br>
+    Step2- Choose testset on each stage and enter the value into threashold for branching. Click on the Apply button.
+    <br> <br>
+    <form action="{{ url_for('testset.clone_insert',id=testset_form.testset_id.data) }}"
+          method="post" id="clone_form" class="form inline" role="form">
+        <div class="accordion" id="accordion">
+            <div class="card card-accent-success">
+                <div class="card-header" id="headingOne">
+                    <i class="icon-cloud-upload"></i>Step 1: Testset Information Clone
+                    <div class="card-header-actions">
+                        <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                           aria-expanded="false" aria-controls="collapseOne">
+                            <i class="icon-arrow-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <h5>Enter your values on each field. Click on the Save button.</h5>
+                        <br>
+                        {{ testset_form.hidden_tag() }}
+                        {{ testset_form.testset_name.label }}
+                        {{ testset_form.testset_name }}
+                        {{ testset_form.test_type.label }}
+                        {{ testset_form.test_type }}
+                        {{ testset_form.grade.label }}
+                        {{ testset_form.grade }}
+                        {{ testset_form.subject.label }}
+                        {{ testset_form.subject }}<br>
+                        {{ testset_form.no_stages.label }}
+                        {{ testset_form.no_stages(type="number",min="1", max="10") }}
+                        {{ testset_form.test_duration.label }}(min)
+                        {{ testset_form.test_duration(type="number",min="5",max="300",step="5") }}
+                        {{ testset_form.total_score.label }}
+                        {{ testset_form.total_score(size="4", pattern="[0-9.]{1,}") }} &nbsp;&nbsp;
+                    </div>
+                </div>
+            </div>
+            {% if testlets %}
+                <div class="card card-accent-success">
+                    <div class="card-header" id="headingTwo">
+                        <i class="icon-basket-loaded"></i>Step 2: Testset - Testlets Branching
+                        <div class="card-header-actions">
+                            <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                               aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="icon-arrow-up"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                        <div class="card-body">
+                            <h5>Choose testlet on each stage and enter the value into threashold for branching.</h5>
+                            <div class="testset_stages_table"></div>
+                            <br>
+                            <div id="status" class="alert alert-success" role="alert"></div>
+                            <br>
+                            <button type="button" id="testset-clone-btn" class="btn btn-danger btn-sm"
+                                    value="finish_testset">Complete - Clone
+                            </button>
+                            <a href="{{ url_for('testset.manage') }}"
+                               class="btn btn-outline-danger btn-sm">Cancel</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </form>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/testset/js/testset_stages.js"></script>
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/testset/js/clone.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var stageData = {{ stageData|tojson }};
+            var options = {
+                'styles': {tableClass: 'stage-table'},
+                'testlets': {{ testlets|tojson }}
+            };
+            TestsetStageTable.init('.testset_stages_table', stageData, options);
+            $('#testset-clone-btn').on('click', function () {
+                clone_testset();
+            });
+            $("#status").hide();
+        });
+    </script>
+{% endblock scripts %}

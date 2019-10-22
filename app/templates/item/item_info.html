@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="card card-accent-success">
+    <div class="card-header" id="headingOne">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    {% if item.active %}
+                        <h1><span class="badge badge-success"><i
+                                class="fas fa-sun"></i> {{ item.name }}.{{ item.version }}</span></h1>
+                    {% else %}
+                        <h1><span class="badge badge-danger"><i
+                                class="fas fa-moon"></i> {{ item.name }}.{{ item.version }}</span></h1>
+                        {{ item.TAO_GUID }}
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <span class="badge badge-pill badge-secondary">Grade</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.grade) }}</span>
+                        <span class="badge badge-pill badge-secondary">Subject</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.subject) }}</span>
+                        <span class="badge badge-pill badge-secondary">Level</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.level) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Category</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.category) }}</span>
+                        <span class="badge badge-pill badge-secondary">Sub-category</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.subcategory) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Correct Answer</span>
+                        <span class="badge ml-0">{{ item.correct_answer }}</span>
+                        <span class="badge badge-pill badge-secondary">Multiple Answer</span>
+                        <span class="badge ml-0">{{ item.multiple_answer }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="rendered_preview">Preview not available</div>
+    </div>
+</div>
+</body>
+</html>

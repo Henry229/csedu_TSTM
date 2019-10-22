@@ -1,0 +1,14 @@
+<svg height="{{ obj.height }}" version="1.1" width="{{ obj.width }}" xmlns="http://www.w3.org/2000/svg"
+	 style="overflow: hidden; position: relative;" viewBox="0 0 {{ obj.width }} {{ obj.height }}" preserveAspectRatio="xMinYMin">
+	<desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">From QTI SVG template</desc>
+	<defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs>
+	<image x="0" y="0" width="{{ obj.width }}" height="{{ obj.height }}" preserveAspectRatio="none" xlink:href="{{ obj.data }}"
+		   stroke-width="0.6" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"
+		   externalresourcesrequired="true"></image>
+	{% for choice in choices %}
+		<{{ choice.shape }} class="choice" x="{{ choice.x }}" y="{{ choice.y }}" width="{{ choice.width }}" height="{{ choice.height }}" identifier={{ choice.identifier }} r="0" rx="0" ry="0" fill="#cccccc" stroke="#8d949e"
+		  stroke-width="1" stroke-linejoin="round" fill-opacity="0.5" stroke-dasharray="0"
+		  style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); stroke-linejoin: round; fill-opacity: 0.5; cursor: pointer;">
+		<title style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Select an image and click</title></rect>
+	{% endfor %}
+</svg>

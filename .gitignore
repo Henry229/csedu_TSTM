@@ -1,0 +1,14 @@
+/venv/
+.idea/
+/logs/
+/.env
+/tmp/
+/import_db/
+/import_temp/
+/storage/
+.DS_Store
+__pycache__/
+/migrations/
+*.sqlite
+*.log
+app/static/report/naplan_result/

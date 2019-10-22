@@ -1,0 +1,5 @@
+<div data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-hottextInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}" data-serial="{{ serial }}" data-qti-class="hottextInteraction">
+  {% if prompt %}{{ prompt }}{% endif %}
+  <div class="instruction-container"></div>
+  <div class="qti-flow-container">{{ body }}</div>
+</div>

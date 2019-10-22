@@ -1,0 +1,230 @@
+{% extends "ui/test_runner_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block app_content %}
+    {% if session_id %}
+        <div class="item-card">
+            <div id="items_selected" class="display table table-hover" style="width:100%">
+                <div class="item-header">
+                    <div class="header-timer">
+				<span class="timer-display">
+					<span class="hours">
+						<span class="number">00</span>
+						<span class="label">Hours</span>
+					</span>
+					<span class="colon number">:</span>
+					<span class="minutes">
+						<span class="number">00</span>
+						<span class="label">Mins</span>
+					</span>
+				</span>
+                    </div>
+                    <div class="header-center">
+                        <button class="header-summary">
+					<span class="summary-text">
+						<span class="summary-label">Question</span>
+						<span class="summary-text-bold"> </span>
+						<span class="summary-text-bold question-number"></span>
+						<i class="fas fa-list-ul"></i>
+					</span>
+                        </button>
+                    </div>
+                    <div class="header-tools">
+                        <div class="header-tools-protractor-btn"><img src="/static/ui/img/protractor_icon.png"/></div>
+                        <div class="tools-protractor"><img src="/static/ui/img/protractor.png"/></div>
+                        <div class="header-tools-ruler-btn"><img src="/static/ui/img/ruler_icon.png"/></div>
+                        <div class="tools-ruler"><img src="/static/ui/img/ruler.png"/></div>
+                    </div>
+                </div>
+                <div class="item-container">
+
+                </div>
+                <div class="summary-container" style="display:none;">
+                    <div class="question-summary-wrapper">
+                        <h1 class="">Progress summary</h1>
+                        <div class="question-filter">
+                            <div class="filter-btn-group filter-show-all">
+                                <button type="button" class="filter-btn all active" data-filter="all"><span>0</span>Show
+                                    all
+                                </button>
+                            </div>
+                            <div class="filter-btn-group filter-answered">
+                                <button type="button" class="filter-btn answered" data-filter="answered"><span>0</span>Answered
+                                </button>
+                            </div>
+                            <div class="filter-btn-group filter-answered">
+                                <button type="button" class="filter-btn not_answered" data-filter="not_answered">
+                                    <span>0</span>Not answered
+                                </button>
+                            </div>
+                            <div class="filter-btn-group filter-answered">
+                                <button type="button" class="filter-btn not_read" data-filter="not_read"><span>0</span>Not
+                                    read
+                                </button>
+                            </div>
+                            <div class="filter-btn-group filter-answered">
+                                <button type="button" class="filter-btn flagged" data-filter="flagged"><span>0</span>Flagged
+                                </button>
+                            </div>
+                        </div>
+                        <h1 class="ng-binding">Questions</h1>
+                        <p class="">Click a number to go to that question.</p>
+                        <div class="question-list-summary">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="item-footer">
+                    <div class="footer-center"></div>
+                    <div class="navigator">
+                        <button class="footer-back-btn" style="display: none"><i class="fas fa-caret-left"></i>Back
+                        </button>
+                        <div class="footer-right-buttons">
+                            <button class="footer-flag-btn"><span>Flag</span><i class="far fa-flag"></i></button>
+                            <button class="footer-next-btn">Next<i class="fas fa-caret-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="stageModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+                 aria-hidden="true" data-backdrop="static">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="dataModalLabel">Stage finished</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                    style="display: none">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Loading...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Review</button>
+                            <button type="button" class="btn btn-primary next-stage">Next stage</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="finishModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+                 aria-hidden="true" data-backdrop="static">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="dataModalLabel">Stage finished</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                    style="display: none">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Loading...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Review</button>
+                            <button type="button" class="btn btn-primary finish-test">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <input type="hidden" name="assessment_guid" value="{{ assessment_guid }}">
+        <input type="hidden" name="testset_id" value="{{ testset.id }}">
+        <input type="hidden" name="student_id" value="{{ student_id }}">
+        <input type="hidden" name="student_ip">
+        <input type="hidden" name="student_external_id" value="{{ student_external_id }}">
+
+        <div class="item-card">
+            <div id="items_selected" class="display table table-hover" style="width:100%">
+                <div class="item-header">
+                    <div class="header-timer">
+				<span class="timer-display">
+				</span>
+                    </div>
+                    <div class="header-center">
+                        {% if student_branch %}
+                            <button class="header-summary" disabled>
+                                {{ student_branch }}
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="header-tools">
+                    </div>
+                </div>
+                <div class="item-container">
+                </div>
+                <div class="notice-container">
+                    <div class="notice start-notice">
+                        <div class="notice-info">
+                            <h1 class="notice-title">{{ testset.name }}</h1>
+                            <div class="notice-content">
+                                Please select Yes to continue:
+                            </div>
+                            <footer>
+                                <button class="start-no-btn">No</button>
+                                <button class="start-yes-btn">Yes</button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-footer">
+                    <div class="footer-center"></div>
+                    <div class="navigator">
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="/static/ui/vendors/jquery-ui-rotatable/jquery.ui.rotatable.min.js"></script>
+    <script src="/static/runner/js/item_handlers.js"></script>
+    <script src="/static/runner/js/item_runner.js"></script>
+    <script src="/static/runner/js/test_runner.js"></script>
+    <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {# assessment_session_id is used as a key to check
+                   - the student came from testset list
+                   - or pushed a refresh button.
+             #}
+            $.getJSON('https://api.ipify.org?format=jsonp&callback=?', function (data) {
+                $('input[name="student_ip"]').val(data['ip']);
+            });
+            {% if session_id %}
+                var options = {
+                    session: "{{ session_id }}"
+                };
+                TestRunner.init($('.item-container'), options);
+                TestRunner.startTest();
+                $('.tools-ruler').hide();
+                $('.tools-protractor').hide();
+            {% else %}
+                var student_id = $('input[name="student_id"]').val();
+                var student_external_id = $('input[name="student_external_id"]').val();
+                var assessment_guid = $('input[name="assessment_guid"]').val();
+                $('.start-yes-btn').on('click', function () {
+                    var options = {
+                        assessment_guid: assessment_guid,
+                        testset_id: $('input[name="testset_id"]').val(),
+                        student_id: student_id,
+                        session_cb: function (session_id) {
+                            window.location = "/testing?session=" + session_id;
+                        }
+                    };
+                    TestRunner.init($('.item-container'), options);
+                });
+                $('.start-no-btn').on('click', function () {
+                    window.location = "/tests/testsets?student_id=" + student_external_id
+                        + "&assessment_guid=" + assessment_guid;
+                });
+
+            {% endif %}
+        });
+    </script>
+{% endblock %}

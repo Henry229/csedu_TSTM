@@ -1,0 +1,304 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="fas fa-calendar-check font-2xl" style="color: #339af0;"></i> Assessment Manage </h3>
+    If you plan to create [New] assessment, please simply click on the New button. <br>
+    If you plan to [Edit] an assessment, search first and choose your assessment.<br><br>
+
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Assessment Search
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    Please follow these steps for [Edit] assessment:<br>
+                    Step1- To Edit the existing assessment, please search assessment first.<br>
+                    Step2- Choose assessment you plan to manage. Edit field on Assessment Form with your values. <br>
+
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                        <h5>Enter you search condition. Click on the Search button. Choose assessment for Edit.</h5>
+                        <small class="text-muted">Assessment Search</small>
+                        <br>
+                        <form method="GET" class="form inline" role="form">
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                            {{ form.test_center }}
+                            <button type="submit" class="btn btn-success btn-sm" id="assessment_search">Search</button>
+                        </form>
+                        <p/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-info">
+            <div class="card-header" id="headingTwo">
+                <i class="icons cui-list"></i> Assessment List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="row">
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                </div>
+                                <div class="col-md-auto">
+                                    <form method="POST" class="form inline" role="form" action="manage/clone">
+                                        <button class="btn btn-warning btn-square btn-sm" type="button"
+                                                name="modalButtonNew"
+                                                value="manage/new" data-toggle="modal" data-target="#dataModalMedium">
+                                            New
+                                        </button>
+                                        {% if is_rows %}
+                                            <button class="btn btn-danger btn-square btn-sm" type="button"
+                                                    name="modalButtonClone"
+                                                    value="manage/clone" data-toggle="modal"
+                                                    data-target="#confirm-clone"> Clone
+                                            </button>
+                                            <button class="btn btn-primary btn-square btn-sm" type="button"
+                                                    name="modalButtonEdit"
+                                                    value="manage/update" data-toggle="modal"
+                                                    data-target="#dataModalMedium"> Edit
+                                            </button>
+                                            <button class="btn btn-outline-success btn-square btn-sm" type="button"
+                                                    name="modalButtonDelete"
+                                                    value="manage/delete" data-toggle="modal"
+                                                    data-target="#confirm-delete"> Delete
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </div>
+                            <small class="text-muted">Click an assessment to list up testsets. </small>
+                            <table id="assessments" class="display table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Assessment Name</th>
+                                    <th>Ver.</th>
+                                    <th>Year</th>
+                                    <th>Test Type</th>
+                                    <th>Test Center</th>
+                                    <th>Review Period</th>
+{#                                    <th>Date</th>#}
+{#                                    <th>Session Time</th>#}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if assessments %}
+                                    {% for assessment in assessments %}
+                                        <tr>
+                                            {% if assessment.delete is sameas True %}
+                                                <td>
+                                                </td>
+                                                <td class="assessment_id">
+                                                    <del>{{ assessment.id }}</del>
+                                                </td>
+                                                <td class="assessment_name">
+                                                    <del> {{ assessment.name }}</del>
+                                                    <br/>
+                                                    <a href="#"
+                                                       data-href="{{ url_for('assessment.recover', id=assessment.id) }}"
+                                                       data-toggle="modal"
+                                                       data-target="#confirm-recover{{ assessment.id }}">Recover</a>
+                                                </td>
+                                                <td class="assessment_version">
+                                                    <del> v{{ assessment.version }}</del>
+                                                </td>
+                                                <td class="assessment_year" id="{{ assessment.year }}">
+                                                    <del> {{ assessment.year }}</del>
+                                                </td>
+                                                <td class="assessment_type" id="{{ assessment.test_type }}">
+                                                    <del> {{ Codebook.get_code_name(assessment.test_type) }}</del>
+                                                </td>
+                                                <td class="assessment_branch" id="{{ assessment.branch_id }}">
+                                                    <del> {{ Codebook.get_code_name(assessment.branch_id) }}</del>
+                                                </td>
+                                                <td class="assessment_review_period" id="{{ assessment.review_period }}">
+                                                    <del> {{ assessment.review_period }} </del>
+                                                </td>
+{#                                                <td class="assessment_date">#}
+{#                                                    <del> {{ assessment.session_date }}</del>#}
+{#                                                </td>#}
+{#                                                <td class="assessment_time">#}
+{#                                                    <del> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</del>#}
+{#                                                </td>#}
+                                            {% else %}
+                                                <td><input type="radio" name="r_tl"
+                                                           id="assessment{{ assessment.id }}_testsets"
+                                                           value="{{ assessment.id }}">
+                                                </td>
+                                                <td class="assessment_id"> {{ assessment.id }}</td>
+                                                <td class="assessment_name"> {{ assessment.name }}</td>
+                                                <td class="assessment_version">v{{ assessment.version }}</td>
+                                                <td class="assessment_year" id="{{ assessment.year }}">{{ assessment.year }}</td>
+                                                <td class="assessment_type"
+                                                    id="{{ assessment.test_type }}"> {{ Codebook.get_code_name(assessment.test_type) }}</td>
+                                                <td class="assessment_branch"
+                                                    id="{{ assessment.branch_id }}"> {{ Codebook.get_code_name(assessment.branch_id) }}</td>
+                                                <td class="assessment_review_period" id="{{ assessment.review_period }}">
+                                                    {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
+{#                                                <td class="assessment_date"> {{ assessment.session_date }}</td>#}
+{#                                                <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
+                                            {% endif %}
+                                        </tr>
+                                        <div class="modal fade" id="confirm-recover{{ assessment.id }}" tabindex="-1"
+                                             role="dialog">
+                                            <div class="modal-dialog modal-sm">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title" id="myModalLabel">
+                                                            Recover
+                                                        </h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="modal-text">
+                                                            Are you sure to recover {{ assessment.name }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <form method="POST"
+                                                              action="{{ url_for('assessment.recover') }}">
+                                                            <input type="hidden" name="id" value="{{ assessment.id }}">
+                                                            <button type="button" class="btn btn-default"
+                                                                    data-dismiss="modal">Cancel
+                                                            </button>
+                                                            <input type="submit" class="btn btn-danger danger"
+                                                                   value="Recover" name="Recover" id="Recover"/>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col">
+                            <br><br><br><br><br>
+                            {% if assessments %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col"> Testsets
+                                            </div>
+                                            <div class="col">
+                                            </div>
+                                            <div class="col-md-auto">
+                                                <form method="POST" action="{{ url_for('assessment.add_detail') }}"
+                                                      class="form inline"
+                                                      role="form" id="item_form">
+                                                    {% if item_form %}
+                                                        {{ item_form.hidden_tag() }}
+                                                        <button id="save_testsets"
+                                                                class="btn btn-danger btn-square btn-sm" type="button">
+                                                            Save
+                                                            Testsets
+                                                        </button>
+                                                        <button id="add_testsets"
+                                                                class="btn btn-primary btn-square btn-sm" type="button"
+                                                                value="manage/testsets" data-toggle="modal"
+                                                                data-target="#dataModalSub" data-backdrop="static">Add Testsets
+                                                        </button>
+                                                    {% endif %}
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Note: To look into the details of testset, click on <i
+                                            class="fas fa-eye"></i>.
+                                    </small>
+                                    <h1>{{ assessments.length }}</h1>
+                                    <ul id="sortable">
+
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if is_rows %}
+        <div class="modal fade" id="confirm-clone" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Clone
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to clone ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger danger"
+                                onclick="renderUrlDocument(this,'dataModalMedium',null,'confirm-clone')"
+                                data-toggle="modal" data-target="#dataModalMedium" value="manage/clone">Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Delete
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to delete ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form method="POST" action="manage/delete">
+                            <input type="hidden" name="assessment_id">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <input type="submit" class="btn btn-danger danger" value="delete" name="Delete"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% include "_modal.html" %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/assessment/js/manage.js"></script>
+    <script src="/static/ui/vendors/moment.js/js/moment.js"></script>
+{% endblock scripts %}

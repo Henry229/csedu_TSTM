@@ -1,0 +1,156 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{%- block styles %}
+    {{ super() }}
+{%- endblock styles %}
+{% block app_content %}
+    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Item Search </h3>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search - List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        {# Item Search #}
+                        <p id="search_panel">
+                        <h5>Choose you search condition. Click on the Search button.</h5>
+                        <small class="text-muted">Item Search</small>
+                        <br>
+
+                        <form action="list" method="POST" class="form inline" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ form.csrf_token }}
+                            {{ form.grade.label }}
+                            {{ form.grade }}
+                            {% for error in form.grade.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            {{ form.subject.label }}
+                            {{ form.subject(id="select_subject") }}
+                            {% for error in form.subject.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            {{ form.level.label }}
+                            {{ form.level }}
+                            {{ form.category.label }}
+                            {{ form.category(id="select_category") }}
+                            {{ form.subcategory.label }}
+                            {{ form.subcategory(id="select_subcategory") }}
+                            {{ form.byme }}
+                            {{ form.byme.label }}
+                            {{ form.active }}
+                            {{ form.active.label }}
+                            {{ form.submit(class="btn btn-success btn-sm", id="search") }}
+                        </form>
+                        <p/>
+                    </div>
+                    <br><br>
+                    {% if current_user.can(Permission.ITEM_MANAGE) %}
+                        {% if items %}
+                            <input class="btn btn-success btn-sm" id="export" type="button"
+                                   style="float: right;margin-bottom: 2px" value="Export">
+                        {% endif %}
+                    {% endif %}
+                    <table id="items" class="display table table-hover" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Item Name</th>
+                            <th>Correct Answers</th>
+                            <th>Grade</th>
+                            <th>Subject</th>
+                            <th>Level</th>
+                            <th>Category</th>
+                            <th>Sub Category</th>
+                            <th>Active</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if items %}
+                            {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-info" type="button" name="modalButton"
+                                                value="{{ url_for('item.preview', item_id=item.id) }}"
+                                                data-toggle="modal" data-target="#dataModal">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                    <td> {{ item.id }}</td>
+                                    <td> {{ item.name }}</td>
+                                    <td> {{ item.correct_answer }}</td>
+                                    <td> {{ Codebook.get_code_name(item.grade) }}</td>
+                                    <td> {{ Codebook.get_code_name(item.subject) }}</td>
+                                    <td> {{ Codebook.get_code_name(item.level) }}</td>
+                                    <td> {{ Codebook.get_code_name(item.category) }}</td>
+                                    <td> {{ Codebook.get_code_name(item.subcategory) }}</td>
+                                    <td> {{ item.active }} </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#export').on('click', function () {
+                var url = '/item/export?export=1';
+                if ($('#grade').val() !== '0')
+                    url = url + '&grade=' + $('#grade').val();
+                if ($('#select_subject').val() !== '0')
+                    url = url + '&subject=' + $('#select_subject').val();
+                if ($('#level').val() !== '0')
+                    url = url + '&subject=' + $('#level').val();
+                if ($('#select_category').val() !== '0')
+                    url = url + '&level=' + $('#select_category').val();
+                if ($('#select_subcategory').val() !== '0')
+                    url = url + '&subcategory=' + $('#select_subcategory').val();
+                if ($('#byme').is(':checked'))
+                    url = url + '&byme=1';
+                if ($('#active').is(':checked'))
+                    url = url + '&active=1';
+                window.location = url;
+            });
+        });
+    </script>
+{% endblock scripts %}

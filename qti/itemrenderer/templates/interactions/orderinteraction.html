@@ -1,0 +1,26 @@
+<div {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-orderInteraction{% if horizontal %} qti-horizontal{% else %} qti-vertical{% endif %}{% if attributes.class %} {{ attributes.class }}{% endif %}"
+     data-serial="{{ serial }}"
+     data-qti-class="orderInteraction"
+     data-orientation="{% if horizontal %}horizontal{% else %}vertical{% endif %}">
+    {% if prompt %}{{ prompt }}{% endif %}
+    <div class="instruction-container"></div>
+    <div class="order-interaction-area" data-identifier="{{ identifier }}" data-base-type="{{ baseType }}">
+        <ul class="choice-area square source solid block-listing {% if horizontal %}horizontal{% endif %}">
+			{% for choice in choices %}
+			{{ choice }}
+			{% endfor %}
+        </ul>
+        <div class="arrow-bar middle">
+            <span class="icon-add-to-selection {% if horizontal %}icon-down{% else %}icon-right{% endif %}"></span>
+            <span class="icon-remove-from-selection {% if horizontal %}icon-up{% else %}icon-left{% endif %} inactive"></span>
+        </div>
+        <ul class="drag-container block-listing"></ul>
+        <ul class="result-area decimal target solid block-listing {% if horizontal %}horizontal{% endif %}">
+        </ul>
+        <div class="arrow-bar">
+            <span class="icon-move-before {% if horizontal %}icon-left{% else %}icon-up{% endif %} inactive"></span>
+            <span class="icon-move-after {% if horizontal %}icon-right{% else %}icon-down{% endif %} inactive"></span>
+        </div>
+    </div>
+    <div class="notification-container"></div>
+</div>

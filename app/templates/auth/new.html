@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+<body>
+<form name="modalForm" autocomplete="new-password" action="{{ url_for('auth.register') }}"
+      id="user_form" method="POST" class="form" role="form">
+    <div class="card-accent-warning">
+        <div class="card-header"><i class="fas fa-calendar-plus" style="color: #339af0;"></i><strong>User
+            Creation</strong>
+            <span class="badge badge-warning float-right">New</span></div>
+        <div class="card-body">
+            <table>
+                {{ form.hidden_tag() }}
+                <tr>
+                    <th>{{ form.u_email.label }}</th>
+                    <td>{{ form.u_email(placeholder="example@gmail.com") }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.u_name.label }}</th>
+                    <td>{{ form.u_name(autocomplete="new-password") }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.u_pwd.label }}</th>
+                    <td>{{ form.u_pwd(autocomplete="new-password") }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.u_pwd2.label }}</th>
+                    <td>{{ form.u_pwd2(autocomplete="new-password") }}  </td>
+                </tr>
+                <tr>
+                    <th>{{ form.u_role.label }}</th>
+                    <td>{{ form.u_role }}  </td>
+                </tr>
+            </table>
+            <br>
+            <div>{{ form.submit(class="btn btn-danger btn-sm", id="u_submit", value="Submit") }}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>
+

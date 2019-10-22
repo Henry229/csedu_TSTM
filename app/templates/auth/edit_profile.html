@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <script src="/static/ui/vendors/moment.js/js/moment.js"></script>
+</head>
+<body>
+<form name="modalForm" action="{{ url_for('auth.user_edit_profile', id=user.id) }}" id="user_profile_form" method="POST"
+      class="form" role="form">
+    <div class="card-accent-info">
+        <div class="card-header"><i class="fas fa-user-cog" style="color: #339af0;"></i><strong>User Profile
+            Update</strong></div>
+        <div class="card-body">
+            <table>
+                {% import "bootstrap/wtf.html" as wtf %}
+                {{ wtf.quick_form(form) }}
+            </table>
+            <br>
+            <div>
+                <button class="btn btn-danger btn-sm" onclick="$('#user_profile_form').submit();" data-dismiss="modal">
+                    Submit
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>
+

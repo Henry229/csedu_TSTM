@@ -1,0 +1,41 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - {{ user.username }}{% endblock %}
+
+{% block app_content %}
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-user-cog"></i> My Profile Detail
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <th>User ID</th>
+                    <td>{{ user.id }}</td>
+                    <th>UserName</th>
+                    <td>{{ user.username }}</td>
+                    <th>User Email</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <th>User Role</th>
+                    <td colspan="5">{{ user.role.name }}</td>
+                </tr>
+                </tbody>
+            </table>
+            {% if  current_user.can(Permission.ADMIN) %}
+                <a class="btn btn-warning" name="modalButtonPassword"
+                   data-toggle="modal" data-target="#dataModal"
+                   href="{{ url_for('.change_password') }}">Change Password</a>
+            {% endif %}
+        </div>
+    </div>
+    {% include "_modal.html" %}
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/auth/js/manage.js"></script>
+{% endblock scripts %}

@@ -1,0 +1,96 @@
+.testset_stages_table {
+}
+
+.testset_stages_table .stage-table thead tr {
+    background-color: beige;
+    font-weight: bold;
+}
+
+.testset_stages_table .stage-table td,
+.testset_stages_table .stage-table th {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-bottom: 1px solid #c8ced3;
+}
+
+.testset_stages_table .stage-table tr.new {
+    border: 2px solid #ef5f32;
+    background-color: #ef5f32;
+}
+
+.testset_stages_table .blank {
+    background-color: #c8ced3;
+}
+
+.testset_stages_table td .name {
+    min-width: 100px;
+}
+
+.testset_stages_table td .condition {
+    min-width: 50px;
+}
+
+.testset_stages_table td .del-ok,
+.testset_stages_table td .del-cancel {
+    visibility: hidden;
+}
+
+.testset_stages_table td.delete-mode .del-ok,
+.testset_stages_table td.delete-mode .del-cancel {
+    visibility: inherit;
+}
+
+.testset_stages_table tr .trash,
+.testset_stages_table tr td.add .add-stage,
+.testset_stages_table .add-mode tr:hover .trash,
+.testset_stages_table .add-mode tr:hover td.add .add-stage,
+.testset_stages_table .delete-mode tr:hover .trash,
+.testset_stages_table .delete-mode tr:hover td.add .add-stage,
+.testset_stages_table tr:hover td.delete-mode .trash {
+    visibility: hidden;
+}
+
+.testset_stages_table tr:hover .trash,
+.testset_stages_table tr:hover td.add .add-stage {
+    visibility: inherit;
+}
+
+.testset_stages_table td.condition input {
+    width: 40px;
+}
+
+.testset_stages_table td i,
+.testset_stages_table td a {
+    cursor: pointer;
+    margin-left: 2px;
+}
+
+/**
+Datatable
+ */
+.dtStage-tableWrapper {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#Stage-table th, td {
+    white-space: nowrap;
+}
+
+.dataTables_scrollHeadInner {
+    margin: 0 auto;
+}
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before {
+    bottom: .5em;
+}
+

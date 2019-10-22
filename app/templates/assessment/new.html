@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <script src="/static/ui/vendors/moment.js/js/moment.js"></script>
+</head>
+<body>
+
+{% set assessment_id = assessment_form.assessment_id.data %}
+<form name="modalForm" action="manage/{% if assessment_id %}update{% else %}new{% endif %}"
+      id="testlet_form" method="POST" class="form" role="form">
+    <div class="card-accent-{% if assessment_id %}info{% else %}warning{% endif %}">
+        <div class="card-header"><i class="fas fa-calendar-plus" style="color: #339af0;"></i><strong>Assessment
+            {% if assessment_id %}Update{% else %}Creation{% endif %}</strong>
+            <span class="badge badge-{% if assessment_id %}info{% else %}warning{% endif %} float-right">{% if assessment_id %}
+                Update Assessment<{{ assessment_id }}>{% else %}New{% endif %}</span></div>
+        <div class="card-body">
+            <table>
+                {{ assessment_form.hidden_tag() }}
+                <tr>
+                    <th>{{ assessment_form.assessment_name.label }}</th>
+                    <td>{{ assessment_form.assessment_name }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ assessment_form.test_type.label }}</th>
+                    <td>{{ assessment_form.test_type(id="t_type") }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ assessment_form.test_center.label }}</th>
+                    <td>{{ assessment_form.test_center(id="t_branch") }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ assessment_form.year.label }}</th>
+                    <td>{{ assessment_form.year }}  </td>
+                </tr>
+                <tr>
+                    <th>{{ assessment_form.review_period.label }}</th>
+                    <td>{{ assessment_form.review_period }} Days</td>
+                </tr>
+{#                <tr>#}
+{#                    <th>{{ assessment_form.session_date.label }}</th>#}
+{#                    <td>{{ assessment_form.session_date(type="date") }}  </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <th>{{ assessment_form.session_start_time.label }}</th>#}
+{#                    <td>{{ assessment_form.session_start_time(type="time") }}~#}
+{#                        {{ assessment_form.session_end_time(type="time") }}  </td>#}
+{#                </tr>#}
+            </table>
+            <br>
+            <div>{{ assessment_form.submit(class="btn btn-danger btn-sm", id="assessment_submit", value="Submit") }}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>

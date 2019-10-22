@@ -1,0 +1,182 @@
+{% extends "ui/ui_base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block app_content %}
+    <h3><i class="fas fa-upload font-2xl" style="color: #339af0;"></i> Item Import </h3>
+    Please follow these steps:<br>
+    Step1- Choose the information and package (.zip) file. Click on the Load button.<br>
+    Step2- Select uploaded items then set up correct properties. Click on the Import button. <br> <br>
+
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icon-cloud-upload"></i> Step 1: Load
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <p id="step1">
+                        <small class="text-muted"> You can upload .zip or .xls package file to import items.</small>
+                    <h5>Choose the information and package (.zip) file. Click on the Import button.</h5>
+                    <small class="text-muted">Item Import</small>
+                    <br>
+
+                    <form action="import/load" method="post" id="form-load" class="form inline" role="form"
+                          enctype="multipart/form-data">
+                        {% if item_form %}
+                            {{ file_form.grade.label }}
+                            {{ file_form.grade(disabled=True) }}
+                            {{ file_form.subject.label }}
+                            {{ file_form.subject(disabled=True) }}
+                            {{ file_form.items_file.label }}
+                            {{ file_form.items_file(disabled=True) }}
+                            {{ file_form.submit(class="btn btn-success btn-sm", id="load",disabled=True) }}
+                        {% else %}
+                            {{ file_form.hidden_tag() }}
+                            {{ file_form.csrf_token() }}
+                            {{ file_form.items_file.label }}
+                            {{ file_form.items_file }}
+                            <br/>
+                            {{ file_form.grade.label }}
+                            {{ file_form.grade }}
+                            {{ file_form.subject.label }}
+                            {{ file_form.subject }}
+                            {% for error in file_form.items_file.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            <button type="submit" id="load" class="btn btn-success btn-sm"><i
+                                    class="fas fa-spinner fa-spin" style="display: none"></i> Load
+                            </button>
+                        {% endif %}
+                    </form>
+                    <hr/>
+                    <p id="step1_result">
+                        {% if file_name %}
+                            {{ file_name }} has been loaded
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% if item_form %}
+            <div class="card card-accent-success">
+                <div class="card-header" id="headingTwo">
+                    <i class="icon-basket-loaded"></i> Step 2: Import
+                    <div class="card-header-actions">
+                        <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                           aria-expanded="false" aria-controls="collapseTwo">
+                            <i class="icon-arrow-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <h5>Set individual values on each item or use the Bulk Property Set to apply multiple values to
+                            multiple items</h5>
+                        <form action="import/import" method="post" class="form inline" role="form">
+                            {{ item_form.hidden_tag() }}
+                            {{ item_form.csrf_token() }}
+
+                            <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                                <small class="text-muted">Bulk Property Set</small>
+                                <br>
+                                {{ item_form.level.label }}
+                                {{ item_form.level }}
+                                {{ item_form.category.label }}
+                                {{ item_form.category }}
+                                {{ item_form.subcategory.label }}
+                                {{ item_form.subcategory }}
+                                <p class="btn btn-success btn-sm" id="checkout">Apply</p>
+                            </div>
+                            <hr/>
+
+                            <table id="items_imported" class="table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selecctall" checked/>
+                                        <a id="reverse"><i class="icon-loop icons"></i></a>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Item Name</th>
+                                    <th>Correct Answers</th>
+                                    <th>Year</th>
+                                    <th>Subject</th>
+                                    <th>Level</th>
+                                    <th>Category</th>
+                                    <th>Sub Category</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if not item_form.items %}
+                                    <tr>
+                                        <td colspan="8">Items will be listed up when a file is imported.</td>
+                                    </tr>
+                                {% endif %}
+
+                                {% for itemform in item_form.items %}
+                                    <tr>
+                                        <td>
+                                            {{ itemform.check(class="item_checkbox") }}
+                                            <button class="btn btn-sm btn-outline-info" type="button" name="modalButton"
+                                                    value="{{ url_for('item.preview', item_id=itemform.item_id.data) }}"
+                                                    data-toggle="modal" data-target="#dataModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                        <td> {{ itemform.item_id(size="3", readonly=True) }} </td>
+                                        <td> {{ itemform.item_name }}</td>
+                                        <td> {{ itemform.correct_answer(size="5") }}</td>
+                                        <td> {{ itemform.grade(size="2", readonly=True) }}</td>
+                                        <td> {{ itemform.subject(size="5", readonly=True) }}</td>
+                                        <td> {{ itemform.level(class="item_levels") }}</td>
+                                        <td> {{ itemform.category(class="item_categories") }}</td>
+                                        <td> {{ itemform.subcategory(class="item_subcategories") }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <p>
+                                {{ item_form.submit(class="btn btn-danger btn-sm", id="import", value="Import") }}
+                                <a href="{{ url_for('item.item_list') }}"
+                                   class="btn btn-outline-danger btn-sm">Cancel</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/item/js/item_import.js"></script>
+{% endblock scripts %}

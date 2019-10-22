@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+use qtism\cli\Cli;
+use qtism\cli\Render;
+use cli as CliTools;
+
+if (!ini_get('date.timezone')) {
+    ini_set('date.timezone', 'UTC');
+}
+
+foreach (array(__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php') as $file) {
+    if (file_exists($file)) {
+        define('QTISDK_COMPOSER_INSTALL', $file);
+        break;
+    }
+}
+
+if (!defined('QTISDK_COMPOSER_INSTALL')) {
+    fwrite(STDERR,
+        'You need to set up the project dependencies using the following commands:' . PHP_EOL .
+        'wget http://getcomposer.org/composer.phar' . PHP_EOL .
+        'php composer.phar install' . PHP_EOL
+    );
+    exit(Cli::EXIT_FAILURE);
+}
+
+require QTISDK_COMPOSER_INSTALL;
+
+// Enable colors if supported.
+CliTools\Colors::enable(false);
+
+// Execute main entry point.
+$availableModules = array('render');
+$requestedModuleName = (isset($argv[1])) ? $argv[1] : '';
+$module = strtolower($requestedModuleName);
+switch ($module) {
+    case 'render':
+        Render::main();
+        break;
+    default:
+        CliTools\err("%RUnknown module '${requestedModuleName}'. Available modules are: " . implode(',', $availableModules) . ".%n");
+        exit(Cli::EXIT_FAILURE);
+}

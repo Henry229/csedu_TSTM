@@ -1,0 +1,161 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report by Center </h3>
+
+
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search Condition
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    This page provides [Test Result by Year/TestType]. <br>
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                        <h5>Enter you search condition. Click on the Search button. Choose report.</h5>
+                        <small class="text-muted">Report Search</small>
+                        <br>
+                        <form method="GET" class="form inline" role="form" id="">
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                            {{ form.test_center }}
+                            <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search</button>
+                            &nbsp;&nbsp;&nbsp;
+                            {% if current_user.can(Permission.ADMIN) %}
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Generate Data for Report</span><br><br>
+                            {% endif %}
+                        </form>
+                        <p/>
+                        <div id="status" class="alert alert-success" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-info">
+            <div class="card-header" id="headingTwo">
+                <i class="icons cui-list"></i> Report List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseTwo">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    {% if current_user.can(Permission.ADMIN) %}
+                        <string>Test Summary Report: </string>
+                        {% if test_summaries %}
+                            {% for ts in test_summaries %}
+                                <a class="btn btn-{{ loop.cycle('warning','danger','success','info','secondary') }} btn-sm img_summary_report"
+                                   href='/report/summary/{{ ts.plan_id }}'
+                                   target="_blank">{{ ts.plan_name }}</a>
+                                &nbsp;
+                            {% endfor %}
+                        {% endif %}
+                    {% endif %}
+                    <br><br>
+                    <table id="reports" class="display table table-hover" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Year</th>
+                            <th>Grade</th>
+                            <th>Test Type</th>
+                            <th>Test No.</th>
+                            <th>Test Name / Test Center / Students</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if reports %}
+                            {% for rpt in reports %}
+                                <tr>
+                                    <td>
+                                        {% if current_user.can(Permission.ADMIN) %}
+                                            <span name="publish" class="badge badge-dark" target="_blank">Publish</span>
+                                        {% endif %}
+                                        <a name="modalButtonTestRanking" class="badge badge-danger" id="{{ test_center }}" target="_blank">Test Ranking</a>
+                                    </td>
+                                    <td class="rpt_year" id="{{ rpt.get("assessment_year") }}"> {{ rpt.get("assessment_year") }}</td>
+                                    <td class="rpt_grade" id="{{ rpt.get("grade") }}"> {{ Codebook.get_code_name(rpt.get("grade")) }}</td>
+                                    <td class="rpt_type"
+                                        id="{{ rpt.get("test_type") }}"> {{ Codebook.get_code_name(rpt.get("test_type")) }}</td>
+                                    <td class="rpt_order" id="{{ rpt.get("assessment_order") }}"> No.{{ rpt.get("assessment_order") }}</td>
+                                    <td class="rpt_id" id="{{ rpt.get("assessment_id")}}">
+                                        <table>
+                                            {% for testset in rpt.get("testsets") %}
+                                                <tr>
+                                                    <td>{{ Codebook.get_subject_name(testset.get("testset_id")) }}</td>
+                                                    <td>
+                                                        {% if testset.get("test_center") %}{{ Codebook.get_code_name(testset.get("test_center")) }}{% else %}-{% endif %}</td>
+                                                    <td>
+                                                        {% if not testset.get("students") %} - {% endif %}
+                                                        {% for student in testset.get("students") %}
+                                                            {% if student %}<a class="badge badge-secondary"
+                                                                               href='/report/ts/{{ rpt.get("assessment_id") }}/{{ testset.get("testset_id") }}/{{ student }}'
+                                                                               target="_blank">
+                                                                {{ Student.getCSStudentName(student)}}</a>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-generate" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Generate Data for Report
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to generate data for Report ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
+                                onclick="gen_report('confirm-generate');">Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/report/js/manage.js"></script>
+{% endblock scripts %}

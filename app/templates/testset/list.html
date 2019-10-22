@@ -1,0 +1,110 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block app_content %}
+    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Testset Search </h3>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search - List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        {# testset Search #}
+                        <p id="search_panel">
+                        <h5>Choose you search condition. Click on the Search button.</h5>
+                        <small class="text-muted">Testset Search</small>
+                        <br>
+
+                        <form action="list" method="GET" class="form inline" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ form.testset_name.label }}
+                            {{ form.testset_name }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.grade.label }}
+                            {{ form.grade }}
+                            {{ form.subject.label }}
+                            {{ form.subject }}
+                            {{ form.completed }}
+                            {{ form.completed.label }}
+                            {{ form.submit(class="btn btn-success btn-sm", id="search") }}
+                        </form>
+                        <p/>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-uppercase mb-1">
+                                <small>
+                                    <b>Testset List</b>
+                                </small>
+                            </div>
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 100%"
+                                     aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Click a testset to list up ... To view the details of testset,
+                                click on <i class="icons cui-info"></i>.
+                            </small>
+                            <table id="testsets" class="display table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>Testset Name</th>
+                                    <th>Version</th>
+                                    <th>Grade</th>
+                                    <th>Subject</th>
+                                    <th>Test Type</th>
+                                    <th># of stages</th>
+                                    <th>Completed?</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if testsets %}
+                                    {% for testset in testsets %}
+                                        <tr>
+                                            <td><input type="radio" name="r_tl" id="testset_{{ testset.id }}"
+                                                       value="{{ testset.id }}"
+                                                       {% if loop.index==1 %}checked{% endif %}>
+                                                <a name="modalButton" onclick="invokeModalTestset({{ testset.id }})"
+                                                   data-toggle="modal" data-target="#dataModal">
+                                                    <i class="icons cui-info"></i>
+                                                </a>
+                                            </td>
+                                            <td> {{ testset.id }}</td>
+                                            <td> {{ testset.name }}</td>
+                                            <td> v{{ testset.version }}</td>
+                                            <td> {{ Codebook.get_code_name(testset.grade) }}</td>
+                                            <td> {{ Codebook.get_code_name(testset.subject) }}</td>
+                                            <td> {{ Codebook.get_code_name(testset.test_type) }}</td>
+                                            <td> {{ testset.no_of_stages }}</td>
+                                            <td> {% if testset.completed %}
+                                                <i class="fa fa-check" style="color:#67b168"></i>{% else %}
+                                                <i class="fa fa-times" style="color:#f75d5c"></i>{% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "_modal.html" %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+{% endblock scripts %}

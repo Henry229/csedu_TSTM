@@ -1,0 +1,5 @@
+<div {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-mediaInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}" data-serial="{{ serial }}">
+    {% if prompt %}{{ prompt }}{% endif %}
+    <div class="instruction-container"></div>
+    <div class="media-container"></div>
+</div>

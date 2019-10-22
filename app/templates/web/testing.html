@@ -1,0 +1,69 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block app_content %}
+
+    <h3><i class="icons cui-laptop" style="color: #339af0;"></i> Naplan Online Test </h3>
+    <div class="row">
+    <div class="col">
+        <div class="card card-accent-info">
+            <div class="card-header">
+                <div class="col">
+                    Please enter your Student ID and Enroll ID.
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+
+                        <form action="" method="post">
+                            {{ form.hidden_tag() }}
+                            <p>
+                                {{ form.student_id.label }}<br>
+                                {{ form.student_id(placeholder='100') }}
+                            </p>
+                            <p>
+                                {{ form.assessment_enroll_id.label }}<br>
+                                {{ form.assessment_enroll_id(placeholder='10023') }}
+                            </p>
+                            <p>{{ form.submit() }} &nbsp
+                                <input class="btn btn-warning" type="submit" name="btn_mock_test" value="Mock Test"></p>
+                        </form>
+                    </div>
+                    <div class="col">
+                        {% if testsets %}
+                            <table id="testsets" class="display table table-hover" style="width:100%">
+                                <tbody>
+                                <form method="POST" action="online-test">
+                                    {{ ot_form.hidden_tag() }}
+                                    {% for ts in testsets %}
+                                        <tr>
+                                            <td><input type="submit" class="btn btn-success btn-block"
+                                                       name="btn_testset" id="{{ ts.id }}" value="{{ ts.name }}"></td>
+                                        </tr>
+                                    {% endfor %}
+                                </form>
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function () {
+            $('input[name="btn_mock_test"]').click(function () {
+                $('input[name="student_id"]').val('100');
+                $('input[name="assessment_enroll_id"]').val('1');
+            });
+
+            $('input[name="btn_testset"]').click(function () {
+                $('input[name="testset_id"]').val($(this).attr("id"));
+            });
+        });
+    </script>
+{% endblock %}

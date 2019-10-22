@@ -1,0 +1,278 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="fas fa-calendar-plus font-2xl" style="color: #339af0;"></i> Education Plan Manage </h3>
+    To create [New] educational plan, please simply click on the New button.<br><br>
+    Please follow these steps for [Clone], [Edit] plan:<br>
+    Step1- To Edit or Clone the existing plan, please search plan first and click on the Save button.<br>
+    Step2- Choose the plan to manage. Click on the Clone or Edit button. <br>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Education Plan Search
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                            <small class="text-muted"> Choose you search condition. Click on the Search button.</small>
+                            <br>
+                        <form method="GET" class="form inline" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.plan_name.label }}
+                            {{ form.plan_name }}
+                            {{ form.grade.label }}
+                            {{ form.grade }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.submit(class="btn btn-success btn-sm", id="search") }}
+                        </form>
+                        <p/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion" id="accordion">
+    <div class="card card-accent-info">
+        <div class="card-header" id="headingTwo">
+            <i class="icons cui-list"></i> Plan List
+            <div class="card-header-actions">
+                <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                   aria-expanded="false" aria-controls="collapseTwo">
+                    <i class="icon-arrow-up"></i>
+                </a>
+            </div>
+        </div>
+        <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col">
+                            </div>
+                            <div class="col">
+                            </div>
+                            <div class="col-md-auto">
+                                <form method="POST" class="form inline" role="form" action="manage/clone">
+                                    <button class="btn btn-warning btn-square btn-sm" type="button"
+                                            name="modalButtonNew"
+                                            value="manage/new" data-toggle="modal" data-target="#dataModalMedium"> New
+                                    </button>
+                                    {% if is_rows %}
+                                        <button class="btn btn-danger btn-square btn-sm" type="button"
+                                                name="modalButtonClone"
+                                                value="manage/clone" data-toggle="modal" data-target="#confirm-clone">
+                                            Clone
+                                        </button>
+                                        <button class="btn btn-primary btn-square btn-sm" type="button"
+                                                name="modalButtonEdit"
+                                                value="manage/update" data-toggle="modal"
+                                                data-target="#dataModalMedium"> Edit
+                                        </button>
+                                        <button class="btn btn-outline-success btn-square btn-sm" type="button"
+                                                name="modalButtonDelete"
+                                                value="manage/delete" data-toggle="modal" data-target="#confirm-delete">
+                                            Delete
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </div>
+
+                        <small class="text-muted">Click a plan to list up assessments.
+                        </small>
+                        <table id="plans" class="display table table-hover" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>ID</th>
+                                <th>Year</th>
+                                <th>Plan Name</th>
+                                <th>Test Type</th>
+                                <th>Year</th>
+                                <th>Version</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if plans %}
+                                {% for plan in plans %}
+                                    <tr>
+                                        {% if plan.delete is sameas True %}
+                                            <td></td>
+                                            <td>
+                                                <del>{{ plan.id }}</del>
+                                            </td>
+                                            <td>
+                                                <del>{{ plan.year }}</del>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                <del>{{ plan.name }}</del>
+                                                <br/>
+                                                <a href="#" data-href="{{ url_for('plan.recover', id=plan.id) }}"
+                                                   data-toggle="modal" data-target="#confirm-recover{{ plan.id }}">Recover</a>
+                                            </td>
+                                            <td>
+                                                <del>{{ Codebook.get_code_name(plan.test_type) }}</del>
+                                            </td>
+                                            <td>
+                                                <del>{{ Codebook.get_code_name(plan.grade) }}</del>
+                                            </td>
+                                            <td>
+                                                <del>v{{ plan.version }}</del>
+                                            </td>
+                                        {% else %}
+                                            <td><input type="radio" name="r_tl" id="plan_{{ plan.id }}"
+                                                       value="{{ plan.id }}">
+                                            </td>
+                                            <td> {{ plan.id }}</td>
+                                            <td> {{ plan.year }}</td>
+                                            <td class="text-nowrap"> {{ plan.name }}</td>
+                                            <td> {{ Codebook.get_code_name(plan.test_type) }}</td>
+                                            <td> {{ Codebook.get_code_name(plan.grade) }}</td>
+                                            <td> v{{ plan.version }}</td>
+                                        {% endif %}
+                                    </tr>
+                                    <div class="modal fade" id="confirm-recover{{ plan.id }}" tabindex="-1"
+                                         role="dialog">
+                                        <div class="modal-dialog modal-sm">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title" id="myModalLabel">
+                                                        Recover
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="modal-text">
+                                                        Are you sure to recover {{ plan.name }}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form method="POST" action="{{ url_for('plan.recover') }}">
+                                                        <input type="hidden" name="id" value="{{ plan.id }}">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-dismiss="modal">Cancel
+                                                        </button>
+                                                        <input type="submit" class="btn btn-danger danger"
+                                                               value="Recover" name="Recover" id="Recover"/>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <br><br><br><br><br>
+                        {% if plans %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col"> Assessments
+                                        </div>
+                                        <div class="col">
+                                        </div>
+                                        <div class="col-md-auto">
+                                            <form method="POST" action="{{ url_for('plan.add_detail') }}"
+                                                  class="form inline"
+                                                  role="form" id="item_form">
+                                                {% if item_form %}
+                                                    {{ item_form.hidden_tag() }}
+                                                    <button id="save_assessments"
+                                                            class="btn btn-danger btn-square btn-sm" type="button">Save
+                                                        Assessments
+                                                    </button>
+                                                    <button id="add_assessments"
+                                                            class="btn btn-primary btn-square btn-sm" type="button"
+                                                            value="manage/assessments" data-toggle="modal"
+                                                            data-target="#dataModalSub" data-backdrop="static">Add Assessments
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <h1>{{ plans.length }}</h1>
+                                    <ul id="sortable">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if is_rows %}
+        <div class="modal fade" id="confirm-clone" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Clone
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to clone ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger danger"
+                                onclick="renderUrlDocument(this,'dataModalMedium',null,'confirm-clone')"
+                                data-toggle="modal" data-target="#dataModalMedium" value="manage/clone">Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Delete
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-text">
+                            Are you sure to delete ?
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form method="POST" action="manage/delete">
+                            <input type="hidden" name="plan_id">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <input type="submit" class="btn btn-danger danger" value="delete" name="Delete"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% include "_modal.html" %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/plan/js/manage.js"></script>
+{% endblock scripts %}

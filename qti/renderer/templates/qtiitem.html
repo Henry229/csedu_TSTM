@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>{{ title }}</title>
+        <style>
+            body {
+                margin:0;
+                height: auto !important;
+                min-height: 100% !important;
+            }
+        </style>
+        <script id="initQtiRunner" type="text/javascript">
+            (function(){
+                window.tao = window.tao || {};
+                window.tao.qtiRunnerContext = {
+                    itemData : {{ itemData }}
+                };
+            }());
+        </script>
+
+        {% if production is defined %}
+            <script type="text/javascript" src="renderer.js"></script>
+        {% else %}
+            <script type="text/javascript" src="renderer.js" data-main=""></script>
+        {% endif %}
+
+    </head>
+    <body class="tao-item-scope">
+        <div id="qti_item"></div>
+    </body>
+</html>

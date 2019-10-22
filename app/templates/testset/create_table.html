@@ -1,0 +1,68 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link href="/static/testset/css/testlet_stages.css" rel="stylesheet">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-map font-2xl" style="color: #339af0;"></i> Testset stage edit </h3>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icon-cloud-upload"></i>Stages
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="testset_stages_table"></div>
+                </div>
+                <div>
+                    <button type="button" id="testset-save-btn" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/testset/js/testset_stages.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var stageData = {{ stageData|tojson }};
+            var options = {
+                'styles': {tableClass: 'stage-table'},
+                'testlets': {{ testlets|tojson }}
+            };
+            TestsetStageTable.init('.testset_stages_table', stageData, options);
+            $('#testset-save-btn').on('click', function () {
+                save_testset();
+            })
+        });
+
+        function save_testset() {
+            var data = TestsetStageTable.getData();
+            $.ajax({
+                url: '/testset/create/tableui',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                beforeSend: function () {
+
+                },
+                complete: function () {
+
+                },
+                success: function (response) {
+                    console.log(response)
+                }
+            });
+        }
+    </script>
+{% endblock scripts %}

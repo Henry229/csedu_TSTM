@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assessmentItem
+    {% for name, uri in namespaces.items() %}
+    {% if name %}
+    xmlns:{{ name }}="{{ uri }}"
+    {% else %}
+    xmlns="{{ uri }}"
+    {% endif %}
+    {% endfor %}
+    {{ xsi }}schemaLocation="{{ schemaLocations }}"
+    {{ attributes }}>
+
+    {{ responses }}
+
+    {{ outcomes }}
+
+    {{ stylesheets }}
+
+    <itemBody {% if class %} class="{{ class }}"{% endif %}>
+	{{ body }}
+    </itemBody>
+
+    {{ renderedResponseProcessing }}
+
+    {{ feedbacks }}
+
+    {{ apipAccessibility }}
+</assessmentItem>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+<body>
+{% set plan_id = plan_form.plan_id.data %}
+<form name="modalForm" action="manage/{% if plan_id %}update{% else %}new{% endif %}"
+      id="plan_form" method="POST" class="form" role="form">
+    <div class="card-accent-{% if plan_id %}info{% else %}warning{% endif %}">
+        <div class="card-header"><i class="icons cui-globe" style="color: #339af0;"></i><strong>Plan
+            {% if plan_id %}Update{% else %}Creation{% endif %}</strong>
+            <span class="badge badge-{% if plan_id %}info{% else %}warning{% endif %} float-right">{% if plan_id %}
+                Update Plan<{{ plan_id }}>{% else %}New{% endif %}</span></div>
+        <div class="card-body">
+            <table>
+                {{ plan_form.hidden_tag() }}
+                <tr>
+                    <th>{{ plan_form.year.label }}</th>
+                    <td>{{ plan_form.year }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ plan_form.plan_name.label }}</th>
+                    <td>{{ plan_form.plan_name }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ plan_form.grade.label }}</th>
+                    <td>{{ plan_form.grade }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ plan_form.test_type.label }}</th>
+                    <td>{{ plan_form.test_type }}   </td>
+                </tr>
+            </table>
+            <br><br>
+            {{ plan_form.submit(class="btn btn-danger btn-sm", id="basic_info", value="Submit") }}
+            <button type="button" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+</form>
+</body>
+</html>

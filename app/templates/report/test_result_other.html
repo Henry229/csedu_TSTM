@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <style>
+        #sub_t_report table {
+            border-collapse: collapse;
+        }
+
+        #sub_t_report table, td, th {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .tr_left {
+            text-align: left;
+        }
+    </style>
+
+
+    <style type="text/css">
+        body, html {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <br><br>
+    <div align="right"><img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo"></div>
+    <div><strong>Test Results</strong></div>
+    <div class="card">
+        <div class="card-body">
+            <div class="clearfix">
+                <span class="float-left">{{ year }} {{ Codebook.get_code_name(test_type) }} - No. {{ sequence }}</span>
+                <span class="float-right"><h3>{{ now.day }}/{{ now.month }}/{{ now.year }}</h3></span>
+            </div>
+            <table style="width:100%" id="sub_t_report">
+                <thead>
+                <tr>
+                    <th> No.</th>
+                    <th> Stud No.</th>
+                    <th> Name</th>
+                    {% for subject_name in subject_names %}
+                        <th> {{ Codebook.get_subject_name(subject_name.testset_id) }} </th>
+                    {% endfor %}
+                    <th> Total</th>
+                    <th> Ranking</th>
+                    <th> Branch Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ts in test_summaries %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ ts.cs_student_id }}</td>
+                        <td class="tr_left"> {{ ts.username }}</td>
+                        {% for i in range(0, subject_names|length) %}
+                            {% if i==0 %}
+                                <td>{{ ts.subject_1 }}</td>
+                            {% elif i==1 %}
+                                <td>{{ ts.subject_2 }}</td>
+                            {% elif i==2 %}
+                                <td>{{ ts.subject_3 }}</td>
+                            {% elif i==3 %}
+                                <td>{{ ts.subject_4 }}</td>
+                            {% elif i==4 %}
+                                <td>{{ ts.subject_5 }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td>{{ ts.total_mark }}</td>
+                        <td>{{ ts.student_rank }}</td>
+                        <td class="tr_left">{{ Codebook.get_code_name(ts.test_center) }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br><br>
+        </div>
+    </div>
+</div>
+</body>
+</html>

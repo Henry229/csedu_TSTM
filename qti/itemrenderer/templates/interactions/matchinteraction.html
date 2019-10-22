@@ -1,0 +1,32 @@
+<div data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-matchInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}" data-serial="{{ serial }}" data-qti-class="matchInteraction">
+  {% if prompt %}{{ prompt }}{% endif %}
+  <div class="instruction-container"></div>
+  <div class="match-interaction-area">
+    <table class="matrix">
+      <thead>
+      <tr>
+        <th> </th>
+		  {% for matchset in matchSet1 %}
+			  {{ matchset }}
+		  {% endfor %}
+      </tr>
+      </thead>
+      <tbody>
+	  {% for matchset in matchSet2 %}
+      <tr>
+        {{ matchset }}
+		  {% for matchset in matchSet1 %}
+			<td>
+			  <label>
+				<input type="checkbox" >
+				<span class="icon-checkbox cross"></span>
+			  </label>
+			</td>
+		  {% endfor %}
+		  </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="notification-container"></div>
+</div>

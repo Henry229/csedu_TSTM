@@ -1,0 +1,3 @@
+
+class QtiLoaderError(Exception):
+    pass

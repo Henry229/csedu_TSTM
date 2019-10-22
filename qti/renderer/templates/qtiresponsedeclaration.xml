@@ -1,0 +1,49 @@
+<responseDeclaration {{ attributes }}
+{% if correctResponses is undefined and mapping is undefined and areaMapping is undefined and defaultValues is undefined %}
+/>
+{% else %}
+>
+    {% if defaultValues is defined and defaultValues|length > 0 %}
+    <defaultValue>
+        {% for value in defaultValues %}
+            {% if value.get_value() != '' %}
+                <value
+                {% for attrName, attrValue in value.get_attributes_values().items() %}
+                    {{ attrName }}="{{ attrValue }}"
+                {% endfor %}><![CDATA[{{ value }}]]></value>
+            {% endif %}
+        {% endfor %}
+    </defaultValue>
+    {% endif %}
+    {% if correctResponses is defined and correctResponses|length > 0 %}
+    <correctResponse>
+        {% for value in correctResponses %}
+            {% if value.get_value() != '' %}
+                <value
+                {% for attrName, attrValue in value.get_attribute_values().items() %}
+                    {{ attrName }}="{{ attrValue }}"
+                {% endfor %}><![CDATA[{{ value }}]]></value>
+            {% endif %}
+        {% endfor %}
+    </correctResponse>
+    {% endif %}
+    {% if mapping is defined and mapping|length > 0 %}
+    <mapping {{ mappingAttributes }}>
+        {% for key, value in mapping.items() %}
+        <mapEntry mapKey="{{ key }}" mappedValue="{{ value }}"/>
+        {% endfor %}
+    </mapping>
+    {% endif %}
+    {% if areaMapping is defined and areaMapping|length > 0 %}
+    <areaMapping {{ mappingAttributes }}>
+        {% for areaMapEntry in areaMapping %}
+        <areaMapEntry
+        {% for key, value in areaMapEntry.items() %}
+        {{ key }}="{{ value }}"
+        {% endfor %}
+        />
+        {% endfor %}
+    </areaMapping>
+    {% endif %}
+</responseDeclaration>
+{% endif %}

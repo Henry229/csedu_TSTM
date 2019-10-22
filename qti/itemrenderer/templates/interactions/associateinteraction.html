@@ -1,0 +1,12 @@
+<div data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-associateInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}" data-serial="{{ serial }}" data-qti-class="associateInteraction">
+    {% if prompt %}{{ prompt }}{% endif %}
+    <div class="instruction-container"></div>
+    <ul class="choice-area clearfix  none block-listing solid horizontal source" data-eyecatcher=">li">
+		{% for choice in choices %}
+        {{ choice }}
+		{% endfor %}
+    </ul>
+    <ul class="result-area none target clearfix">
+    </ul>
+    <div class="notification-container"></div>
+</div>

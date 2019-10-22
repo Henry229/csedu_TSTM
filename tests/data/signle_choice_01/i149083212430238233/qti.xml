@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1  http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+                identifier="i1490750477862136994" title="Item title" adaptive="false" timeDependent="false" label=""
+                xml:lang="en-US" toolName="TAO" toolVersion="3.0.0">
+    <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="identifier">
+        <correctResponse>
+            <value>
+                <![CDATA[B]]>
+            </value>
+        </correctResponse>
+    </responseDeclaration>
+    <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+    <itemBody>
+        <div class="grid-row">
+            <div class="col-12">
+                <choiceInteraction responseIdentifier="RESPONSE" shuffle="false" maxChoices="1" minChoices="1" orientation="vertical">
+                    <prompt>Which sentence is correct?</prompt>
+                    <simpleChoice identifier="A" fixed="false" showHide="show">
+                        <p>Her and him had a dog.</p>
+                    </simpleChoice>
+                    <simpleChoice identifier="B" fixed="false" showHide="show">
+                        <p>He and his sister had a dog.</p>
+                    </simpleChoice>
+                    <simpleChoice identifier="C" fixed="false" showHide="show">
+                        <p>Him and his sister had a dog.</p>
+                    </simpleChoice>
+                    <simpleChoice identifier="D" fixed="false" showHide="show">
+                        <p>Himself and his sister had a dog. </p>
+                    </simpleChoice>
+                </choiceInteraction>
+            </div>
+        </div>
+    </itemBody>
+    <responseProcessing template="http://www.imsglobal.org/question/qti_v2p1/rptemplates/match_correct"/>
+</assessmentItem>

@@ -1,0 +1,7 @@
+<outcomeDeclaration {{ attributes }}{% if default_value is none %}/>
+{% else %}>
+    <defaultValue>
+        <value>{{ default_value }}</value>
+    </defaultValue>
+</outcomeDeclaration>
+{% endif %}

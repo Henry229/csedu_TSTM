@@ -1,0 +1,10 @@
+<div data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-blockInteraction qti-gapMatchInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}" data-serial="{{ serial }}" data-qti-class="gapMatchInteraction">
+    {% if prompt %}{{ prompt }}{% endif %}
+    <ul class="choice-area none block-listing solid horizontal source" data-eyecatcher=">li">
+		{% for choice in choices %}
+			{{ choice }}
+		{% endfor %}
+    </ul>
+    <div class="instruction-container"></div>
+    <div class="qti-flow-container">{{ body }}</div>
+</div>

@@ -1,0 +1,6 @@
+<{{ tag }} {{ attributes }}>
+{% if prompt %} {{ prompt }}{% endif %}
+{{ object }}
+{{ gapImgs }}
+{{ choices }}
+</{{ tag }}>

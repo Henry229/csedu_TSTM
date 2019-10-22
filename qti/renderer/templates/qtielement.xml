@@ -1,0 +1,5 @@
+{% if body|trim == '' %}
+    <{{ tag }} {{ attributes }}/>
+{% else %}
+    <{{ tag }} {{ attributes }}>{{ body }}</{{ tag }}>
+{% endif %}

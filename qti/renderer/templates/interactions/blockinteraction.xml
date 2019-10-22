@@ -1,0 +1,14 @@
+<{{ tag }} {{ attributes }}>
+{% if prompt is not none %}
+    {{ prompt }}
+{% endif %}
+{% if object is not none %}
+    {{ object }}
+{% endif %}
+{% if choices is not none %}
+    {{ choices }}
+{% endif %}
+{% if body is not none %}
+    {{ body }}
+{% endif %}
+</{{ tag }}>

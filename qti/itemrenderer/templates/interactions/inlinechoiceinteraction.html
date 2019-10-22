@@ -1,0 +1,9 @@
+<select data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" {% if attributes.id %}id="{{ attributes.id }}"{% endif %} class="qti-interaction qti-inlineInteraction qti-inlineChoiceInteraction{% if attributes.class %} {{ attributes.class }}{% endif %}"
+        data-serial="{{ serial }}"
+        data-qti-class="inlineChoiceInteraction"
+        data-has-search="false">
+    <option value="">Select</option>
+	{% for choice in choices %}
+		{{ choice }}
+	{% endfor %}
+</select>

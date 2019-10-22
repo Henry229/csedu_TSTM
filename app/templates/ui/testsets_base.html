@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {%- block head %}
+        <base href="./">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>CS Education</title>
+        {%- block styles %}
+            <!-- Icons-->
+            <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+            <link href="/static/ui/vendors/DataTables/datatables.min.css" rel="stylesheet" type="text/css"/>
+            <!-- Main styles for this application-->
+            <link href="/static/ui/css/style.css" rel="stylesheet">
+            <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+            <!-- QTI Item -->
+            <link href="/static/runner/css/test_runner.css" rel="stylesheet">
+        {%- endblock styles %}
+    {%- endblock head %}
+</head>
+<body class="app header-fixed sidebar-fixed aside-menu-fixed {% if g.sidebar_mini %}sidebar-minimized brand-minimized{% endif %} {% if g.sidebar_show %}sidebar-lg-show{% endif %}">
+<header class="app-header navbar">
+    <button class="navbar-toggler sidebar-toggler d-lg-none mr-auto" type="button" data-toggle="sidebar-show">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/">
+        <div class="navbar-brand-full">
+            <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+        </div>
+        <img class="navbar-brand-minimized" src="/static/ui/img/CSEducationLogo.png" width="36" height="20"
+             alt="CSEdu Logo">
+    </a>
+    <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item d-md-down-none">
+            <a class="btn btn btn-outline-warning" href="/auth/logout"><i class="fas fa-sign-out-alt nav-icon"></i>Logout</a>
+        </li>
+    </ul>
+</header>
+<div class="app-body">
+    <main class="main">
+        {% block content %}
+            <div class="container-fluid">
+                <div class="animated fadeIn">
+                    <div class="container">
+                        {% for message in get_flashed_messages() %}
+                            <div class="alert alert-warning">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        {% block app_content %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+    </main>
+</div>
+<footer class="app-footer" style="margin-left: 0">
+    <div>
+        <span>Tailored Testing System</span>
+    </div>
+    <div class="ml-auto">
+        <a href="http://www.cseducation.com.au">CS Education</a>
+        <span>&copy; 2019 CS Education</span>
+    </div>
+</footer>
+{%- block scripts %}
+    <!-- CoreUI and necessary plugins-->
+    <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
+    <script src="/static/ui/vendors/js.cookie/js.cookie.js"></script>
+    <script src="/static/ui/vendors/popper.js/js/popper.min.js"></script>
+    <script src="/static/ui/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/ui/vendors/pace-progress/js/pace.min.js"></script>
+    <script src="/static/ui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+    <script src="/static/ui/vendors/@coreui/coreui/js/coreui.min.js"></script>
+    <script src="/static/ui/vendors/DataTables/datatables.min.js" type="text/javascript"></script>
+    <script src="/static/ui/js/main.js"></script>
+    <!-- Plugins and scripts required by this view-->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.sidebar-toggler').on('click', function () {
+                setTimeout(sidebarChecker, 100);
+            });
+            $('.sidebar-minimizer').on('click', function () {
+                setTimeout(sidebarChecker, 100);
+            });
+
+            function sidebarChecker() {
+                var $body = $('body');
+                var show = $body.hasClass('sidebar-lg-show') ? 'show' : 'hide';
+                var size = $body.hasClass('sidebar-minimized') ? 'mini' : 'full';
+                Cookies.set('sidebar-show', show, {path: '/', expires: 365});
+                Cookies.set('sidebar-size', size, {path: '/', expires: 365});
+            }
+        });
+    </script>
+{%- endblock scripts %}
+</body>
+</html>

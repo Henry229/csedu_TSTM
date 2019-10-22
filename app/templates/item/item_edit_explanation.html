@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <script src="/static/item/js/item_edit.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover();
+        });
+    </script>
+</head>
+<body>
+<div class="card card-accent-success">
+    <div class="card-header" id="headingOne">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    {% if item.active %}
+                        <h1><span class="badge badge-success"><i
+                                class="fas fa-sun"></i> {{ item.name }}.{{ item.version }}</span></h1>
+                    {% else %}
+                        <h1><span class="badge badge-danger"><i
+                                class="fas fa-moon"></i> {{ item.name }}.{{ item.version }}</span></h1>
+                        {{ item.TAO_GUID }}
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <span class="badge badge-pill badge-secondary">Grade</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.grade) }}</span>
+                        <span class="badge badge-pill badge-secondary">Subject</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.subject) }}</span>
+                        <span class="badge badge-pill badge-secondary">Level</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.level) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Category</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.category) }}</span>
+                        <span class="badge badge-pill badge-secondary">Sub-category</span>
+                        <span class="badge ml-0">{{ Codebook.get_code_name(item.subcategory) }}</span>
+                        <div class="w-100 mt-1"></div>
+                        <span class="badge badge-pill badge-secondary">Correct Answer</span>
+                        <span class="badge ml-0">{{ item.correct_answer }}</span>
+                        <span class="badge badge-pill badge-secondary">Multiple Answer</span>
+                        <span class="badge ml-0">{{ item.multiple_answer }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form name="extended_edit_form" id="extended_edit_form" enctype="multipart/form-data"
+              method="POST" action="{{ url_for('item.extended_update',item_id=item.id) }}">
+            <table>
+                {{ form.hidden_tag() }}
+                <tr>
+                    <th>{{ form.explanation.label }}</th>
+                    <td colspan="2">{{ form.explanation(rows="4", cols="70") }} </td>
+
+                </tr>
+                {% for i in range(1,6) %}
+                    {% if explanation.images %}
+                        {% set no_images = explanation.images["images"]|length %}
+                    {% else %}
+                        {% set no_images = 0 %}
+                    {% endif %}
+                    <tr>
+                        <th>{{ form.image.label }}{{ i }}</th>
+                        <td>
+                            {% if i<=no_images %}
+                                {{ form.image(style="display:None") }}
+                                <input type="checkbox" class="img_chx_remove" value="{{ i }}">Remove
+                            {% else %}
+                                {{ form.image }}
+                            {% endif %}
+                        </td>
+                        {% if explanation.images %}
+                            {% if loop.index==1 %}
+                                <td rowspan="10">
+                                    {% if explanation.images %}
+                                        {% set exp_images = explanation.images["images"] %}
+                                        {% for j in range(0,exp_images|length) %}
+                                            <img src="data:{{ exp_images[j]["mime-type"] }};base64,{{ exp_images[j]["image"] }}"
+                                                 height="100" width="100"/>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <th>{{ form.link1.label }}</th>
+                    <td>{{ form.link1 }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.link2.label }}</th>
+                    <td>{{ form.link2 }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.link3.label }}</th>
+                    <td>{{ form.link3 }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.link4.label }}</th>
+                    <td>{{ form.link4 }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.link5.label }}</th>
+                    <td>{{ form.link5 }}   </td>
+                </tr>
+            </table>
+            <div class="row">
+                <div class="col"></div>
+                <div class="col">
+                    <button class="btn btn-warning btn-sm" id="itemExplanationButton" data-dismiss="modal">Update
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" data-dismiss="modal">Close</button>
+                </div>
+                <div class="col"></div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#itemExplanationButton').click(function () {
+            var value = $('#chx_remove').val();
+            $('.img_chx_remove').each(function () {
+                var checked = $(this).prop('checked');
+                var img_number = $(this).attr("value");
+                if (checked) {
+                    if (value.length == 0) {
+                        value = img_number;
+                    } else {
+                        value = value + ',' + img_number;
+                    }
+                }
+            });
+            $('#chx_remove').val(value);
+            $('#extended_edit_form').submit();
+        });
+    });
+
+    function test_1() {
+        alert('test');
+    }
+</script>
+</body>
+</html>
