@@ -130,6 +130,17 @@ Run the app on port 8000
 ### Supervisor
 ```
 $ sudo apt install postfix supervisor
+$ sudo vim /etc/supervisord.d/csedu.ini
+[program:csedu]
+command=/home/ec2-user/csedu/venv/bin/gunicorn -b 0.0.0.0:8000 -w 4 csedu:app
+directory=/home/ec2-user/csedu
+environment=FLASK_DEBUG="1",TEMP="/tmp"
+user=ec2-user
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+
 ```
 ### nginx
 ```
@@ -138,4 +149,5 @@ $ sudo ufw app list
 $ sudo ufw allow 'Nginx HTTP'
 $ sudo ufw status
 $ sudo systemctl status nginx
+$ sudo systemctl start supervisord
 ```
