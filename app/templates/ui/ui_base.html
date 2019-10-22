@@ -133,7 +133,7 @@
                     </li>
                 {% endif %}
                 <li class="nav-title">Report</li>
-                {% if current_user.can(Permission.ITEM_EXEC) %}
+                {% if current_user.can(Permission.ITEM_EXEC) and not current_user.is_administrator() %}
                     <li class="nav-item">
                         <a class="nav-link" href="/report/my_report">
                             <i class="icons cui-monitor nav-icon"></i> My Report </a>
