@@ -115,9 +115,7 @@ $ cd csedu
 (venv) ~/csedu$ flask deploy
 (venv) ~/csedu$ flask testdata (Only when want to have sample test data)
 
-Make a temp folder(replace 'tester' with your account name)
-(venv) ~/csedu$ mkdir /home/tester/temp
-(venv) ~/csedu$ export TEMP=/home/tester/temp/
+(venv) ~/csedu$ export TEMP=/tmp
 
 Run the app on port 8000
 (venv) ~/csedu$ gunicorn -b localhost:8000 -w 4 csedu:app
@@ -144,6 +142,9 @@ killasgroup=true
 ```
 ### nginx
 ```
+$ vi /etc/nginx/nginx.conf
+# Upload size
+        client_max_body_size 50M;
 $ sudo apt install nginx
 $ sudo ufw app list
 $ sudo ufw allow 'Nginx HTTP'
