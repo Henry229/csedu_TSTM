@@ -1,6 +1,8 @@
 import logging
 import os
+import random
 import shutil
+import string
 import time
 from getpass import getpass
 from glob import glob
@@ -104,8 +106,12 @@ def deploy():
     print('Inserting roles into Roles table')
     Role.insert_roles()
 
-    print('Create default admin user: <email:{}> <password:{}>'.format("admin@csedu.com", "welcome"))
-    User.create_default_admin("admin@csedu.com", "welcome")
+    username = "admin@cseducation.com.au"
+    password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+    with open('admin.txt', 'w') as f:
+        f.write('username: %s\npassword: %s' % (username, password))
+    print('Create default admin user: <email:%s> <password saved in admin.txt>' % username)
+    User.create_default_admin(username, password)
 
     print('Create default users(except Administrator):<password:{}>'.format("welcome"))
     User.create_default_user("welcome")

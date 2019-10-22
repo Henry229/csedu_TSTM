@@ -70,15 +70,15 @@ class Config(metaclass=MetaFlaskEnv):
 
     # CS_API
     CS_API_URL = os.environ.get('CS_API_URL') or 'https://13.210.98.100:7443/csonlineschool'
-    CS_API_USER = "admin@csedu.com"
-    CS_API_PASSWORD = "kpKp*oiTokH8"
+    CS_API_USER = os.environ.get('CS_API_USER')
+    CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored'
     # SQLALCHEMY_ECHO = True
-    # PREFERRED_URL_SCHEME = 'https'
+    PREFERRED_URL_SCHEME = 'https'
 
 
 class TestingConfig(Config):

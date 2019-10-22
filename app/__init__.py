@@ -13,9 +13,6 @@ from jinja2.environment import Environment
 from config import config
 from qti.itemservice.itemservice import ItemService
 
-# from app.models import ModelWithUpdate
-
-# db = SQLAlchemy(model_class=ModelWithUpdate)
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 mail = Mail()

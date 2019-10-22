@@ -88,7 +88,7 @@ Change Ident to md5 for the local connection
 # IPv4 local connections:
 host    all             all             127.0.0.1/32            md5
 ```
-#### SQLALCHEMY_DATABASE_URI(DEV_DATABASE_URL or DATABASE_URL) 
+#### SQLALCHEMY_DATABASE_URI 
 ```
 postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
 ```
