@@ -67,5 +67,5 @@ WITH DATA;
 
 -- Permissions
 
-ALTER TABLE public.test_summary_mview OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_mview TO dbuser;
+ALTER TABLE public.test_summary_mview OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_mview TO tailored;

@@ -19,5 +19,5 @@ AS SELECT cepv.plan_id,
 
 -- Permissions
 
-ALTER TABLE public.csedu_plan_assessment_testsets_enrolled_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.csedu_plan_assessment_testsets_enrolled_v TO dbuser;
+ALTER TABLE public.csedu_plan_assessment_testsets_enrolled_v OWNER TO tailored;
+GRANT ALL ON TABLE public.csedu_plan_assessment_testsets_enrolled_v TO tailored;

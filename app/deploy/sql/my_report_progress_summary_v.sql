@@ -17,5 +17,5 @@ AS SELECT e.student_id,
 
 -- Permissions
 
-ALTER TABLE public.my_report_progress_summary_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.my_report_progress_summary_v TO dbuser;
+ALTER TABLE public.my_report_progress_summary_v OWNER TO tailored;
+GRANT ALL ON TABLE public.my_report_progress_summary_v TO tailored;

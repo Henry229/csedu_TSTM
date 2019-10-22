@@ -40,5 +40,5 @@ AS WITH test_result_by_subject AS (
 
 -- Permissions
 
-ALTER TABLE public.test_summary_all_subjects_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_all_subjects_v TO dbuser;
+ALTER TABLE public.test_summary_all_subjects_v OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_all_subjects_v TO tailored;

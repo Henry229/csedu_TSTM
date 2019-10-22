@@ -17,5 +17,5 @@ AS SELECT d.plan_id,
 
 -- Permissions
 
-ALTER TABLE public.test_summary_by_center_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_by_center_v TO dbuser;
+ALTER TABLE public.test_summary_by_center_v OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_by_center_v TO tailored;

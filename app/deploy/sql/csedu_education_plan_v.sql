@@ -17,5 +17,5 @@ AS SELECT p.id AS plan_id,
 
 -- Permissions
 
-ALTER TABLE public.csedu_education_plan_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.csedu_education_plan_v TO dbuser;
+ALTER TABLE public.csedu_education_plan_v OWNER TO tailored;
+GRANT ALL ON TABLE public.csedu_education_plan_v TO tailored;

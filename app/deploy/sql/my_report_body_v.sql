@@ -17,5 +17,5 @@ AS SELECT m.assessment_enroll_id,
 
 -- Permissions
 
-ALTER TABLE public.my_report_body_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.my_report_body_v TO dbuser;
+ALTER TABLE public.my_report_body_v OWNER TO tailored;
+GRANT ALL ON TABLE public.my_report_body_v TO tailored;

@@ -57,5 +57,5 @@ AS WITH org_score AS (
 
 -- Permissions
 
-ALTER TABLE public.test_summary_by_category_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_by_category_v TO dbuser;
+ALTER TABLE public.test_summary_by_category_v OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_by_category_v TO tailored;

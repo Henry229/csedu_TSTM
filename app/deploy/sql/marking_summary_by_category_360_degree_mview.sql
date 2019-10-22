@@ -39,5 +39,5 @@ WITH DATA;
 
 -- Permissions
 
-ALTER TABLE public.marking_summary_by_category_360_degree_mview OWNER TO dbuser;
-GRANT ALL ON TABLE public.marking_summary_by_category_360_degree_mview TO dbuser;
+ALTER TABLE public.marking_summary_by_category_360_degree_mview OWNER TO tailored;
+GRANT ALL ON TABLE public.marking_summary_by_category_360_degree_mview TO tailored;

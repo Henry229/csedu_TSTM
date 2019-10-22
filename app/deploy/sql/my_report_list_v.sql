@@ -32,5 +32,5 @@ AS WITH marked_ts_list AS (
 
 -- Permissions
 
-ALTER TABLE public.my_report_list_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.my_report_list_v TO dbuser;
+ALTER TABLE public.my_report_list_v OWNER TO tailored;
+GRANT ALL ON TABLE public.my_report_list_v TO tailored;

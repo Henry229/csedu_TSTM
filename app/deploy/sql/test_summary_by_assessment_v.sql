@@ -22,5 +22,5 @@ AS WITH org_v AS (
 
 -- Permissions
 
-ALTER TABLE public.test_summary_by_assessment_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_by_assessment_v TO dbuser;
+ALTER TABLE public.test_summary_by_assessment_v OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_by_assessment_v TO tailored;

@@ -21,5 +21,5 @@ AS SELECT subject_t.plan_id,
 
 -- Permissions
 
-ALTER TABLE public.test_summary_by_subject_v OWNER TO dbuser;
-GRANT ALL ON TABLE public.test_summary_by_subject_v TO dbuser;
+ALTER TABLE public.test_summary_by_subject_v OWNER TO tailored;
+GRANT ALL ON TABLE public.test_summary_by_subject_v TO tailored;
