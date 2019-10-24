@@ -22,6 +22,16 @@ def send_email(to, subject, template, **kwargs):
     return thr
 
 
+def send_password_reset_email(user):
+    token = user.get_reset_password_token()
+    send_email(to=user.email,
+               subject='[Tailored] Reset Your Password',
+               template='auth/email/reset_password',
+               user=user,
+               token=token
+               )
+
+
 """
 Sample for email:
 app/auth/templates/auth/email/confirm.html

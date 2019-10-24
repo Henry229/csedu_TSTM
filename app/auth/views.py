@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 import requests
@@ -6,14 +5,14 @@ from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from requests.auth import HTTPBasicAuth
 
-from common.config import Config as common_config
 from common.logger import log
 from config import Config
 from . import auth
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileAdminForm, SearchUserForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileAdminForm, SearchUserForm, \
+    ResetPasswordRequestForm, ResetPasswordForm
 from .. import db
 from ..decorators import permission_required, admin_required
-from ..email import send_email
+from ..email import send_email, send_password_reset_email
 from ..models import User, Permission, Role, Codebook
 
 
@@ -239,6 +238,36 @@ def set_password():
     for key in form.errors.keys():
         flash(form.errors.get(key))
     return redirect(url_for('auth.user_profile', id=current_user.id))
+
+
+@auth.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('web.index'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Password reset e-mail has been sent')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password_request.html', title='Reset Password', form=form)
+
+
+@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('web.index'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('web.index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.password = form.password.data
+        db.session.commit()
+        flash('Your password has been reset')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password.html', form=form)
 
 
 def get_member_info(stud_id):
