@@ -5,6 +5,15 @@
     color: #6b6868;
 }
 
+.grid-row {
+    display:-ms-flexbox;
+    display:flex;
+    -ms-flex-wrap:wrap;
+    flex-wrap:wrap;
+    margin-right:-15px;
+    margin-left:-15px
+}
+
 .qti-item input[type=text], .qti-item select {
     padding: 2px 5px;
     margin: 8px 0;
@@ -41,23 +50,6 @@ textarea:focus.qti-item.qti-interaction.solid {
     right: 1px;
     background: rgb(255, 255, 255);
 }
-
-/*.qti-item .grid-row > div {*/
-/*    top: 0;*/
-/*    width: 50%;*/
-/*    height: 550px;*/
-/*    position: relative;*/
-/*    overflow: auto*/
-
-/*}*/
-
-/*.qti-item .grid-row .qti-interaction {*/
-/*    position: fixed;*/
-/*    top: 250px;*/
-/*    right: 450px;*/
-/*    width: 400px;*/
-/*    !*border: 3px solid #73AD21;*!*/
-/*}*/
 
 .qti-choice img {
     width: 50%;
