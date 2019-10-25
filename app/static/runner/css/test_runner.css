@@ -45,7 +45,6 @@ textarea:focus.qti-item.qti-interaction.solid {
 .qti-item input[type="radio"], .qti-item input[type="checkbox"] {
     width: 24px;
     height: 24px;
-    /*position:relative;*/
     margin-right: 0.75em;
     right: 1px;
     background: rgb(255, 255, 255);
