@@ -17,8 +17,8 @@ class Config(metaclass=MetaFlaskEnv):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
     CSEDU_MAIL_SUBJECT_PREFIX = '[CSEDU]'
-    CSEDU_MAIL_SENDER = 'CSEDU Admin <csedu@example.com>'
-    CSEDU_ADMIN = os.environ.get('CSEDU_ADMIN')
+    CSEDU_MAIL_SENDER = 'CSEDU Admin <testsystem@cseducation.com.au>'
+    CSEDU_ADMIN = os.environ.get('CSEDU_ADMIN') or 'testsystem@cseducation.com.au'
     CSEDU_ITEM_PER_PAGE = 25
 
     # ToDo: Need to update Upload_folder, allowed_extentions
