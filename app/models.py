@@ -929,8 +929,9 @@ class Codebook(db.Model):
     @staticmethod
     def get_subject_name(testset_id):
         ts = db.session.query(Testset.subject).filter_by(id=testset_id).first()
-        subject_name = Codebook.get_code_name(ts[0])
-        return subject_name
+        if ts is None:
+            return '-'
+        return Codebook.get_code_name(ts[0])
 
     @staticmethod
     def get_code_id(code_name):

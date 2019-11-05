@@ -7,8 +7,6 @@
 {% endblock %}
 {% block app_content %}
     <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report by Center </h3>
-
-
     <div class="accordion" id="accordion">
         <div class="card card-accent-success">
             <div class="card-header" id="headingOne">
@@ -88,40 +86,51 @@
                         <tbody>
                         {% if reports %}
                             {% for rpt in reports %}
-                                <tr>
-                                    <td>
-                                        {% if current_user.can(Permission.ADMIN) %}
-                                            <span name="publish" class="badge badge-dark" target="_blank">Publish</span>
-                                        {% endif %}
-                                        <a name="modalButtonTestRanking" class="badge badge-danger" id="{{ test_center }}" target="_blank">Test Ranking</a>
-                                    </td>
-                                    <td class="rpt_year" id="{{ rpt.get("assessment_year") }}"> {{ rpt.get("assessment_year") }}</td>
-                                    <td class="rpt_grade" id="{{ rpt.get("grade") }}"> {{ Codebook.get_code_name(rpt.get("grade")) }}</td>
-                                    <td class="rpt_type"
-                                        id="{{ rpt.get("test_type") }}"> {{ Codebook.get_code_name(rpt.get("test_type")) }}</td>
-                                    <td class="rpt_order" id="{{ rpt.get("assessment_order") }}"> No.{{ rpt.get("assessment_order") }}</td>
-                                    <td class="rpt_id" id="{{ rpt.get("assessment_id")}}">
-                                        <table>
+                                {% if rpt.get("assessment_id")!=0 %}
+                                    <tr>
+                                        <td>
+                                            {% if current_user.can(Permission.ADMIN) %}
+                                                <span name="publish" class="badge badge-dark" target="_blank">Publish</span>
+                                            {% endif %}
                                             {% for testset in rpt.get("testsets") %}
-                                                <tr>
-                                                    <td>{{ Codebook.get_subject_name(testset.get("testset_id")) }}</td>
-                                                    <td>
-                                                        {% if testset.get("test_center") %}{{ Codebook.get_code_name(testset.get("test_center")) }}{% else %}-{% endif %}</td>
-                                                    <td>
-                                                        {% if not testset.get("students") %} - {% endif %}
-                                                        {% for student in testset.get("students") %}
-                                                            {% if student %}<a class="badge badge-secondary"
-                                                                               href='/report/ts/{{ rpt.get("assessment_id") }}/{{ testset.get("testset_id") }}/{{ student }}'
-                                                                               target="_blank">
-                                                                {{ Student.getCSStudentName(student)}}</a>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </td>
-                                                </tr>
+                                                {%- if testset.get('test_center') %}
+                                                    <a name="modalButtonTestRanking" class="badge badge-danger" id="{{ test_center }}" target="_blank">Test Ranking</a>
+                                                    {% break %}
+                                                {% endif %}
                                             {% endfor %}
-                                        </table>
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td class="rpt_year" id="{{ rpt.get("assessment_year") }}"> {{ rpt.get("assessment_year") }}</td>
+                                        <td class="rpt_grade" id="{{ rpt.get("grade") }}"> {{ Codebook.get_code_name(rpt.get("grade")) }}</td>
+                                        <td class="rpt_type"
+                                            id="{{ rpt.get("test_type") }}"> {{ Codebook.get_code_name(rpt.get("test_type")) }}</td>
+                                        <td class="rpt_order" id="{{ rpt.get("assessment_order") }}"> No.{{ rpt.get("assessment_order") }}</td>
+                                        <td class="rpt_id" id="{{ rpt.get("assessment_id")}}">
+                                            <table>
+                                                {% for testset in rpt.get("testsets") %}
+                                                    <tr>
+                                                        <td>{{ Codebook.get_subject_name(testset.get("testset_id")) }}</td>
+                                                        <td>
+                                                            {% if testset.get("test_center") %}{{ Codebook.get_code_name(testset.get("test_center")) }}{% else %}-{% endif %}</td>
+                                                        <td>
+                                                            {% if not testset.get("students") %} - {% endif %}
+                                                            {% for student in testset.get("students") %}
+                                                                {% if student %}<a class="badge badge-secondary"
+                                                                                   href='/report/ts/{{ rpt.get("assessment_id") }}/{{ testset.get("testset_id") }}/{{ student }}'
+                                                                                   target="_blank">
+                                                                    {{ Student.getCSStudentName(student)}}</a>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="10"> No Data Found. </td>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
                         {% endif %}
                         </tbody>
