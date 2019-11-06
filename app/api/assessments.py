@@ -14,7 +14,7 @@ from app.api import api
 from app.api.assessmentsession import AssessmentSession
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater
+    Marking, AssessmentEnroll, MarkingBySimulater, Student
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request
 from .. import db
@@ -190,13 +190,17 @@ def create_session():
     assessment_guid = request.json.get('assessment_guid')
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
-    student_id = current_user.id
     student_ip = request.json.get('student_ip')
 
     # 1. check if there is an assessment with the guid and get the latest one.
     assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
     if assessment is None:
         return bad_request()
+
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
 
     # 2. check if the student went through the testset.
     # ToDo: What should we do if he already did?
