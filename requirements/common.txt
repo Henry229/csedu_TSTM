@@ -19,3 +19,5 @@ pytz==2019.*
 requests==2.22.*
 WeasyPrint==50
 xlrd==1.2.*
+XlsxWriter==1.1.8
+Unidecode==1.0.23

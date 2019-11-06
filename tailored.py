@@ -103,8 +103,8 @@ def test(coverage, test_names):
 
 @app.cli.command()
 def deploy():
-    print('Inserting roles into Roles table')
-    Role.insert_roles()
+    # print('Inserting roles into Roles table')
+    # Role.insert_roles()
 
     username = "admin@cseducation.com.au"
     password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
@@ -158,7 +158,7 @@ def deploy():
     Codebook.create_default_codeset(None, "test_center", "CS Online School", "Norwest", "Castle Hill", "All")
 
     # Create DB views
-    create_views()
+    # create_views()
 
 
 def create_views():

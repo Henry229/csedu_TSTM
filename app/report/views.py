@@ -249,9 +249,9 @@ def test_summary_report(plan_id):
 
     column_names_all = ['p.plan_id', 'p."order"', 'p.assessment_id',
                         'p.student_id',
-                        "to_char(p.score,'999.99') as my_set_score",
+                        "to_char(coalesce(p.score,0),'999.99') as my_set_score",
                         "p.rank_v",
-                        "to_char(p.avg_score,'999.99') as avg_set_score"
+                        "to_char(coalesce(p.avg_score,0),'999.99') as avg_set_score"
                         ]
     sql_stmt_all = 'SELECT DISTINCT {columns} ' \
                    'FROM test_summary_by_assessment_v p ' \
@@ -343,10 +343,10 @@ def test_summary_report(plan_id):
     # # -- 학생이 친 시험 과목별 평균점수, rank, 최저점, 최고점
     column_names = ['plan_id', 'testset_id', 'student_id',
                     'rank_v',
-                    "to_char(subject_avg_my_score,'999.99') as subject_avg_my_score,"
-                    "to_char(subject_avg_avg_score,'999.99') as subject_avg_avg_score",
-                    "to_char(subject_avg_min_score,'999.99') as subject_avg_min_score",
-                    "to_char(subject_avg_max_score,'999.99') as subject_avg_max_score"
+                    "to_char(coalesce(subject_avg_my_score,0),'999.99') as subject_avg_my_score,"
+                    "to_char(coalesce(subject_avg_avg_score,0),'999.99') as subject_avg_avg_score",
+                    "to_char(coalesce(subject_avg_min_score,0),'999.99') as subject_avg_min_score",
+                    "to_char(coalesce(subject_avg_max_score,0),'999.99') as subject_avg_max_score"
                     ]
     sql_stmt = 'SELECT {columns} ' \
                'from test_summary_by_subject_v ts' \
@@ -361,10 +361,10 @@ def test_summary_report(plan_id):
     # # -- 학생이 친 시험 전체(plan package단위) 점수, rank, 최저점, 최고점
     column_names = ['plan_id', 'student_id',
                     'rank_v',
-                    "to_char(sum_my_score/" + str(num_of_assessments) + ",'999.99') as sum_my_score",
-                    "to_char(sum_avg_score/" + str(num_of_assessments) + ",'999.99') as sum_avg_score",
-                    "to_char(sum_min_score/" + str(num_of_assessments) + ",'999.99') as sum_min_score",
-                    "to_char(sum_max_score/" + str(num_of_assessments) + ",'999.99') as sum_max_score"
+                    "to_char(coalesce(sum_my_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_my_score",
+                    "to_char(coalesce(sum_avg_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_avg_score",
+                    "to_char(coalesce(sum_min_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_min_score",
+                    "to_char(coalesce(sum_max_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_max_score"
                     ]
     sql_stmt = 'SELECT {columns} ' \
                'from test_summary_by_plan_v ts' \
@@ -476,17 +476,17 @@ def manage():
         Record = namedtuple('Record', cursor.keys())
         rows = [Record(*r) for r in cursor.fetchall()]
         index = 0
-        _assessment_enroll_id, _testset_id = 0, 0
+        _assessment_enroll_id, _testset_id, _test_center, _assessment_year, _assessment_order = 0, 0, 0, 0, 0
+        _assessment_id, _grade, _test_type = 0, 0, 0
         for row in rows:
             if index>0 and \
-                    ((_testset_id != row.testset_id and _assessment_enroll_id != row.assessment_enroll_id)
-                        or row.assessment_enroll_id is None):
+                    (_testset_id != row.testset_id or row.assessment_enroll_id is None):
                 testset_json_string = {"testset_id": _testset_id,
                                        "test_center": _test_center,
                                        "students": students
                                        }
                 testsets.append(testset_json_string)
-                if (_assessment_id != row.assessment_id) or (_assessment_enroll_id != row.assessment_enroll_id):
+                if (_assessment_id != row.assessment_id):
                     json_string = {"assessment_year": _assessment_year,
                                    "grade": _grade,
                                    "test_type": _test_type,
@@ -769,10 +769,87 @@ def list(year, test_type, sequence, assessment_id, test_center):
         if r.test_center == test_center:
             test_summaries.append(r)
     template_file_name = 'report/test_result_' + Codebook.get_code_name(test_type) + '.html'
+    if request.args.get('excel-download') == "1":
+        rsp = build_test_result_excel_response(subjects, test_summaries, year, test_type, sequence)
+        return rsp
+    elif request.args.get('excel-download') == "0":
+        pass
+        # rsp = build_test_result_pdf_response(test_summaries)
+        # return rsp
+
     return render_template(template_file_name,
                            year=year, test_type=test_type, sequence=sequence,
                            subject_names=subjects,
                            test_summaries=test_summaries, now=datetime.utcnow())
+
+def build_test_result_excel_response(subjects, test_summaries, year, test_type, sequence):
+    """
+    test_result_summary 를 받아서 엑셀로 export 하는 response object 를 만듭니다.
+    :param test_summaries: test_summary query object list
+    :return: flask response object
+    """
+    import io
+    import time
+    import unidecode
+    from urllib import parse
+    from flask import send_file
+    import xlsxwriter
+
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet('Test Ranking')
+
+    row, col = 0, 0
+    # Excel header list
+    headers = ["No.", "Student No.", "Name" ]
+    for subject in subjects:
+        headers.append(subject.subject_name)
+    headers.append("Total")
+    headers.append("Ranking")
+    headers.append("Branch Name")
+    for header in headers:
+        worksheet.write(row, col, header)
+        col += 1
+
+    # test_summaries object 에서 Excel 로 export 할 attribute
+    attributes = ["cs_student_id", "student_name"]
+    for i in range(1,len(subjects)+1):
+        attributes.append("subject_"+str(i))
+    attributes.append("total_mark")
+    attributes.append("student_rank")
+    attributes.append("test_center")
+
+    for ts in test_summaries:
+        row += 1
+        worksheet.write(row, 0, str(col+1))
+        col = 1
+        for attr in attributes:
+            if attr == "test_center":
+                tc = getattr(ts, attr)
+                worksheet.write(row, col, Codebook.get_code_name(tc))
+            else:
+                worksheet.write(row, col, getattr(ts, attr))
+            col += 1
+
+    workbook.close()
+    output.seek(0)
+    file_name = 'test_ranking_%s_%s_%s_%s.xlsx' % (year, test_type, sequence, int(time.time()))
+
+    # response object 생성
+    rsp = send_file(
+        io.BytesIO(output.read()), as_attachment=True,
+        attachment_filename=file_name,
+        mimetype='application/vnd.ms-excel'
+    )
+    rsp.headers["Content-Disposition"] = \
+        "attachment;" \
+        "filename={ascii_filename};" \
+        "filename*=UTF-8''{utf_filename}".format(
+            ascii_filename=unidecode.unidecode(file_name).replace(' ', '_'),
+            utf_filename=parse.quote(file_name)
+        )
+
+    return rsp
 
 
 @report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',
