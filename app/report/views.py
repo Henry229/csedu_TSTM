@@ -1,7 +1,8 @@
+import os
 from collections import namedtuple
 from datetime import datetime
 
-from flask import render_template, flash, request
+from flask import render_template, flash, request, current_app
 from flask_login import login_required, current_user
 
 from . import report
@@ -241,7 +242,7 @@ def test_summary_report(plan_id):
     cursor_1 = db.session.execute(sql_stmt_1, {'plan_id': plan_id})
     ts_header = cursor_1.fetchone()
     test_type_string = Codebook.get_code_name(ts_header.test_type)
-    if test_type_string!='Naplan':
+    if test_type_string != 'Naplan':
         test_type_string = 'other'
     # ##
     # Individual Progress Report : Body - Summary Report
@@ -466,7 +467,7 @@ def manage():
         if test_type:
             sql_stmt_sub = sql_stmt_sub + 'AND test_type = :test_type '
         if test_center:
-            if Codebook.get_code_name(test_center)!='All':
+            if Codebook.get_code_name(test_center) != 'All':
                 sql_stmt_sub = sql_stmt_sub + 'AND test_center = :test_center '
         if year:
             sql_stmt_sub = sql_stmt_sub + 'AND "year" = :year '
@@ -479,7 +480,7 @@ def manage():
         _assessment_enroll_id, _testset_id, _test_center, _assessment_year, _assessment_order = 0, 0, 0, 0, 0
         _assessment_id, _grade, _test_type = 0, 0, 0
         for row in rows:
-            if index>0 and \
+            if index > 0 and \
                     (_testset_id != row.testset_id or row.assessment_enroll_id is None):
                 testset_json_string = {"testset_id": _testset_id,
                                        "test_center": _test_center,
@@ -638,14 +639,14 @@ def score_summary(item_id):
 def list(year, test_type, sequence, assessment_id, test_center):
     column_names = ['att.testset_id',
                     '(select cb.code_name ' \
-                        + ' from testset ts, codebook cb ' \
-                        + ' where att.testset_id=ts.id ' \
-                        + ' and ts.subject = cb.id ' \
-                        + " and cb.code_type = 'subject') as subject_name"]
+                    + ' from testset ts, codebook cb ' \
+                    + ' where att.testset_id=ts.id ' \
+                    + ' and ts.subject = cb.id ' \
+                    + " and cb.code_type = 'subject') as subject_name"]
     sql_stmt = 'SELECT distinct {columns} ' \
                'FROM assessment_testsets as att, assessment_enroll as ae' \
                ' WHERE att.assessment_id = ae.assessment_id ' \
-                ' AND  att.assessment_id = :assessment_id ' \
+               ' AND  att.assessment_id = :assessment_id ' \
                ' ORDER BY 1 ASC'.format(columns=','.join(column_names))
     cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id})
     Record = namedtuple('Record', cursor.keys())
@@ -697,61 +698,61 @@ def list(year, test_type, sequence, assessment_id, test_center):
     # AND trs.student_id = a.student_id;
 
     sql_stmt = ' WITH test_result_by_subject AS( ' \
-                + ' SELECT test_summary_v.row_name[1] AS student_id, '\
-                + ' test_summary_v.row_name[2] AS assessment_id, '
+               + ' SELECT test_summary_v.row_name[1] AS student_id, ' \
+               + ' test_summary_v.row_name[2] AS assessment_id, '
     for subject in subjects:
-        sql_stmt = sql_stmt + ' test_summary_v.'+subject.subject_name+', '
+        sql_stmt = sql_stmt + ' test_summary_v.' + subject.subject_name + ', '
     index = 1
     for subject in subjects:
-        if index!=1:
+        if index != 1:
             sql_stmt = sql_stmt + '+'
         sql_stmt = sql_stmt \
-                + ' COALESCE(NULLIF(test_summary_v.'+subject.subject_name+', 0::double precision), 0::double precision)'
+                   + ' COALESCE(NULLIF(test_summary_v.' + subject.subject_name + ', 0::double precision), 0::double precision)'
         index += 1
     sql_stmt = sql_stmt + ' AS total_mark '
     sql_stmt = sql_stmt \
-        + " FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score "  \
-        + "                  from (SELECT m.student_id, " \
-        + "                            m.assessment_id, " \
-        + "                             m.testset_id, " \
-        + "                            m.score AS my_score "\
-        + "                            FROM marking_summary_360_degree_mview m " \
-        + "                            where student_id is not null " \
-        + "                            and m.assessment_id = :assessment_id) test_summary_v " \
-        + "                        order by 1, 2 ', " \
-        + "                        'select distinct att.testset_id " \
-        + "                            from assessment_testsets as att join assessment_enroll as ae " \
-        + "                            on att.assessment_id = ae.assessment_id " \
-        + "                            where att.assessment_id = :assessment_id " \
-        + "                            order by 1') "
+               + " FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score " \
+               + "                  from (SELECT m.student_id, " \
+               + "                            m.assessment_id, " \
+               + "                             m.testset_id, " \
+               + "                            m.score AS my_score " \
+               + "                            FROM marking_summary_360_degree_mview m " \
+               + "                            where student_id is not null " \
+               + "                            and m.assessment_id = :assessment_id) test_summary_v " \
+               + "                        order by 1, 2 ', " \
+               + "                        'select distinct att.testset_id " \
+               + "                            from assessment_testsets as att join assessment_enroll as ae " \
+               + "                            on att.assessment_id = ae.assessment_id " \
+               + "                            where att.assessment_id = :assessment_id " \
+               + "                            order by 1') "
     sql_stmt = sql_stmt + ' AS test_summary_v(row_name integer[], '
     index = 1
     for subject in subjects:
         sql_stmt = sql_stmt + subject.subject_name + ' double precision'
-        if index<len(subjects):
-            sql_stmt = sql_stmt +', '
+        if index < len(subjects):
+            sql_stmt = sql_stmt + ', '
         index += 1
     sql_stmt = sql_stmt + ') )'
-    sql_stmt = sql_stmt  \
-        + " SELECT trs.student_id, "\
-        + "     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id, " \
-        + "     (select u.username from users u where u.id=trs.student_id) AS student_name, " \
-        + "     trs.assessment_id, " \
-        + "      a.test_center, "
+    sql_stmt = sql_stmt \
+               + " SELECT trs.student_id, " \
+               + "     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id, " \
+               + "     (select u.username from users u where u.id=trs.student_id) AS student_name, " \
+               + "     trs.assessment_id, " \
+               + "      a.test_center, "
     index = 1
     for subject in subjects:
-        sql_stmt = sql_stmt + 'trs.'+ subject.subject_name + ' as subject_'+str(index)+', '
+        sql_stmt = sql_stmt + 'trs.' + subject.subject_name + ' as subject_' + str(index) + ', '
         index += 1
-    sql_stmt = sql_stmt  \
-        + ' trs.total_mark, '\
-        + ' rank() OVER(PARTITION BY trs.assessment_id ORDER BY trs.total_mark DESC) AS student_rank '\
-        + ' FROM test_result_by_subject trs, '\
-        + ' (SELECT DISTINCT assessment_enroll.assessment_id, '\
-        + '     assessment_enroll.student_id, '\
-        + '     assessment_enroll.test_center '\
-        + '     FROM assessment_enroll) a '\
-        + ' WHERE trs.assessment_id = a.assessment_id '\
-        + ' AND trs.student_id = a.student_id '
+    sql_stmt = sql_stmt \
+               + ' trs.total_mark, ' \
+               + ' rank() OVER(PARTITION BY trs.assessment_id ORDER BY trs.total_mark DESC) AS student_rank ' \
+               + ' FROM test_result_by_subject trs, ' \
+               + ' (SELECT DISTINCT assessment_enroll.assessment_id, ' \
+               + '     assessment_enroll.student_id, ' \
+               + '     assessment_enroll.test_center ' \
+               + '     FROM assessment_enroll) a ' \
+               + ' WHERE trs.assessment_id = a.assessment_id ' \
+               + ' AND trs.student_id = a.student_id '
 
     cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id})
     Record = namedtuple('Record', cursor.keys())
@@ -782,6 +783,7 @@ def list(year, test_type, sequence, assessment_id, test_center):
                            subject_names=subjects,
                            test_summaries=test_summaries, now=datetime.utcnow())
 
+
 def build_test_result_excel_response(subjects, test_summaries, year, test_type, sequence):
     """
     test_result_summary 를 받아서 엑셀로 export 하는 response object 를 만듭니다.
@@ -801,7 +803,7 @@ def build_test_result_excel_response(subjects, test_summaries, year, test_type, 
 
     row, col = 0, 0
     # Excel header list
-    headers = ["No.", "Student No.", "Name" ]
+    headers = ["No.", "Student No.", "Name"]
     for subject in subjects:
         headers.append(subject.subject_name)
     headers.append("Total")
@@ -813,15 +815,15 @@ def build_test_result_excel_response(subjects, test_summaries, year, test_type, 
 
     # test_summaries object 에서 Excel 로 export 할 attribute
     attributes = ["cs_student_id", "student_name"]
-    for i in range(1,len(subjects)+1):
-        attributes.append("subject_"+str(i))
+    for i in range(1, len(subjects) + 1):
+        attributes.append("subject_" + str(i))
     attributes.append("total_mark")
     attributes.append("student_rank")
     attributes.append("test_center")
 
     for ts in test_summaries:
         row += 1
-        worksheet.write(row, 0, str(col+1))
+        worksheet.write(row, 0, str(col + 1))
         col = 1
         for attr in attributes:
             if attr == "test_center":
@@ -1013,7 +1015,14 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
 
             template_html_name = 'report/results_pdf_' + test_type_string + '.html'
             # ToDo: Need to remove return statement and continue to loop without break
-            rendered_template = render_template(template_html_name, file_name=file_name, subjects=subjects)
+
+            web_file_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), file_name)
+            rendered_template = render_template(template_html_name, image_file_path=web_file_path, subjects=subjects)
+            local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
+                                                    current_app.config['NAPLAN_RESULT_DIR'],
+                                                    file_name)
+            rendered_template_pdf = render_template(template_html_name, image_file_path=local_file_path,
+                                                    subjects=subjects)
             from weasyprint import HTML, CSS
             from weasyprint.fonts import FontConfiguration
             font_config = FontConfiguration()
@@ -1023,7 +1032,7 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
                     src: url(http://example.com/fonts/Gentium.otf);
                 }
                 h1 { font-family: Gentium }''', font_config=font_config)
-            html = HTML(string=rendered_template)
+            html = HTML(string=rendered_template_pdf)
             html.write_pdf(target='./tmp.pdf',
                            presentational_hints=True)
 
