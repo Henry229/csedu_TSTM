@@ -40,18 +40,22 @@
 <div class="container">
     <br><br>
     <div class="row">
-        <div class="col">
-            <strong>Test Results</strong> &nbsp;
-            {% if current_user.can(Permission.ADMIN) %}
-                <form action=""  method="GET">
-                <input type="hidden" id="excel-download" name="excel-download" value="0">
-                <input class="btn btn-success" id="submit" name="submit" type="submit" value="" style="visibility: hidden">
-                <input class="btn btn-primary" id="export" type="button" value="Excel Download">
-                </form>
-            {% endif %}
-        </div>
+        {% if not image_file_path  %}
+            <div class="col">
+                <strong>Test Results</strong> &nbsp;
+                {% if current_user.can(Permission.ADMIN) %}
+                    <form action=""  method="GET">
+                    <input type="hidden" id="excel-download" name="excel-download" value="0">
+                    <input type="hidden" id="pdf-download" name="pdf-download" value="0">
+                    <input class="btn btn-success" id="submit" name="submit" type="submit" value="" style="visibility: hidden">
+                    <input class="btn btn-primary" id="export" type="button" value="Excel Download">
+                    <input class="btn btn-info" id="export-pdf" type="button" value="PDF Download">
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="col" align="right">
-            <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo"></div>
+            <img src={{ image_file_path }} width="150" height="20" alt="CSEdu Logo"></div>
         </div>
         <br>
         <div class="card">

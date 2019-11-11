@@ -61,7 +61,7 @@
             <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
                 <div class="card-body">
                     {% if current_user.can(Permission.ADMIN) %}
-                        <string>Test Summary Report: </string>
+                        <string>Individual Progress Summary Report: </string>
                         {% if test_summaries %}
                             {% for ts in test_summaries %}
                                 <a class="btn btn-{{ loop.cycle('warning','danger','success','info','secondary') }} btn-sm img_summary_report"
@@ -70,6 +70,16 @@
                                 &nbsp;
                             {% endfor %}
                         {% endif %}
+{#                        <br><br>#}
+{#                        <string>Test Report: </string>#}
+{#                        {% if test_summaries %}#}
+{#                            {% for ts in test_summaries %}#}
+{#                                <a class="btn btn-{{ loop.cycle('warning','danger','success','info','secondary') }} btn-sm img_summary_report"#}
+{#                                   href='/report/pdf/{{ ts.plan_id }}'#}
+{#                                   target="_blank">{{ ts.plan_name }}</a>#}
+{#                                &nbsp;#}
+{#                            {% endfor %}#}
+{#                        {% endif %}#}
                     {% endif %}
                     <br><br>
                     <table id="reports" class="display table table-hover" style="width:100%">
@@ -95,6 +105,7 @@
                                             {% for testset in rpt.get("testsets") %}
                                                 {%- if testset.get('test_center') %}
                                                     <a name="modalButtonTestRanking" class="badge badge-danger" id="{{ test_center }}" target="_blank">Test Ranking</a>
+                                                    <a name="btnTestReports" class="badge badge-danger" id="{{ test_center }}">Download: Test Report</a>
                                                     {% break %}
                                                 {% endif %}
                                             {% endfor %}
@@ -141,27 +152,27 @@
         </div>
     </div>
     <div class="modal fade" id="confirm-generate" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">
-                            Generate Data for Report
-                        </h4>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">
+                        Generate Data for Report
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-text">
+                        Are you sure to generate data for Report ?
                     </div>
-                    <div class="modal-body">
-                        <div class="modal-text">
-                            Are you sure to generate data for Report ?
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
-                                onclick="gen_report('confirm-generate');">Generate
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
+                            onclick="gen_report('confirm-generate');">Generate
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 {% endblock app_content %}
 {% block scripts %}
     {{ super() }}

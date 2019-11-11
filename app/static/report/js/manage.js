@@ -19,43 +19,27 @@ $(document).ready(function () {
                 param_str += '/' + $objs[i].id;
             }
         }
-        // report/list/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>
-        var href = '/report/list' + param_str + '/' + $btn.attr("id");
+        // report/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>
+        var href = '/report/test_ranking' + param_str + '/' + $btn.attr("id");
         $btn.attr("href", href);
     });
 
-    $('a[name="modalButtonTestResults"]').click(function () {
+    $('a[name="btnTestReports"]').click(function () {
         $btn = $(this);
         param_str = '';
         $objs = $btn.parent().siblings();
-        for (i = 0; i < $objs.length; i++) {
-
-            param_str += '/' + $objs[i].id;
+       for (i = 0; i < $objs.length; i++) {
+            if (($objs[i].className=='rpt_year') || ($objs[i].className=='rpt_type') ||
+                ($objs[i].className=='rpt_order') || ($objs[i].className=='rpt_id')) {
+                param_str += '/' + $objs[i].id;
+            }
         }
-        var href = '/report/results/pdf' + param_str;
+        // report/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>
+        var href = '/report/results/pdf' + param_str + '/' + $btn.attr("id");
         $btn.attr("href", href);
     });
 });
 
-function gen_report(modal_name) {
-    $.ajax({
-        url: '/api/gen_report/',
-        method: 'POST',
-        beforeSend: function () {
-
-        },
-        complete: function () {
-
-        },
-        success: function (response) {
-            console.log(response);
-            $("#status").show();
-            $("#status").html("Report generated successfully").fadeOut(3000, function () {
-                $(this).hide()
-            });
-        }
-    });
-}
 
 function invokeModalItem(id) {
     var url = '/item/' + id + '/preview';
