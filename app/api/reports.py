@@ -137,6 +137,7 @@ def draw_report(result):
     return file_name
 
 
+
 '''Student UI - Student Naplan Report : Query data and return image file_name generated '''
 def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, assessment_GUID, grade):
     column_names = ['assessment_id',
@@ -249,6 +250,8 @@ def query_my_report_list_v(student_id):
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
+
+
 
 
 '''Student UI: Query My Report (subject) Header for each Student'''
@@ -699,26 +702,6 @@ def build_test_ranking_pdf_response(template_file_name, image_file_path, year, t
     return rsp
 
 
-def build_test_results_zipper(assessment_GUID):
-
-    from zipfile import ZipFile
-    from flask import send_file
-
-    pdf_dir_path = 'test_report_pdf_%s' % (assessment_GUID)
-    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
-    file_paths = get_all_files(pdf_dir_path)
-    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
-        for file in file_paths:
-            zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
-    rsp =  send_file(
-                zfile,
-                mimetype='application/zip',
-                as_attachment=True,
-                attachment_filename='zfile')
-    return rsp
-
-
 def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_id):
 
     rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path)
@@ -743,6 +726,137 @@ def build_test_results_pdf_response(template_file_name, image_file_path, assessm
                    presentational_hints=True)
     os.chdir(curr_dir)
     return 'success'
+
+
+def build_test_results_zipper(assessment_GUID):
+    from zipfile import ZipFile
+    from flask import send_file
+
+    pdf_dir_path = 'test_report_pdf_%s' % (assessment_GUID)
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    file_paths = get_all_files(pdf_dir_path)
+    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+        for file in file_paths:
+            zip.write(file)
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
+    rsp =  send_file(
+                zfile,
+                mimetype='application/zip',
+                as_attachment=True,
+                attachment_filename='zfile')
+    return rsp
+
+
+'''Admin UI individual_progress Report by_subject - draw picture '''
+def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
+    import numpy as np
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    sns.set(style="whitegrid")
+    f, axes = plt.subplots(len(score_summaries), 1, figsize=(3*len(score_summaries), len(score_summaries)), sharex=True)
+    y = np.array(["My Score","Avg"])
+
+    arr_x = []
+    index = 0
+    for score in score_summaries:
+        _subject = score.get('subject')
+        # _my_score_range = score.get('my_score_range')
+        _my_score = float(score.get('my_score'))
+        _total_score = float(score.get('total_score'))
+        # _my_avg_range = float(score.get('my_avg_range'))
+        _avg = float(score.get('average'))
+        arr_x.append(np.array([_my_score,_avg]))
+        axes[index].set_ylabel(_subject)
+        axes[index].set(xlim=(0, _total_score))
+        index += 1
+
+    index = 0
+    for x in arr_x:
+        sns.barplot(x=x, y=y, palette="deep", ax=axes[index])
+        index += 1
+
+    file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_id)
+    f.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
+    return file_name
+
+
+'''Admin UI individual_progress Report by_set - draw picture '''
+def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_id):
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    sns.set(style="darkgrid")
+    fig = plt.figure()
+
+    values, tests = [], []
+    for i in range(0, len(my_set_score)):
+        # score = [my_set_score[i], avg_set_score[i]]
+        values.append([my_set_score[i], avg_set_score[i]])
+        tests.append('Test%s'%str(i+1))
+    df = pd.DataFrame(values, tests, columns=['My Score','Avg Score'])
+    sns.lineplot(data=df, palette="tab10", linewidth=2.5)
+    # plt.show()
+    file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_id)
+    fig.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
+    return file_name
+
+
+def build_individual_progress_pdf_response(template_file_name, logo_file_name,
+                                           by_subject_file_name, by_set_file_name,
+                                           ts_header, num_of_assessments, num_of_subjects,
+                                           subject_names, subjects, my_set_score,
+                                           avg_set_score, my_set_rank, score_summaries, plan_id,
+                                           plan_GUID, student_id):
+    rendered_template_pdf = render_template(template_file_name, logo_file_name=logo_file_name,
+                                            by_subject_file_name=by_subject_file_name, by_set_file_name=by_set_file_name,
+                                            ts_header = ts_header,
+                                            num_of_assessments = num_of_assessments, num_of_subjects = num_of_subjects,
+                                            subject_names = subject_names,
+                                            subjects = subjects, my_set_score = my_set_score,
+                                            avg_set_score = avg_set_score, my_set_rank = my_set_rank,
+                                            score_summaries = score_summaries, plan_id = plan_id
+                                            )
+
+    from weasyprint import HTML, CSS
+    from weasyprint.fonts import FontConfiguration
+    font_config = FontConfiguration()
+    css = CSS(string='''
+        @font-face {
+            font-family: Gentium;
+            src: url(http://example.com/fonts/Gentium.otf);
+        }
+        h1 { font-family: Gentium }''', font_config=font_config)
+    html = HTML(string=rendered_template_pdf)
+
+    pdf_dir_path = 'individual_progress_report_pdf_%s' % (plan_GUID)
+    curr_dir = os.getcwd()
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    if not os.path.exists(pdf_dir_path):
+        os.makedirs(pdf_dir_path)
+    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_id)
+    html.write_pdf(target=pdf_file_path,
+                   presentational_hints=True)
+    os.chdir(curr_dir)
+    return 'success'
+
+
+def build_individual_progress_zipper(plan_GUID):
+    from zipfile import ZipFile
+    from flask import send_file
+
+    pdf_dir_path = 'individual_progress_report_pdf_%s' % (plan_GUID)
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    file_paths = get_all_files(pdf_dir_path)
+    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+        for file in file_paths:
+            zip.write(file)
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
+    rsp =  send_file(
+                zfile,
+                mimetype='application/zip',
+                as_attachment=True,
+                attachment_filename='zfile')
+    return rsp
 
 
 def get_all_files(directory):

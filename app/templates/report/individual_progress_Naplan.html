@@ -40,54 +40,20 @@
             text-align: center;
             border: 1px solid #c8ced3;
         }
-
-        #t_graph {
-            table-layout: auto;
-            width: 100%;
-            border: 5px solid white;
-        }
-
-        #t_graph td {
-            vertical-align: middle;
-            border: 0px solid white;
-        }
-    </style>
-    <script src="/static/ui/vendors/chart.js/js/Chart.min.js"></script>
-    <script src="/static/ui/vendors/chart.js/js/utils.js"></script>
-    <style>
-        canvas {
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-        }
-
-        .chart-container {
-            width: 500px;
-            margin-left: 40px;
-            margin-right: 40px;
-            margin-bottom: 40px;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
     </style>
 </head>
 <body>
 <p></p>
 <div class="container">
     <br><br>
+    <div align="left">&nbsp;<img src="{{logo_file_name}}" width="150" height="20" alt="CSEdu Logo"></div>
+    <div align="center"><h3
+            style="color: #397e38;">{{ ts_header.year }} {{ Codebook.get_code_name(ts_header.test_type) }} Test
+        Summary Report</h3></div>
+
     <div class="card">
-    <br>
-        <div align="left">&nbsp;<img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo"></div>
-        <div align="center"><h3
-                style="color: #397e38;">{{ ts_header.year }} {{ Codebook.get_code_name(ts_header.test_type) }} Test
-            Summary Report</h3></div>
         <div class="card-header">
-            <table style="width:100%" id="t_student_info">
+            <table id="t_student_info">
                 <tr>
                     <th> Student Name:</th>
                     <td> {{ current_user.username }} </td>
@@ -95,14 +61,13 @@
                     <td> {{ ts_header.grade }}</td>
                     <th> Student ID:</th>
                     <td> {{ Student.getCSStudentId(current_user.id) }}</td>
-                    <th> <a class="btn btn-secondary" href="/report/summary/{{plan_id}}/pdf">Print</a></th>
                 </tr>
             </table>
         </div>
         <div class="card-body">
             {% if subjects %}
                 <strong>Summary Report(Subject)</strong>
-                <table class="table" style="width:100%" id="t_mark_info">
+                <table class="table" id="t_mark_info">
                     <tr>
                         <th> Category</th>
                         {% for i in range(0,num_of_assessments) %}
@@ -121,9 +86,6 @@
                         </tr>
                     {% endfor %}
                     <tr>
-                        <td></td>
-                    </tr>
-                    <tr>
                         <td><small>Student Average</small></td>
                         {% for score in my_set_score %}
                             <td>{{ score }}</td>
@@ -134,9 +96,6 @@
                         {% for score in avg_set_score %}
                             <td>{{ score }}</td>
                         {% endfor %}
-                    </tr>
-                    <tr>
-                        <td></td>
                     </tr>
                     <tr>
                         <td><small>Student Rank</small></td>
@@ -155,7 +114,7 @@
 
             {% if subjects %}
                 <strong>Strength/Weakness Report(Subject)</strong>
-                <table class="table" style="width:100%" id="t_mark_info">
+                <table class="table" id="t_mark_info">
                     <tr>
                         <th>Subject</th>
                         <th>Performance Chart</th>
@@ -163,40 +122,12 @@
                         <th>Max</th>
                         <th>Rank</th>
                     </tr>
-                    <tr style="background-color: floralwhite">
-                        <th style="border-bottom: 2px solid floralwhite"></th>
-                    </tr>
                     {% for score in score_summaries %}
                         <tr>
                             <td>{{ score.subject }}</td>
-                            <td>
-                                <table id="t_graph">
-                                    <tr>
-                                        <td width="15%"><small>My Score(Avg)</small></td>
-                                        <td width="75%">
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar bg-warning" role="progressbar"
-                                                     style="width: {{ score.my_score_range }}%"
-                                                     aria-valuenow="{{ score.my_score }}" aria-valuemin="0"
-                                                     aria-valuemax="{{ score.total_score }}"></div>
-                                            </div>
-                                        </td>
-                                        <td width="10%"><small> {{ score.my_score }} </small></td>
-                                    </tr>
-                                    <tr>
-                                        <td width="15%"><small>Subject(Avg)</small></td>
-                                        <td width="75%">
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar bg-danger" role="progressbar"
-                                                     style="width: {{ score.my_avg_range }}%"
-                                                     aria-valuenow="{{ score.average }}" aria-valuemin="0"
-                                                     aria-valuemax="{{ score.total_score }}"></div>
-                                            </div>
-                                        </td>
-                                        <td width="10%"><small> {{ score.average }} </small></td>
-                                    </tr>
-                                </table>
-                            </td>
+                            {% if loop.index0==0 %}
+                            <td rowspan="{{score_summaries|length}}"><img src=" {{ by_subject_file_name }}" width="600" height="200" alt="by subject chart"></td>
+                            {% endif %}
                             <td>{{ score.min }}</td>
                             <td>{{ score.max }}</td>
                             <td>{{ score.rank }}</td>
@@ -204,178 +135,15 @@
                     {% endfor %}
                 </table>
                 <strong>Summary Progress Report</strong>
-                <table class="table" border=1 style="width:100%" id="t_mark_info">
+                <table class="table" border=1 id="t_mark_info">
                     <tr>
-                        <th>
-                            <div class="chart-container">
-                                <canvas id="canvas_interpolation">
-                                </canvas>
-                            </div>
-                        </th>
+                        <td><img src=" {{ by_set_file_name }}" alt="by set chart" width="400" height="300" ></td>
                     </tr>
                 </table>
             {% endif %}
         </div>
-
-        <div class="row" align="center">
-            <div class="col-4" align="center">
-                <div class="chart-container">
-                    <canvas id="canvas_1"></canvas>
-                </div>
-            </div>
-            <div class="col-4" align="center">
-                <div class="chart-container">
-                    <canvas id="canvas_2"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="row" align="center">
-            <div class="col-4" align="center">
-                <div class="chart-container">
-                    <canvas id="canvas_3"></canvas>
-                </div>
-            </div>
-            <div class="col-4" align="center">
-                <div class="chart-container">
-                    <canvas id="canvas_4"></canvas>
-                </div>
-            </div>
-        </div>
     </div>
-    <script>
-        {% set ns = namespace(set_names="") %}
-        {% for i in range(0,num_of_assessments)  %}
-            {% if i==0 %}
-                {% set ns.set_names = "[`Test"+(loop.index)|string+"`" %}
-            {% else %}
-                {% set ns.set_names = ns.set_names+",`Test"+(loop.index)|string+"`" %}
-            {% endif %}
-        {% endfor %}
-        {% set ns.set_names = ns.set_names+']' %}
-        var set_names = {{ ns.set_names }};
-        var my_set_score = {{ my_set_score }};
-        var avg_set_score = {{ avg_set_score }};
-        var config_set_score = function () {
-            var _conf = {
-                type: 'line',
-                data: {
-                    labels: set_names,
-                    datasets: [{
-                        data: my_set_score,
-                        borderColor: window.chartColors.yellow,
-                        backgroundColor: 'rgba(0, 0, 0, 0)',
-                        fill: false,
-                        lineTension: 0
-                    },
-                        {
-                            label: 'Avg',
-                            data: avg_set_score,
-                            borderColor: window.chartColors.green,
-                            backgroundColor: window.chartColors.green,
-                            borderDash: [5, 5],
-                            fill: false,
-                            lineTension: 0
-                        }]
-                },
-                options: {
-                    responsive: true,
-                    legend: {
-                        position: 'bottom',
-                    },
-                    hover: {
-                        mode: 'index'
-                    },
-                    scales: {
-                        xAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Test'
-                            }
-                        }],
-                        yAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Score'
-                            }
-                        }]
-                    },
-                    title: {
-                        display: true
-                    }
-                }
-            };
-            return _conf;
-        };
-
-        subjects = ['Subject_1', 'Subject_2', 'Subject_3', 'All'];
-        category_1 = ['Position', 'Data Analysis', 'Graph', 'Arithmetic', 'Percentage', 'Volume'];
-        category_2 = ['Definition', 'Language', 'Tone', 'Identifying', 'Meaning', 'Distinguishing'];
-        category_3 = ['Facts and Detail', 'Understanding', 'Inference', 'Making Predictions', 'Finding Word Meaning', 'Authors Purpose'];
-        category_4 = ['Math', 'LC', 'RC', 'Total'];
-        dataset_1 = [92, 75, 66, 82, 80, 82];
-        dataset_1_avg = [70, 68, 65, 70, 68, 68];
-        dataset_2 = [95, 93, 89, 85, 87, 80];
-        dataset_2_avg = [83, 80, 81, 80, 73, 65];
-        dataset_3 = [89, 95, 88, 80, 50, 88];
-        dataset_3_avg = [72, 75, 70, 77, 60, 70];
-        dataset_4 = [79.5, 88.17, 81.67, 83.11];
-        dataset_4_avg = [68.17, 77, 69, 71.39];
-        var color = Chart.helpers.color;
-        var config = function (labels, subject, dataset) {
-            var _conf = {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: subject,
-                        data: dataset,
-                        backgroundColor: color(window.chartColors.red).alpha(0.2).rgbString(),
-                        borderColor: window.chartColors.red,
-                        pointBackgroundColor: window.chartColors.red
-                    },
-                        {
-                            label: 'Avg',
-                            data: dataset_1_avg,
-                            backgroundColor: color(window.chartColors.blue).alpha(0.2).rgbString(),
-                            borderColor: window.chartColors.blue,
-                            pointBackgroundColor: window.chartColors.blue,
-                        }]
-                },
-                options: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: subject
-                    },
-                    scale: {
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    },
-                    responsive: false
-                }
-            };
-            return _conf;
-        };
-
-        window.onload = function () {
-            var ctx = document.getElementById('canvas_interpolation').getContext('2d');
-            window.myLine = new Chart(ctx, config_set_score());
-
-            var ctx_1 = document.getElementById('canvas_1').getContext('2d');
-            var ctx_2 = document.getElementById('canvas_2').getContext('2d');
-            var ctx_3 = document.getElementById('canvas_3').getContext('2d');
-            var ctx_4 = document.getElementById('canvas_4').getContext('2d');
-            window.myLine = new Chart(ctx_1, config(category_1, subjects[0], dataset_1));
-            window.myLine = new Chart(ctx_2, config(category_2, subjects[1], dataset_2));
-            window.myLine = new Chart(ctx_3, config(category_3, subjects[2], dataset_3));
-            window.myLine = new Chart(ctx_4, config(category_4, subjects[3], dataset_4));
-        }
-    </script>
 </div>
+
 </body>
 </html>
