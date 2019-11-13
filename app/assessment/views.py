@@ -2,22 +2,26 @@ import uuid
 from datetime import datetime
 
 import pytz
+import requests
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import login_required, current_user
 
+from config import Config
 from . import assessment
 from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestsetCreateForm, TestsetSearchForm
 from .. import db
 from ..decorators import permission_required
-from ..models import Codebook, Permission, Assessment, AssessmentHasTestset
-
-'''New Assessment Page - rendering template'''
+from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlanDetail
 
 
 @assessment.route('/manage/new', methods=['GET'])
 @login_required
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def new():
+    """
+    New Assessment Page - rendering template
+    :return: A page to create an assessment
+    """
     form = AssessmentCreateForm()
     form.test_type.data = Codebook.get_code_id('Naplan')
     # Todo: Need testcenter info
@@ -51,6 +55,7 @@ def insert():
         # assessment.session_end_time = form.session_end_time.data
         db.session.add(assessment)
         db.session.commit()
+        register_to_csonlineschool(assessment)
         flash('Assessment {} has been created.'.format(assessment.id))
         return redirect(url_for('assessment.manage', test_type=assessment.test_type, test_center=assessment.branch_id))
     return redirect(url_for('assessment.manage'), error="Assessment New - Form validation Error")
@@ -91,6 +96,7 @@ def recover():
             row.modified_date = datetime.utcnow()
             row.modified_by = current_user.id
             db.session.commit()
+            register_to_csonlineschool(assessment)
             flash("{} has been recovered".format(row.name))
             return redirect(url_for('assessment.manage', test_type=row.test_type, test_center=row.branch_id))
     return redirect(url_for('assessment.manage', error="Assessment Recovery validation error!"))
@@ -175,6 +181,7 @@ def update():
                 result_test_type = assessment.test_type
                 result_test_center = assessment.branch_id
             db.session.commit()
+            register_to_csonlineschool(assessment)
             return redirect(url_for('assessment.manage', test_type=result_test_type, test_center=result_test_center))
     return redirect(url_for('assessment.manage', error="Assessment %s not found" % id))
 
@@ -232,6 +239,7 @@ def clone_insert():
             db.session.add(new_d)
         flash('Assessment {} has been cloned.'.format(assessment.id))
         db.session.commit()
+        register_to_csonlineschool(assessment)
         return redirect(url_for('assessment.manage', test_type=assessment.test_type,
                                 test_center=assessment.branch_id))
     return redirect(url_for('assessment.manage', error="Assessment Clone - Form validation error"))
@@ -283,7 +291,9 @@ def add_detail():
         for i in t_items:
             db.session.delete(i)
         flash('Testsets are saved to Assessment {}.'.format(assessment_id))
+        assessment = Assessment.query.filter_by(id=assessment_id).first()
         db.session.commit()
+        register_to_csonlineschool(assessment)
         return redirect(url_for('assessment.manage', test_type=test_type,
                                 test_center=test_center))
     return redirect(url_for('assessment.manage', error="Assessment Detail - Form validation error"))
@@ -369,3 +379,59 @@ def list():
         rows = query.order_by(Assessment.id.desc()).all()
         flash('Found {} assessment(s)'.format(len(rows)))
     return render_template('assessment/list.html', form=search_form, assessments=rows)
+
+
+def register_to_csonlineschool(assessment):
+    """
+    Register an assessment to csonlineschool's DB
+    :param assessment: An assessment to register
+    :return: True on success
+    """
+
+    test_detail = []
+    grade_table = {"K": "0",
+                   "Y1": "1",
+                   "Y2": "2",
+                   "Y3": "3",
+                   "Y4": "4",
+                   "Y5": "5",
+                   "Y6": "6",
+                   "Y7": "7",
+                   "Y8": "8",
+                   "Y9": "9",
+                   "Y10": "10",
+                   "Y11": "1",
+                   "Y12": "1"
+                   }
+
+    # TODO - There could be more than one plan. How to handle the case?
+    plan = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
+
+    items = AssessmentHasTestset.query.filter_by(assessment_id=assessment.id).all()
+    for item in items:
+        grade = grade_table[Codebook.get_code_name(item.testset.grade)]
+        test_detail.append(
+            {
+                "test_kind": "objective",
+                "test_no": Codebook.get_code_name(plan.order) if plan else None,
+                "title": item.testset.name,
+                "subject": Codebook.get_code_name(item.testset.subject),
+                "myear": assessment.year,
+                "grade": grade,
+                "qn_total": 0,
+                "test_time": item.testset.test_duration,
+                "title_a": item.testset.GUID
+            })
+
+    test_type = [{
+        "kind": "tstm",
+        "testtype": Codebook.get_code_name(assessment.test_type),
+        "title": assessment.name,
+        "grade": grade,
+        "myear": assessment.year,
+        "title_a": assessment.GUID,
+        "details": test_detail
+    }]
+
+    info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
+    return info.ok
