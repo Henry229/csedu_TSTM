@@ -132,7 +132,7 @@ $ sudo vim /etc/supervisord.d/csedu.ini
 [program:csedu]
 command=/home/ec2-user/csedu/venv/bin/gunicorn -b 0.0.0.0:8000 -w 4 csedu:app
 directory=/home/ec2-user/csedu
-environment=FLASK_DEBUG="1",TEMP="/tmp"
+environment=FLASK_DEBUG="1",TEMP="/tmp",QT_QPA_PLATFORM="offscreen"
 user=ec2-user
 autostart=true
 autorestart=true
