@@ -12,3 +12,4 @@ __pycache__/
 *.sqlite
 *.log
 app/static/report/naplan_result/
+admin.txt
