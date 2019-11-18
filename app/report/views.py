@@ -14,10 +14,12 @@ from ..api.reports import draw_report, query_my_report_list_v, query_my_report_h
     query_item_score_summary_data, query_individual_progress_summary_report_header, \
     query_individual_progress_summary_report_by_assessment, query_individual_progress_summary_report_by_plan, \
     query_individual_progress_summary_by_subject_v, query_individual_progress_summary_by_plan_v, \
-    build_test_ranking_pdf_response, build_test_results_pdf_response, build_test_results_zipper
+    build_test_ranking_pdf_response, build_test_results_pdf_response, build_test_results_zipper, \
+    build_individual_progress_pdf_response, build_individual_progress_zipper, \
+    draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    refresh_mviews, Item, Marking
+    refresh_mviews, Item, Marking, EducationPlan
 
 ''' 
  @report.route('/my_report', methods=['GET'])
@@ -40,15 +42,17 @@ def list_my_report():
     rows = query_my_report_list_v(student_id)
     return render_template("report/my_report_list.html", assessment_enrolls=rows)
 
+
 ''' 
  @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_id>', methods=['GET'])
  my_report() : Student Login > My Report > Report 
-    - Provide link to Subject Report 
+    - Execute: Provide link to Subject Report 
 '''
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def my_report(assessment_id, ts_id, student_id):
+    # Todo: Check accessibility to get report
     refresh_mviews()
     row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id). \
         filter_by(assessment_id=assessment_id). \
@@ -75,15 +79,15 @@ def my_report(assessment_id, ts_id, student_id):
 
 
 ''' 
- @report.route('/student/set/<int:assessment_id>', methods=['GET'])
+ @report.route('/student/set/<int:assessment_id>/<int:student_id>', methods=['GET'])
  my_student_set_report() : Student Login > My Report > Student Report 
-    - Provide link to Student Report by assessment (all subject)
+    - Execute: Provide link to Student Report by assessment (all subject)
 '''
-@report.route('/student/set/<int:assessment_id>', methods=['GET'])
+@report.route('/student/set/<int:assessment_id>/<int:student_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def my_student_set_report(assessment_id):
-    student_id = current_user.id
+def my_student_set_report(assessment_id, student_id):
+    # ToDO: Check accessbility to get Report
     assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
         student_id=student_id).all()
     if assessment_enrolls:
@@ -98,8 +102,9 @@ def my_student_set_report(assessment_id):
             # For selective test or other test type
             test_type_string = 'other'
         template_html_name = 'report/my_report_' + test_type_string + '.html'
+        grade = EducationPlanDetail.get_grade(assessment_id)
         web_file_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), file_name)
-        return render_template(template_html_name, image_file_path=web_file_path)
+        return render_template(template_html_name, image_file_path=web_file_path, grade=grade)
     else:
         return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
 
@@ -109,8 +114,9 @@ def my_student_set_report(assessment_id):
  manage() : Report user Login > Report By Center 
     - Search Report 
     - Provide link to Test Summary Report by test package (all assessments)
+    - Provide link to Download: Test Summary report for all students    
     - Provide link to Test Ranking Report by assessment 
-    - Provide link to individual Subject Report by student    
+    - Provide link to Download: individual Subject Report for all students    
 '''
 @report.route('/manage', methods=['GET'])
 @login_required
@@ -203,6 +209,12 @@ def manage():
                            test_summaries=test_summaries, test_center=test_center)
 
 
+''' 
+ @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
+              methods=['GET'])
+ test_ranking_report() : Report user Login > Report By Center > Search
+    - Execute: Provide link to Test Ranking Report by assessment 
+'''
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
               methods=['GET'])
 @login_required
@@ -247,13 +259,40 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
                            test_summaries=test_summaries, now=datetime.utcnow())
 
 
-@report.route('/summary/<int:plan_id>', methods=['GET'])
+''' 
+ @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
+ summary_report() : Report user Login > Report By Center > Search
+    - Execute: Provide link to Download: individual Subject Report for all students 
+'''
+@report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def individual_progress_summary_report(plan_id):
-    # Todo: change student_id
-    student_id = 8
-    # student_id = current_user.id
+def summary_report(plan_id, branch_id):
+    plan_GUID, test_type_string, grade = '', '', ''
+    assessment_ids = [row.assessment_id for row in EducationPlanDetail.query.filter_by(plan_id=plan_id).all()]
+    query = db.session.query(AssessmentEnroll.student_id).distinct()
+    # Todo: Need to check if current_user have access right on queried data
+    test_center = Codebook.get_testcenter_of_current_user()
+    if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+        test_center = Codebook.query.filter_by(code_type='test_center').filter_by(code_name='All').first()
+    if (test_center.id == branch_id):
+        if not (test_center.code_name == 'All'):
+            query = query.filter(AssessmentEnroll.test_center == branch_id)
+        query = query.filter(AssessmentEnroll.assessment_id.in_(assessment_ids))
+        enrolled_students = query.all()
+        for enrolled_student in enrolled_students:
+            student_id = enrolled_student.student_id
+            plan_GUID = individual_progress_summary_report(plan_id, student_id)
+            if plan_GUID is None:
+                return redirect(url_for('report.manage', error='Error during generating pdf files'))
+        rsp = build_individual_progress_zipper(plan_GUID)
+        return rsp
+    else:
+        return 'Invalid Request: No data for current user'
+
+
+def individual_progress_summary_report(plan_id, student_id):
+    plan_GUID = (EducationPlan.query.filter_by(id=plan_id).first()).GUID
     # ##
     # Header - 'year', 'grade', 'test_type'
     ts_header = query_individual_progress_summary_report_header(plan_id)
@@ -360,15 +399,108 @@ def individual_progress_summary_report(plan_id):
                             "max": total_score.sum_max_score,
                             "rank": total_score.rank_v})
 
+    plan_GUID = (EducationPlan.query.filter_by(id=plan_id).first()).GUID
+    by_subject_file_name = draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id)
+    by_set_file_name = draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_id)
+
     template_file_name = 'report/individual_progress_' + test_type_string + '.html'
-    return render_template(template_file_name, ts_header=ts_header,
+    logo_web_path = os.path.join(current_app.config['CSEDU_IMG_DIR'].lstrip('app'), 'CSEducation.png')
+    logo_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
+                                            current_app.config['CSEDU_IMG_DIR'],
+                                            'CSEducation.png')
+    by_subject_web_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), by_subject_file_name)
+    by_subject_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
+                                                  current_app.config['NAPLAN_RESULT_DIR'],
+                                                  by_subject_file_name)
+    by_set_web_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), by_set_file_name)
+    by_set_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
+                                              current_app.config['NAPLAN_RESULT_DIR'],
+                                              by_set_file_name)
+
+    success = build_individual_progress_pdf_response(template_file_name, logo_file_name=logo_local_path,
+                           by_subject_file_name=by_subject_local_path, by_set_file_name=by_set_local_path,
+                           ts_header=ts_header,
                            num_of_assessments=num_of_assessments, num_of_subjects=num_of_subjects,
                            subject_names=subject_names,
                            subjects=subjects, my_set_score=my_set_score,
                            avg_set_score=avg_set_score, my_set_rank=my_set_rank,
-                           score_summaries=score_summaries, plan_id=plan_id)
+                           score_summaries=score_summaries, plan_id=plan_id, plan_GUID=plan_GUID, student_id=student_id)
+
+    if success != 'success':
+        return None # plan_GUID
+    return plan_GUID
 
 
+''' 
+ @report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',
+              methods=['GET'])
+ report_results_pdf() : Report user Login > Report By Center 
+    - Execute: Provide link to Download: Test Summary report for all students    
+'''
+@report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',
+              methods=['GET'])
+@login_required
+@permission_required(Permission.ASSESSMENT_READ)
+def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
+    # ##
+    # Get Assessment Enrolled Students list "enrolled_students" enrolled at test_center
+    # If students, Get Assessment general information for report
+    assessment_GUID, test_type_string, grade = '', '', ''
+    query = db.session.query(AssessmentEnroll.student_id).distinct()
+    # Todo: Need to check if current_user have access right on queried data
+    test_center = Codebook.get_testcenter_of_current_user()
+    if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+        test_center = Codebook.query.filter_by(code_type='test_center').filter_by(code_name='All').first()
+    if (test_center.id == branch_id):
+        if not (test_center.code_name == 'All'):
+            query = query.filter(AssessmentEnroll.test_center==branch_id)
+        query = query.filter(AssessmentEnroll.assessment_id==assessment_id)
+        enrolled_students = query.all()
+        if enrolled_students:
+            assessment = db.session.query(Assessment.GUID, Assessment.test_type).filter(
+                Assessment.id == assessment_id).first()
+            assessment_GUID = assessment.GUID
+            test_type_string = Codebook.get_code_name(assessment.test_type)
+            grade = EducationPlanDetail.get_grade(assessment_id)
+        else:
+            return redirect(url_for('report.manage', error='Not found enroll data'))
+
+        for enrolled_student in enrolled_students:
+            student_id = enrolled_student.student_id
+            enrollment = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
+                student_id=student_id).all()
+            if enrollment:
+                if test_type_string == 'Naplan':
+                    # Student Report : Generate image file for  Naplan student Report
+                    #                   saved into /static/report/naplan_result/naplan-*.png
+                    file_name = make_naplan_student_report(enrollment, assessment_id, student_id, assessment_GUID, grade)
+
+                else:
+                    # For selective test or other test type
+                    test_type_string = 'other'
+                template_file_name = 'report/my_report_' + test_type_string + '.html'
+
+                local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
+                                                        current_app.config['NAPLAN_RESULT_DIR'],
+                                                        file_name)
+                success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_id=student_id)
+                if success != 'success':
+                    return redirect(url_for('report.manage', error='Error during generating pdf files'))
+            else:
+                return redirect(url_for('report.manage', error='Not found enroll data'))
+
+        rsp = build_test_results_zipper(assessment_GUID)
+        return rsp
+    else:
+        return 'Invalid Request: No data for current user'
+
+
+''' 
+ @report.route('/score_summary', methods=['GET'])
+ score_summary_list() : Report user Login > Item Score Summary
+    - Provide link to Item Runner
+    - Provide link to Item Score  
+'''
 @report.route('/score_summary', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_MANAGE)
@@ -425,6 +557,11 @@ def score_summary_list():
     return render_template('report/score_summary_list.html', form=search_form, items=items)
 
 
+''' 
+ @report.route('/score_summary/<int:item_id>', methods=['GET'])
+ score_summary() : Report user Login > Item Score Summary
+    - Execute: Provide link to Item Score  
+'''
 @report.route('/score_summary/<int:item_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_MANAGE)
@@ -440,60 +577,3 @@ def score_summary(item_id):
             by_assessment.append(row)
     item = Item.query.filter_by(id=item_id).first()
     return render_template('report/score_summary.html', by_item=by_item, by_assessment=by_assessment, item=item)
-
-
-
-@report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',
-              methods=['GET'])
-@login_required
-@permission_required(Permission.ASSESSMENT_READ)
-def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
-    # ##
-    # Get Assessment Enrolled Students list "enrolled_students" enrolled at test_center
-    # If students, Get Assessment general information for report
-    assessment_GUID, test_type_string, grade = '', '', ''
-    query = db.session.query(AssessmentEnroll.student_id).distinct()
-    # Todo: Need to check if current_user have access right on queried data
-    test_center = Codebook.get_testcenter_of_current_user()
-    if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
-        test_center = Codebook.query.filter_by(code_type='test_center').filter_by(code_name='All').first()
-    if (test_center.id == branch_id):
-        if not (test_center.code_name == 'All'):
-            query = query.filter(AssessmentEnroll.test_center==branch_id)
-        query = query.filter(AssessmentEnroll.assessment_id==assessment_id)
-        enrolled_students = query.all()
-        if enrolled_students:
-            assessment = db.session.query(Assessment.GUID, Assessment.test_type).filter(
-                Assessment.id == assessment_id).first()
-            assessment_GUID = assessment.GUID
-            test_type_string = Codebook.get_code_name(assessment.test_type)
-            grade = EducationPlanDetail.get_grade(assessment_id)
-        else:
-            return redirect(url_for('report.manage', error='Not found enroll data'))
-
-    for enrolled_student in enrolled_students:
-        student_id = enrolled_student.student_id
-        enrollment = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
-            student_id=student_id).all()
-        if enrollment:
-            if test_type_string == 'Naplan':
-                # Student Report : Generate image file for  Naplan student Report
-                #                   saved into /static/report/naplan_result/naplan-*.png
-                file_name = make_naplan_student_report(enrollment, assessment_id, student_id, assessment_GUID, grade)
-
-            else:
-                # For selective test or other test type
-                test_type_string = 'other'
-            template_file_name = 'report/my_report_' + test_type_string + '.html'
-
-            local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
-                                                    current_app.config['NAPLAN_RESULT_DIR'],
-                                                    file_name)
-            success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_id=student_id)
-            if success != 'success':
-                return redirect(url_for('report.manage', error='Error during generating pdf files'))
-        else:
-            return redirect(url_for('report.manage', error='Not found enroll data'))
-
-    rsp = build_test_results_zipper(assessment_GUID)
-    return rsp

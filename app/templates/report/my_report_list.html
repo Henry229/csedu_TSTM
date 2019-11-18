@@ -31,7 +31,7 @@
                         <td>{{ assessment.year }}-{{ Codebook.get_code_name(assessment.test_type) }} <br>
                             {% if Codebook.get_code_name(assessment.test_type)=='Naplan' %}
                                 <a class="badge badge-pill badge-danger" id="{{ assessment.id }}"
-                                   href='/report/student/set/{{ assessment.id }}' target="_blank">Student Report</a>
+                                   href='/report/student/set/{{ assessment.id }}/{{ current_user.id }}' target="_blank">Student Report</a>
                             {% endif %}
                         </td>
                         <td class="assessment_type" id="{{ assessment.test_type }}"> {{ assessment.name }} </td>

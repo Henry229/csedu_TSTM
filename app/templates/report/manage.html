@@ -65,21 +65,11 @@
                         {% if test_summaries %}
                             {% for ts in test_summaries %}
                                 <a class="btn btn-{{ loop.cycle('warning','danger','success','info','secondary') }} btn-sm img_summary_report"
-                                   href='/report/summary/{{ ts.plan_id }}'
-                                   target="_blank">{{ ts.plan_name }}</a>
+                                   href='/report/summary/{{ ts.plan_id }}/{{ form.test_center.data }}'
+                                   target="_blank">Download: {{ ts.plan_name }}</a>
                                 &nbsp;
                             {% endfor %}
                         {% endif %}
-{#                        <br><br>#}
-{#                        <string>Test Report: </string>#}
-{#                        {% if test_summaries %}#}
-{#                            {% for ts in test_summaries %}#}
-{#                                <a class="btn btn-{{ loop.cycle('warning','danger','success','info','secondary') }} btn-sm img_summary_report"#}
-{#                                   href='/report/pdf/{{ ts.plan_id }}'#}
-{#                                   target="_blank">{{ ts.plan_name }}</a>#}
-{#                                &nbsp;#}
-{#                            {% endfor %}#}
-{#                        {% endif %}#}
                     {% endif %}
                     <br><br>
                     <table id="reports" class="display table table-hover" style="width:100%">
@@ -105,7 +95,7 @@
                                             {% for testset in rpt.get("testsets") %}
                                                 {%- if testset.get('test_center') %}
                                                     <a name="modalButtonTestRanking" class="badge badge-danger" id="{{ test_center }}" target="_blank">Test Ranking</a>
-                                                    <a name="btnTestReports" class="badge badge-danger" id="{{ test_center }}">Download: Test Report</a>
+                                                    <a name="btnTestAssessmentReports" class="badge badge-danger" id="{{ test_center }}">Download: All Assessment Report</a>
                                                     {% break %}
                                                 {% endif %}
                                             {% endfor %}
@@ -118,19 +108,42 @@
                                         <td class="rpt_id" id="{{ rpt.get("assessment_id")}}">
                                             <table>
                                                 {% for testset in rpt.get("testsets") %}
+                                                    {% if loop.index0==0 %}
+                                                        <tr>
+                                                            <td colspan="2">All Subjects</td>
+                                                            <td>
+                                                                <select id="select_student">
+                                                                {% for student in testset.get("students") %}
+                                                                    {% if student %}
+                                                                        <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                </select>
+                                                                {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"
+                                                                           onclick="getAssessmentReport({{ rpt.get("assessment_id") }})" target="_blank"> Assessment Report</a>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <td>{{ Codebook.get_subject_name(testset.get("testset_id")) }}</td>
                                                         <td>
                                                             {% if testset.get("test_center") %}{{ Codebook.get_code_name(testset.get("test_center")) }}{% else %}-{% endif %}</td>
                                                         <td>
                                                             {% if not testset.get("students") %} - {% endif %}
+                                                            <select id="select_student">
                                                             {% for student in testset.get("students") %}
-                                                                {% if student %}<a class="badge badge-secondary"
-                                                                                   href='/report/ts/{{ rpt.get("assessment_id") }}/{{ testset.get("testset_id") }}/{{ student }}'
-                                                                                   target="_blank">
-                                                                    {{ Student.getCSStudentName(student)}}</a>
+                                                                {% if student %}
+                                                                    <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
                                                                 {% endif %}
                                                             {% endfor %}
+                                                            </select>
+                                                            {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"
+                                                                       onclick="getTestReport({{ rpt.get("assessment_id") }},{{ testset.get("testset_id") }})" target="_blank"> Test Report</a>
+                                                            {% endif %}
+{#                                                            {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"#}
+{#                                                                       onclick="getAssessmentReport({{ rpt.get("assessment_id") }})" target="_blank"> Assessment Report</a>#}
+{#                                                            {% endif %}#}
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
