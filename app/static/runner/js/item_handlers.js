@@ -133,7 +133,7 @@ var ItemHandlers = (function () {
         if (this === window) return new graphicGapMatchInteraction(options);
         this._$container = options.container;
         var destMap = {};
-        var _targetEl = null;
+        var _targets = [];
         var object_variables = options.data.object_variables;
         for (var key in object_variables) {
             if (object_variables.hasOwnProperty(key)) {
@@ -142,16 +142,16 @@ var ItemHandlers = (function () {
                 break;
             }
         }
+        var _paper = 'graphic-paper-' + this.interaction_serial;
 
         this._svg = null;
         this._sources = null;
-
 
         this.processUI = function (answer) {
             var self = this;
             var obj = self.object_variables.obj;
             var choices = self.object_variables.choices;
-            var svg = SVG('graphic-paper-' + self.interaction_serial).size(obj.width, obj.height);
+            var svg = SVG(_paper).size(obj.width, obj.height);
             svg.viewbox(0, 0, obj.width, obj.height);
             svg.image(obj.data, obj.width, obj.height);
             self._svg = svg;
@@ -171,6 +171,7 @@ var ItemHandlers = (function () {
                     'identifier': c.identifier, 'index': i
                 });
                 destMap[c.identifier] = shape;
+                _targets.push(shape);
                 var click_cb = function () {
                     var index = this.attr('index');
                     var $selected = $('.source .ui-selected');
@@ -196,12 +197,6 @@ var ItemHandlers = (function () {
                     });
                 };
                 shape.on('click', click_cb);
-                shape.on('mouseover', function () {
-                    _targetEl = this;
-                });
-                shape.on('mouseout', function () {
-                    _targetEl = null;
-                });
             }
             self._sources = $(".source .selectable");
             self._sources.on('click', function (events) {
@@ -211,13 +206,22 @@ var ItemHandlers = (function () {
             $('.source .selectable img').draggable({
                 appendTo: 'body', helper: "clone", zIndex: 100,
                 start: function (event, ui) {
-
+                    $(event.target).click();
                 },
                 stop: function (event, ui) {
-                    if (_targetEl != null) {
-                        _targetEl.fire('click');
+                    var m_x = event.pageX, m_y = event.pageY;
+                    // console.log("Stop Mouse X: " + event.pageX + " Y: " + event.pageY);
+                    for (var i=0; i<_targets.length; i++) {
+                        var t = _targets[i];
+                        var bound = t.node.getBoundingClientRect();
+                        // console.log("bound rect X: " + bound.x + " Y: " + bound.y);
+                        if (m_x > bound.x && m_x < bound.x + bound.width
+                            && m_y > bound.y && m_y < bound.y + bound.height) {
+                            t.fire('click');
+                        }
                     }
-
+                },
+                drag: function (event, ui) {
                 }
             });
             this.setSavedAnswer(answer);
