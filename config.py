@@ -70,7 +70,7 @@ class Config(metaclass=MetaFlaskEnv):
             os.mkdir(cache_dir)
 
     # CS_API
-    CS_API_URL = os.environ.get('CS_API_URL') or 'https://13.210.98.100:7443/csonlineschool'
+    CS_API_URL = os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool'
     CS_API_USER = os.environ.get('CS_API_USER')
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
 
