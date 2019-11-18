@@ -1,12 +1,14 @@
 import os
 
 from PIL import Image, ImageDraw
-from flask import current_app
-
+from flask import current_app, render_template
+from .. import db
 from app.api import api
 from app.decorators import permission_required
-from app.models import Permission, refresh_mviews
+from app.models import Permission, refresh_mviews, Codebook
+from collections import namedtuple
 
+'''Student Naplan Report - graph mapping for drawing picture '''
 graph_mapping = {
     "column_coords": {
         "ceiling": 558,
@@ -65,7 +67,7 @@ graph_mapping = {
     }
 }
 
-
+'''Student Naplan Report - draw picture '''
 def draw_report(result):
     # Read base image
     if not os.path.exists(current_app.config['NAPLAN_RESULT_DIR']):
@@ -134,6 +136,644 @@ def draw_report(result):
     img.save('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
     return file_name
 
+
+'''Student UI - Student Naplan Report : Query data and return image file_name generated '''
+def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, assessment_GUID, grade):
+    column_names = ['assessment_id',
+                    'testset_id',
+                    'student_id',
+                    'percentile_score',
+                    'median',
+                    'percentile_20',
+                    'percentile_80'
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM test_summary_mview ' \
+               'WHERE student_id = :student_id ' \
+               'AND assessment_id = :assessment_id ' \
+               'AND testset_id = :testset_id '.format(columns=','.join(column_names))
+    assessment_json = {}
+    for assessment in assessment_enrolls:
+        student_score, average_score = 0, 0
+        testset_id = assessment.testset_id
+        cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id, 'testset_id': testset_id,
+                                               'student_id': student_id})
+        Record = namedtuple('Record', cursor.keys())
+        rows = [Record(*r) for r in cursor.fetchall()]
+        for row in rows:
+            student_score = row.percentile_score
+            average_score = row.median
+            percentile_20 = row.percentile_20
+            percentile_80 = row.percentile_80
+            subject_name = Codebook.get_subject_name(testset_id)
+            # Todo: need update if clause
+            subject = ''
+            if subject_name == 'LC':
+                column_names_sub = ['code_name',
+                                    'percentile_score',
+                                    'median',
+                                    'percentile_20',
+                                    'percentile_80'
+                                    ]
+                sql_stmt_sub = 'SELECT {columns} ' \
+                               'FROM test_summary_by_category_v ' \
+                               'WHERE student_id = :student_id ' \
+                               'AND assessment_id = :assessment_id ' \
+                               'AND testset_id = :testset_id '.format(columns=','.join(column_names_sub))
+                cursor_sub = db.session.execute(sql_stmt_sub,
+                                                {'assessment_id': assessment_id, 'testset_id': testset_id,
+                                                 'student_id': student_id})
+                Record = namedtuple('Record', cursor_sub.keys())
+                sub_rows = [Record(*r) for r in cursor_sub.fetchall()]
+                lc_spelling_score, lc_spelling_average_score, lc_spelling_percentile_20, lc_spelling_percentile_80 = 0, 0, 0, 0
+                lc_other_score, lc_other_average_score, lc_other_percentile_20, lc_other_percentile_80 = 0, 0, 0, 0
+                for sub_row in sub_rows:
+                    if sub_row.code_name == 'spelling':
+                        lc_spelling_score = sub_row.percentile_score
+                        lc_spelling_average_score = sub_row.median
+                        lc_spelling_percentile_20 = sub_row.percentile_20
+                        lc_spelling_percentile_80 = sub_row.percentile_80
+                    else:
+                        lc_other_score = lc_other_score + sub_row.percentile_score
+                        lc_other_average_score = lc_other_average_score + sub_row.median
+                        lc_other_percentile_20 = lc_other_percentile_20 + sub_row.percentile_20
+                        lc_other_percentile_80 = lc_other_percentile_80 + sub_row.percentile_80
+                assessment_json['spelling'] = {
+                    "student": lc_spelling_score,
+                    "average": lc_spelling_average_score,
+                    "sixty": (lc_spelling_percentile_20, lc_spelling_percentile_80)}
+                assessment_json['grammar'] = {
+                    "student": lc_other_score,
+                    "average": lc_other_average_score,
+                    "sixty": (lc_other_percentile_20, lc_other_percentile_80)}
+            else:
+                if subject_name == 'RC':
+                    assessment_json["reading"] = {
+                        "student": student_score,
+                        "average": average_score,
+                        "sixty": (percentile_20, percentile_80)}
+                elif subject_name == 'Math':
+                    assessment_json["numeracy"] = {
+                        "student": student_score,
+                        "average": average_score,
+                        "sixty": (percentile_20, percentile_80)}
+    scores = {
+        "grade": grade,
+        "assessment_GUID": assessment_GUID,
+        "student_id": student_id,
+        "assessments": assessment_json
+    }
+    file_name = draw_report(scores)
+    return file_name
+
+
+'''Student UI: Query My Report List for each Student'''
+def query_my_report_list_v(student_id):
+    column_names = ['id',
+                    'assessment_id',
+                    'student_id',
+                    'year',
+                    'test_type',
+                    'name',
+                    'branch_id',
+                    'subject_1',
+                    'subject_2',
+                    'subject_3',
+                    'subject_4',
+                    'subject_5'
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM my_report_list_v ' \
+               ' WHERE student_id=:student_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'student_id': student_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
+'''Student UI: Query My Report (subject) Header for each Student'''
+def query_my_report_header(assessment_id, ts_id, student_id):
+    column_names = ['rank_v as student_rank',
+                    'total_students',
+                    "to_char(score,'999.99') as score",
+                    "to_char(total_score,'999.99') as total_score",
+                    "to_char(percentile_score,'999.99') as percentile_score"
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM test_summary_mview ' \
+               'WHERE assessment_id=:assessment_id and testset_id=:testset_id ' \
+               'and student_id=:student_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt,
+                                {'assessment_id': assessment_id, 'testset_id': ts_id, 'student_id': student_id})
+    ts_header = cursor.fetchone()
+    return ts_header
+
+
+'''Student UI: Query My Report (subject) Body for each Student'''
+def query_my_report_body(assessment_enroll_id, ts_id):
+    column_names_1 = ['assessment_enroll_id',
+                      'testset_id',
+                      'candidate_r_value',
+                      'student_id',
+                      'grade',
+                      "to_char(created_time,'YYYY-MM-DD Dy') as created_time",
+                      'is_correct',
+                      'correct_r_value',
+                      'item_percentile',
+                      'item_id',
+                      'category'
+                      ]
+    sql_stmt_1 = 'SELECT {columns} ' \
+                 'FROM my_report_body_v ' \
+                 'WHERE assessment_enroll_id=:assessment_enroll_id and testset_id=:testset_id'.format(
+        columns=','.join(column_names_1))
+    cursor_1 = db.session.execute(sql_stmt_1, {'assessment_enroll_id': assessment_enroll_id, 'testset_id': ts_id})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+    return rows
+
+
+'''Student UI: Query My Report (subject) Footer for each Student'''
+def query_my_report_footer(assessment_id, student_id):
+    column_names_2 = ['code_name as category',
+                      "to_char(score,'999.99') as score",
+                      "to_char(total_score,'999.99') as total_score",
+                      "to_char(avg_score,'999.99') as avg_score",
+                      "to_char(percentile_score,'999.99') as percentile_score"
+                      ]
+    sql_stmt_2 = 'SELECT {columns} ' \
+                 'FROM test_summary_by_category_v ' \
+                 'WHERE student_id = :student_id ' \
+                 'AND assessment_id = :assessment_id ' \
+                 'ORDER BY category'.format(columns=','.join(column_names_2))
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_id': student_id})
+    Record = namedtuple('Record', cursor_2.keys())
+    rows = [Record(*r) for r in cursor_2.fetchall()]
+    return rows
+
+
+'''Admin UI: Query all subject report data including assessment, plan(package)'''
+def query_all_report_data(test_type, test_center, year):
+    column_names = ['plan_id',
+                    'plan_name',
+                    '"year" as assessment_year',
+                    'grade',
+                    'test_type',
+                    '"order" as assessment_order',
+                    'assessment_id',
+                    'testset_id',
+                    'id as assessment_enroll_id',
+                    'student_id',
+                    'attempt_count',
+                    'test_center',
+                    'start_time_client'
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM csedu_plan_assessment_testsets_enrolled_v '.format(columns=','.join(column_names))
+    sql_stmt_sub = ''
+    if test_type:
+        sql_stmt_sub = sql_stmt_sub + 'AND test_type = :test_type '
+    if test_center:
+        if Codebook.get_code_name(test_center) != 'All':
+            sql_stmt_sub = sql_stmt_sub + 'AND test_center = :test_center '
+    if year:
+        sql_stmt_sub = sql_stmt_sub + 'AND "year" = :year '
+    sql_stmt = sql_stmt + sql_stmt_sub.replace('AND', 'WHERE', 1)
+    sql_stmt = sql_stmt + ' ORDER BY plan_id, assessment_order, testset_id, test_center,student_id'
+    cursor = db.session.execute(sql_stmt, {'test_type': test_type, 'test_center': test_center, 'year': year})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
+'''Admin UI: Query individual progress summary report list'''
+def query_individual_progress_summary_report_list():
+    column_names_1 = ['plan_id',
+                      'plan_name',
+                      'year',
+                      'grade',
+                      'test_type'
+                      ]
+    sql_stmt_1 = 'SELECT distinct {columns} ' \
+                 'FROM my_report_progress_summary_v '.format(columns=','.join(column_names_1))
+    cursor_1 = db.session.execute(sql_stmt_1)
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+    return rows
+
+
+'''Admin UI: Query individual progress summary report header'''
+def query_individual_progress_summary_report_header(plan_id):
+    column_names_1 = ['year',
+                      'grade',
+                      'test_type'
+                      ]
+    sql_stmt_1 = 'SELECT DISTINCT {columns} ' \
+                 'FROM csedu_education_plan_v ' \
+                 ' WHERE plan_id=:plan_id '.format(columns=','.join(column_names_1))
+    cursor_1 = db.session.execute(sql_stmt_1, {'plan_id': plan_id})
+    row = cursor_1.fetchone()
+    return row
+
+
+'''Admin UI: Query individual progress summary report by assessment'''
+def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
+    column_names_all = ['p.plan_id', 'p."order"', 'p.assessment_id',
+                        'p.student_id',
+                        "to_char(coalesce(p.score,0),'999.99') as my_set_score",
+                        "p.rank_v",
+                        "to_char(coalesce(p.avg_score,0),'999.99') as avg_set_score"
+                        ]
+    sql_stmt_all = 'SELECT DISTINCT {columns} ' \
+                   'FROM test_summary_by_assessment_v p ' \
+                   ' WHERE p.plan_id = :plan_id ' \
+                   '  AND student_id = :student_id ' \
+                   ' ORDER BY p.plan_id, p."order" '.format(columns=','.join(column_names_all))
+    cursor_all = db.session.execute(sql_stmt_all, {'plan_id': plan_id, 'student_id': student_id})
+    Record = namedtuple('Record', cursor_all.keys())
+    rows = [Record(*r) for r in cursor_all.fetchall()]
+    return rows
+
+
+'''Admin UI: Query individual progress summary report - plan information'''
+def query_individual_progress_summary_report_by_plan(plan_id, student_id):
+    column_names = ['p.plan_id', 'p."order"', 'p.assessment_id',
+                    'p.testset_id',
+                    'ts.student_id',
+                    "to_char(coalesce(ts.score,0),'999.99') as score",
+                    "to_char(coalesce(ts.total_score,0),'999.99') as total_score",
+                    "to_char(coalesce(ts.avg_score,0),'999.99') as avg_score",
+                    "to_char(coalesce(ts.percentile_score,0),'999.99') as percentile_score",
+                    "coalesce(ts.rank_v,0) as rank_v",
+                    'coalesce(ts.total_students,0) as total_students'
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM csedu_education_plan_v p left join test_summary_mview ts ' \
+               ' ON p.assessment_id = ts.assessment_id and p.testset_id = ts.testset_id ' \
+               ' WHERE p.plan_id = :plan_id ' \
+               '  AND student_id = :student_id ' \
+               ' ORDER BY p.plan_id, p."order", p.testset_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
+'''Admin UI: Query individual progress summary report by subject'''
+def query_individual_progress_summary_by_subject_v(plan_id, student_id):
+    column_names = ['plan_id', 'testset_id', 'student_id',
+                    'rank_v',
+                    "to_char(coalesce(subject_avg_my_score,0),'999.99') as subject_avg_my_score,"
+                    "to_char(coalesce(subject_avg_avg_score,0),'999.99') as subject_avg_avg_score",
+                    "to_char(coalesce(subject_avg_min_score,0),'999.99') as subject_avg_min_score",
+                    "to_char(coalesce(subject_avg_max_score,0),'999.99') as subject_avg_max_score"
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'from test_summary_by_subject_v ts' \
+               ' WHERE plan_id = :plan_id ' \
+               ' AND student_id =:student_id ' \
+               ' ORDER BY testset_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
+'''Admin UI: Query individual progress summary report by plan'''
+def query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_assessments):
+    column_names = ['plan_id', 'student_id',
+                    'rank_v',
+                    "to_char(coalesce(sum_my_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_my_score",
+                    "to_char(coalesce(sum_avg_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_avg_score",
+                    "to_char(coalesce(sum_min_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_min_score",
+                    "to_char(coalesce(sum_max_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_max_score"
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'from test_summary_by_plan_v ts' \
+               ' WHERE plan_id = :plan_id ' \
+               ' AND student_id =:student_id '.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+    row = cursor.fetchone()
+    return row
+
+
+'''Admin UI: Query Test Ranking report - subject list )'''
+def query_test_ranking_subject_list(assessment_id):
+    column_names = ['att.testset_id',
+                    '(select cb.code_name ' \
+                    + ' from testset ts, codebook cb ' \
+                    + ' where att.testset_id=ts.id ' \
+                    + ' and ts.subject = cb.id ' \
+                    + " and cb.code_type = 'subject') as subject_name"]
+    sql_stmt = 'SELECT distinct {columns} ' \
+               'FROM assessment_testsets as att, assessment_enroll as ae' \
+               ' WHERE att.assessment_id = ae.assessment_id ' \
+               ' AND  att.assessment_id = :assessment_id ' \
+               ' ORDER BY 1 ASC'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
+'''Admin UI: Query Test Ranking report - student rank list )'''
+def query_test_ranking_data(subjects, assessment_id):
+    # ##
+    # Original SQL Statement for student_ranking report
+    # ##
+    # sql_stmt = WITH test_result_by_subject AS(
+    #     SELECT test_summary_v.row_name[1] AS student_id,
+    #             test_summary_v.row_name[2] AS assessment_id,
+    #             test_summary_v."2",
+    #             test_summary_v."3",
+    #             test_summary_v."4",
+    #             COALESCE(NULLIF(test_summary_v."2", 0::double precision), 0::double precision)
+    #             + COALESCE(NULLIF(test_summary_v."3", 0::double precision), 0::double precision)
+    #             + COALESCE(NULLIF(test_summary_v."4", 0::double precision), 0::double precision) AS total_mark
+    #     FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score
+    #                     from (SELECT m.student_id,
+    #                             m.assessment_id,
+    #                             m.testset_id,
+    #                             m.score AS my_score
+    #                             FROM marking_summary_360_degree_mview m
+    #                             where student_id is not null
+    #                             and m.assessment_id = 2) test_summary_v
+    #                     order by 1, 2 ',
+    #                     'select distinct att.testset_id
+    #                         from assessment_testsets as att join assessment_enroll as ae
+    #                         on att.assessment_id = ae.assessment_id
+    #                         where att.assessment_id = 2
+    #                         order by 1')
+    #     AS test_summary_v(row_name integer[], "2" double precision, "3" double precision, "4" double precision)
+    # )
+    # SELECT trs.student_id,
+    #     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id,
+    #       (select u.username from users u where u.id=trs.student_id) AS student_name,
+    #     trs.assessment_id,
+    #     a.test_center,
+    #     trs."2" as subject_1,
+    #     trs."3" as subject_2,
+    #     trs."4" as subject_3,
+    #     trs.total_mark,
+    #     rank() OVER(PARTITION BY trs.assessment_id ORDER BY trs.total_mark DESC) AS student_rank
+    # FROM
+    # test_result_by_subject trs,
+    #     (SELECT DISTINCT assessment_enroll.assessment_id,
+    #     assessment_enroll.student_id,
+    #     assessment_enroll.test_center
+    #     FROM assessment_enroll) a
+    # WHERE trs.assessment_id = a.assessment_id
+    # AND trs.student_id = a.student_id;
+    #
+    sql_stmt = ' WITH test_result_by_subject AS( ' \
+               + ' SELECT test_summary_v.row_name[1] AS student_id, ' \
+               + ' test_summary_v.row_name[2] AS assessment_id, '
+    for subject in subjects:
+        sql_stmt = sql_stmt + ' test_summary_v.' + subject.subject_name + ', '
+    index = 1
+    for subject in subjects:
+        if index != 1:
+            sql_stmt = sql_stmt + '+'
+        sql_stmt = sql_stmt \
+                   + ' COALESCE(NULLIF(test_summary_v.' + subject.subject_name + ', 0::double precision), 0::double precision)'
+        index += 1
+    sql_stmt = sql_stmt + ' AS total_mark '
+    sql_stmt = sql_stmt \
+               + " FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score " \
+               + "                  from (SELECT m.student_id, " \
+               + "                            m.assessment_id, " \
+               + "                             m.testset_id, " \
+               + "                            m.score AS my_score " \
+               + "                            FROM marking_summary_360_degree_mview m " \
+               + "                            where student_id is not null " \
+               + "                            and m.assessment_id = :assessment_id) test_summary_v " \
+               + "                        order by 1, 2 ', " \
+               + "                        'select distinct att.testset_id " \
+               + "                            from assessment_testsets as att join assessment_enroll as ae " \
+               + "                            on att.assessment_id = ae.assessment_id " \
+               + "                            where att.assessment_id = :assessment_id " \
+               + "                            order by 1') "
+    sql_stmt = sql_stmt + ' AS test_summary_v(row_name integer[], '
+    index = 1
+    for subject in subjects:
+        sql_stmt = sql_stmt + subject.subject_name + ' double precision'
+        if index < len(subjects):
+            sql_stmt = sql_stmt + ', '
+        index += 1
+    sql_stmt = sql_stmt + ') )'
+    sql_stmt = sql_stmt \
+               + " SELECT trs.student_id, " \
+               + "     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id, " \
+               + "     (select u.username from users u where u.id=trs.student_id) AS student_name, " \
+               + "     trs.assessment_id, " \
+               + "      a.test_center, "
+    index = 1
+    for subject in subjects:
+        sql_stmt = sql_stmt + 'trs.' + subject.subject_name + ' as subject_' + str(index) + ', '
+        index += 1
+    sql_stmt = sql_stmt \
+               + ' trs.total_mark, ' \
+               + ' rank() OVER(PARTITION BY trs.assessment_id ORDER BY trs.total_mark DESC) AS student_rank ' \
+               + ' FROM test_result_by_subject trs, ' \
+               + ' (SELECT DISTINCT assessment_enroll.assessment_id, ' \
+               + '     assessment_enroll.student_id, ' \
+               + '     assessment_enroll.test_center ' \
+               + '     FROM assessment_enroll) a ' \
+               + ' WHERE trs.assessment_id = a.assessment_id ' \
+               + ' AND trs.student_id = a.student_id '
+
+    cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+def build_test_ranking_excel_response(subjects, test_summaries, year, test_type, sequence):
+    """
+    test_result_summary 를 받아서 엑셀로 export 하는 response object 를 만듭니다.
+    :param test_summaries: test_summary query object list
+    :return: flask response object
+    """
+    import io
+    import time
+    import unidecode
+    from urllib import parse
+    from flask import send_file
+    import xlsxwriter
+
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet('Test Ranking')
+
+    row, col = 0, 0
+    # Excel header list
+    headers = ["No.", "Student No.", "Name"]
+    for subject in subjects:
+        headers.append(subject.subject_name)
+    headers.append("Total")
+    headers.append("Ranking")
+    headers.append("Branch Name")
+    for header in headers:
+        worksheet.write(row, col, header)
+        col += 1
+
+    # test_summaries object 에서 Excel 로 export 할 attribute
+    attributes = ["cs_student_id", "student_name"]
+    for i in range(1, len(subjects) + 1):
+        attributes.append("subject_" + str(i))
+    attributes.append("total_mark")
+    attributes.append("student_rank")
+    attributes.append("test_center")
+
+    for ts in test_summaries:
+        row += 1
+        worksheet.write(row, 0, str(col + 1))
+        col = 1
+        for attr in attributes:
+            if attr == "test_center":
+                tc = getattr(ts, attr)
+                worksheet.write(row, col, Codebook.get_code_name(tc))
+            else:
+                worksheet.write(row, col, getattr(ts, attr))
+            col += 1
+
+    workbook.close()
+    output.seek(0)
+    file_name = 'test_ranking_%s_%s_%s_%s.xlsx' % (year, test_type, sequence, int(time.time()))
+
+    # response object 생성
+    rsp = send_file(
+        io.BytesIO(output.read()), as_attachment=True,
+        attachment_filename=file_name,
+        mimetype='application/vnd.ms-excel'
+    )
+    rsp.headers["Content-Disposition"] = \
+        "attachment;" \
+        "filename={ascii_filename};" \
+        "filename*=UTF-8''{utf_filename}".format(
+            ascii_filename=unidecode.unidecode(file_name).replace(' ', '_'),
+            utf_filename=parse.quote(file_name)
+        )
+
+    return rsp
+
+
+def build_test_ranking_pdf_response(template_file_name, image_file_path, year, test_type, sequence,
+                           subject_names, test_summaries, now):
+
+    from zipfile import ZipFile
+    from flask import send_file
+
+    rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path,
+                           year=year, test_type=test_type, sequence=sequence,
+                           subject_names=subject_names,
+                           test_summaries=test_summaries, now=now)
+    from weasyprint import HTML, CSS
+    from weasyprint.fonts import FontConfiguration
+    font_config = FontConfiguration()
+    css = CSS(string='''
+        @font-face {
+            font-family: Gentium;
+            src: url(http://example.com/fonts/Gentium.otf);
+        }
+        h1 { font-family: Gentium }''', font_config=font_config)
+    html = HTML(string=rendered_template_pdf)
+
+    pdf_dir_path = 'test_ranking_pdf_%s_%s_%s' % (year, test_type, sequence)
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    os.makedirs(pdf_dir_path)
+    file_num = 1
+    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, file_num)
+    html.write_pdf(target=pdf_file_path,
+                   presentational_hints=True)
+    file_paths = get_all_files(pdf_dir_path)
+
+    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+        for file in file_paths:
+            zip.write(file)
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
+    rsp =  send_file(
+                zfile,
+                mimetype='application/zip',
+                as_attachment=True,
+                attachment_filename='zfile')
+    return rsp
+
+
+def build_test_results_zipper(assessment_GUID):
+
+    from zipfile import ZipFile
+    from flask import send_file
+
+    pdf_dir_path = 'test_report_pdf_%s' % (assessment_GUID)
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    file_paths = get_all_files(pdf_dir_path)
+    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+        for file in file_paths:
+            zip.write(file)
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
+    rsp =  send_file(
+                zfile,
+                mimetype='application/zip',
+                as_attachment=True,
+                attachment_filename='zfile')
+    return rsp
+
+
+def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_id):
+
+    rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path)
+    from weasyprint import HTML, CSS
+    from weasyprint.fonts import FontConfiguration
+    font_config = FontConfiguration()
+    css = CSS(string='''
+        @font-face {
+            font-family: Gentium;
+            src: url(http://example.com/fonts/Gentium.otf);
+        }
+        h1 { font-family: Gentium }''', font_config=font_config)
+    html = HTML(string=rendered_template_pdf)
+
+    pdf_dir_path = 'test_report_pdf_%s' % (assessment_GUID)
+    curr_dir = os.getcwd()
+    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
+    if not os.path.exists(pdf_dir_path):
+        os.makedirs(pdf_dir_path)
+    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_id)
+    html.write_pdf(target=pdf_file_path,
+                   presentational_hints=True)
+    os.chdir(curr_dir)
+    return 'success'
+
+
+def get_all_files(directory):
+    file_paths = []
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+    return file_paths
+
+
+'''Admin UI: Item Score Summary report data '''
+def query_item_score_summary_data(item_id):
+    # grouping : 'by_item_assessment', 'by_item'
+    column_names = ['item_id',
+                    'grouping',
+                    'assessment_id',
+                    'assessment_name',
+                    'number_of_exec',
+                    'percentile_correct'
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM item_score_summary_v ' \
+               'WHERE item_id = :item_id ' \
+               'ORDER BY assessment_name '.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'item_id': item_id})
+    Record = namedtuple('Record', cursor.keys())
+    rows = [Record(*r) for r in cursor.fetchall()]
+    return rows
+
+
 '''Refresh Mview for generating Report'''
 @api.route('/gen_report/', methods=['POST'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
@@ -141,3 +781,5 @@ def gen_report():
     refresh_mviews()
     print('Finish refresh mviews')
     return 'True'
+
+

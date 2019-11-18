@@ -20,6 +20,7 @@ class Config(metaclass=MetaFlaskEnv):
     CSEDU_MAIL_SENDER = 'CSEDU Admin <testsystem@cseducation.com.au>'
     CSEDU_ADMIN = os.environ.get('CSEDU_ADMIN') or 'testsystem@cseducation.com.au'
     CSEDU_ITEM_PER_PAGE = 25
+    CSEDU_IMG_DIR = os.environ.get('CSEDU_IMG_DIR') or 'app/static/ui/img'
 
     # ToDo: Need to update Upload_folder, allowed_extentions
     UPLOAD_FOLDER = os.environ.get('TEMP') or 'tmp/upload'

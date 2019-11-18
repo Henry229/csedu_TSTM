@@ -125,3 +125,26 @@ function renderUrlDocument(obj, modalId, id, parentModalId) {
     }
     $('#' + modalId + ' .modal-content').html("Loading... Try again if data not shown");
 }
+
+/**
+ * Execute Materialized View for batch data
+ */
+function gen_report(modal_name) {
+    $.ajax({
+        url: '/api/gen_report/',
+        method: 'POST',
+        beforeSend: function () {
+
+        },
+        complete: function () {
+
+        },
+        success: function (response) {
+            console.log(response);
+            $("#status").show();
+            $("#status").html("Report generated successfully").fadeOut(3000, function () {
+                $(this).hide()
+            });
+        }
+    });
+}
