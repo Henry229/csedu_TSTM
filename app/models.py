@@ -850,6 +850,23 @@ class MarkingBySimulater(db.Model):
         return '<Marking By Simulator {}>'.format(self.id)
 
 
+class MarkingForWriting(db.Model):
+    """marking for writing item Model: """
+    __tablename__ = 'marking_writing'
+
+    id = db.Column(db.Integer, primary_key=True)
+    candidate_file_link = db.Column(db.String(256))  # candidate response writing image file
+    marked_file_link = db.Column(db.String(256))    # marker's response image file
+    candidate_mark_detail = db.Column(JSONB)        # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
+    marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
+
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    def __repr__(self):
+        return '<Marking Detail For Writing {}>'.format(self.id)
+
+
 class ScoreSummary(db.Model):
     '''score summary Model: information of score summary on each item. it is for the statistics  '''
     __tablename__ = 'score_summary'
