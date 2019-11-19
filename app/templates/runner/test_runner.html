@@ -220,8 +220,7 @@
                     TestRunner.init($('.item-container'), options);
                 });
                 $('.start-no-btn').on('click', function () {
-                    window.location = "/tests/testsets?student_id=" + student_external_id
-                        + "&assessment_guid=" + assessment_guid;
+                    window.location = "/tests/assessments?guid_list=" + assessment_guid;
                 });
 
             {% endif %}
