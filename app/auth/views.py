@@ -270,26 +270,14 @@ def reset_password(token):
     return render_template('auth/reset_password.html', form=form)
 
 
-def get_member_info(stud_id):
+def get_student_info(stud_id):
     """
     Get member info from CS_API
-    :param stud_id:
+    :param stud_id: csonlineschool student id
     :return: a member info
     """
     print(Config.CS_API_URL + "/member/%s" % stud_id)
     info = requests.get(Config.CS_API_URL + "/member/%s" % stud_id,
-                        auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
-    return info
-
-
-def get_member_session(stud_id):
-    """
-    Get member session info from CS_API. This should be doable without login because
-    it's used to login a member using the ssion informatio
-    :param stud_id:
-    :return: a member's session info
-    """
-    info = requests.get(Config.CS_API_URL + "/session/%s" % stud_id,
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
     return info
 
