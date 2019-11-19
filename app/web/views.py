@@ -136,6 +136,7 @@ def process_inward():
     try:
         token = base64.urlsafe_b64decode(request.args.get("token"))
     except:
+        flash("Wrong token")
         return internal_server_error('Wrong token')
 
     args = json.loads(token.decode('UTF-8'))
