@@ -11,7 +11,7 @@ from flask_login import login_required, login_user, current_user
 
 from app import db
 from app.testset.forms import TestsetSearchForm
-from app.web.errors import forbidden, page_not_found
+from app.web.errors import forbidden, page_not_found, internal_server_error
 from . import web
 from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
@@ -133,7 +133,11 @@ def process_inward():
     if error:
         flash(error)
 
-    token = base64.urlsafe_b64decode(request.args.get("token"))
+    try:
+        token = base64.urlsafe_b64decode(request.args.get("token"))
+    except:
+        return internal_server_error('Wrong token')
+
     args = json.loads(token.decode('UTF-8'))
     student_id = args["sid"]
     assessment_guid = args["aid"]
