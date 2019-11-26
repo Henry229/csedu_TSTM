@@ -130,16 +130,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/plan/manage">
                             <i class="icons cui-globe nav-icon"></i> Package </a>
+                            <i class="icons cil-aperture nav-icon"></i>
                     </li>
                 {% endif %}
                 <li class="nav-title">Writing</li>
                 {% if current_user.can(Permission.ITEM_EXEC) %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/report/my_report">
+                        <a class="nav-link" href="/writing/writing_ui">
                             <i class="icons cui-monitor nav-icon"></i> Testing UI </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/report/my_report">
+                        <a class="nav-link" href="/writing/manage">
                             <i class="icons cui-monitor nav-icon"></i> Marking </a>
                     </li>
                 {% endif %}

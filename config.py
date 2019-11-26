@@ -26,6 +26,9 @@ class Config(metaclass=MetaFlaskEnv):
     UPLOAD_FOLDER = os.environ.get('TEMP') or 'tmp/upload'
     ALLOWED_EXTENSIONS = {'xml', 'xls', 'xlsx', 'zip'}
 
+    WRITING_UPLOAD_FOLDER = os.environ.get('WRITING_UPLOAD_FOLDER') or 'app/static/writing/img'
+    WRITING_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'txt'}
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 

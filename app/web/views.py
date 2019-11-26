@@ -273,12 +273,3 @@ def start_test_manager():
         for tsets in testsets:
             tsets.enrolled = tsets.id in testset_enrolled
     return render_template('web/start_online_test.html', guid_list=guid_list, form=form, testsets=testsets)
-
-
-@web.route('/test_pdf', methods=['GET', 'POST'])
-def test_pdf():
-    errors = []
-    results = {}
-    wkhtmltopdf = Wkhtmltopdf(app)
-
-    render_template_to_pdf('index.html', download=True, save=False, param='hello')

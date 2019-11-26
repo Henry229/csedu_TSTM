@@ -78,6 +78,9 @@ def create_app(config_name):
     from .plan import plan as plan_blueprint
     app.register_blueprint(plan_blueprint, url_prefix='/plan')
 
+    from .writing import writing as writing_blueprint
+    app.register_blueprint(writing_blueprint, url_prefix='/writing')
+
     app.session_interface = CustomSessionInterface()
 
     return app

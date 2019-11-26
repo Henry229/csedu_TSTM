@@ -859,7 +859,8 @@ class MarkingForWriting(db.Model):
     marked_file_link = db.Column(db.String(256))    # marker's response image file
     candidate_mark_detail = db.Column(JSONB)        # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
     marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
-
+    markers_comment = db.Column(db.String(2048))
+    marker_id = db.Column(db.Integer)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
@@ -902,7 +903,11 @@ class Student(db.Model):
 
     @staticmethod
     def getCSStudentId(id):
-        return (Student.query.filter_by(id=id).first()).student_id
+        return (Student.query.filter_by(user_id=id).first()).student_id
+
+    # @staticmethod
+    # def getCSStudentId(id):
+    #     return (Student.query.filter_by(id=id).first()).student_id
 
     @staticmethod
     def getCSStudentName(user_id):
