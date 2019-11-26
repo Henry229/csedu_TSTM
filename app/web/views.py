@@ -11,10 +11,10 @@ from flask_login import login_required, login_user, current_user
 
 from app import db
 from app.testset.forms import TestsetSearchForm
-from app.web.errors import forbidden, page_not_found
+from app.web.errors import forbidden, page_not_found, internal_server_error
 from . import web
 from .forms import StartOnlineTestForm
-from ..auth.views import get_member_info, get_member_session, get_campuses
+from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
     User, Role
@@ -90,15 +90,15 @@ def testset_simulator():
     return render_template('simulator.html', form=search_form, testsets=rows)
 
 
-def is_authorised(student_id, timeout=120):
+def is_authorised(student, timeout=120):
     # Get session info
-    student_session = get_member_session(student_id)
+    student_session = student['session']
     # Check IP matching
     server_public_ip = requests.get('https://api.ipify.org').text
     public_ip = request.headers.environ[
         'HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.headers.environ else request.headers.environ[
         'REMOTE_ADDR']
-    if student_session['IP'] in ("127.0.0.1", public_ip, server_public_ip):
+    if student_session['IP'] in ("127.0.0.1", "1.158.42.34", public_ip, server_public_ip):
         # Check session expiration. Default 120min
         REG_DT = datetime.strptime(student_session['REG_DT'], "%a, %d %b %Y %H:%M:%S %Z")
         session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
@@ -133,28 +133,33 @@ def process_inward():
     if error:
         flash(error)
 
-    token = base64.urlsafe_b64decode(request.args.get("token"))
+    try:
+        token = base64.urlsafe_b64decode(request.args.get("token"))
+    except:
+        return internal_server_error('Wrong token')
+
     args = json.loads(token.decode('UTF-8'))
     student_id = args["sid"]
     assessment_guid = args["aid"]
     session_timeout = int(args["sto"]) if args["sto"] else 120  # Minutes
 
-    if is_authorised(student_id, session_timeout):
-        member = get_member_info(student_id)
+    member = get_student_info(student_id)
+    if is_authorised(member, session_timeout):
         registered_student = Student.query.filter_by(student_id=student_id).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
-            student_user.username = "%s %s" % (member['stud_first_name'], member['stud_last_name'])
+            student_user.username = "%s %s" % (member['member']['stud_first_name'], member['member']['stud_last_name'])
             student_user.last_seen = datetime.now(pytz.utc)
             registered_student.last_access = datetime.now(pytz.utc)
-            registered_student.branch = member['branch']
+            registered_student.branch = member['member']['branch']
         else:
             role = Role.query.filter_by(name='Test_taker').first()
-            student_user = User(username="%s %s" % (member['stud_first_name'], member['stud_last_name']),
-                                role=role,
-                                confirmed=True,
-                                active=True)
+            student_user = User(
+                username="%s %s" % (member['member']['stud_first_name'], member['member']['stud_last_name']),
+                role=role,
+                confirmed=True,
+                active=True)
             student_user.password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
             db.session.add(student_user)
@@ -162,7 +167,7 @@ def process_inward():
 
             student = Student(student_id=student_id,
                               user_id=student_user.id,
-                              branch=member['branch'])
+                              branch=member['member']['branch'])
             db.session.add(student)
 
         # Update campus info in the code book
@@ -173,7 +178,11 @@ def process_inward():
         if assessment_guid:
             return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
         else:
-            return redirect(url_for('web.index'))  # TODO use report.my_report
+            guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
+            if len(guid_list):
+                return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
+            else:
+                return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
     return forbidden('Insufficient permissions')
 
 
@@ -215,6 +224,35 @@ def testset_list():
 
     return render_template('web/testsets.html', student_id=current_user.id, assessment_guid=assessment_guid,
                            testsets=testsets)
+
+
+@web.route('/tests/assessments', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def assessment_list():
+    # Parameter check
+    guid_list = request.args.get("guid_list").split(",")
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return page_not_found()
+
+    assessments = []
+    for assessment_guid in guid_list:
+        # Check if there is an assessment with the guid
+        assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+        if assessment is None:
+            return page_not_found()
+
+        # Get all assessment enroll to get testsets the student enrolled in already.
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=current_user.id).all()
+        testset_enrolled = {en.testset_id: en.id for en in enrolled}
+
+        # Get all testset the assessment has
+        for tset in assessment.testsets:
+            tset.enrolled = tset.id in testset_enrolled
+        assessments.append(assessment)
+
+    return render_template('web/assessments.html', student_id=current_user.id, assessments=assessments)
 
 
 @web.route('/testing', methods=['GET'])
