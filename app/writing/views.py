@@ -57,7 +57,7 @@ def manage():
         rows = query.order_by(Assessment.id.desc()).all()
 
         for r in rows:
-            student_ids = [sub.student_id for sub in AssessmentEnroll.query.options(load_only("student_id")).filter_by(assessment_id=r.id).all()]
+            student_ids = [sub.student_id for sub in db.session.query(AssessmentEnroll.student_id).filter(AssessmentEnroll.assessment_id==r.id).distinct()]
             assessment_json_str = { "assessment_guid" : r.GUID,
                                     "year" : r.year,
                                     "test_type" : r.test_type,
@@ -67,7 +67,7 @@ def manage():
             }
             assessments.append(assessment_json_str)
 
-        flash('Found {} writing assessment(s)'.format(len(rows)))
+        # flash('Found {} writing assessment(s)'.format(len(rows)))
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
 
 
