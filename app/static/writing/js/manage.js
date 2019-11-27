@@ -32,7 +32,8 @@ function searchWritings(assessment_guid) {
             removeItemList();
             result.forEach(function (item) {
                 drawItemList(data.student_id, item.assessment_enroll_id, item.assessment_name,
-                    item.item_id, item.marking_id, item.marking_writing_id, item.start_time);
+                    item.item_id, item.marking_id, item.marking_writing_id, item.start_time,
+                    item.is_candidate_file,item.is_marked);
                 i++;
             });
 
@@ -52,15 +53,18 @@ function searchWritings(assessment_guid) {
  * @param marking_id
  * @param marking_writing_id
  * @param start_time
+ * @param is_candidate_file
+ * @param is_marked
  * @returns {boolean}
  */
 function drawItemList(student_id, assessment_enroll_id, assessment_name,
-                            item_id, marking_id, marking_writing_id, start_time) {
+                            item_id, marking_id, marking_writing_id, start_time,
+                            is_candidate_file,is_marked) {
     var tbody = document.getElementById("w_table_body");
     var row = tbody.insertRow(0);
     var cell1 = row.insertCell(0);
     if ((student_id==null)&&(assessment_enroll_id==null)) {
-        cell1.colSpan = 6;
+        cell1.colSpan = 8;
         cell1.innerHTML = "No data found.";
         return true;
     }
@@ -69,6 +73,8 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     var cell4 = row.insertCell(3);
     var cell5 = row.insertCell(4);
     var cell6 = row.insertCell(5);
+    var cell7 = row.insertCell(6);
+    var cell8 = row.insertCell(7);
 
     // Item Detail Modal box invoke
     var span_item = document.createElement("a");
@@ -90,15 +96,21 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     cell3.innerHTML = start_time;
     cell4.appendChild(span_item);
     cell5.innerHTML = marking_id;
-    cell6.appendChild(span_marking);
-
+    if (is_candidate_file==true)
+        cell6.innerHTML = 'Y';
+    else
+        cell6.innerHTML = 'N';
+    if (is_marked==true)
+        cell7.innerHTML = 'Y';
+    else
+        cell7.innerHTML = 'N';
+    cell8.appendChild(span_marking);
     $('#detail' + item_id).attr("onclick", "invokeModalItem(" + item_id + ")");
     $('#detail' + item_id).attr("data-toggle", "modal");
     $('#detail' + item_id).attr("data-target", "#dataModal");
     $('#marking' + marking_writing_id).attr("onclick", "invokeModalMarking(" + marking_writing_id + ","+student_id+")");
     $('#marking' + marking_writing_id).attr("data-toggle", "modal");
     $('#marking' + marking_writing_id).attr("data-target", "#dataModalSub");
-
     return true;
 }
 
@@ -112,7 +124,6 @@ function removeItemList() {
     return true;
 }
 
-
 /**
  * Function invokeModalItem() : Item Preview modal dialog when click <eye> icon
  * @param id
@@ -124,7 +135,6 @@ function invokeModalItem(id) {
     });
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
 }
-
 
 /**
  * Function invokeModalMarking() : Marking for writing modal dialog when click <check> icon
@@ -139,3 +149,10 @@ function invokeModalMarking(marking_writing_id, student_id) {
     $('#dataModalSub .modal-content').html("Loading... Try again if data not shown");
 }
 
+// Modal Image Gallery
+function onClick(element) {
+  document.getElementById("img01").src = element.src;
+  document.getElementById("modal01").style.display = "block";
+  var captionText = document.getElementById("caption");
+  captionText.innerHTML = element.alt;
+}

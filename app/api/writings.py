@@ -22,12 +22,23 @@ def get_writing_item_list():
             if marking_writing:
                 interaction_type = (Item.query.options(load_only("interaction_type")).filter_by(id=m.item_id).first()).interaction_type
                 if interaction_type=='extendedTextInteraction' or interaction_type=='uploadInteraction':
+                    if marking_writing.candidate_file_link:
+                        is_candidate_file = True
+                    else:
+                        is_candidate_file = False
+                    if marking_writing.candidate_mark_detail:
+                        is_marked = True
+                    else:
+                        is_marked = False
+
                     json_str = { "assessment_enroll_id" : a.id,
                                  "assessment_name": a.assessment.name,
                                  "start_time": a.start_time,
                                  "marking_id": m.id,
                                  "item_id": m.item_id,
-                                 "marking_writing_id" : marking_writing.id}
+                                 "marking_writing_id" : marking_writing.id,
+                                 "is_candidate_file" : is_candidate_file,
+                                 "is_marked" : is_marked}
                     marking_writing_list.append(json_str)
     return jsonify(marking_writing_list)
 
