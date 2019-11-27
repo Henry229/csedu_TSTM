@@ -84,12 +84,15 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     i1.className = "fas fa-eye";
     span_item.appendChild(i1);
 
-    // Marking for writing link
     var span_marking = document.createElement("span");
     span_marking.id = 'marking' + marking_writing_id;
+    var anchor = document.createElement("a");
+    anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_id;
+    anchor.target = '_blank';
     var i2 = document.createElement("i");
     i2.className = "icons cui-task";
-    span_marking.appendChild(i2);
+    anchor.appendChild(i2);
+    span_marking.appendChild(anchor);
 
     cell1.innerHTML = assessment_enroll_id;
     cell2.innerHTML = assessment_name;
@@ -108,9 +111,6 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     $('#detail' + item_id).attr("onclick", "invokeModalItem(" + item_id + ")");
     $('#detail' + item_id).attr("data-toggle", "modal");
     $('#detail' + item_id).attr("data-target", "#dataModal");
-    $('#marking' + marking_writing_id).attr("onclick", "invokeModalMarking(" + marking_writing_id + ","+student_id+")");
-    $('#marking' + marking_writing_id).attr("data-toggle", "modal");
-    $('#marking' + marking_writing_id).attr("data-target", "#dataModalSub");
     return true;
 }
 
@@ -136,23 +136,4 @@ function invokeModalItem(id) {
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
 }
 
-/**
- * Function invokeModalMarking() : Marking for writing modal dialog when click <check> icon
- * @param marking_writing_id
- * @param student_id
- */
-function invokeModalMarking(marking_writing_id, student_id) {
-    var url = '/writing/marking/'+marking_writing_id+'/'+student_id;
-    $.get(url, function (data) {
-        $('#dataModalSub .modal-content').html(data);
-    });
-    $('#dataModalSub .modal-content').html("Loading... Try again if data not shown");
-}
 
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
