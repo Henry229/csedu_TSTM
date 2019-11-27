@@ -15,6 +15,10 @@ import os
 @login_required
 @permission_required(Permission.ADMIN)
 def manage():
+    """
+    Menu Writing > Marking main page
+    :return: search form and search result - assessment related information
+    """
     assessment_name = request.args.get("assessment_name")
     year = request.args.get("year")
     test_type = request.args.get("test_type")
@@ -76,6 +80,12 @@ def manage():
 @writing.route('/marking/<int:marking_writing_id>/<int:student_id>', methods=['GET'])
 @login_required
 def marking(marking_writing_id, student_id):
+    """
+    Menu Writing > Marking > Click 'search writing' > Click 'link to Marking' page
+    :param marking_writing_id:
+    :param student_id:
+    :return: the specific student's writing information for marking by marker
+    """
     form = WritingMarkingForm()
     form.marking_writing_id.data = marking_writing_id
     form.student_id.data = student_id
@@ -102,7 +112,12 @@ def marking(marking_writing_id, student_id):
 
 
 def populate_criteria_form(form, criteria_detail=None):
-
+    """
+    Call from writing.marking(marking_writing_id, student_id) to populate form - fieldList Criteria information
+    :param form:
+    :param criteria_detail:
+    :return:
+    """
     criteria = Codebook.query.filter_by(code_type='criteria').order_by(Codebook.id).all()
     if criteria_detail is None:
         while len(form.markings) > 0:
@@ -129,6 +144,10 @@ def populate_criteria_form(form, criteria_detail=None):
 @writing.route('/marking', methods=['POST'])
 @login_required
 def marking_edit():
+    """
+    Requested from HTTP to update marker's input into marking_writing table
+    :return: Response to Writing > Marking menu
+    """
     form = WritingMarkingForm()
     if form.validate_on_submit():
         row = MarkingForWriting.query.filter_by(id=form.marking_writing_id.data).first()
@@ -154,6 +173,10 @@ def marking_edit():
 @writing.route('/writing_ui', methods=['GET'])
 @login_required
 def writing_ui():
+    """
+    Temporary Usage / Menu Writing > Testing UI main page
+    :return: search form and Writing upload form
+    """
     form = StartOnlineTestForm()
     assessment_guid = request.args.get("assessment_guid")
     st_id = request.args.get("student_id")
@@ -179,6 +202,10 @@ def writing_ui():
 @writing.route('/upload_writing', methods=['POST'])
 @login_required
 def upload_writing():
+    """
+    Temporary Usage / Menu Writing > Testing UI > upload writing
+    :return:
+    """
     form = WritingTestForm()
     assessment_guid = form.assessment_guid.data
     st_id = form.student_id.data
@@ -219,6 +246,12 @@ def upload_writing():
 
 
 def insertMarkingForWriting(marking_id,file_name):
+    """
+    Call from writing.upload_writing - update marking_writing table set candidate_file_link
+    :param marking_id:
+    :param file_name:
+    :return: true
+    """
     marking_writing = MarkingForWriting(candidate_file_link=file_name,
                                 marking_id=marking_id)
     db.session.add(marking_writing)
@@ -227,6 +260,14 @@ def insertMarkingForWriting(marking_id,file_name):
 
 
 def saveWritingFile(filefield_name, text, assessment_guid, student_id):
+    """
+    Call from writing.upload_writing - save student's writing to current_app.config['WRITING_UPLOAD_FOLDER']
+    :param filefield_name:
+    :param text:
+    :param assessment_guid:
+    :param student_id:
+    :return: filename saved to current_app.config['WRITING_UPLOAD_FOLDER']
+    """
     my_files = request.files.getlist(filefield_name)
     file_name = ''
     if len(my_files[0].filename) > 0:
@@ -252,5 +293,10 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
 
 
 def allowed_file(filename):
+    """
+    Call from writing.saveWritingFile to check file extension allowed
+    :param filename:
+    :return:
+    """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']
