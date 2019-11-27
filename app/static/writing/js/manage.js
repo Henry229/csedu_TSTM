@@ -1,7 +1,9 @@
-
 $(document).ready(function () {
     $("#w_table").hide();
 
+    $("#dataModalSub").on("hidden.bs.modal", function () {
+        $("#w_table").show();
+    });
 });
 
 /**
@@ -26,17 +28,18 @@ function searchWritings(assessment_guid) {
             $btn.attr('disabled', false);
         },
         success: function (result) {
-            i=0;
+            i = 0;
+            removeItemList();
             result.forEach(function (item) {
                 drawItemList(data.student_id, item.assessment_enroll_id, item.assessment_name,
-                            item.item_id, item.marking_id, item.marking_writing_id, item.start_time);
+                    item.item_id, item.marking_id, item.marking_writing_id, item.start_time);
                 i++;
             });
-            if (i==0) {
-                $("#w_table").hide();
-            } else {
-                $("#w_table").show();
+
+            if (i == 0) {
+                drawItemList();
             }
+            $("#w_table").show();
         }
     });
 }
@@ -56,6 +59,11 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     var tbody = document.getElementById("w_table_body");
     var row = tbody.insertRow(0);
     var cell1 = row.insertCell(0);
+    if ((student_id==null)&&(assessment_enroll_id==null)) {
+        cell1.colSpan = 6;
+        cell1.innerHTML = "No data found.";
+        return true;
+    }
     var cell2 = row.insertCell(1);
     var cell3 = row.insertCell(2);
     var cell4 = row.insertCell(3);
@@ -71,15 +79,11 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     span_item.appendChild(i1);
 
     // Marking for writing link
-    var span_marking = document.createElement("a");
+    var span_marking = document.createElement("span");
     span_marking.id = 'marking' + marking_writing_id;
-    var anchor = document.createElement("a");
-    anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_id;
-    anchor.target = '_blank';
     var i2 = document.createElement("i");
     i2.className = "icons cui-task";
-    anchor.appendChild(i2);
-    span_marking.appendChild(anchor);
+    span_marking.appendChild(i2);
 
     cell1.innerHTML = assessment_enroll_id;
     cell2.innerHTML = assessment_name;
@@ -91,8 +95,28 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     $('#detail' + item_id).attr("onclick", "invokeModalItem(" + item_id + ")");
     $('#detail' + item_id).attr("data-toggle", "modal");
     $('#detail' + item_id).attr("data-target", "#dataModal");
+    $('#marking' + marking_writing_id).attr("onclick", "invokeModalMarking(" + marking_writing_id + ","+student_id+")");
+    $('#marking' + marking_writing_id).attr("data-toggle", "modal");
+    $('#marking' + marking_writing_id).attr("data-target", "#dataModalSub");
+
+    return true;
 }
 
+/**
+ * Function removeItemList() : remove all tr under table tbody
+ * @returns {boolean}
+ */
+function removeItemList() {
+    var tbody = $('#w_table');
+    tbody.find('tbody tr').remove();
+    return true;
+}
+
+
+/**
+ * Function invokeModalItem() : Item Preview modal dialog when click <eye> icon
+ * @param id
+ */
 function invokeModalItem(id) {
     var url = '/item/' + id + '/preview';
     $.get(url, function (data) {
@@ -100,3 +124,18 @@ function invokeModalItem(id) {
     });
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
 }
+
+
+/**
+ * Function invokeModalMarking() : Marking for writing modal dialog when click <check> icon
+ * @param marking_writing_id
+ * @param student_id
+ */
+function invokeModalMarking(marking_writing_id, student_id) {
+    var url = '/writing/marking/'+marking_writing_id+'/'+student_id;
+    $.get(url, function (data) {
+        $('#dataModalSub .modal-content').html(data);
+    });
+    $('#dataModalSub .modal-content').html("Loading... Try again if data not shown");
+}
+
