@@ -11,6 +11,7 @@ from .mediainteraction import MediaInteraction
 from .objectinteraction import ObjectInteraction
 from .orderinteraction import OrderInteraction
 from .textentryinteraction import TextEntryInteraction
+from .uploadinteraction import UploadInteraction
 
 class_dict = {
     'ChoiceInteraction': ChoiceInteraction,
@@ -26,6 +27,7 @@ class_dict = {
     'HotspotInteraction': HotspotInteraction,
     'ExtendedTextInteraction': ExtendedTextInteraction,
     'GapMatchInteraction': GapMatchInteraction,
+    'UploadInteraction': UploadInteraction,
 }
 
 
