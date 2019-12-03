@@ -2,18 +2,61 @@ from flask import render_template, flash, request, redirect, url_for, current_ap
 from flask_login import login_required, current_user
 from app.web.errors import page_not_found
 from . import writing
-from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm
+from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm, MarkerAssignForm
 from .. import db
-from ..decorators import permission_required
+from ..decorators import permission_required, permission_required_or_multiple
 from sqlalchemy.orm import load_only
-from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, MarkingForWriting
+from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
+    MarkingForWriting, AssessmentHasTestset, Testset, EducationPlanDetail
 from werkzeug.utils import secure_filename
 import os
 
 
-@writing.route('/manage', methods=['GET'])
+@writing.route('/assign/<string:assessment_guid>', methods=['GET'])
 @login_required
 @permission_required(Permission.ADMIN)
+def assign(assessment_guid):
+    """
+    Menu Writing > Assign main page
+    :return:
+    """
+    assessment = Assessment.query.filter_by(GUID=assessment_guid).first()
+    if not assessment:
+        return redirect(
+            url_for('writing.manage', error="Invalid Request - assessment information not found"))
+    form = MarkerAssignForm()
+    form.assessment_id.data = assessment.id
+    ep = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
+    form.markers.data = ep.marker_ids["ids"]
+    return render_template('writing/assign.html', form=form, assessment=assessment)
+
+
+@writing.route('/assign', methods=['POST'])
+@login_required
+@permission_required(Permission.ADMIN)
+def assign_marker():
+    """
+    Requested from Menu Writing > Assign
+    :return: assign marker and return manage
+    """
+    form = MarkerAssignForm()
+    if form.validate_on_submit():
+        marker_ids = form.markers.data
+        row = EducationPlanDetail.query.filter_by(assessment_id=form.assessment_id.data).first()
+        if row is None:
+            return redirect(url_for('writing.manage', error="Fail to assign - Please register assessment to Education Plan first"))
+        row.marker_ids = {"ids": marker_ids }
+        db.session.add(row)
+        db.session.commit()
+        flash('Marker assigned successfully.')
+        return redirect(url_for('writing.manage'))
+    return redirect(url_for('writing.manage', error="Marker Assign - Form validation Error"))
+
+
+
+@writing.route('/manage', methods=['GET'])
+@login_required
+@permission_required_or_multiple(Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE)
 def manage():
     """
     Menu Writing > Marking main page
@@ -22,9 +65,8 @@ def manage():
     assessment_name = request.args.get("assessment_name")
     year = request.args.get("year")
     test_type = request.args.get("test_type")
-    grade = request.args.get("grade")
-    test_center = request.args.get("grade")
-    if assessment_name or year or test_type or grade or test_center:
+    test_center = request.args.get("test_center")
+    if assessment_name or year or test_type or test_center:
         flag = True
     else:
         flag = False
@@ -38,9 +80,6 @@ def manage():
     if test_type:
         test_type = int(test_type)
     search_form.test_type.data = test_type
-    # if grade:
-    #     grade = int(grade)
-    # search_form.grade.data = grade
     if test_center:
         test_center = int(test_center)
     search_form.test_center.data = test_center
@@ -54,12 +93,20 @@ def manage():
             query = query.filter_by(year=year)
         if test_type:
             query = query.filter_by(test_type=test_type)
-        # if grade:
-        #     query = query.filter_by(grade=grade)
         if test_center:
-            query = query.filter_by(branch_id=test_center)
-        rows = query.order_by(Assessment.id.desc()).all()
+            # Todo: Need to check if current_user have access right on queried data
+            if test_center == Codebook.get_code_id(current_user.username):
+                query = query.filter_by(branch_id=test_center)
+            elif Codebook.get_code_name(test_center)=='All':
+                query = query
+            else:
+                query = query.filter(1==2)  # always false return
 
+        # Filtering for only writing testset
+        subject_id = Codebook.get_code_id('Writing')
+        query = query.join(AssessmentHasTestset, Assessment.id==AssessmentHasTestset.assessment_id).join(Testset, AssessmentHasTestset.testset_id == Testset.id).filter(Testset.subject == subject_id)
+
+        rows = query.order_by(Assessment.id.desc()).all()
         for r in rows:
             student_ids = [sub.student_id for sub in db.session.query(AssessmentEnroll.student_id).filter(AssessmentEnroll.assessment_id==r.id).distinct()]
             assessment_json_str = { "assessment_guid" : r.GUID,
@@ -70,8 +117,6 @@ def manage():
                                     "students" : student_ids
             }
             assessments.append(assessment_json_str)
-
-        # flash('Found {} writing assessment(s)'.format(len(rows)))
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
 
 
@@ -164,7 +209,7 @@ def marking_edit():
         db.session.commit()
         flash('Marking for Writing updated.')
         return redirect(url_for('writing.manage'))
-    return redirect(url_for('writing.manage', error="Testlet New - Form validation Error"))
+    return redirect(url_for('writing.manage', error="Marking Edit - Form validation Error"))
 
 
 

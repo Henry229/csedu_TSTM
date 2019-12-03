@@ -1,9 +1,10 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, HiddenField, StringField, FileField, TextAreaField, FieldList, FormField
+from wtforms import SelectField, SubmitField, HiddenField, StringField, FileField, \
+                    TextAreaField, FieldList, FormField, SelectMultipleField
 from wtforms.validators import DataRequired
 from .. import db
-from ..models import Choices, EducationPlan, Codebook
+from ..models import Choices, EducationPlan, Codebook, User, Role
 import re
 
 class StartOnlineTestForm(FlaskForm):
@@ -77,3 +78,15 @@ class WritingMarkingForm(FlaskForm):
     markings = FieldList(FormField(WritingMMForm))  # marking mapping
     submit = SubmitField('Save')
 
+
+class MarkerAssignForm(FlaskForm):
+    assessment_id = HiddenField('Id', default='')
+    markers = SelectMultipleField('To', id='marker_ids', coerce=int)
+    submit = SubmitField('Assign')
+
+    def __init__(self, *args, **kwargs):
+        super(MarkerAssignForm, self).__init__(*args, **kwargs)
+        role = Role.query.filter_by(name='Writing_marker').first()
+        self.markers.choices = [(u.id, u.username)
+            for u in
+                db.session.query(User.id, User.username).filter(User.role==role).distinct().order_by(User.username).all()]

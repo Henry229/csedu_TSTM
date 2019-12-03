@@ -1,9 +1,18 @@
 $(document).ready(function () {
     $("#w_table").hide();
 
+    $('a[name="modalButtonAssign"]').click(function () {
+        var url = $(this).attr("href");
+        $.get(url, function (data) {
+            $('#dataModalMedium .modal-content').html(data);
+        });
+        $('#dataModalMedium .modal-content').html("Loading... Try again if data not shown");
+    });
+
     $("#dataModalSub").on("hidden.bs.modal", function () {
         $("#w_table").show();
     });
+
 });
 
 /**

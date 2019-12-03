@@ -134,7 +134,7 @@
                     </li>
                 {% endif %}
                 <li class="nav-title">Writing</li>
-                {% if current_user.can(Permission.ITEM_EXEC) %}
+                {% if current_user.can(Permission.ASSESSMENT_MANAGE) or current_user.can(Permission.ASSESSMENT_READ) %}
                     <li class="nav-item">
                         <a class="nav-link" href="/writing/writing_ui">
                             <i class="icons cui-monitor nav-icon"></i> Testing UI </a>

@@ -45,7 +45,12 @@
                             <th>Test Type</th>
                             <th>Test Name</th>
                             <th>Test Center</th>
-                            <th>Student ID</th>
+                            {% if current_user.can(Permission.ASSESSMENT_MANAGE) %}
+                                <th>Marker Assign</th>
+                            {% endif %}
+                            {% if current_user.can(Permission.ASSESSMENT_READ) and current_user.can(Permission.ITEM_EXEC) %}
+                                <th>Student ID</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -58,16 +63,24 @@
                                     id="{{ w.test_type }}"> {{ Codebook.get_code_name(w.test_type) }}</td>
                                 <td class="a_name" id="{{ w.name }}"> {{ w.name }}</td>
                                 <td class="a_test_center" id="{{ w.test_center }}"> {{ Codebook.get_code_name(w.test_center) }}</td>
-                                <td>
-                                    <select id="select_student">
-                                    {% for student in w.students %}
-                                        <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
-                                    {% endfor %}
-                                    </select>
-                                    <span class="badge badge-warning" href="" name="search_item" id="search_item"
-                                                                       onclick="searchWritings('{{ w.assessment_guid }}')"> Search Writings </span>
-
-                                </td>
+                                {% if current_user.can(Permission.ADMIN) %}
+                                    <td>
+                                        <a name="modalButtonAssign"
+                                        href="{{ url_for('writing.assign', assessment_guid=w.assessment_guid) }}" data-toggle="modal"
+                                        data-target="#dataModalMedium"> <i class="icons cui-user-follow"></i> </a>
+                                    </td>
+                                {% endif %}
+                                {% if current_user.can(Permission.ASSESSMENT_READ) and current_user.can(Permission.ITEM_EXEC) %}
+                                    <td>
+                                        <select id="select_student">
+                                        {% for student in w.students %}
+                                            <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                        {% endfor %}
+                                        </select>
+                                        <span class="badge badge-warning" href="" name="search_item" id="search_item"
+                                                                           onclick="searchWritings('{{ w.assessment_guid }}')"> Search Writings </span>
+                                    </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         {% else %}
