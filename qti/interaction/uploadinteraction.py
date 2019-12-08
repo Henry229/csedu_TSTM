@@ -17,7 +17,7 @@ class UploadInteraction(BlockInteraction):
         return variables
 
     def to_html(self, interaction=None):
-        template = 'interactions/extendedtextinteraction.html'
+        template = 'interactions/uploadinteraction.html'
         variables = self.get_template_html_variables()
         html_rendered = self.render_item_html_template(template, variables)
         return html_rendered
