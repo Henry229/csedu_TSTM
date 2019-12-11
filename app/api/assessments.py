@@ -379,7 +379,10 @@ def response_process(item_id):
         return bad_request(message="Processing response error")
 
     marking = Marking.query.filter_by(id=marking_id).first()
-    candidate_response = parse_processed_response(processed.get('RESPONSE'))
+    if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get('file'):
+        candidate_response = response.get("RESPONSE").get("base")
+    else:
+        candidate_response = parse_processed_response(processed.get('RESPONSE'))
     marking.candidate_r_value = candidate_response
     marking.candidate_mark = processed.get('SCORE')
     marking.outcome_score = processed.get('maxScore')

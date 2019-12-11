@@ -724,6 +724,59 @@ var ItemHandlers = (function () {
             return response;
         };
     };
+
+    var uploadInteraction = function (options) {
+        if (this === window) return new uploadInteraction(options);
+        this._$container = options.container;
+        this.cardinality = options.data.cardinality;
+        this.fileData = "";
+        this.fileName = "";
+        this.fileType = "";
+
+        this.readFile = function(file) {
+            var self = this;
+            var reader  = new FileReader();
+
+            reader.addEventListener("load", function () {
+                self.fileData = reader.result.split(';base64,')[1];
+            }, false);
+
+            if (file) {
+                self.fileName = file.files[0].name;
+                self.fileType = file.files[0].type;
+                reader.readAsDataURL(file.files[0]);
+            }
+        };
+
+        this.processUI = function (answer) {
+            var self = this;
+            $('.qti-uploadInteraction input[type=file]').on("change", function () {
+                self.readFile(this);
+            });
+            this.setSavedAnswer(answer);
+        };
+
+        this.setSavedAnswer = function (answer) {
+            if (typeof answer === 'string')
+                answer = [answer];
+        };
+
+        this.getResponse = function () {
+            var $interaction = $('.qti-uploadInteraction');
+            var response = {};
+            var base = {};
+            var identifier = $interaction.data('identifier');
+            var baseType = $interaction.data('base-type');
+            var $file = $('.file-upload input');
+            base[baseType] = {
+                "data": this.fileData,
+                "mime": this.fileName,
+                "name": this.fileType
+            };
+            response[identifier] = {'base': base};
+            return response;
+        };
+    };
     var handlers = {
         'choiceInteraction': choiceInteractionHandler,
         'orderInteraction': orderInteractionHandler,
@@ -736,7 +789,8 @@ var ItemHandlers = (function () {
         'extendedTextInteraction': extendedTextInteraction,
         'hottextInteraction': hottextInteraction,
         'mediaInteraction': mediaInteraction,
-        'gapMatchInteraction': gapMatchInteraction
+        'gapMatchInteraction': gapMatchInteraction,
+        'uploadInteraction': uploadInteraction
     };
     var getInteractionHandler = function (interaction_type) {
         console.log(interaction_type);
