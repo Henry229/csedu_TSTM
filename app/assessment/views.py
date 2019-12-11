@@ -388,6 +388,9 @@ def register_to_csonlineschool(assessment):
     :return: True on success
     """
 
+    if Config.CS_API_DISABLE:
+        return
+
     test_detail = []
     grade_table = {"K": "0",
                    "Y1": "1",
@@ -408,30 +411,31 @@ def register_to_csonlineschool(assessment):
     plan = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
 
     items = AssessmentHasTestset.query.filter_by(assessment_id=assessment.id).all()
-    for item in items:
-        grade = grade_table[Codebook.get_code_name(item.testset.grade)]
-        test_detail.append(
-            {
-                "test_kind": "objective",
-                "test_no": Codebook.get_code_name(plan.order) if plan else None,
-                "title": item.testset.name,
-                "subject": Codebook.get_code_name(item.testset.subject),
-                "myear": assessment.year,
-                "grade": grade,
-                "qn_total": 0,
-                "test_time": item.testset.test_duration,
-                "title_a": item.testset.GUID
-            })
+    if len(items) > 0:
+        for item in items:
+            grade = grade_table[Codebook.get_code_name(item.testset.grade)]
+            test_detail.append(
+                {
+                    "test_kind": "objective",
+                    "test_no": Codebook.get_code_name(plan.order) if plan else None,
+                    "title": item.testset.name,
+                    "subject": Codebook.get_code_name(item.testset.subject),
+                    "myear": assessment.year,
+                    "grade": grade,
+                    "qn_total": 0,
+                    "test_time": item.testset.test_duration,
+                    "title_a": item.testset.GUID
+                })
 
-    test_type = [{
-        "kind": "tstm",
-        "testtype": Codebook.get_code_name(assessment.test_type),
-        "title": assessment.name,
-        "grade": grade,
-        "myear": assessment.year,
-        "title_a": assessment.GUID,
-        "details": test_detail
-    }]
+        test_type = [{
+            "kind": "tstm",
+            "testtype": Codebook.get_code_name(assessment.test_type),
+            "title": assessment.name,
+            "grade": grade,
+            "myear": assessment.year,
+            "title_a": assessment.GUID,
+            "details": test_detail
+        }]
 
-    info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
-    return info.ok
+        info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
+        return info.ok

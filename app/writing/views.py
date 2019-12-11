@@ -153,7 +153,7 @@ def marking(marking_writing_id, student_id):
         form.markers_comment.data = marking_writing.markers_comment
     else:
         populate_criteria_form(form)  # SubForm creation
-    return render_template('writing/marking.html', form=form, web_img_link=web_img_link, web_markers_img_link=web_markers_img_link)
+    return render_template('writing/marking_onscreen.html', form=form, web_img_link=web_img_link, web_markers_img_link=web_markers_img_link)
 
 
 def populate_criteria_form(form, criteria_detail=None):
@@ -313,6 +313,9 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
     :param student_id:
     :return: filename saved to current_app.config['WRITING_UPLOAD_FOLDER']
     """
+    if not os.path.exists(current_app.config['WRITING_UPLOAD_FOLDER']):
+        os.makedirs(current_app.config['WRITING_UPLOAD_FOLDER'])
+
     my_files = request.files.getlist(filefield_name)
     file_name = ''
     if len(my_files[0].filename) > 0:

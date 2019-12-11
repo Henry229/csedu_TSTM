@@ -76,6 +76,7 @@ class Config(metaclass=MetaFlaskEnv):
     CS_API_URL = os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool'
     CS_API_USER = os.environ.get('CS_API_USER')
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
+    CS_API_DISABLE = True if os.environ.get('CS_API_DISABLE') else False
 
 
 class DevelopmentConfig(Config):
