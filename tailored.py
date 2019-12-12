@@ -103,18 +103,20 @@ def test(coverage, test_names):
 
 @app.cli.command()
 def deploy():
-    # print('Inserting roles into Roles table')
-    # Role.insert_roles()
+    print('Inserting roles into Roles table')
+    Role.insert_roles()
 
     username = "admin@cseducation.com.au"
     password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
-    with open('admin.txt', 'w') as f:
-        f.write('username: %s\npassword: %s' % (username, password))
-    print('Create default admin user: <email:%s> <password saved in admin.txt>' % username)
-    User.create_default_admin(username, password)
+    with open('passwords.txt', 'w') as f:
+        f.write('username: %s\npassword: %s\n\n' % (username, password))
+        print('Create default admin user: <email:%s>' % username)
+        User.create_default_admin(username, password)
 
-    print('Create default users(except Administrator):<password:{}>'.format("welcome"))
-    User.create_default_user("welcome")
+        print('Create default non admin users')
+        for u, p in User.create_default_users():
+            f.write('username: %s\npassword: %s\n\n' % (u, p))
+        print('User passwords saved in passwords.txt')
     # User.reset_password(token,reset_password) : need generated-token, new password
 
     print('Create default category: <subject> <categories:...> ')
@@ -158,7 +160,7 @@ def deploy():
     Codebook.create_default_codeset(None, "test_center", "CS Online School", "Norwest", "Castle Hill", "All")
 
     # Create DB views
-    # create_views()
+    create_views()
 
 
 def create_views():

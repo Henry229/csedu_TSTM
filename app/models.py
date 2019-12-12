@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import datetime
 from time import time
 
@@ -131,24 +133,30 @@ class User(UserMixin, db.Model):
             # if you want to set Random Password, please use as following:
             # password = ''.join(random.SystemRandom().choice(string.ascii_uppercase+string.digits) for _ in rnage(16)
             admin_user.password = password
+            db.session.add(admin_user)
             db.session.commit()
         else:
             print("Cannot create default admin user: user already existing.")
 
     @staticmethod
-    def create_default_user(password):
+    def create_default_users():
         roles = Role.query.all()
+        created_users = []
         for role in roles:
+            password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
             if role.name == 'Administrator':
                 continue
             if not User.query.filter_by(username=role.name).first():
                 t_email = role.name + '@csedu.com'
                 user = User(username=role.name, email=t_email, confirmed=True, active=True, role=role)
                 user.password = password
-                db.session.commit()
+                db.session.add(user)
+                created_users.append((user.email, password))
                 print("{} User created: with {} role ".format(user.username, user.role.name))
             else:
                 print("Cannot create default admin user: user already existing.")
+        db.session.commit()
+        return created_users
 
     def ping(self):
         self.last_seen = datetime.now(pytz.utc)
@@ -201,7 +209,7 @@ class Role(db.Model):
             for perm in p:
                 role.add_permission(perm)
             role.default = (role.name == default_role)
-            db.session.commit()
+        db.session.commit()
 
     def add_permission(self, perm):
         if not self.has_permission(perm):

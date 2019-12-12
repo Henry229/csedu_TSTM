@@ -24,7 +24,7 @@ $ sudo apt install gcc make perl
 2. Proceed install by following on screen instructions
 ### Python venv
 ```
-$ sudo apt-get -y install python3-venv python3-dev python3-wheel
+$ sudo apt-get -y install python3-venv python3-dev python3-wheel python3-distutils python3-pip
 ```
 ### Git
 ```
@@ -71,9 +71,9 @@ Type "help" for help.
 
 postgres=# create database tailored;
 CREATE DATABASE
-postgres=# create user dbuser with encrypted password 'P@ssword1';
+postgres=# create user tailored with encrypted password 'P@ssword1';
 CREATE ROLE
-postgres=# grant all privileges on database tailored to dbuser;
+postgres=# grant all privileges on database tailored to tailored;
 GRANT
 postgres=# \c tailored
 postgres=# CREATE EXTENSION IF NOT EXISTS tablefunc;
@@ -95,7 +95,7 @@ postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
 # Application
 #### Clone the repo
 ```
-$ git clone https://flashcharity_org@bitbucket.org/flashcharity_org/csedu.git
+$ git clone https://flashcharity_org@bitbucket.org/csedutailored/tailored.git
 ```
 #### Create Python venv
 ```
@@ -106,14 +106,13 @@ $ cd csedu
 ```
 #### Run the app
 ```
-(venv) ~/csedu$ export FLASK_APP=csedu.py
-(venv) ~/csedu$ export DEV_DATABASE_URL=postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
+(venv) ~/csedu$ export FLASK_APP=tailored.py
+(venv) ~/csedu$ export SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://tailored:P@ssword1@localhost/tailored
 
 (venv) ~/csedu$ flask db init
 (venv) ~/csedu$ flask db migrate
 (venv) ~/csedu$ flask db upgrade
 (venv) ~/csedu$ flask deploy
-(venv) ~/csedu$ flask testdata (Only when want to have sample test data)
 
 (venv) ~/csedu$ export TEMP=/tmp
 
