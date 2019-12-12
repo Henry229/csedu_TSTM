@@ -131,6 +131,7 @@ class User(UserMixin, db.Model):
             # if you want to set Random Password, please use as following:
             # password = ''.join(random.SystemRandom().choice(string.ascii_uppercase+string.digits) for _ in rnage(16)
             admin_user.password = password
+            db.session.add(admin_user)
             db.session.commit()
         else:
             print("Cannot create default admin user: user already existing.")
@@ -145,6 +146,7 @@ class User(UserMixin, db.Model):
                 t_email = role.name + '@csedu.com'
                 user = User(username=role.name, email=t_email, confirmed=True, role=role)
                 user.password = password
+                db.session.add(user)
                 db.session.commit()
                 print("{} User created: with {} role ".format(user.username, user.role.name))
             else:
