@@ -71,9 +71,9 @@ Type "help" for help.
 
 postgres=# create database tailored;
 CREATE DATABASE
-postgres=# create user dbuser with encrypted password 'P@ssword1';
+postgres=# create user tailored with encrypted password 'P@ssword1';
 CREATE ROLE
-postgres=# grant all privileges on database tailored to dbuser;
+postgres=# grant all privileges on database tailored to tailored;
 GRANT
 postgres=# \c tailored
 postgres=# CREATE EXTENSION IF NOT EXISTS tablefunc;
@@ -107,7 +107,7 @@ $ cd csedu
 #### Run the app
 ```
 (venv) ~/csedu$ export FLASK_APP=tailored.py
-(venv) ~/csedu$ export DEV_DATABASE_URL=postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
+(venv) ~/csedu$ export SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://tailored:P@ssword1@localhost/tailored
 
 (venv) ~/csedu$ flask db init
 (venv) ~/csedu$ flask db migrate
