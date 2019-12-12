@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import datetime
 from time import time
 
@@ -137,9 +139,11 @@ class User(UserMixin, db.Model):
             print("Cannot create default admin user: user already existing.")
 
     @staticmethod
-    def create_default_user(password):
+    def create_default_users():
         roles = Role.query.all()
+        created_users = []
         for role in roles:
+            password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
             if role.name == 'Administrator':
                 continue
             if not User.query.filter_by(username=role.name).first():
@@ -147,10 +151,12 @@ class User(UserMixin, db.Model):
                 user = User(username=role.name, email=t_email, confirmed=True, role=role)
                 user.password = password
                 db.session.add(user)
-                db.session.commit()
+                created_users.append((user.email, password))
                 print("{} User created: with {} role ".format(user.username, user.role.name))
             else:
                 print("Cannot create default admin user: user already existing.")
+        db.session.commit()
+        return created_users
 
     def ping(self):
         self.last_seen = datetime.now(pytz.utc)
