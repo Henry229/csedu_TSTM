@@ -95,7 +95,7 @@ postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
 # Application
 #### Clone the repo
 ```
-$ git clone https://flashcharity_org@bitbucket.org/flashcharity_org/csedu.git
+$ git clone https://flashcharity_org@bitbucket.org/csedutailored/tailored.git
 ```
 #### Create Python venv
 ```
