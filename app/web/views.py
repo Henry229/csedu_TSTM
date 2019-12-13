@@ -179,11 +179,12 @@ def process_inward():
             return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
         else:
             guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
-            if len(guid_list):
-                return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
-            else:
-                return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
-    return forbidden('Insufficient permissions')
+            if guid_list:
+                if len(guid_list):
+                    return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
+                else:
+                    return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
+    return forbidden('Insufficient permissions or no available test')
 
 
 @web.route('/tests/testsets', methods=['GET'])
