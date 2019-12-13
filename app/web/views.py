@@ -178,8 +178,8 @@ def process_inward():
         if assessment_guid:
             return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
         else:
-            guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
-            if guid_list:
+            if member['sales']:
+                guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
                 if len(guid_list):
                     return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
                 else:
