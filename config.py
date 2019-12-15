@@ -71,6 +71,9 @@ class Config(metaclass=MetaFlaskEnv):
         cache_dir = app.config['CACHE_DIR']
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
+        writing_upload_dir = app.config['WRITING_UPLOAD_FOLDER']
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
 
     # CS_API
     CS_API_URL = os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool'

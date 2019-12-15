@@ -732,19 +732,23 @@ var ItemHandlers = (function () {
         this.fileData = "";
         this.fileName = "";
         this.fileType = "";
+        this.formData = null;
 
         this.readFile = function(file) {
             var self = this;
-            var reader  = new FileReader();
+            // var reader  = new FileReader();
 
-            reader.addEventListener("load", function () {
-                self.fileData = reader.result.split(';base64,')[1];
-            }, false);
+            // reader.addEventListener("load", function () {
+            //     self.fileData = reader.result.split(';base64,')[1];
+            // }, false);
 
             if (file) {
                 self.fileName = file.files[0].name;
                 self.fileType = file.files[0].type;
-                reader.readAsDataURL(file.files[0]);
+                self.formData = {
+                    'file': file.files[0]
+                };
+                // reader.readAsDataURL(file.files[0]);
             }
         };
 
@@ -767,13 +771,15 @@ var ItemHandlers = (function () {
             var base = {};
             var identifier = $interaction.data('identifier');
             var baseType = $interaction.data('base-type');
-            var $file = $('.file-upload input');
+            //var $file = $('.file-upload input');
             base[baseType] = {
-                "data": this.fileData,
-                "mime": this.fileName,
-                "name": this.fileType
+                //"data": this.fileData,
+                "data": "",
+                "mime": this.fileType,
+                "name": this.fileName
             };
             response[identifier] = {'base': base};
+            response['formData'] = this.formData;
             return response;
         };
     };

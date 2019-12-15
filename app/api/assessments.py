@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 from datetime import datetime
+import random
+import string
 from time import time
 
 import pytz
@@ -9,12 +11,13 @@ from flask import jsonify, request, current_app, render_template
 from flask_login import current_user
 from sqlalchemy import desc
 from sqlalchemy.orm import load_only
+from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater, Student
+    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request
 from .. import db
@@ -436,6 +439,51 @@ def response_process(item_id):
         'start_time': assessment_session.get_value('start_time'),
     })
     return success(data)
+
+
+@api.route('/responses/file/<int:item_id>', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def response_process_file(item_id):
+    session_key = request.form.get('session')
+    marking_id = request.form.get('marking_id')
+    writing_file = request.files.get('file')
+
+    if allowed_file(writing_file.filename) is False:
+        return bad_request(message='File type is not supported.')
+
+    assessment_session = AssessmentSession(key=session_key)
+    # check session status
+    if assessment_session.get_status() == AssessmentSession.STATUS_READY:
+        return bad_request(message='Session status is wrong.')
+
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
+
+    # 1. Save the file to the path at config['WRITING_UPLOAD_FOLDER']
+    random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+    file_name = str(student_id) + '_' + random_name + '_' + secure_filename(writing_file.filename)
+    item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
+    writing_file.save(item_file)
+
+    # 2. Create a record in MarkingForWriting
+    marking_writing = MarkingForWriting(candidate_file_link=file_name,
+                                        marking_id=marking_id)
+    db.session.add(marking_writing)
+    db.session.commit()
+
+    return success({"result": "success"})
+
+
+def allowed_file(filename):
+    """
+    Call from writing.saveWritingFile to check file extension allowed
+    :param filename:
+    :return:
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']
 
 
 def parse_correct_response(correct_response):
