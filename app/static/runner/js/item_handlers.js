@@ -515,6 +515,7 @@ var ItemHandlers = (function () {
         if (this === window) return new extendedTextInteraction(options);
         this._$container = options.container;
         this.cardinality = options.data.cardinality;
+        this.writing_text = null;
         this.processUI = function (answer) {
             this.setSavedAnswer(answer);
         };
@@ -538,6 +539,9 @@ var ItemHandlers = (function () {
                 var baseType = $interaction.data('base-type');
                 results.push($interaction.find('textarea').val());
                 response[identifier] = {'base': base};
+                // Set writing_text to save as a file in the server.
+                // Only single text file is accepted now.
+                this.writing_text = $interaction.find('textarea').val();
             }
             if (this.cardinality === 'multiple') {
                 base[baseType] = results;
@@ -546,6 +550,9 @@ var ItemHandlers = (function () {
                 base[baseType] = results[0];
                 response[identifier] = {'base': base};
             }
+
+            if (this.writing_text !== null)
+                response['writing_text'] = this.writing_text;
             return response;
         };
     };

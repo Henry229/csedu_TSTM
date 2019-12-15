@@ -146,11 +146,14 @@ var ItemRunner = (function () {
         var url = '/api/responses/' + _item_id;
         var data = {
             'session': _session,
-            // 'item_id': _item_id,
             'question_no': _question_no,
-            'marking_id': _marking_id,
-            'response': response
+            'marking_id': _marking_id
         };
+        if (response.writing_text) {
+            data['writing_text'] = response.writing_text;
+            delete response.writing_text;
+        }
+        data['response'] = response;
         $.ajax({
             url: url,
             type: 'POST',
