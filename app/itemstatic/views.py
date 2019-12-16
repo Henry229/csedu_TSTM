@@ -14,6 +14,8 @@ def item_img(resource_id, path):
     file_dir = os.path.join(current_app.config['STORAGE_DIR'], resource_id)
     file_dir = os.path.join(file_dir, 'itemContent/en-US')
     file_path = os.path.join(file_dir, path)
+    if not os.path.exists(file_path):
+        file_path = os.path.join(file_dir, 'items', resource_id, path)
     file_name = file_path.rsplit('/', 1)[1]
     content_type = mimetypes.guess_type(file_name)[0]
     with open(file_path, 'rb') as bites:

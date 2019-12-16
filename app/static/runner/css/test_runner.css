@@ -883,7 +883,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     z-index: 9;
     margin-top: 30%;
     margin-left: 30%;
-    width: 55%;
+    width: 50%;
     background: rgba(255, 255, 255, .1);
 }
 
