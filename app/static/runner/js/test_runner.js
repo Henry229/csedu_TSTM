@@ -86,6 +86,9 @@ var TestRunner = (function () {
         $('#finishModal .finish-test').on('click', function () {
             _finishTest();
         });
+        document.addEventListener("contextmenu", function(e){
+            e.preventDefault();
+        }, false);
     };
     var _setDurationTimer = function () {
         var seconds_past = moment().unix() - _start_time;
