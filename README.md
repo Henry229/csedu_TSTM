@@ -22,9 +22,9 @@ $ sudo apt install gcc make perl
 ### Install Guest Addition Tools
 1. Use Devices >  Insert Guest Additions CD Image...
 2. Proceed install by following on screen instructions
-### Python venv
+### Install packages
 ```
-$ sudo apt-get -y install python3-venv python3-dev python3-wheel python3-distutils python3-pip
+$ sudo apt-get -y install python3-venv python3-dev python3-wheel python3-distutils python3-pip php php7.2-dom
 ```
 ### Git
 ```
