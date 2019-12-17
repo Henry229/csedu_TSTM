@@ -3,11 +3,6 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="/static/csedu_style.css">
-    <link href="/static/ui/vendors/literallycanvas-0.4.14/css/literallycanvas.css" rel="stylesheet">
-    <!-- dependency: React.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-with-addons.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
-    <script src="/static/ui/vendors/literallycanvas-0.4.14/js/literallycanvas.js"></script>
 {% endblock %}
 {% block app_content %}
     <form action="{{ url_for('writing.marking_edit') }}" id="marking_form" method="POST" class="form" role="form">
@@ -52,6 +47,7 @@
         <button class="marking_button btn btn-primary btn-sm" onclick="colorChange(this)">Blue</button>
         <button class="marking_button btn btn-success btn-sm" onclick="colorChange(this)">Green</button>
         <button class="marking_button btn btn-warning btn-sm" onclick="colorChange(this)">Yellow</button>
+        <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
 
         <div id="canvases" style="position: relative;">
             <canvas id="writing"
@@ -72,7 +68,6 @@
     {{ super() }}
     <script src="/static/common/js/csedu_common.js"></script>
     <script src="/static/writing/js/manage.js"></script>
-    <script src="/static/writing/js/responsive-sketchpad.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             writing_layer = document.getElementById("writing");
@@ -121,22 +116,22 @@
 
         var el = document.getElementById('marking');
         var ctx = el.getContext('2d');
-        var penColor = "red";
-
-        ctx.lineWidth = 20;
-        ctx.lineJoin = ctx.lineCap = 'round';
+        var penColor = "rgba(255, 0, 0, 0.8)";
+        var penWidth = 2;
 
         var isDrawing, points = [];
 
         el.onmousedown = function (e) {
             isDrawing = true;
-            points.push({x: e.clientX, y: e.clientY});
+            var d = marking_layer.getBoundingClientRect();
+            points.push({x: e.clientX - d.left, y: e.clientY - d.top});
         };
 
         el.onmousemove = function (e) {
             if (!isDrawing) return;
 
-            points.push({x: e.clientX, y: e.clientY});
+            var d = marking_layer.getBoundingClientRect();
+            points.push({x: e.clientX - d.left, y: e.clientY - d.top});
 
             {#ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);#}
 
@@ -159,6 +154,7 @@
             // the bezier control point
             ctx.lineTo(p1.x, p1.y);
             ctx.strokeStyle = penColor;
+            ctx.lineWidth = penWidth;
             ctx.stroke();
         };
 
@@ -172,7 +168,16 @@
         }
 
         function colorChange(button) {
-            penColor = button.innerHTML;
+            color = button.innerHTML;
+            if(color === "Eraser") {
+                ctx.globalCompositeOperation = 'destination-out';
+                penColor = "rgba(255, 255, 255, 1)";
+                penWidth = 40;
+            } else {
+                penColor = button.innerHTML;
+                ctx.globalCompositeOperation = 'source-over';
+                penWidth = 2;
+            }
         }
 
     </script>
