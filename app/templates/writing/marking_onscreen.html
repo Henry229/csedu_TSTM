@@ -48,6 +48,7 @@
         <button class="marking_button btn btn-success btn-sm" onclick="colorChange(this)">Green</button>
         <button class="marking_button btn btn-warning btn-sm" onclick="colorChange(this)">Yellow</button>
         <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
+        <i id="pen-icon" class="fas fa-pen float-right" style="font-size: 25px"></i>
 
         <div id="canvases" style="position: relative;">
             <canvas id="writing"
@@ -118,6 +119,7 @@
         var ctx = el.getContext('2d');
         var penColor = "rgba(255, 0, 0, 0.8)";
         var penWidth = 2;
+        $("#pen-icon").css('color', penColor);
 
         var isDrawing, points = [];
 
@@ -173,11 +175,14 @@
                 ctx.globalCompositeOperation = 'destination-out';
                 penColor = "rgba(255, 255, 255, 1)";
                 penWidth = 40;
+                $("#pen-icon").removeClass("fa-pen").addClass("fa-eraser");
             } else {
                 penColor = button.innerHTML;
                 ctx.globalCompositeOperation = 'source-over';
                 penWidth = 2;
+                $("#pen-icon").removeClass("fa-eraser").addClass("fa-pen");
             }
+            $("#pen-icon").css('color', penColor);
         }
 
     </script>
