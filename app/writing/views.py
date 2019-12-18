@@ -153,7 +153,7 @@ def marking(marking_writing_id, student_id):
         form.markers_comment.data = marking_writing.markers_comment
     else:
         populate_criteria_form(form)  # SubForm creation
-    return render_template('writing/marking_onscreen.html', form=form, web_img_link=web_img_link, web_markers_img_link=web_markers_img_link)
+    return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_link=web_img_link, web_markers_img_link=web_markers_img_link)
 
 
 def populate_criteria_form(form, criteria_detail=None):
