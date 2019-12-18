@@ -87,7 +87,7 @@
                                                                                    min="1"
                                                                                    value="1"></i>
                 <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
-                <button class="marking_button btn btn-warning btn-sm highligther">
+                <button class="marking_button btn btn-flickr btn-sm highligther">
                     <i id="highlighter-icon" class="fas fa-highlighter"></i>
                     <span style="color: white">Highlighter</span>
                 </button>
@@ -142,6 +142,7 @@
         var penWidth;
         var eraserMode;
         var eraserWidth;
+        var highlighterMode;
         var alpha_pen;
         var color_pen;
         var alpha_highliter;
@@ -154,8 +155,9 @@
             alpha_highliter = 0.02;
             penColor = "rgba(246,72,70, " + alpha_pen + ")";
             penWidth = 1;
-            eraserWidth = 40;
+            eraserWidth = 30;
             eraserMode = false;
+            highlighterMode = false;
             marking_ctx.globalCompositeOperation = 'source-over';
             $("#pen-icon").css('color', penColor);
             $("#pen-icon").removeClass("fa-eraser").addClass("fa-pen");
@@ -179,17 +181,28 @@
         };
 
         marking_layer.onmousemove = function (e) {
-            var cursorWidth = penWidth;
+            var lineWidth = penWidth;
+            var cursorColor = color_pen;
             var d = marking_layer.getBoundingClientRect();
             var mouse_x = e.clientX - d.left;
             var mouse_y = e.clientY - d.top;
 
-            if (eraserMode)
-                cursorWidth = eraserWidth;
+            if (eraserMode) {
+                lineWidth = eraserWidth;
+                cursorColor = "#708090";
+            }
+
+            if (highlighterMode) {
+                cursorColor = "rgba(255, 0, 132)";
+                lineWidth = 10;
+            }
+
+            cursor_ctx.strokeStyle = cursorColor;
+
             cursor_ctx.clearRect(0, 0, marking_layer.width, marking_layer.height);
-            cursor_ctx.strokeStyle = penColor;
+
             cursor_ctx.beginPath();
-            cursor_ctx.arc(mouse_x, mouse_y, cursorWidth, 0, 2 * Math.PI);
+            cursor_ctx.arc(mouse_x, mouse_y, lineWidth, 0, 2 * Math.PI);
             cursor_ctx.stroke();
 
             if (!isDrawing) return;
@@ -211,13 +224,13 @@
                 for (var i = 0; i < dist; i += 1) {
                     x = lastPoint.x + (Math.sin(angle) * i);
                     y = lastPoint.y + (Math.cos(angle) * i);
-                    var radgrad = marking_ctx.createRadialGradient(x, y, penWidth / 2, x, y, penWidth * 2);
+                    var radgrad = marking_ctx.createRadialGradient(x, y, lineWidth / 2, x, y, lineWidth * 2);
 
                     radgrad.addColorStop(0, penColor);
                     radgrad.addColorStop(0.5, penColor);
                     radgrad.addColorStop(1, penColor);
                     marking_ctx.fillStyle = radgrad;
-                    marking_ctx.fillRect(x - penWidth, y - penWidth, penWidth * 2, penWidth * 2);
+                    marking_ctx.fillRect(x - lineWidth, y - lineWidth, lineWidth * 2, lineWidth * 2);
                 }
             }
             lastPoint = currentPoint;
@@ -238,6 +251,7 @@
         function colorChange(button) {
             $("#pen-icon").attr("disabled", false);
             $(".slider").attr("disabled", false);
+            highlighterMode = false;
             if (button.innerHTML === "Eraser") {
                 eraserMode = true;
                 penColor = "grey";
@@ -294,9 +308,9 @@
         $("#pen_width").change(changeWidth);
 
         var highlighter = function () {
+            highlighterMode = true;
             eraserMode = false;
-            penColor = "rgba(255, 193, 7, " + alpha_highliter + ")";
-            penWidth = 10;
+            penColor = "rgba(255, 0, 132, " + alpha_highliter + ")";
             $("#pen-icon").css('color', "lightgrey");
             $(".slider").css('background', "lightgrey");
             $("#pen-icon").attr("disabled", true);
