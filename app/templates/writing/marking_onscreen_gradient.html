@@ -78,12 +78,14 @@
     <div class="card-body">
         <hr>
         <div id="marking_tools">
-            <button id="marking_save" class="btn btn-primary btn-sm"><i class="fas fa-save ml-1 mr-1"> Save Marking</i>
+            <button id="marking_save" class="btn btn-primary btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
+                    style="font-weight: bold">Save Marking</span>
             </button>
             <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
                     class="fas fa-caret-square-left ml-1 mr-1"></i></button>
             <button id="marking_next" class="btn btn-outline-info btn-sm"><i
                     class="fas fa-caret-square-right ml-1 mr-1"></i></button>
+            <span id="pageCount" class="badge badge-pill badge-primary"></span>
             <div class="float-right">
                 <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
                 <button class="marking_button btn btn-dark btn-sm" onclick="colorChange(this)">Reset</button>
@@ -331,16 +333,19 @@
 
         function setPageButtons() {
             console.log("CurrentImage: " + imageCurrent + "/" + imageCount);
+            $("#pageCount").html((imageCurrent + 1) + " of " + imageCount);
+            if (imageCurrent === imageCount - 1) {
+                $("#marking_next").attr("disabled", true).removeClass("btn-outline-info").addClass("btn-outline-light");
 
-            if (imageCurrent === imageCount -1)
-                $("#marking_next").attr("disabled", true);
-            else
-                $("#marking_next").attr("disabled", false);
+            } else {
+                $("#marking_next").attr("disabled", false).removeClass("btn-outline-light").addClass("btn-outline-info");
+            }
 
-            if (imageCurrent === 0)
-                $("#marking_prev").attr("disabled", true);
-            else
-                $("#marking_prev").attr("disabled", false);
+            if (imageCurrent === 0) {
+                $("#marking_prev").attr("disabled", true).removeClass("btn-outline-info").addClass("btn-outline-light");
+            } else {
+                $("#marking_prev").attr("disabled", false).removeClass("btn-outline-light").addClass("btn-outline-info");
+            }
         }
 
         $("#marking_prev").click(function () {
