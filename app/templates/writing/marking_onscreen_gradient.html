@@ -78,7 +78,7 @@
     <div class="card-body">
         <hr>
         <div id="marking_tools">
-            <button id="marking_save" class="btn btn-primary btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
+            <button id="marking_save" class="btn btn-warning btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
                     style="font-weight: bold">Save Marking</span>
             </button>
             <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
@@ -310,7 +310,7 @@
             $(".slider").css('background', controlColor);
         }
 
-        $("#pen_width").change(function () {
+        var changeWidth = function () {
             if (eraserMode) {
                 eraserWidth = $("#pen_width").val() * 10;
             } else {
@@ -318,8 +318,9 @@
                 alpha_pen = 1.0 / (penWidth * penWidth / 3.0);
                 applyColor();
             }
-        });
+        }
 
+        $("#pen_width").change(changeWidth);
 
         $(".highligther").click(function () {
             highlighterMode = true;
@@ -332,7 +333,6 @@
         });
 
         function setPageButtons() {
-            console.log("CurrentImage: " + imageCurrent + "/" + imageCount);
             $("#pageCount").html((imageCurrent + 1) + " of " + imageCount);
             if (imageCurrent === imageCount - 1) {
                 $("#marking_next").attr("disabled", true).removeClass("btn-outline-info").addClass("btn-outline-light");
