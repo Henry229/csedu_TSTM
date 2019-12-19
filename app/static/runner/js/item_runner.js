@@ -100,11 +100,20 @@ var ItemRunner = (function () {
         });
     };
 
+    /**
+     * Test runner 에서 Next 를 누를 때 입력한 답을 서버에 전달한다.
+     *  - File upload 가 있는 때는 response.formData 에 데이터가 있다.
+     *    이 경우 우선 processAssessmentFormResponse 로 파일을 업로드 하고, 성공하면 success 에서 processAssessmentResponse 를
+     *    실행한다.
+     */
     var processResponse = function () {
         var response = _handler.getResponse();
         if (response === null) return;
         if (_mode === 'assessment') {
-            processAssessmentResponse(response);
+            if (response.formData)
+                processAssessmentFormResponse(response);
+            else
+                processAssessmentResponse(response);
         } else {
             processPreviewResponse(response);
         }
@@ -137,11 +146,14 @@ var ItemRunner = (function () {
         var url = '/api/responses/' + _item_id;
         var data = {
             'session': _session,
-            // 'item_id': _item_id,
             'question_no': _question_no,
-            'marking_id': _marking_id,
-            'response': response
+            'marking_id': _marking_id
         };
+        if (response.writing_text) {
+            data['writing_text'] = response.writing_text;
+            delete response.writing_text;
+        }
+        data['response'] = response;
         $.ajax({
             url: url,
             type: 'POST',
@@ -160,6 +172,49 @@ var ItemRunner = (function () {
                     if (_responseProcessedCb) {
                         _responseProcessedCb(response.data);
                     }
+                }
+            }
+        });
+    };
+
+    /**
+     * File 을 업로드한다.
+     *  - 두 단계 처리:
+     *      1. processAssessmentFormResponse 로 formData(file 을 포함한)을 우선 처리한다.
+     *      2. 처리가 success 로 나오면 일반적인 데이터를 processAssessmentResponse 보낸다.
+     * @param response
+     */
+    var processAssessmentFormResponse = function (response) {
+        var url = '/api/responses/file/' + _item_id;
+        var formData = new FormData();
+        var data = response.formData;
+		var response_data = response;
+		delete response_data['formData'];
+
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				formData.append(key, data[key]);
+			}
+		}
+		formData.append('session', _session);
+		formData.append('marking_id', _marking_id);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+			contentType: false,
+			processData: false,
+            data: formData,
+            beforeSend: function () {
+
+            },
+            complete: function () {
+
+            },
+            success: function (response) {
+                if (response.result === 'success') {
+                    processAssessmentResponse(response_data);
                 }
             }
         });

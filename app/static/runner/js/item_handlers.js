@@ -515,6 +515,7 @@ var ItemHandlers = (function () {
         if (this === window) return new extendedTextInteraction(options);
         this._$container = options.container;
         this.cardinality = options.data.cardinality;
+        this.writing_text = null;
         this.processUI = function (answer) {
             this.setSavedAnswer(answer);
         };
@@ -538,6 +539,9 @@ var ItemHandlers = (function () {
                 var baseType = $interaction.data('base-type');
                 results.push($interaction.find('textarea').val());
                 response[identifier] = {'base': base};
+                // Set writing_text to save as a file in the server.
+                // Only single text file is accepted now.
+                this.writing_text = $interaction.find('textarea').val();
             }
             if (this.cardinality === 'multiple') {
                 base[baseType] = results;
@@ -546,6 +550,9 @@ var ItemHandlers = (function () {
                 base[baseType] = results[0];
                 response[identifier] = {'base': base};
             }
+
+            if (this.writing_text !== null)
+                response['writing_text'] = this.writing_text;
             return response;
         };
     };
@@ -724,6 +731,65 @@ var ItemHandlers = (function () {
             return response;
         };
     };
+
+    var uploadInteraction = function (options) {
+        if (this === window) return new uploadInteraction(options);
+        this._$container = options.container;
+        this.cardinality = options.data.cardinality;
+        this.fileData = "";
+        this.fileName = "";
+        this.fileType = "";
+        this.formData = null;
+
+        this.readFile = function(file) {
+            var self = this;
+            // var reader  = new FileReader();
+
+            // reader.addEventListener("load", function () {
+            //     self.fileData = reader.result.split(';base64,')[1];
+            // }, false);
+
+            if (file) {
+                self.fileName = file.files[0].name;
+                self.fileType = file.files[0].type;
+                self.formData = {
+                    'file': file.files[0]
+                };
+                // reader.readAsDataURL(file.files[0]);
+            }
+        };
+
+        this.processUI = function (answer) {
+            var self = this;
+            $('.qti-uploadInteraction input[type=file]').on("change", function () {
+                self.readFile(this);
+            });
+            this.setSavedAnswer(answer);
+        };
+
+        this.setSavedAnswer = function (answer) {
+            if (typeof answer === 'string')
+                answer = [answer];
+        };
+
+        this.getResponse = function () {
+            var $interaction = $('.qti-uploadInteraction');
+            var response = {};
+            var base = {};
+            var identifier = $interaction.data('identifier');
+            var baseType = $interaction.data('base-type');
+            //var $file = $('.file-upload input');
+            base[baseType] = {
+                //"data": this.fileData,
+                "data": "",
+                "mime": this.fileType,
+                "name": this.fileName
+            };
+            response[identifier] = {'base': base};
+            response['formData'] = this.formData;
+            return response;
+        };
+    };
     var handlers = {
         'choiceInteraction': choiceInteractionHandler,
         'orderInteraction': orderInteractionHandler,
@@ -736,7 +802,8 @@ var ItemHandlers = (function () {
         'extendedTextInteraction': extendedTextInteraction,
         'hottextInteraction': hottextInteraction,
         'mediaInteraction': mediaInteraction,
-        'gapMatchInteraction': gapMatchInteraction
+        'gapMatchInteraction': gapMatchInteraction,
+        'uploadInteraction': uploadInteraction
     };
     var getInteractionHandler = function (interaction_type) {
         console.log(interaction_type);

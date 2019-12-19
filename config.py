@@ -26,6 +26,9 @@ class Config(metaclass=MetaFlaskEnv):
     UPLOAD_FOLDER = os.environ.get('TEMP') or 'tmp/upload'
     ALLOWED_EXTENSIONS = {'xml', 'xls', 'xlsx', 'zip'}
 
+    WRITING_UPLOAD_FOLDER = os.environ.get('WRITING_UPLOAD_FOLDER') or 'app/static/writing/img'
+    WRITING_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'txt'}
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 
@@ -68,11 +71,15 @@ class Config(metaclass=MetaFlaskEnv):
         cache_dir = app.config['CACHE_DIR']
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
+        writing_upload_dir = app.config['WRITING_UPLOAD_FOLDER']
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
 
     # CS_API
     CS_API_URL = os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool'
     CS_API_USER = os.environ.get('CS_API_USER')
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
+    CS_API_DISABLE = True if os.environ.get('CS_API_DISABLE') else False
 
 
 class DevelopmentConfig(Config):

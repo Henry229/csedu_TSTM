@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 from datetime import datetime
+import random
+import string
 from time import time
 
 import pytz
@@ -9,12 +11,13 @@ from flask import jsonify, request, current_app, render_template
 from flask_login import current_user
 from sqlalchemy import desc
 from sqlalchemy.orm import load_only
+from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater, Student
+    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request
 from .. import db
@@ -356,9 +359,19 @@ def response_process(item_id):
     # check session status
     if assessment_session.get_status() == AssessmentSession.STATUS_READY:
         return bad_request(message='Session status is wrong.')
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+    if qti_item_obj.interaction_type == 'extendedTextInteraction':
+        item_subject = Codebook.get_code_name(qti_item_obj.subject)
+        if item_subject.lower() == 'writing':
+            writing_text = request.json.get('writing_text')
+            save_writing_data(student_id, marking_id, writing_text=writing_text)
+
     processed = None
     # correct_response = ''
     try:
@@ -379,12 +392,16 @@ def response_process(item_id):
         return bad_request(message="Processing response error")
 
     marking = Marking.query.filter_by(id=marking_id).first()
-    candidate_response = parse_processed_response(processed.get('RESPONSE'))
+    if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get('file'):
+        candidate_response = response.get("RESPONSE").get("base")
+    else:
+        candidate_response = parse_processed_response(processed.get('RESPONSE'))
     marking.candidate_r_value = candidate_response
     marking.candidate_mark = processed.get('SCORE')
     marking.outcome_score = processed.get('maxScore')
     marking.is_correct = marking.candidate_mark >= marking.outcome_score
     marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
     db.session.commit()
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
@@ -433,6 +450,59 @@ def response_process(item_id):
         'start_time': assessment_session.get_value('start_time'),
     })
     return success(data)
+
+
+@api.route('/responses/file/<int:item_id>', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def response_process_file(item_id):
+    session_key = request.form.get('session')
+    marking_id = request.form.get('marking_id')
+    writing_file = request.files.get('file')
+
+    if allowed_file(writing_file.filename) is False:
+        return bad_request(message='File type is not supported.')
+
+    assessment_session = AssessmentSession(key=session_key)
+    # check session status
+    if assessment_session.get_status() == AssessmentSession.STATUS_READY:
+        return bad_request(message='Session status is wrong.')
+
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
+    save_writing_data(student_id, marking_id, writing_file=writing_file)
+
+    return success({"result": "success"})
+
+
+def save_writing_data(student_id, marking_id, writing_file=None, writing_text=None):
+    file_name = writing_file.filename if writing_file is not None else 'writing.txt'
+    # 1. Save the file to the path at config['WRITING_UPLOAD_FOLDER']
+    random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+    new_file_name = str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
+    item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], new_file_name)
+    if writing_file is not None:
+        writing_file.save(item_file)
+    else:
+        with open(item_file, "w") as f:
+            f.write(writing_text)
+
+    # 2. Create a record in MarkingForWriting
+    marking_writing = MarkingForWriting(candidate_file_link=new_file_name,
+                                        marking_id=marking_id)
+    db.session.add(marking_writing)
+    db.session.commit()
+
+
+def allowed_file(filename):
+    """
+    Call from writing.saveWritingFile to check file extension allowed
+    :param filename:
+    :return:
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']
 
 
 def parse_correct_response(correct_response):
