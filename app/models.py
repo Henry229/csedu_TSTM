@@ -865,8 +865,8 @@ class MarkingForWriting(db.Model):
     __tablename__ = 'marking_writing'
 
     id = db.Column(db.Integer, primary_key=True)
-    candidate_file_link = db.Column(db.String(256))  # candidate response writing image file
-    marked_file_link = db.Column(db.String(256))    # marker's response image file
+    candidate_file_link = db.Column(JSONB)          # {"file1" :"file1_path", ... "filen" : "filen_path" } candidate response writing image file
+    marked_file_link = db.Column(JSONB)             # {"file1" :"file1_path", ... "filen" : "filen_path" } marker's response image file
     candidate_mark_detail = db.Column(JSONB)        # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
     marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
     markers_comment = db.Column(db.String(2048))

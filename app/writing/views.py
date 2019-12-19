@@ -297,7 +297,8 @@ def insertMarkingForWriting(marking_id,file_name):
     :param file_name:
     :return: true
     """
-    marking_writing = MarkingForWriting(candidate_file_link=file_name,
+    candidate_file_link_json = {"file1":file_name}
+    marking_writing = MarkingForWriting(candidate_file_link=candidate_file_link_json,
                                 marking_id=marking_id)
     db.session.add(marking_writing)
     db.session.commit()
