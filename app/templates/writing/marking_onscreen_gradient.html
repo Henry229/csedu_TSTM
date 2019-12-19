@@ -33,6 +33,10 @@
             background: #FFFFFF;
             cursor: pointer;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 {% endblock %}
 {% block app_content %}
@@ -74,10 +78,14 @@
     <div class="card-body">
         <hr>
         <div id="marking_tools">
-            <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
-            <button id="marking_save" class="btn-sm ml-5"><i class="fas fa-save ml-1 mr-1"> Save Marking</i>
+            <button id="marking_save" class="btn btn-primary btn-sm"><i class="fas fa-save ml-1 mr-1"> Save Marking</i>
             </button>
+            <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
+                    class="fas fa-caret-square-left ml-1 mr-1"></i></button>
+            <button id="marking_next" class="btn btn-outline-info btn-sm"><i
+                    class="fas fa-caret-square-right ml-1 mr-1"></i></button>
             <div class="float-right">
+                <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
                 <button class="marking_button btn btn-dark btn-sm" onclick="colorChange(this)">Reset</button>
                 <button class="marking_button btn btn-danger btn-sm" onclick="colorChange(this)">Red</button>
                 <button class="marking_button btn btn-primary btn-sm" onclick="colorChange(this)">Blue</button>
@@ -93,19 +101,24 @@
                 </button>
             </div>
         </div>
+        <div id="images">
+            {% for key, image in web_img_links.items() %}
+                <img id="{{ key }}" class="hidden student_writing" src="{{ image['writing'] }}">
+                <img id="{{ key }}" class="hidden marking" src="{{ image['marking'] }}">
+            {% endfor %}
+        </div>
         <div id="canvases" style="position: relative;">
             <canvas id="writing"
                     style="z-index: 1; position: absolute; left: 0px; top: 0px;">
                 Student writing
-                <img id="student_writing" src="{{ web_img_link }}">
-            </canvas>
-            <canvas id="marking"
-                    style="z-index: 3; position: absolute; left: 0px; top: 0px;">
-                On screen marking
             </canvas>
             <canvas id="cursor"
                     style="z-index: 2; position: absolute; left: 0px; top: 0px;">
                 Cursor
+            </canvas>
+            <canvas id="marking"
+                    style="z-index: 3; position: absolute; left: 0px; top: 0px;">
+                On screen marking
             </canvas>
         </div>
     </div>
@@ -115,29 +128,12 @@
     <script src="/static/common/js/csedu_common.js"></script>
     <script src="/static/writing/js/manage.js"></script>
     <script type="text/javascript">
-        $(document).ready(function () {
-            writing_layer = document.getElementById("writing");
-            writing_ctx = writing_layer.getContext("2d");
-            marking_layer = document.getElementById("marking");
-            cursor_layer = document.getElementById("cursor");
-
-            card_body = $("div.card-body");
-            var img = document.getElementById("student_writing");
-            ratio = img.height / img.width;
-            writing_layer.width = card_body.width();
-            writing_layer.height = writing_layer.width * ratio;
-            marking_layer.width = card_body.width();
-            marking_layer.height = writing_layer.width * ratio;
-            cursor_layer.width = card_body.width();
-            cursor_layer.height = writing_layer.width * ratio;
-
-            writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
-        })
-
-        var marking_layer = document.getElementById('marking');
-        var marking_ctx = marking_layer.getContext('2d');
+        var writing_layer = document.getElementById("writing");
+        var writing_ctx = writing_layer.getContext("2d");
         var cursor_layer = document.getElementById("cursor");
         var cursor_ctx = cursor_layer.getContext('2d');
+        var marking_layer = document.getElementById('marking');
+        var marking_ctx = marking_layer.getContext('2d');
         var penColor;
         var penWidth;
         var eraserMode;
@@ -147,7 +143,24 @@
         var color_pen;
         var alpha_highliter;
         var isDrawing, lastPoint;
+        var images = document.getElementsByClassName("student_writing");
+        var imageCount = images.length;
+        var imageCurrent = 0;
         marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
+
+        function draw_images() {
+            card_body = $("div.card-body");
+            var img = images.item(imageCurrent);
+            ratio = img.height / img.width;
+            writing_layer.width = card_body.width();
+            writing_layer.height = writing_layer.width * ratio;
+            marking_layer.width = card_body.width();
+            marking_layer.height = writing_layer.width * ratio;
+            cursor_layer.width = card_body.width();
+            cursor_layer.height = writing_layer.width * ratio;
+
+            writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
+        }
 
         function init_marker() {
             alpha_pen = 1.0;
@@ -295,7 +308,7 @@
             $(".slider").css('background', controlColor);
         }
 
-        var changeWidth = function () {
+        $("#pen_width").change(function () {
             if (eraserMode) {
                 eraserWidth = $("#pen_width").val() * 10;
             } else {
@@ -303,11 +316,10 @@
                 alpha_pen = 1.0 / (penWidth * penWidth / 3.0);
                 applyColor();
             }
-        };
+        });
 
-        $("#pen_width").change(changeWidth);
 
-        var highlighter = function () {
+        $(".highligther").click(function () {
             highlighterMode = true;
             eraserMode = false;
             penColor = "rgba(255, 0, 132, " + alpha_highliter + ")";
@@ -315,11 +327,46 @@
             $(".slider").css('background', "lightgrey");
             $("#pen-icon").attr("disabled", true);
             $(".slider").attr("disabled", true);
+        });
+
+        function setPageButtons() {
+            console.log("CurrentImage: " + imageCurrent + "/" + imageCount);
+
+            if (imageCurrent === imageCount -1)
+                $("#marking_next").attr("disabled", true);
+            else
+                $("#marking_next").attr("disabled", false);
+
+            if (imageCurrent === 0)
+                $("#marking_prev").attr("disabled", true);
+            else
+                $("#marking_prev").attr("disabled", false);
         }
 
-        $(".highligther").click(highlighter);
+        $("#marking_prev").click(function () {
+            if (imageCurrent > 0) {
+                imageCurrent -= 1;
+                draw_images();
+                setPageButtons();
+            }
+        });
 
-        init_marker();
+        $("#marking_next").click(function () {
+            if (imageCurrent < imageCount - 1) {
+                imageCurrent += 1;
+                draw_images();
+                setPageButtons();
+            }
+        });
+
+        $(document).ready(function () {
+            console.log("CurrentImage: " + imageCurrent + "/" + imageCount);
+
+            draw_images();
+            init_marker();
+            setPageButtons();
+        })
+
     </script>
 {% endblock scripts %}
 

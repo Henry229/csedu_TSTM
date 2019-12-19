@@ -137,23 +137,25 @@ def marking(marking_writing_id, student_id):
     web_img_link, web_markers_img_link = '', ''
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
-        file_name = marking_writing.candidate_file_link
-        item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
+        web_img_links = {}
+        for key, file_name in marking_writing.candidate_file_link.items():
+            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
 
-        # import magic
-        # mime_type = magic.from_file(item_file, mime=True)
-        if file_name:
-            web_img_link = '/static/writing/img/' + file_name
-        if marking_writing.marked_file_link:
-            web_markers_img_link = '/static/writing/img/' + marking_writing.marked_file_link
-        if  marking_writing.candidate_mark_detail:
+            # import magic
+            # mime_type = magic.from_file(item_file, mime=True)
+            if file_name:
+                web_img_links[key] = {'writing': '/static/writing/img/' + file_name}
+            if marking_writing.marked_file_link:
+                if key in marking_writing.marked_file_link.keys():
+                    web_img_links[key] = {'marking': '/static/writing/img/' + marking_writing.marked_file_link[key]}
+        if marking_writing.candidate_mark_detail:
             populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
         else:
             populate_criteria_form(form)
         form.markers_comment.data = marking_writing.markers_comment
     else:
         populate_criteria_form(form)  # SubForm creation
-    return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_link=web_img_link, web_markers_img_link=web_markers_img_link)
+    return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_links=web_img_links)
 
 
 def populate_criteria_form(form, criteria_detail=None):
