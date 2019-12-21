@@ -3,6 +3,7 @@ import os
 import time
 import urllib
 
+from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from sqlalchemy.orm import load_only
@@ -253,11 +254,9 @@ def marking_onscreen_load(marking_writing_id, student_id):
     web_img_links = {}
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
-            # import magic
-            # mime_type = magic.from_file(item_file, mime=True)
             if file_name:
-                if os.path.exists(
-                        os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), file_name)):
+                file_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), file_name)
+                if os.path.exists(file_path):
                     web_img_links[key] = {
                         'writing': '/static/writing/img/%s/%s' % (student_id, file_name)}
                 if marking_writing.marked_file_link:
@@ -268,6 +267,42 @@ def marking_onscreen_load(marking_writing_id, student_id):
                             web_img_links[key]['marking'] = '/static/writing/img/%s/%s' % (
                                 student_id, marking_writing.marked_file_link[key])
     return web_img_links
+
+
+def text_to_images(student_id, file_path):
+    file_name = os.path.basename(file_path)
+    image_x = 1200
+    image_y = 1596
+    font_size = 40
+    line_space = 10
+    characters_per_line = int(image_x / (font_size / 2.0))
+    lines_per_page = int(image_y / (font_size + line_space * 1.5))
+    with open(file_path, "r") as f:
+        paragraphs = f.readlines()
+        pages = []
+        contents_wrapped = []
+        for paragraph in paragraphs:
+            from textwrap import wrap
+            paragraph_wrapped = wrap(paragraph, characters_per_line)
+            # Filter out whitespace line
+            if paragraph_wrapped:
+                contents_wrapped += paragraph_wrapped
+                contents_wrapped += '\n'
+        while len(contents_wrapped):
+            joined_line = '\n'.join(contents_wrapped[:lines_per_page])
+            pages.append(joined_line.replace('\n\n', '\n'))
+            del contents_wrapped[:lines_per_page]
+
+        fnt = ImageFont.truetype('app/static/writing/font/Kalam-Regular.ttf', font_size)
+        count = 1
+        for p in pages:
+            # Create and save image files
+            img = Image.new('RGBA', (image_x, image_y), (255, 255, 255, 0))
+            d = ImageDraw.Draw(img)
+            d.multiline_text((10, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0, 255))
+            img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id),
+                                  os.path.splitext(file_name)[0] + str(count) + ".png"))
+            count += 1
 
 
 @login_required
