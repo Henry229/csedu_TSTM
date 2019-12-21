@@ -231,7 +231,6 @@
 
 
             if (eraserMode) {
-                console.log(eraserWidth);
                 marking_ctx.globalCompositeOperation = 'destination-out';
                 marking_ctx.fillStyle = "White";
                 marking_ctx.beginPath();
@@ -390,7 +389,6 @@
 
         function save_marking(show_notification) {
             var img = marking_layer.toDataURL("image/png");
-            console.log(images.item(imageCurrent).src);
             var notification = function () {
                 if (show_notification) {
                     $("#marking_alert").html("Marking saved successfully");
@@ -422,8 +420,6 @@
         });
 
         $(document).ready(function () {
-            console.log("CurrentImage: " + imageCurrent + "/" + imageCount);
-
             draw_images();
             init_marker();
             setPageButtons();
