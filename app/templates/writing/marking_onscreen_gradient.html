@@ -75,6 +75,7 @@
             </div>
         </div>
     </form>
+
     <div class="card-body">
         <div id="marking_alert" class="alert alert-info alert-dismissible fade show"></div>
         <hr>
@@ -107,9 +108,9 @@
         <div id="images">
             {% for key, image in web_img_links.items() %}
                 <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
-                     src="{{ image['writing'] }}">
+                     src="{{ image['writing'] }}?{{ timestamp }}">
                 <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
-                     src="{{ image['marking'] }}">
+                     src="{{ image['marking'] }}?{{ timestamp }}">
             {% endfor %}
         </div>
         <div id="canvases" style="position: relative;">
@@ -152,6 +153,7 @@
         var markings = document.getElementsByClassName("onscreen_marking");
         var imageCount = images.length;
         var imageCurrent = 0;
+        var oldMarking;
         marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
 
         function draw_images() {
@@ -164,6 +166,7 @@
 
             writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
             marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
+            oldMarking = marking_layer.toDataURL("image/png");
         }
 
         function init_marker() {
@@ -184,11 +187,11 @@
             $("#marking_alert").hide();
         }
 
-        function distanceBetween(point1, point2) {
+        function getDistance(point1, point2) {
             return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
         }
 
-        function angleBetween(point1, point2) {
+        function getAngle(point1, point2) {
             return Math.atan2(point2.x - point1.x, point2.y - point1.y);
         }
 
@@ -226,8 +229,8 @@
             if (!isDrawing) return;
 
             var currentPoint = {x: mouse_x, y: mouse_y};
-            var dist = distanceBetween(lastPoint, currentPoint);
-            var angle = angleBetween(lastPoint, currentPoint);
+            var dist = getDistance(lastPoint, currentPoint);
+            var angle = getAngle(lastPoint, currentPoint);
 
 
             if (eraserMode) {
@@ -375,44 +378,53 @@
         function load_images() {
             $.ajax({
                 type: "GET",
-                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data) }}",
+                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data, student_id=form.student_id.data) }}",
                 success: function (images, status) {
                     Object.keys(images).forEach(function (key) {
                         var writing_id = key + "_writing";
                         var marking_id = key + "_marking";
-                        $("#" + writing_id).attr("src", images[key]['writing'] + "#" + Date.now());
-                        $("#" + marking_id).attr("src", images[key]['marking'] + "#" + Date.now());
+                        $("#" + writing_id).attr("src", images[key]['writing'] + "?" + Date.now());
+                        $("#" + marking_id).attr("src", images[key]['marking'] + "?" + Date.now());
                     });
                 }
             })
         }
 
-        function save_marking(show_notification) {
+        function save_marking(quiet) {
             var img = marking_layer.toDataURL("image/png");
-            var notification = function () {
-                if (show_notification) {
-                    $("#marking_alert").html("Marking saved successfully");
-                    $("#marking_alert").fadeTo(2000, 500).fadeOut();
+            var confirmed = true;
+            if (oldMarking !== img) {
+                if (!quiet) {
+                    if (!confirm("Marking changed. Do you want to save?"))
+                        confirmed = false;
+                }
+
+                if (confirmed) {
+                    var notification = function () {
+                        $("#marking_alert").html("Marking saved successfully");
+                        $("#marking_alert").fadeTo(2000, 500).fadeOut();
+                        oldMarking = img;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('writing.marking_onscreen_save') }}",
+                        data: JSON.stringify({
+                            "writing_id": "{{ form.marking_writing_id.data }}",
+                            "student_id": "{{ form.student_id.data }}",
+                            "key": images.item(imageCurrent).id.replace('_writing', ''),
+                            "writing_path": images.item(imageCurrent).name,
+                            "marking_path": markings.item(imageCurrent).name,
+                            "marking_image": img
+                        }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: notification,
+                        error: function () {
+                            alert('Failed to save marking');
+                        }
+                    });
                 }
             }
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('writing.marking_onscreen_save') }}",
-                data: JSON.stringify({
-                    "writing_id": "{{ form.marking_writing_id.data }}",
-                    "student_id": "{{ form.student_id.data }}",
-                    "key": images.item(imageCurrent).id.replace('_writing', ''),
-                    "writing_path": images.item(imageCurrent).name,
-                    "marking_path": markings.item(imageCurrent).name,
-                    "marking_image": img
-                }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: notification,
-                error: function () {
-                    alert('Failed to save marking');
-                }
-            });
         }
 
         $("#marking_save").click(function () {

@@ -481,7 +481,7 @@ def save_writing_data(student_id, marking_id, writing_file=None, writing_text=No
     # 1. Save the file to the path at config['WRITING_UPLOAD_FOLDER']
     random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
     new_file_name = str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
-    item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], new_file_name)
+    item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), new_file_name)
     if writing_file is not None:
         writing_file.save(item_file)
     else:

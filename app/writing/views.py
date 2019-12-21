@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import urllib
 
 from flask import render_template, flash, request, redirect, url_for, current_app
@@ -145,15 +146,17 @@ def marking(marking_writing_id, student_id):
     form.student_id.data = student_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
-        web_img_links = marking_onscreen_load(marking_writing_id)
-        if marking_writing.candidate_mark_detail:
-            populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
+        web_img_links = marking_onscreen_load(marking_writing_id, student_id)
+        if len(web_img_links.keys()):
+            if marking_writing.candidate_mark_detail:
+                populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
+            else:
+                populate_criteria_form(form)
+            form.markers_comment.data = marking_writing.markers_comment
+            return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_links=web_img_links,
+                                   timestamp=str(round(time.time() * 1000)))
         else:
-            populate_criteria_form(form)
-        form.markers_comment.data = marking_writing.markers_comment
-    else:
-        populate_criteria_form(form)  # SubForm creation
-    return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_links=web_img_links)
+            return render_template('writing/marking_empty.html')
 
 
 def populate_criteria_form(form, criteria_detail=None):
@@ -243,20 +246,27 @@ def writing_ui():
 
 @login_required
 @permission_required(Permission.ADMIN)
-@writing.route('/marking_onscreen/<marking_writing_id>', methods=['GET'])
+@writing.route('/marking_onscreen/<int:marking_writing_id>/<int:student_id>', methods=['GET'])
 @login_required
-def marking_onscreen_load(marking_writing_id):
+def marking_onscreen_load(marking_writing_id, student_id):
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     web_img_links = {}
-    if marking_writing:
+    if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             # import magic
             # mime_type = magic.from_file(item_file, mime=True)
             if file_name:
-                web_img_links[key] = {'writing': '/static/writing/img/' + file_name}
+                if os.path.exists(
+                        os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), file_name)):
+                    web_img_links[key] = {
+                        'writing': '/static/writing/img/%s/%s' % (student_id, file_name)}
                 if marking_writing.marked_file_link:
                     if key in marking_writing.marked_file_link.keys():
-                        web_img_links[key]['marking'] = '/static/writing/img/' + marking_writing.marked_file_link[key]
+                        if os.path.exists(
+                                os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id),
+                                             marking_writing.marked_file_link[key])):
+                            web_img_links[key]['marking'] = '/static/writing/img/%s/%s' % (
+                                student_id, marking_writing.marked_file_link[key])
     return web_img_links
 
 
@@ -271,6 +281,7 @@ def marking_onscreen_save():
     """
     if request:
         writing_id = request.json["writing_id"]
+        student_id = request.json["student_id"]
         key = request.json["key"];
         writing_path = request.json["writing_path"]
         marking_path = request.json["marking_path"]
@@ -280,7 +291,7 @@ def marking_onscreen_save():
             if not marking_file_name:
                 writing_file_name = os.path.splitext(os.path.basename(writing_path))[0]
                 marking_file_name = writing_file_name + "_marking.png"
-            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'],
+            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id,
                                                   marking_file_name).replace('\\', '/')
 
             # Save image
@@ -374,8 +385,8 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
     :param student_id:
     :return: filename saved to current_app.config['WRITING_UPLOAD_FOLDER']
     """
-    if not os.path.exists(current_app.config['WRITING_UPLOAD_FOLDER']):
-        os.makedirs(current_app.config['WRITING_UPLOAD_FOLDER'])
+    if not os.path.exists(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id)):
+        os.makedirs(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id))
 
     my_files = request.files.getlist(filefield_name)
     file_name = ''
@@ -384,7 +395,7 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
             f_file_name = f.filename
             if f and allowed_file(f.filename):
                 file_name = student_id + '_' + assessment_guid + '_' + secure_filename(f.filename)
-                item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
+                item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
                 f.save(item_file)
                 flash("File %s uploaded as %s. " % (f_file_name, file_name))
             else:
@@ -393,7 +404,7 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
         text = text
         if text:
             file_name = student_id + '_' + assessment_guid + '_writing.txt'
-            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
+            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
             f = open(item_file, "w")
             f.write(text)
             flash("Writing Texts are uploaded into %s. " % (file_name))
