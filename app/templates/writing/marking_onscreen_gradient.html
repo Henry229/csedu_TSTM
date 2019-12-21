@@ -156,10 +156,17 @@
         var oldMarking;
         marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
 
+        var img = images.item(imageCurrent);
+        var marking = markings.item(imageCurrent);
+
+        {#Make sure images are ready before canvases#}
+        img.addEventListener("load", draw_images, false);
+        marking.addEventListener("load", draw_images, false);
+
         function draw_images() {
             card_body = $("div.card-body");
-            var img = images.item(imageCurrent);
-            var marking = markings.item(imageCurrent);
+            img = images.item(imageCurrent);
+            marking = markings.item(imageCurrent);
             ratio = img.height / img.width;
             writing_layer.width = marking_layer.width = cursor_layer.width = card_body.width();
             writing_layer.height = marking_layer.height = cursor_layer.height = writing_layer.width * ratio;
