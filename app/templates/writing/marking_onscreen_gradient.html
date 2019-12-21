@@ -109,8 +109,10 @@
             {% for key, image in web_img_links.items() %}
                 <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
                      src="{{ image['writing'] }}?{{ timestamp }}">
-                <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
-                     src="{{ image['marking'] }}?{{ timestamp }}">
+                {% if image['marking'] %}
+                    <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
+                         src="{{ image['marking'] }}?{{ timestamp }}">
+                {% endif %}
             {% endfor %}
         </div>
         <div id="canvases" style="position: relative;">
@@ -156,23 +158,26 @@
         var oldMarking;
         marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
 
-        var img = images.item(imageCurrent);
-        var marking = markings.item(imageCurrent);
-
         {#Make sure images are ready before canvases#}
+        var img = images.item(imageCurrent);
         img.addEventListener("load", draw_images, false);
-        marking.addEventListener("load", draw_images, false);
+        var marking = markings[img.id.replace('_writing', '_marking')];
+        if (marking)
+            marking.addEventListener("load", draw_images, false);
 
         function draw_images() {
             card_body = $("div.card-body");
             img = images.item(imageCurrent);
-            marking = markings.item(imageCurrent);
             ratio = img.height / img.width;
             writing_layer.width = marking_layer.width = cursor_layer.width = card_body.width();
             writing_layer.height = marking_layer.height = cursor_layer.height = writing_layer.width * ratio;
 
             writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
-            marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
+            marking = markings[img.id.replace('_writing', '_marking')];
+            if (marking) {
+                marking.addEventListener("load", draw_images, false);
+                marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
+            }
             oldMarking = marking_layer.toDataURL("image/png");
         }
 
@@ -398,6 +403,7 @@
         }
 
         function save_marking(quiet) {
+            var marking_path = null;
             var img = marking_layer.toDataURL("image/png");
             var confirmed = true;
             if (oldMarking !== img) {
@@ -412,6 +418,10 @@
                         $("#marking_alert").fadeTo(2000, 500).fadeOut();
                         oldMarking = img;
                     }
+
+                    if (markings.item(imageCurrent))
+                        markeing_path = markings.item(imageCurrent).name
+
                     $.ajax({
                         type: "POST",
                         url: "{{ url_for('writing.marking_onscreen_save') }}",
@@ -420,7 +430,7 @@
                             "student_id": "{{ form.student_id.data }}",
                             "key": images.item(imageCurrent).id.replace('_writing', ''),
                             "writing_path": images.item(imageCurrent).name,
-                            "marking_path": markings.item(imageCurrent).name,
+                            "marking_path": marking_path,
                             "marking_image": img
                         }),
                         contentType: "application/json; charset=utf-8",

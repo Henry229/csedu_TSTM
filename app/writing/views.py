@@ -273,10 +273,11 @@ def text_to_images(student_id, file_path):
     file_name = os.path.basename(file_path)
     image_x = 1200
     image_y = 1596
-    font_size = 40
+    font_size = 30
     line_space = 10
     characters_per_line = int(image_x / (font_size / 2.0))
     lines_per_page = int(image_y / (font_size + line_space * 1.5))
+    file_names = []
     with open(file_path, "r") as f:
         paragraphs = f.readlines()
         pages = []
@@ -297,12 +298,15 @@ def text_to_images(student_id, file_path):
         count = 1
         for p in pages:
             # Create and save image files
-            img = Image.new('RGBA', (image_x, image_y), (255, 255, 255, 0))
+            img = Image.new('RGB', (image_x, image_y), (255, 255, 255))
             d = ImageDraw.Draw(img)
-            d.multiline_text((10, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0, 255))
+            d.multiline_text((10, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0))
+            saved_file_name = os.path.splitext(file_name)[0] + str(count) + ".jpg"
             img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id),
-                                  os.path.splitext(file_name)[0] + str(count) + ".png"))
+                                  saved_file_name))
             count += 1
+            file_names.append(saved_file_name)
+    return file_names
 
 
 @login_required
@@ -322,7 +326,9 @@ def marking_onscreen_save():
         marking_path = request.json["marking_path"]
         marking_image = request.json["marking_image"]
         if writing_path:
-            marking_file_name = os.path.basename(marking_path)
+            marking_file_name = None
+            if marking_path:
+                marking_file_name = os.path.basename(marking_path)
             if not marking_file_name:
                 writing_file_name = os.path.splitext(os.path.basename(writing_path))[0]
                 marking_file_name = writing_file_name + "_marking.png"
@@ -391,19 +397,25 @@ def upload_writing():
         # Step for marking_writing
         filefield_name = "w_image"
         text = form.w_text.data
-        file_name = saveWritingFile(filefield_name, text, assessment_guid, st_id)
-        insertMarkingForWriting(marking_id, file_name)
+        file_names = saveWritingFile(filefield_name, text, assessment_guid, st_id)
+        insertMarkingForWriting(marking_id, file_names)
     return redirect(url_for('writing.writing_ui', assessment_guid=assessment_guid, student_id=st_id))
 
 
-def insertMarkingForWriting(marking_id, file_name):
+def insertMarkingForWriting(marking_id, file_names):
     """
     Call from writing.upload_writing - update marking_writing table set candidate_file_link
     :param marking_id:
-    :param file_name:
+    :param file_names: list of file names
     :return: true
     """
-    candidate_file_link_json = {"file1": file_name}
+
+    index = 1
+    candidate_file_link_json = {}
+    for file_name in file_names:
+        candidate_file_link_json["file%s" % index] = file_name
+        index += 1
+
     marking_writing = MarkingForWriting(candidate_file_link=candidate_file_link_json,
                                         marking_id=marking_id)
     db.session.add(marking_writing)
@@ -418,13 +430,13 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
     :param text:
     :param assessment_guid:
     :param student_id:
-    :return: filename saved to current_app.config['WRITING_UPLOAD_FOLDER']
+    :return: filenames saved to current_app.config['WRITING_UPLOAD_FOLDER']
     """
     if not os.path.exists(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id)):
         os.makedirs(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id))
 
     my_files = request.files.getlist(filefield_name)
-    file_name = ''
+    file_names = []
     if len(my_files[0].filename) > 0:
         for f in my_files:
             f_file_name = f.filename
@@ -433,6 +445,7 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
                 item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
                 f.save(item_file)
                 flash("File %s uploaded as %s. " % (f_file_name, file_name))
+                file_names.append(file_name)
             else:
                 flash("Reject {} file importing".format(f.filename))
     else:
@@ -442,9 +455,10 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
             item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
             f = open(item_file, "w")
             f.write(text)
-            flash("Writing Texts are uploaded into %s. " % (file_name))
             f.close()
-    return file_name
+            file_names = text_to_images(student_id, item_file)
+            flash("Writing Texts are uploaded into %s. " % (", ".join(file_names)))
+    return file_names
 
 
 def allowed_file(filename):
