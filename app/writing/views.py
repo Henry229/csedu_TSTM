@@ -1,15 +1,21 @@
+import json
+import os
+import urllib
+
 from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
+from sqlalchemy.orm import load_only
+from sqlalchemy.orm.attributes import flag_modified
+from werkzeug.utils import secure_filename
+
 from app.web.errors import page_not_found
 from . import writing
-from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm, MarkerAssignForm
+from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
+    MarkerAssignForm
 from .. import db
 from ..decorators import permission_required, permission_required_or_multiple
-from sqlalchemy.orm import load_only
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
     MarkingForWriting, AssessmentHasTestset, Testset, EducationPlanDetail
-from werkzeug.utils import secure_filename
-import os
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
@@ -44,14 +50,14 @@ def assign_marker():
         marker_ids = form.markers.data
         row = EducationPlanDetail.query.filter_by(assessment_id=form.assessment_id.data).first()
         if row is None:
-            return redirect(url_for('writing.manage', error="Fail to assign - Please register assessment to Education Plan first"))
-        row.marker_ids = {"ids": marker_ids }
+            return redirect(
+                url_for('writing.manage', error="Fail to assign - Please register assessment to Education Plan first"))
+        row.marker_ids = {"ids": marker_ids}
         db.session.add(row)
         db.session.commit()
         flash('Marker assigned successfully.')
         return redirect(url_for('writing.manage'))
     return redirect(url_for('writing.manage', error="Marker Assign - Form validation Error"))
-
 
 
 @writing.route('/manage', methods=['GET'])
@@ -97,25 +103,28 @@ def manage():
             # Todo: Need to check if current_user have access right on queried data
             if test_center == Codebook.get_code_id(current_user.username):
                 query = query.filter_by(branch_id=test_center)
-            elif Codebook.get_code_name(test_center)=='All':
+            elif Codebook.get_code_name(test_center) == 'All':
                 query = query
             else:
-                query = query.filter(1==2)  # always false return
+                query = query.filter(1 == 2)  # always false return
 
         # Filtering for only writing testset
         subject_id = Codebook.get_code_id('Writing')
-        query = query.join(AssessmentHasTestset, Assessment.id==AssessmentHasTestset.assessment_id).join(Testset, AssessmentHasTestset.testset_id == Testset.id).filter(Testset.subject == subject_id)
+        query = query.join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id).join(Testset,
+                                                                                                           AssessmentHasTestset.testset_id == Testset.id).filter(
+            Testset.subject == subject_id)
 
         rows = query.order_by(Assessment.id.desc()).all()
         for r in rows:
-            student_ids = [sub.student_id for sub in db.session.query(AssessmentEnroll.student_id).filter(AssessmentEnroll.assessment_id==r.id).distinct()]
-            assessment_json_str = { "assessment_guid" : r.GUID,
-                                    "year" : r.year,
-                                    "test_type" : r.test_type,
-                                    "name" : r.name,
-                                    "test_center" : r.branch_id,
-                                    "students" : student_ids
-            }
+            student_ids = [sub.student_id for sub in db.session.query(AssessmentEnroll.student_id).filter(
+                AssessmentEnroll.assessment_id == r.id).distinct()]
+            assessment_json_str = {"assessment_guid": r.GUID,
+                                   "year": r.year,
+                                   "test_type": r.test_type,
+                                   "name": r.name,
+                                   "test_center": r.branch_id,
+                                   "students": student_ids
+                                   }
             assessments.append(assessment_json_str)
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
 
@@ -139,15 +148,14 @@ def marking(marking_writing_id, student_id):
     if marking_writing:
         web_img_links = {}
         for key, file_name in marking_writing.candidate_file_link.items():
-            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], file_name)
 
             # import magic
             # mime_type = magic.from_file(item_file, mime=True)
             if file_name:
                 web_img_links[key] = {'writing': '/static/writing/img/' + file_name}
-            if marking_writing.marked_file_link:
-                if key in marking_writing.marked_file_link.keys():
-                    web_img_links[key] = {'marking': '/static/writing/img/' + marking_writing.marked_file_link[key]}
+                if marking_writing.marked_file_link:
+                    if key in marking_writing.marked_file_link.keys():
+                        web_img_links[key]['marking'] = '/static/writing/img/' + marking_writing.marked_file_link[key]
         if marking_writing.candidate_mark_detail:
             populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
         else:
@@ -179,10 +187,10 @@ def populate_criteria_form(form, criteria_detail=None):
         while len(form.markings) > 0:
             form.markings.pop_entry()
         for c in criteria:
-                wm_form = WritingMMForm()  # weight mapping
-                wm_form.criteria = c.code_name
-                wm_form.marking = criteria_detail[c.code_name]
-                form.markings.append_entry(wm_form)
+            wm_form = WritingMMForm()  # weight mapping
+            wm_form.criteria = c.code_name
+            wm_form.marking = criteria_detail[c.code_name]
+            form.markings.append_entry(wm_form)
     return form
 
 
@@ -205,14 +213,13 @@ def marking_edit():
         # json_str = { 'entry' : form.markings.data }
         json_str = {}
         for entry in form.markings.data:
-            json_str[entry['criteria']]=entry['marking']
+            json_str[entry['criteria']] = entry['marking']
         row.candidate_mark_detail = json_str
         db.session.add(row)
         db.session.commit()
         flash('Marking for Writing updated.')
         return redirect(url_for('writing.manage'))
     return redirect(url_for('writing.manage', error="Marking Edit - Form validation Error"))
-
 
 
 @login_required
@@ -237,11 +244,53 @@ def writing_ui():
         test_form = []
 
     guid_list = [(a.GUID) for a in Assessment.query.distinct(Assessment.GUID). \
-                            filter(Assessment.name.ilike('%{}%'.format('writing'))).all()]
+        filter(Assessment.name.ilike('%{}%'.format('writing'))).all()]
     student = Student.query.filter_by(user_id=st_id).first()
     if student is None:
         return page_not_found()
     return render_template('writing/writing_ui.html', form=form, guid_list=guid_list, test_form=test_form)
+
+
+@login_required
+@permission_required(Permission.ADMIN)
+@writing.route('/marking_onscreen', methods=['POST'])
+@login_required
+def marking_onscreen_save():
+    """
+    Save onscreen marking an an image
+    :return:
+    """
+    if request:
+        writing_id = request.json["writing_id"]
+        student_id = request.json["student_id"]
+        writing_path = request.json["writing_path"]
+        marking_path = request.json["marking_path"]
+        marking_image = request.json["marking_image"]
+        if writing_path:
+            key = writing_path.split(":")[0]
+            marking_file_name = os.path.basename(marking_path.split(":")[1])
+            if not marking_file_name:
+                writing_file_name = os.path.splitext(os.path.basename(writing_path.split(":")[1]))[0]
+                marking_file_name = writing_file_name + "_marking.png"
+            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], marking_file_name).replace('\\', '/')
+
+            # Save image
+            r = urllib.request.urlopen(marking_image)
+            with open(marking_file_save_path, 'wb') as f:
+                f.write(r.file.read())
+
+            # Update DB if required
+            marking_writing = MarkingForWriting.query.filter_by(id=writing_id).first()
+            if marking_writing.marked_file_link is None:
+                marking_writing.marked_file_link = {key: marking_file_name}
+            elif key not in marking_writing.marked_file_link.keys():
+                marking_writing.marked_file_link[key] = marking_file_name
+
+            flag_modified(marking_writing, "marked_file_link")
+            db.session.commit()
+            return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+            # except:
+            #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
 
 
 @login_required
@@ -264,9 +313,9 @@ def upload_writing():
         testset_id = assessment.testsets[0].id
 
         assessment_enroll = AssessmentEnroll(assessment_guid=assessment_guid,
-                                             assessment_id = assessment_id,
-                                             testset_id = testset_id,
-                                             student_id = st_id)
+                                             assessment_id=assessment_id,
+                                             testset_id=testset_id,
+                                             student_id=st_id)
         db.session.add(assessment_enroll)
         db.session.commit()
         assessment_enroll_id = assessment_enroll.id
@@ -275,11 +324,11 @@ def upload_writing():
         testlet_id = assessment.testsets[0].getFirstStageTestletID()
         item_id = (TestletHasItem.query.options(load_only("item_id")).filter_by(testlet_id=testlet_id).first()).item_id
         marking = Marking(question_no=1,
-                         testset_id = testset_id,
-                         testlet_id=testlet_id,
-                         item_id = item_id,
+                          testset_id=testset_id,
+                          testlet_id=testlet_id,
+                          item_id=item_id,
                           weight=1.0,
-                          assessment_enroll_id = assessment_enroll_id)
+                          assessment_enroll_id=assessment_enroll_id)
         db.session.add(marking)
         db.session.commit()
         marking_id = marking.id
@@ -292,16 +341,16 @@ def upload_writing():
     return redirect(url_for('writing.writing_ui', assessment_guid=assessment_guid, student_id=st_id))
 
 
-def insertMarkingForWriting(marking_id,file_name):
+def insertMarkingForWriting(marking_id, file_name):
     """
     Call from writing.upload_writing - update marking_writing table set candidate_file_link
     :param marking_id:
     :param file_name:
     :return: true
     """
-    candidate_file_link_json = {"file1":file_name}
+    candidate_file_link_json = {"file1": file_name}
     marking_writing = MarkingForWriting(candidate_file_link=candidate_file_link_json,
-                                marking_id=marking_id)
+                                        marking_id=marking_id)
     db.session.add(marking_writing)
     db.session.commit()
     flash("Writing is saved successfully.")

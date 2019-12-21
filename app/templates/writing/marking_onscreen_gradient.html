@@ -76,6 +76,7 @@
         </div>
     </form>
     <div class="card-body">
+        <div id="marking_alert" class="alert alert-info alert-dismissible fade show"></div>
         <hr>
         <div id="marking_tools">
             <button id="marking_save" class="btn btn-warning btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
@@ -105,21 +106,21 @@
         </div>
         <div id="images">
             {% for key, image in web_img_links.items() %}
-                <img id="{{ key }}" class="hidden student_writing" src="{{ image['writing'] }}">
-                <img id="{{ key }}" class="hidden marking" src="{{ image['marking'] }}">
+                <img id="{{ key }}:{{ image['writing'] }}" class="hidden student_writing" src="{{ image['writing'] }}">
+                <img id="{{ key }}:{{ image['marking'] }}" class="hidden onscreen_marking" src="{{ image['marking'] }}">
             {% endfor %}
         </div>
         <div id="canvases" style="position: relative;">
             <canvas id="writing"
-                    style="z-index: 1; position: absolute; left: 0px; top: 0px;">
+                    style="z-index: 1; position: absolute; left: 0px; top: 10px;">
                 Student writing
             </canvas>
             <canvas id="cursor"
-                    style="z-index: 2; position: absolute; left: 0px; top: 0px;">
+                    style="z-index: 2; position: absolute; left: 0px; top: 10px;">
                 Cursor
             </canvas>
             <canvas id="marking"
-                    style="z-index: 3; position: absolute; left: 0px; top: 0px;">
+                    style="z-index: 3; position: absolute; left: 0px; top: 10px;">
                 On screen marking
             </canvas>
         </div>
@@ -146,6 +147,7 @@
         var alpha_highliter;
         var isDrawing, lastPoint;
         var images = document.getElementsByClassName("student_writing");
+        var markings = document.getElementsByClassName("onscreen_marking");
         var imageCount = images.length;
         var imageCurrent = 0;
         marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
@@ -153,15 +155,13 @@
         function draw_images() {
             card_body = $("div.card-body");
             var img = images.item(imageCurrent);
+            var marking = markings.item(imageCurrent);
             ratio = img.height / img.width;
-            writing_layer.width = card_body.width();
-            writing_layer.height = writing_layer.width * ratio;
-            marking_layer.width = card_body.width();
-            marking_layer.height = writing_layer.width * ratio;
-            cursor_layer.width = card_body.width();
-            cursor_layer.height = writing_layer.width * ratio;
+            writing_layer.width = marking_layer.width = cursor_layer.width = card_body.width();
+            writing_layer.height = marking_layer.height = cursor_layer.height = writing_layer.width * ratio;
 
             writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
+            marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
         }
 
         function init_marker() {
@@ -179,6 +179,7 @@
             $(".slider").css('background', penColor);
             $("#pen_width").val(penWidth);
             $("#highlighter-icon").css('color', "white");
+            $("#marking_alert").hide();
         }
 
         function distanceBetween(point1, point2) {
@@ -362,6 +363,35 @@
                 draw_images();
                 setPageButtons();
             }
+        });
+
+        function save_marking() {
+
+        }
+
+        $("#marking_save").click(function () {
+            var img = marking_layer.toDataURL("image/png");
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('writing.marking_onscreen_save') }}",
+                data: JSON.stringify({
+                    "writing_id": "{{ form.marking_writing_id.data }}",
+                    "student_id": "{{ form.student_id.data }}",
+                    "writing_path": images.item(imageCurrent).id,
+                    "marking_path": markings.item(imageCurrent).id,
+                    "marking_image": img
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function () {
+                    $("#marking_alert").html("Marking saved successfully");
+                    $("#marking_alert").fadeTo(2000, 500).fadeOut();
+
+                },
+                error: function () {
+                    alert('Failed to save marking');
+                }
+            })
         });
 
         $(document).ready(function () {
