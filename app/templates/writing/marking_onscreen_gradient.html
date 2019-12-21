@@ -112,6 +112,8 @@
                 {% if image['marking'] %}
                     <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
                          src="{{ image['marking'] }}?{{ timestamp }}">
+                {% else %}
+                    <img id="{{ key }}_marking" class="hidden onscreen_marking">
                 {% endif %}
             {% endfor %}
         </div>
@@ -174,7 +176,7 @@
 
             writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
             marking = markings[img.id.replace('_writing', '_marking')];
-            if (marking) {
+            if (marking.src) {
                 marking.addEventListener("load", draw_images, false);
                 marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
             }
@@ -395,8 +397,9 @@
                     Object.keys(images).forEach(function (key) {
                         var writing_id = key + "_writing";
                         var marking_id = key + "_marking";
-                        $("#" + writing_id).attr("src", images[key]['writing'] + "?" + Date.now());
-                        $("#" + marking_id).attr("src", images[key]['marking'] + "?" + Date.now());
+                        $("#" + writing_id).attr("name", images[key]['writing']).attr("src", images[key]['writing'] + "?" + Date.now());
+                        if (images[key]['marking'])
+                            $("#" + marking_id).attr("name", images[key]['marking']).attr("src", images[key]['marking'] + "?" + Date.now());
                     });
                 }
             })
