@@ -106,8 +106,10 @@
         </div>
         <div id="images">
             {% for key, image in web_img_links.items() %}
-                <img id="{{ key }}:{{ image['writing'] }}" class="hidden student_writing" src="{{ image['writing'] }}">
-                <img id="{{ key }}:{{ image['marking'] }}" class="hidden onscreen_marking" src="{{ image['marking'] }}">
+                <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
+                     src="{{ image['writing'] }}">
+                <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
+                     src="{{ image['marking'] }}">
             {% endfor %}
         </div>
         <div id="canvases" style="position: relative;">
@@ -351,7 +353,10 @@
 
         $("#marking_prev").click(function () {
             if (imageCurrent > 0) {
+                save_marking();
+                {#Save first then change#}
                 imageCurrent -= 1;
+                load_images();
                 draw_images();
                 setPageButtons();
             }
@@ -359,39 +364,61 @@
 
         $("#marking_next").click(function () {
             if (imageCurrent < imageCount - 1) {
+                save_marking();
+                {#Save first then change#}
                 imageCurrent += 1;
+                load_images();
                 draw_images();
                 setPageButtons();
             }
         });
 
-        function save_marking() {
-
+        function load_images() {
+            $.ajax({
+                type: "GET",
+                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data) }}",
+                success: function (images, status) {
+                    Object.keys(images).forEach(function (key) {
+                        var writing_id = key + "_writing";
+                        var marking_id = key + "_marking";
+                        $("#" + writing_id).attr("src", images[key]['writing'] + "#" + Date.now());
+                        $("#" + marking_id).attr("src", images[key]['marking'] + "#" + Date.now());
+                    });
+                }
+            })
         }
 
-        $("#marking_save").click(function () {
+        function save_marking(show_notification) {
             var img = marking_layer.toDataURL("image/png");
+            console.log(images.item(imageCurrent).src);
+            var notification = function () {
+                if (show_notification) {
+                    $("#marking_alert").html("Marking saved successfully");
+                    $("#marking_alert").fadeTo(2000, 500).fadeOut();
+                }
+            }
             $.ajax({
                 type: "POST",
                 url: "{{ url_for('writing.marking_onscreen_save') }}",
                 data: JSON.stringify({
                     "writing_id": "{{ form.marking_writing_id.data }}",
                     "student_id": "{{ form.student_id.data }}",
-                    "writing_path": images.item(imageCurrent).id,
-                    "marking_path": markings.item(imageCurrent).id,
+                    "key": images.item(imageCurrent).id.replace('_writing', ''),
+                    "writing_path": images.item(imageCurrent).name,
+                    "marking_path": markings.item(imageCurrent).name,
                     "marking_image": img
                 }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                success: function () {
-                    $("#marking_alert").html("Marking saved successfully");
-                    $("#marking_alert").fadeTo(2000, 500).fadeOut();
-
-                },
+                success: notification,
                 error: function () {
                     alert('Failed to save marking');
                 }
-            })
+            });
+        }
+
+        $("#marking_save").click(function () {
+            save_marking(true);
         });
 
         $(document).ready(function () {

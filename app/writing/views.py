@@ -143,19 +143,9 @@ def marking(marking_writing_id, student_id):
     form = WritingMarkingForm()
     form.marking_writing_id.data = marking_writing_id
     form.student_id.data = student_id
-    web_img_link, web_markers_img_link = '', ''
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
-        web_img_links = {}
-        for key, file_name in marking_writing.candidate_file_link.items():
-
-            # import magic
-            # mime_type = magic.from_file(item_file, mime=True)
-            if file_name:
-                web_img_links[key] = {'writing': '/static/writing/img/' + file_name}
-                if marking_writing.marked_file_link:
-                    if key in marking_writing.marked_file_link.keys():
-                        web_img_links[key]['marking'] = '/static/writing/img/' + marking_writing.marked_file_link[key]
+        web_img_links = marking_onscreen_load(marking_writing_id)
         if marking_writing.candidate_mark_detail:
             populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
         else:
@@ -253,6 +243,25 @@ def writing_ui():
 
 @login_required
 @permission_required(Permission.ADMIN)
+@writing.route('/marking_onscreen/<marking_writing_id>', methods=['GET'])
+@login_required
+def marking_onscreen_load(marking_writing_id):
+    marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
+    web_img_links = {}
+    if marking_writing:
+        for key, file_name in marking_writing.candidate_file_link.items():
+            # import magic
+            # mime_type = magic.from_file(item_file, mime=True)
+            if file_name:
+                web_img_links[key] = {'writing': '/static/writing/img/' + file_name}
+                if marking_writing.marked_file_link:
+                    if key in marking_writing.marked_file_link.keys():
+                        web_img_links[key]['marking'] = '/static/writing/img/' + marking_writing.marked_file_link[key]
+    return web_img_links
+
+
+@login_required
+@permission_required(Permission.ADMIN)
 @writing.route('/marking_onscreen', methods=['POST'])
 @login_required
 def marking_onscreen_save():
@@ -262,17 +271,17 @@ def marking_onscreen_save():
     """
     if request:
         writing_id = request.json["writing_id"]
-        student_id = request.json["student_id"]
+        key = request.json["key"];
         writing_path = request.json["writing_path"]
         marking_path = request.json["marking_path"]
         marking_image = request.json["marking_image"]
         if writing_path:
-            key = writing_path.split(":")[0]
-            marking_file_name = os.path.basename(marking_path.split(":")[1])
+            marking_file_name = os.path.basename(marking_path)
             if not marking_file_name:
-                writing_file_name = os.path.splitext(os.path.basename(writing_path.split(":")[1]))[0]
+                writing_file_name = os.path.splitext(os.path.basename(writing_path))[0]
                 marking_file_name = writing_file_name + "_marking.png"
-            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], marking_file_name).replace('\\', '/')
+            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'],
+                                                  marking_file_name).replace('\\', '/')
 
             # Save image
             r = urllib.request.urlopen(marking_image)
