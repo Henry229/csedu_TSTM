@@ -186,16 +186,10 @@ var ItemRunner = (function () {
      */
     var processAssessmentFormResponse = function (response) {
         var url = '/api/responses/file/' + _item_id;
-        var formData = new FormData();
-        var data = response.formData;
+        var formData = response.formData;
 		var response_data = response;
 		delete response_data['formData'];
 
-		for (var key in data) {
-			if (data.hasOwnProperty(key)) {
-				formData.append(key, data[key]);
-			}
-		}
 		formData.append('session', _session);
 		formData.append('marking_id', _marking_id);
 

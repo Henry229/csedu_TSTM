@@ -743,19 +743,14 @@ var ItemHandlers = (function () {
 
         this.readFile = function(file) {
             var self = this;
-            // var reader  = new FileReader();
-
-            // reader.addEventListener("load", function () {
-            //     self.fileData = reader.result.split(';base64,')[1];
-            // }, false);
-
             if (file) {
+                //This fileName and fileType are just for response checker in PHP.
                 self.fileName = file.files[0].name;
                 self.fileType = file.files[0].type;
-                self.formData = {
-                    'file': file.files[0]
-                };
-                // reader.readAsDataURL(file.files[0]);
+                self.formData = new FormData();
+                for (var i=0; i<file.files.length; i++) {
+                    self.formData.append('files', file.files[i]);
+                }
             }
         };
 

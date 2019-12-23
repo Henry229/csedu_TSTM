@@ -457,10 +457,11 @@ def response_process(item_id):
 def response_process_file(item_id):
     session_key = request.form.get('session')
     marking_id = request.form.get('marking_id')
-    writing_file = request.files.get('file')
+    writing_files = request.files.getlist('files')
 
-    if allowed_file(writing_file.filename) is False:
-        return bad_request(message='File type is not supported.')
+    for f in writing_files:
+        if allowed_file(f.filename) is False:
+            return bad_request(message='File type is not supported.')
 
     assessment_session = AssessmentSession(key=session_key)
     # check session status
@@ -471,25 +472,47 @@ def response_process_file(item_id):
     if student is None:
         return bad_request()
     student_id = student.id
-    save_writing_data(student_id, marking_id, writing_file=writing_file)
+    save_writing_data(student_id, marking_id, writing_files=writing_files)
 
     return success({"result": "success"})
 
 
-def save_writing_data(student_id, marking_id, writing_file=None, writing_text=None):
-    file_name = writing_file.filename if writing_file is not None else 'writing.txt'
-    # 1. Save the file to the path at config['WRITING_UPLOAD_FOLDER']
-    random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
-    new_file_name = str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
-    item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), new_file_name)
-    if writing_file is not None:
+def save_writing_data(student_id, marking_id, writing_files=None, writing_text=None):
+    if writing_files is None:
+        writing_files = []
+    file_names = []
+    # 1.1 Save the file to the path at config['WRITING_UPLOAD_FOLDER']
+    for writing_file in writing_files:
+        file_name = writing_file.filename if writing_file is not None else 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
         writing_file.save(item_file)
-    else:
+        file_names.append(new_file_name)
+
+    # 1.2 Save the text to the path at config['WRITING_UPLOAD_FOLDER']
+    if writing_text is not None:
+        file_name = 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
         with open(item_file, "w") as f:
             f.write(writing_text)
+        file_names.append(new_file_name)
 
     # 2. Create a record in MarkingForWriting
-    marking_writing = MarkingForWriting(candidate_file_link=new_file_name,
+    index = 1
+    candidate_file_link_json = {}
+    for file_name in file_names:
+        candidate_file_link_json["file%s" % index] = file_name
+        index += 1
+    marking_writing = MarkingForWriting(candidate_file_link=candidate_file_link_json,
                                         marking_id=marking_id)
     db.session.add(marking_writing)
     db.session.commit()
