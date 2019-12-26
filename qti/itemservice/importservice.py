@@ -41,10 +41,10 @@ class ImportService(ItemService):
         """
         # package 에 있는 qti.xml 파일이 위치한 폴더를 base_dir 로 한다.
         item_file_name = self.resource.get_file()
-        base_dir = item_file_name.rsplit('/', 1)[0] if len(item_file_name.rsplit('/')) == 2 else ''
+        base_dir = item_file_name.rsplit('/', 1)[0] if len(item_file_name.rsplit('/')) > 1 else ''
         for auxiliary_file in self.resource.get_auxiliary_files():
             package_zip.extract(auxiliary_file, self.get_qti_base_temp_dir())
-            # qti.xml 이 위치한 폴더를 기준으로 위치할 path를 구한다.
+            # qti.xml 이 위치한 폴더를 기준으로 위치할 path 를 구한다.
             dest_file = auxiliary_file.replace(base_dir + '/', '') if base_dir != '' else auxiliary_file
 
             # 파일이 위치할 곳에 디렉토리를 생성해야한다면 생성해 준다.
