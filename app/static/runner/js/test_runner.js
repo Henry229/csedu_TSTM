@@ -156,6 +156,10 @@ var TestRunner = (function () {
     };
 
     function _hasAnswer(answer) {
+        if (answer.writing_text)
+            return true;
+        if (answer.file_names)
+            return true;
         if (typeof answer === "string")
             answer = [answer];
         for (var i = 0; i < answer.length; i++) {

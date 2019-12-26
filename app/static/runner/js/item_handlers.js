@@ -1,5 +1,5 @@
 var ItemHandlers = (function () {
-    var _interaction_type, _handler;
+    var _interaction_type, _handler, _subject;
     var emptyInteractionHandler = function (options) {
         if (this === window) return new emptyInteractionHandler(options);
 
@@ -516,20 +516,66 @@ var ItemHandlers = (function () {
         this._$container = options.container;
         this.cardinality = options.data.cardinality;
         this.writing_text = null;
+        this.formData = null;
+        this.fileNames = null;
+
+        /**
+         * To handle writing item with file uploading.
+         */
+        this.readFile = function(file) {
+            var self = this;
+            var interactions = $('.qti-uploadInteraction');
+            interactions.find('.file-names ul').empty();
+            self.formData = null;
+            if (file && file.files.length > 0) {
+                //This fileName and fileType are just for response checker in PHP.
+                self.fileName = file.files[0].name;
+                self.fileType = file.files[0].type;
+                self.formData = new FormData();
+                self.fileNames = [];
+                for (var i=0; i<file.files.length; i++) {
+                    self.formData.append('files', file.files[i]);
+                    self.fileNames.push(file.files[i].name);
+                    var li = $('<li>').html(file.files[i].name);
+                    interactions.find('.file-names ul').append(li);
+                }
+            }
+        };
+
         this.processUI = function (answer) {
+            var self = this;
+            if (_subject.toLowerCase() === 'writing') {
+                $('.qti-uploadInteraction input[type=file]').on("change", function () {
+                    self.readFile(this);
+                });
+            }
             this.setSavedAnswer(answer);
         };
         this.setSavedAnswer = function (answer) {
+            var answers = [];
             if (typeof answer === 'string')
-                answer = [answer];
-            var interactions = $('.qti-interaction');
+                answers.push(answer);
+            else if (answer.writing_text)
+                answers.push(answer.writing_text);
+            else
+                answers = answer;
+            var interactions = $('.qti-extendedTextInteraction');
             for (var i = 0; i < interactions.length; i++) {
                 var $interaction = $(interactions[i]);
-                $interaction.find('textarea').val(answer[i]);
+                $interaction.find('textarea').val(answers[i]);
+            }
+            if (answer.file_names) {
+                this.fileNames = [];
+                interactions = $('.qti-uploadInteraction');
+                for (i = 0; i < answer.file_names.length; i++) {
+                    var li = $('<li>').html(answer.file_names[i]);
+                    interactions.find('.file-names ul').append(li);
+                    this.fileNames.push(answer.file_names[i]);
+                }
             }
         };
         this.getResponse = function () {
-            var interactions = $('.qti-interaction');
+            var interactions = $('.qti-extendedTextInteraction');
             var response = {};
             var results = [];
             for (var i = 0; i < interactions.length; i++) {
@@ -551,8 +597,100 @@ var ItemHandlers = (function () {
                 response[identifier] = {'base': base};
             }
 
-            if (this.writing_text !== null)
+            if (this.writing_text !== null && this.writing_text !== '')
                 response['writing_text'] = this.writing_text;
+            if (_subject.toLowerCase() === 'writing') {
+                response['formData'] = this.formData;
+                response['fileNames'] = this.fileNames;
+            }
+            return response;
+        };
+    };
+    var uploadInteraction = function (options) {
+        if (this === window) return new uploadInteraction(options);
+        this._$container = options.container;
+        this.cardinality = options.data.cardinality;
+        this.fileData = "";
+        this.fileName = "";
+        this.fileType = "";
+        this.writing_text = null;
+        this.formData = null;
+        this.fileNames = null;
+
+        this.readFile = function(file) {
+            var self = this;
+            var interactions = $('.qti-uploadInteraction');
+            interactions.find('.file-names ul').empty();
+            self.formData = null;
+            if (file && file.files.length > 0) {
+                //This fileName and fileType are just for response checker in PHP.
+                self.fileName = file.files[0].name;
+                self.fileType = file.files[0].type;
+                self.formData = new FormData();
+                self.fileNames = [];
+                for (var i=0; i<file.files.length; i++) {
+                    self.formData.append('files', file.files[i]);
+                    self.fileNames.push(file.files[i].name);
+                    var li = $('<li>').html(file.files[i].name);
+                    interactions.find('.file-names ul').append(li);
+                }
+            }
+        };
+
+        this.processUI = function (answer) {
+            var self = this;
+            $('.qti-uploadInteraction input[type=file]').on("change", function () {
+                self.readFile(this);
+            });
+            this.setSavedAnswer(answer);
+        };
+
+        this.setSavedAnswer = function (answer) {
+            if (typeof answer === 'string')
+                answer = [answer];
+            var interactions, $interaction, i;
+            if (answer.writing_text) {
+                interactions = $('.qti-extendedTextInteraction');
+                for (i = 0; i < interactions.length; i++) {
+                    $interaction = $(interactions[i]);
+                    $interaction.find('textarea').val(answer.writing_text);
+                }
+            }
+            if (answer.file_names) {
+                this.fileNames = [];
+                interactions = $('.qti-uploadInteraction');
+                for (i = 0; i < answer.file_names.length; i++) {
+                    var li = $('<li>').html(answer.file_names[i]);
+                    interactions.find('.file-names ul').append(li);
+                    this.fileNames.push(answer.file_names[i]);
+                }
+            }
+        };
+
+        this.getResponse = function () {
+            var $interaction = $('.qti-uploadInteraction');
+            var response = {};
+            var base = {};
+            var identifier = $interaction.data('identifier');
+            var baseType = $interaction.data('base-type');
+            //var $file = $('.file-upload input');
+            base[baseType] = {
+                //"data": this.fileData,
+                "data": "",
+                "mime": this.fileType,
+                "name": this.fileName
+            };
+            response[identifier] = {'base': base};
+            response['formData'] = this.formData;
+            response['fileNames'] = this.fileNames;
+            if (_subject.toLowerCase() === 'writing') {
+                var writing_interaction = $('.qti-extendedTextInteraction');
+                for (var i = 0; i < writing_interaction.length; i++) {
+                    this.writing_text = writing_interaction.find('textarea').val();
+                }
+                if (this.writing_text !== null && this.writing_text !== '')
+                response['writing_text'] = this.writing_text;
+            }
             return response;
         };
     };
@@ -732,59 +870,7 @@ var ItemHandlers = (function () {
         };
     };
 
-    var uploadInteraction = function (options) {
-        if (this === window) return new uploadInteraction(options);
-        this._$container = options.container;
-        this.cardinality = options.data.cardinality;
-        this.fileData = "";
-        this.fileName = "";
-        this.fileType = "";
-        this.formData = null;
 
-        this.readFile = function(file) {
-            var self = this;
-            if (file) {
-                //This fileName and fileType are just for response checker in PHP.
-                self.fileName = file.files[0].name;
-                self.fileType = file.files[0].type;
-                self.formData = new FormData();
-                for (var i=0; i<file.files.length; i++) {
-                    self.formData.append('files', file.files[i]);
-                }
-            }
-        };
-
-        this.processUI = function (answer) {
-            var self = this;
-            $('.qti-uploadInteraction input[type=file]').on("change", function () {
-                self.readFile(this);
-            });
-            this.setSavedAnswer(answer);
-        };
-
-        this.setSavedAnswer = function (answer) {
-            if (typeof answer === 'string')
-                answer = [answer];
-        };
-
-        this.getResponse = function () {
-            var $interaction = $('.qti-uploadInteraction');
-            var response = {};
-            var base = {};
-            var identifier = $interaction.data('identifier');
-            var baseType = $interaction.data('base-type');
-            //var $file = $('.file-upload input');
-            base[baseType] = {
-                //"data": this.fileData,
-                "data": "",
-                "mime": this.fileType,
-                "name": this.fileName
-            };
-            response[identifier] = {'base': base};
-            response['formData'] = this.formData;
-            return response;
-        };
-    };
     var handlers = {
         'choiceInteraction': choiceInteractionHandler,
         'orderInteraction': orderInteractionHandler,
@@ -810,6 +896,7 @@ var ItemHandlers = (function () {
 
     var init = function (interaction_type, options) {
         _interaction_type = interaction_type;
+        _subject = options.data.subject;
         var h = getInteractionHandler(interaction_type);
         _handler = h(options);
         return _handler;

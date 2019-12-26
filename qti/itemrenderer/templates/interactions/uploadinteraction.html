@@ -1,11 +1,15 @@
 <div data-identifier="{{ identifier }}" data-base-type="{{ baseType }}" class="qti-interaction qti-blockInteraction qti-uploadInteraction" data-serial="{{ serial }}">
 	{% if prompt %}{{prompt}}{% endif %}
 	<div class="instruction-container"></div>
-    <div class="file-upload fixed-grid-row lft">
+    <div class="file-upload fixed-grid-row">
         <div class="progressbar"></div>
-        <span class="btn-info small col-4"></span>
+        <span class="btn-info small col-4" style="display: none"></span>
         <span class="file-name placeholder col-8 truncate"></span>
         <input type="file" {% if accept %}accept="{{ accept }}"{% endif %} multiple/>
+    </div>
+    <div class="file-names">
+        <ul>
+        </ul>
     </div>
     <div class="file-upload-preview lft visible-file-upload-preview runtime-visible-file-upload-preview" style="display: none">
         <p class="nopreview">No preview available</p>

@@ -110,7 +110,7 @@ var ItemRunner = (function () {
         var response = _handler.getResponse();
         if (response === null) return;
         if (_mode === 'assessment') {
-            if (response.formData)
+            if (response.formData || response.writing_text)
                 processAssessmentFormResponse(response);
             else
                 processAssessmentResponse(response);
@@ -153,6 +153,10 @@ var ItemRunner = (function () {
             data['writing_text'] = response.writing_text;
             delete response.writing_text;
         }
+        if (response.fileNames) {
+            data['file_names'] = response.fileNames;
+            delete response.fileNames;
+        }
         data['response'] = response;
         $.ajax({
             url: url,
@@ -186,9 +190,18 @@ var ItemRunner = (function () {
      */
     var processAssessmentFormResponse = function (response) {
         var url = '/api/responses/file/' + _item_id;
-        var formData = response.formData;
+        var formData = new FormData();
 		var response_data = response;
-		delete response_data['formData'];
+        if (response.formData) {
+            formData = response.formData;
+    		delete response_data['formData'];
+        }
+        if (response.writing_text) {
+            formData.append('writing_text', response.writing_text);
+        }
+        if (response.fileNames) {
+            formData.append('has_files', "true");
+        }
 
 		formData.append('session', _session);
 		formData.append('marking_id', _marking_id);

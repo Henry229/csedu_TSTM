@@ -310,6 +310,7 @@ class Item(FlowContainerMixin, IdentifiedElementContainerMixin, IdentifiedElemen
         for element in self.body.get_elements().values():
             if ClassUtils.is_subclass_by_name(element, 'Interaction'):
                 interaction_type = element.get_qti_tag()
+                # break
         return interaction_type
 
     def get_cardinality(self):
