@@ -23,6 +23,13 @@
                                                    data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
                                                    {% if ts.enrolled %}disabled{% endif %}>
                                         </td>
+                                        <td>
+                                            {% if ts.enrolled %}
+                                                 <input type="button" class="btn btn-primary btn-block" value="Finished" disabled>
+                                            {% else %}
+                                                 <input type="button" class="btn btn-primary btn-block" value="" style="display: none" disabled>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

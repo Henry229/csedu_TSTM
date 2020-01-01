@@ -215,7 +215,7 @@ def testset_list():
         return page_not_found()
 
     # Get all assessment enroll to get testsets the student enrolled in already.
-    enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=current_user.id).all()
+    enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=student.id).all()
     testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
     # Get all testset the assessment has
@@ -223,7 +223,7 @@ def testset_list():
     for tsets in testsets:
         tsets.enrolled = tsets.id in testset_enrolled
 
-    return render_template('web/testsets.html', student_id=current_user.id, assessment_guid=assessment_guid,
+    return render_template('web/testsets.html', student_id=student.id, assessment_guid=assessment_guid,
                            testsets=testsets)
 
 
