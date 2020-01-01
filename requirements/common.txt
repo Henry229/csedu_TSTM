@@ -11,12 +11,14 @@ Flask-Migrate==2.5.*
 Flask-SQLAlchemy==2.4.*
 Flask-WTF==0.14.*
 lxml==4.4.*
+numpy==1.18.*
 openpyxl==3.0.*
 Pillow==6.2.*
 psycopg2==2.8.*
 pyjwt==1.7.*
 pytz==2019.*
 requests==2.22.*
+seaborn==0.9.*
 WeasyPrint==50
 xlrd==1.2.*
 XlsxWriter==1.1.8
