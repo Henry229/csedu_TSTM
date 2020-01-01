@@ -1,11 +1,14 @@
+import re
+
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, HiddenField, StringField, FileField, \
-                    TextAreaField, FieldList, FormField, SelectMultipleField, DecimalField
+from wtforms import SelectField, SubmitField, HiddenField, StringField, MultipleFileField, \
+    TextAreaField, FieldList, FormField, SelectMultipleField, DecimalField
 from wtforms.validators import DataRequired
+
 from .. import db
 from ..models import Choices, EducationPlan, Codebook, User, Role
-import re
+
 
 class StartOnlineTestForm(FlaskForm):
     assessment_guid = StringField('Assessment GUID', validators=[DataRequired()])
@@ -14,7 +17,7 @@ class StartOnlineTestForm(FlaskForm):
 
 
 class WritingTestForm(FlaskForm):
-    w_image = FileField('Writing File')
+    w_image = MultipleFileField('Writing File')
     w_text = TextAreaField('Writing Text')
     assessment_guid = HiddenField('Assessment GUID', validators=[DataRequired()])
     student_id = HiddenField('Student ID', validators=[DataRequired()])
@@ -23,6 +26,7 @@ class WritingTestForm(FlaskForm):
     def validate_image(form, field):
         if field.data:
             field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+
 
 def get_test_center():
     my_codesets = []
@@ -88,5 +92,6 @@ class MarkerAssignForm(FlaskForm):
         super(MarkerAssignForm, self).__init__(*args, **kwargs)
         role = Role.query.filter_by(name='Writing_marker').first()
         self.markers.choices = [(u.id, u.username)
-            for u in
-                db.session.query(User.id, User.username).filter(User.role==role).distinct().order_by(User.username).all()]
+                                for u in
+                                db.session.query(User.id, User.username).filter(User.role == role).distinct().order_by(
+                                    User.username).all()]
