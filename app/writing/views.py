@@ -175,7 +175,7 @@ def populate_criteria_form(form, criteria_detail=None):
         for c in criteria:
             wm_form = WritingMMForm()  # weight mapping
             wm_form.criteria = c.code_name
-            wm_form.marking = '0.0'
+            wm_form.marking = 0
             form.markings.append_entry(wm_form)
     else:
         while len(form.markings) > 0:
@@ -183,7 +183,7 @@ def populate_criteria_form(form, criteria_detail=None):
         for c in criteria:
             wm_form = WritingMMForm()  # weight mapping
             wm_form.criteria = c.code_name
-            wm_form.marking = criteria_detail[c.code_name]
+            wm_form.marking = float(criteria_detail[c.code_name])
             form.markings.append_entry(wm_form)
     return form
 
@@ -207,7 +207,7 @@ def marking_edit():
         # json_str = { 'entry' : form.markings.data }
         json_str = {}
         for entry in form.markings.data:
-            json_str[entry['criteria']] = entry['marking']
+            json_str[entry['criteria']] = str(entry['marking'])
         row.candidate_mark_detail = json_str
         db.session.add(row)
         db.session.commit()

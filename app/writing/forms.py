@@ -1,7 +1,7 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, HiddenField, StringField, FileField, \
-                    TextAreaField, FieldList, FormField, SelectMultipleField
+                    TextAreaField, FieldList, FormField, SelectMultipleField, DecimalField
 from wtforms.validators import DataRequired
 from .. import db
 from ..models import Choices, EducationPlan, Codebook, User, Role
@@ -68,7 +68,7 @@ class WritingMMForm(FlaskForm):
         csrf = False
 
     criteria = StringField('Criteria', default='')
-    marking = StringField('Mark', default='0.0')
+    marking = DecimalField('Mark', default=0.0, places=0)
 
 
 class WritingMarkingForm(FlaskForm):
