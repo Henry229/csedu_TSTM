@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+<body>
+
+<form name="modalForm" action="{{ url_for('writing.assign_marker') }}" method="POST" class="form" role="form">
+    {{ form.hidden_tag() }}
+    <div class="card">
+        <div class="card-header"><i class="icons cui-user-follow"></i><strong>Assessment - Marker Assign</strong>
+        </div>
+        <div class="card-body">
+            <strong>For Assessment {{ assessment.name }} </strong>
+            <small>({{ assessment.id }}, {{ assessment.year }},{{ Codebook.get_code_name(assessment.test_type) }},{{ Codebook.get_code_name(assessment.branch_id) }})</small>
+            <br><br>
+            <div class="row">
+                <div class="col">
+                    {{ form.markers(size=10) }}
+                </div>
+                <div class="col">
+                    {{ form.submit(class="btn btn-warning btn-sm", id="basic_info") }}
+                    <button type="button" class="btn btn-outline-warning btn-sm" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>

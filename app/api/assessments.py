@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 from datetime import datetime
+import random
+import string
 from time import time
 
 import pytz
@@ -9,12 +11,13 @@ from flask import jsonify, request, current_app, render_template
 from flask_login import current_user
 from sqlalchemy import desc
 from sqlalchemy.orm import load_only
+from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater, Student
+    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request
 from .. import db
@@ -350,15 +353,25 @@ def response_process(item_id):
     session_key = request.json.get('session')
     marking_id = request.json.get('marking_id')
     response = request.json.get('response')
+    file_names = request.json.get('file_names')
 
     assessment_session = AssessmentSession(key=session_key)
 
     # check session status
     if assessment_session.get_status() == AssessmentSession.STATUS_READY:
         return bad_request(message='Session status is wrong.')
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+    item_subject = Codebook.get_code_name(qti_item_obj.subject)
+    writing_text = None
+    if item_subject.lower() == 'writing':
+        writing_text = request.json.get('writing_text')
+
     processed = None
     # correct_response = ''
     try:
@@ -379,12 +392,27 @@ def response_process(item_id):
         return bad_request(message="Processing response error")
 
     marking = Marking.query.filter_by(id=marking_id).first()
-    candidate_response = parse_processed_response(processed.get('RESPONSE'))
-    marking.candidate_r_value = candidate_response
+    if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get('file'):
+        candidate_response = response.get("RESPONSE").get("base")
+    else:
+        candidate_response = parse_processed_response(processed.get('RESPONSE'))
+    if item_subject.lower() == 'writing':
+        if writing_text is None and file_names is None:
+            candidate_response = ''
+        else:
+            candidate_response = {}
+            if writing_text is not None:
+                candidate_response["writing_text"] = writing_text
+            if file_names is not None:
+                candidate_response["file_names"] = file_names
+        marking.candidate_r_value = candidate_response
+    else:
+        marking.candidate_r_value = candidate_response
     marking.candidate_mark = processed.get('SCORE')
     marking.outcome_score = processed.get('maxScore')
     marking.is_correct = marking.candidate_mark >= marking.outcome_score
     marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
     db.session.commit()
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
@@ -435,6 +463,95 @@ def response_process(item_id):
     return success(data)
 
 
+@api.route('/responses/file/<int:item_id>', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def response_process_file(item_id):
+    session_key = request.form.get('session')
+    marking_id = request.form.get('marking_id')
+    writing_files = request.files.getlist('files')
+    writing_text = request.form.get('writing_text')
+    has_files = request.form.get('has_files', 'false')
+    has_files = has_files.lower() == 'true'
+    for f in writing_files:
+        if allowed_file(f.filename) is False:
+            return bad_request(message='File type is not supported.')
+
+    assessment_session = AssessmentSession(key=session_key)
+    # check session status
+    if assessment_session.get_status() == AssessmentSession.STATUS_READY:
+        return bad_request(message='Session status is wrong.')
+
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+    student_id = student.id
+    save_writing_data(student_id, marking_id, writing_files=writing_files, writing_text=writing_text,
+                      has_files=has_files)
+
+    return success({"result": "success"})
+
+
+def save_writing_data(student_id, marking_id, writing_files=None, writing_text=None, has_files=False):
+    if writing_files is None:
+        writing_files = []
+    file_names = []
+    # 1.1 Save the file to the path at config['WRITING_UPLOAD_FOLDER']
+    for writing_file in writing_files:
+        file_name = writing_file.filename if writing_file is not None else 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = 'file_' + str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
+        writing_file.save(item_file)
+        file_names.append(new_file_name)
+
+    marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
+        .order_by(MarkingForWriting.id.desc()).first()
+    if len(writing_files) == 0 and has_files and marking_writing is not None:
+        candidate_file_link = json.loads(marking_writing.candidate_file_link)
+        for f_n in candidate_file_link.values():
+            if not f_n.startswith('writing'):
+                file_names.append(f_n)
+
+    # 1.2 Save the text to the path at config['WRITING_UPLOAD_FOLDER']
+    if writing_text is not None:
+        file_name = 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = 'writing_' + str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
+        with open(item_file, "w") as f:
+            f.write(writing_text)
+        file_names.append(new_file_name)
+
+    # 2. Create a record in MarkingForWriting
+    index = 1
+    candidate_file_link_json = {}
+    for file_name in file_names:
+        candidate_file_link_json["file%s" % index] = file_name
+        index += 1
+    if marking_writing is None:
+        marking_writing = MarkingForWriting(marking_id=marking_id)
+    marking_writing.candidate_file_link = candidate_file_link_json
+    marking_writing.modified_time = datetime.utcnow()
+    db.session.add(marking_writing)
+    db.session.commit()
+
+
+def allowed_file(filename):
+    """
+    Call from writing.saveWritingFile to check file extension allowed
+    :param filename:
+    :return:
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']
+
+
 def parse_correct_response(correct_response):
     correct_response = correct_response.strip()
     if correct_response != '' and correct_response[0] == '[':
@@ -463,6 +580,7 @@ def rendered(item_id):
     response = {}
     rendered_item = ''
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+    item_subject = Codebook.get_code_name(qti_item_obj.subject)
     if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
         try:
             item_service = ItemService(qti_item_obj.file_link)
@@ -472,6 +590,7 @@ def rendered(item_id):
             response['cardinality'] = qti_item.get_cardinality()
             response['object_variables'] = qti_item.get_interaction_object_variables()
             response['interactions'] = qti_item.get_interaction_info()
+            response['subject'] = item_subject
         except Exception as e:
             print(e)
     else:
@@ -482,6 +601,7 @@ def rendered(item_id):
         response['cardinality'] = qti_item.get_cardinality()
         response['object_variables'] = qti_item.get_interaction_object_variables()
         response['interactions'] = qti_item.get_interaction_info()
+        response['subject'] = item_subject
 
     # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
     debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'

@@ -74,6 +74,7 @@ class CodebookForm(FlaskForm):
     subcategory = SelectField('Sub Category',
                               id='select_subcategory',
                               coerce=int)
+    criteria = SelectField('Criteria For Writing', id="select_criteria", coerce=int)
     submit = SubmitField('Search')
 
     def __init__(self, *args, **kwargs):
@@ -85,3 +86,4 @@ class CodebookForm(FlaskForm):
         self.subject.choices = Choices.get_codes('subject')
         self.category.choices = [(0, '')]
         self.subcategory.choices = [(0, '')]
+        self.criteria.choices = Choices.get_codes('criteria')

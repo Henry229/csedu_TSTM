@@ -222,9 +222,10 @@ def testset_list():
     testsets = assessment.testsets
     for tsets in testsets:
         tsets.enrolled = tsets.id in testset_enrolled
+    sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_id=student.id, assessment_guid=assessment_guid,
-                           testsets=testsets)
+                           testsets=sorted_testsets)
 
 
 @web.route('/tests/assessments', methods=['GET'])

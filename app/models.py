@@ -148,7 +148,7 @@ class User(UserMixin, db.Model):
                 continue
             if not User.query.filter_by(username=role.name).first():
                 t_email = role.name + '@csedu.com'
-                user = User(username=role.name, email=t_email, confirmed=True, role=role)
+                user = User(username=role.name, email=t_email, confirmed=True, active=True, role=role)
                 user.password = password
                 db.session.add(user)
                 created_users.append((user.email, password))
@@ -195,7 +195,8 @@ class Role(db.Model):
                               Permission.ITEM_MANAGE, Permission.TESTLET_MANAGE, Permission.TESTSET_READ,
                               Permission.TESTSET_MANAGE,
                               Permission.ASSESSMENT_READ, Permission.ADMIN],
-            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE]
+            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE],
+            'Writing_marker': [Permission.ITEM_EXEC, Permission.ASSESSMENT_READ]
         }
         default_role = 'Test_taker'
 
@@ -736,6 +737,7 @@ class EducationPlanDetail(db.Model):
     order = db.Column(db.Integer, index=True)
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
     plan_id = db.Column(db.Integer, db.ForeignKey('education_plan.id'))
+    marker_ids = db.Column(JSONB)  # {'ids': [...] }
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
@@ -858,6 +860,38 @@ class MarkingBySimulater(db.Model):
         return '<Marking By Simulator {}>'.format(self.id)
 
 
+class MarkingForWriting(db.Model):
+    """marking for writing item Model: """
+    __tablename__ = 'marking_writing'
+
+    id = db.Column(db.Integer, primary_key=True)
+    candidate_file_link = db.Column(JSONB)          # {"file1" :"file1_path", ... "filen" : "filen_path" } candidate response writing image file
+    marked_file_link = db.Column(JSONB)             # {"file1" :"file1_path", ... "filen" : "filen_path" } marker's response image file
+    candidate_mark_detail = db.Column(JSONB)        # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
+    marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
+    markers_comment = db.Column(db.String(2048))
+    marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    def __repr__(self):
+        return '<Marking Detail For Writing {}>'.format(self.id)
+
+
+class MarkerAssigned(db.Model):
+    """Marker assigned for writing Model: """
+    __tablename__ = 'marker_assigned'
+
+    id = db.Column(db.Integer, primary_key=True)
+    marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    def __repr__(self):
+        return '<Marker Assigned For Writing {}>'.format(self.id)
+
+
 class ScoreSummary(db.Model):
     '''score summary Model: information of score summary on each item. it is for the statistics  '''
     __tablename__ = 'score_summary'
@@ -893,7 +927,11 @@ class Student(db.Model):
 
     @staticmethod
     def getCSStudentId(id):
-        return (Student.query.filter_by(id=id).first()).student_id
+        return (Student.query.filter_by(user_id=id).first()).student_id
+
+    # @staticmethod
+    # def getCSStudentId(id):
+    #     return (Student.query.filter_by(id=id).first()).student_id
 
     @staticmethod
     def getCSStudentName(user_id):
@@ -944,7 +982,10 @@ class Codebook(db.Model):
     @staticmethod
     def get_code_id(code_name):
         code = Codebook.query.options(load_only("id")).filter_by(code_name=code_name).first()
-        return code.id
+        if code:
+            return code.id
+        else:
+            return 0
 
     @staticmethod
     def get_testcenter_by_ip(ip):

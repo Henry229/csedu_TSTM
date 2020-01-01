@@ -1,0 +1,528 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/csedu_style.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        .pen_slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 5px;
+            background: #FFFFFF;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .pen_slider:hover {
+            opacity: 1;
+        }
+
+        .pen_slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        .pen_slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #weight_mapping input {
+            border: 0
+        }
+
+        #weight_mapping .slider {
+            width: 20em;
+            float: left;
+            margin-left: 1.0em;
+            margin-right: 1.5em;
+        }
+
+        #custom-handle {
+            width: 2em;
+            height: 1.6em;
+            top: 50%;
+            margin-top: -.8em;
+            text-align: center;
+            line-height: 1.6em;
+        }
+
+        #weight_mapping tr {
+            height: 3.0em;
+        }
+    </style>
+{% endblock %}
+{% block app_content %}
+    <form action="{{ url_for('writing.marking_edit') }}" id="marking_form" method="POST" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class="card card-accent-info">
+            <div class="card-header"><i class="fas fa-pencil-alt" style="color: #339af0;"></i><strong>Marking</strong>
+                <span class="badge badge-info float-right">Marking of Student Writing</span>
+                {{ Student.getCSStudentName(form.student_id.data) }}({{ Student.getCSStudentId(form.student_id.data) }})
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="ml-5 mr-5">
+                        {{ form.markers_comment.label }}<p/>
+                        {{ form.markers_comment(rows="8", cols="50") }}
+                    </div>
+                    <table id="weight_mapping" class="table-borderless">
+                        <thead>
+                        <th>Criteria</th>
+                        <th colspan="2">Mark</th>
+                        </thead>
+                        <tbody>
+                        {% for criteria_form in form.markings %}
+                            <tr>
+                                <td>
+                                    {{ criteria_form.criteria(readonly=True) }}
+                                </td>
+                                <td>
+                                    <span>
+                                        {{ criteria_form.marking(size=2, readonly=True) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div id="slider{{ loop.index }}" class="slider">
+                                        <div id="custom-handle" name="custom-handle{{ loop.index }}"
+                                             class="ui-slider-handle"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="float-right">
+                    {{ form.submit(class="btn btn-danger btn-sm", id="basic_info", value="Submit") }}
+                    <button type="reset" class="btn btn-outline-danger btn-sm" data-dismiss="modal" aria-label="Close">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="card-body">
+        <div id="marking_alert" class="alert alert-info alert-dismissible fade show"></div>
+        <hr>
+        <div id="marking_tools">
+            <button id="marking_save" class="btn btn-warning btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
+                    style="font-weight: bold">Save Marking</span>
+            </button>
+            <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
+                    class="fas fa-caret-square-left ml-1 mr-1"></i></button>
+            <button id="marking_next" class="btn btn-outline-info btn-sm"><i
+                    class="fas fa-caret-square-right ml-1 mr-1"></i></button>
+            <span id="pageCount" class="badge badge-pill badge-primary"></span>
+            <div class="float-right">
+                <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
+                <button class="marking_button btn btn-dark btn-sm" onclick="colorChange(this)">Reset</button>
+                <button class="marking_button btn btn-danger btn-sm" onclick="colorChange(this)">Red</button>
+                <button class="marking_button btn btn-primary btn-sm" onclick="colorChange(this)">Blue</button>
+                <button class="marking_button btn btn-success btn-sm" onclick="colorChange(this)">Green</button>
+                <i id="pen-icon" class="fas fa-pen" style="font-size: 25px"><input id="pen_width" type="range"
+                                                                                   class="pen_slider" max="10"
+                                                                                   min="1"
+                                                                                   value="1"></i>
+                <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
+                <button class="marking_button btn btn-flickr btn-sm highligther">
+                    <i id="highlighter-icon" class="fas fa-highlighter"></i>
+                    <span style="color: white">Highlighter</span>
+                </button>
+            </div>
+        </div>
+        <div id="images">
+            {% for key, image in web_img_links.items() %}
+                <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
+                     src="{{ image['writing'] }}?{{ timestamp }}">
+                {% if image['marking'] %}
+                    <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
+                         src="{{ image['marking'] }}?{{ timestamp }}">
+                {% else %}
+                    <img id="{{ key }}_marking" class="hidden onscreen_marking">
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div id="canvases" style="position: relative;">
+            <canvas id="writing"
+                    style="z-index: 1; position: absolute; left: 0px; top: 10px;">
+                Student writing
+            </canvas>
+            <canvas id="cursor"
+                    style="z-index: 2; position: absolute; left: 0px; top: 10px;">
+                Cursor
+            </canvas>
+            <canvas id="marking"
+                    style="z-index: 3; position: absolute; left: 0px; top: 10px;">
+                On screen marking
+            </canvas>
+        </div>
+    </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/writing/js/manage.js"></script>
+    <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+        var writing_layer = document.getElementById("writing");
+        var writing_ctx = writing_layer.getContext("2d");
+        var cursor_layer = document.getElementById("cursor");
+        var cursor_ctx = cursor_layer.getContext('2d');
+        var marking_layer = document.getElementById('marking');
+        var marking_ctx = marking_layer.getContext('2d');
+        var penColor;
+        var penWidth;
+        var eraserMode;
+        var eraserWidth;
+        var highlighterMode;
+        var alpha_pen;
+        var color_pen;
+        var alpha_highliter;
+        var isDrawing, lastPoint;
+        var images = document.getElementsByClassName("student_writing");
+        var markings = document.getElementsByClassName("onscreen_marking");
+        var imageCount = images.length;
+        var imageCurrent = 0;
+        var oldMarking;
+        marking_ctx.lineJoin = marking_ctx.lineCap = 'round';
+
+        {#Make sure images are ready before canvases#}
+        var img = images.item(imageCurrent);
+        img.addEventListener("load", draw_images, false);
+        var marking = markings[img.id.replace('_writing', '_marking')];
+        if (marking)
+            marking.addEventListener("load", draw_images, false);
+
+        function draw_images() {
+            card_body = $("div.card-body");
+            img = images.item(imageCurrent);
+            ratio = img.height / img.width;
+            writing_layer.width = marking_layer.width = cursor_layer.width = card_body.width();
+            writing_layer.height = marking_layer.height = cursor_layer.height = writing_layer.width * ratio;
+
+            writing_ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, writing_layer.width, writing_layer.height);
+            marking = markings[img.id.replace('_writing', '_marking')];
+            if (marking.src) {
+                marking.addEventListener("load", draw_images, false);
+                marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
+            }
+            oldMarking = marking_layer.toDataURL("image/png");
+        }
+
+        function init_marker() {
+            alpha_pen = 1.0;
+            color_pen = "Red";
+            alpha_highliter = 0.02;
+            penColor = "rgba(246,72,70, " + alpha_pen + ")";
+            penWidth = 1;
+            eraserWidth = 30;
+            eraserMode = false;
+            highlighterMode = false;
+            marking_ctx.globalCompositeOperation = 'source-over';
+            $("#pen-icon").css('color', penColor);
+            $("#pen-icon").removeClass("fa-eraser").addClass("fa-pen");
+            $(".pen_slider").css('background', penColor);
+            $("#pen_width").val(penWidth);
+            $("#highlighter-icon").css('color', "white");
+            $("#marking_alert").hide();
+        }
+
+        function getDistance(point1, point2) {
+            return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+        }
+
+        function getAngle(point1, point2) {
+            return Math.atan2(point2.x - point1.x, point2.y - point1.y);
+        }
+
+        marking_layer.onmousedown = function (e) {
+            isDrawing = true;
+            var d = marking_layer.getBoundingClientRect();
+            lastPoint = {x: e.clientX - d.left, y: e.clientY - d.top};
+        };
+
+        marking_layer.onmousemove = function (e) {
+            var lineWidth = penWidth;
+            var cursorColor = color_pen;
+            var d = marking_layer.getBoundingClientRect();
+            var mouse_x = e.clientX - d.left;
+            var mouse_y = e.clientY - d.top;
+
+            if (eraserMode) {
+                lineWidth = eraserWidth;
+                cursorColor = "#708090";
+            }
+
+            if (highlighterMode) {
+                cursorColor = "rgba(255, 0, 132)";
+                lineWidth = 10;
+            }
+
+            cursor_ctx.strokeStyle = cursorColor;
+
+            cursor_ctx.clearRect(0, 0, marking_layer.width, marking_layer.height);
+
+            cursor_ctx.beginPath();
+            cursor_ctx.arc(mouse_x, mouse_y, lineWidth, 0, 2 * Math.PI);
+            cursor_ctx.stroke();
+
+            if (!isDrawing) return;
+
+            var currentPoint = {x: mouse_x, y: mouse_y};
+            var dist = getDistance(lastPoint, currentPoint);
+            var angle = getAngle(lastPoint, currentPoint);
+
+
+            if (eraserMode) {
+                marking_ctx.globalCompositeOperation = 'destination-out';
+                marking_ctx.fillStyle = "White";
+                marking_ctx.beginPath();
+                marking_ctx.arc(mouse_x, mouse_y, eraserWidth, 0, 2 * Math.PI);
+                marking_ctx.fill();
+            } else {
+                marking_ctx.globalCompositeOperation = 'source-over';
+                for (var i = 0; i < dist; i += 1) {
+                    x = lastPoint.x + (Math.sin(angle) * i);
+                    y = lastPoint.y + (Math.cos(angle) * i);
+                    var radgrad = marking_ctx.createRadialGradient(x, y, lineWidth / 2, x, y, lineWidth * 2);
+
+                    radgrad.addColorStop(0, penColor);
+                    radgrad.addColorStop(0.5, penColor);
+                    radgrad.addColorStop(1, penColor);
+                    marking_ctx.fillStyle = radgrad;
+                    marking_ctx.fillRect(x - lineWidth, y - lineWidth, lineWidth * 2, lineWidth * 2);
+                }
+            }
+            lastPoint = currentPoint;
+        };
+
+        marking_layer.onmouseup = function () {
+            isDrawing = false;
+            cursor_ctx.clearRect(0, 0, marking_layer.width, marking_layer.height);
+        };
+
+        document.getElementById("marking_clear").onclick = function () {
+            if (confirm("Are you sure to clear? Can't undo")) {
+                marking_ctx.clearRect(0, 0, marking_ctx.canvas.width, marking_ctx.canvas.height);
+                init_marker();
+            }
+        }
+
+        function colorChange(button) {
+            $("#pen-icon").attr("disabled", false);
+            $(".pen_slider").attr("disabled", false);
+            highlighterMode = false;
+            if (button.innerHTML === "Eraser") {
+                eraserMode = true;
+                penColor = "grey";
+                $("#pen_width").val(eraserWidth / 10);
+                $("#pen-icon").css('color', "Grey");
+                $("#pen-icon").removeClass("fa-pen").addClass("fa-eraser");
+                $(".pen_slider").css('background', "Grey");
+            } else {
+                eraserMode = false;
+                $("#pen_width").val(penWidth);
+                $("#pen-icon").removeClass("fa-eraser").addClass("fa-pen");
+                color_pen = button.innerHTML;
+                changeWidth();
+                applyColor();
+            }
+        }
+
+        function applyColor() {
+            switch (color_pen) {
+                case "Reset":
+                    init_marker();
+                    controlColor = penColor;
+                    break;
+                case "Red":
+                    penColor = "rgba(246, 72, 70, " + alpha_pen + ")";
+                    controlColor = "rgba(246, 72, 70, " + 3 / penWidth + ")";
+                    break;
+                case "Green":
+                    penColor = "rgba(62, 166, 98, " + alpha_pen + ")";
+                    controlColor = "rgba(62, 166, 98, " + 3 / penWidth + ")";
+                    break;
+                case "Blue":
+                    penColor = "rgba(27, 142, 183, " + alpha_pen + ")";
+                    controlColor = "rgba(27, 142, 183, " + 3 / penWidth + ")";
+                    break;
+                default:
+                    penColor = "rgba(246, 72, 70, " + alpha_pen + ")";
+                    controlColor = "rgba(246, 72, 70, " + 3 / penWidth + ")";
+            }
+            $("#pen-icon").css('color', controlColor);
+            $(".pen_slider").css('background', controlColor);
+        }
+
+        var changeWidth = function () {
+            if (eraserMode) {
+                eraserWidth = $("#pen_width").val() * 10;
+            } else {
+                penWidth = $("#pen_width").val();
+                alpha_pen = 1.0 / (penWidth * penWidth / 3.0);
+                applyColor();
+            }
+        }
+
+        $("#pen_width").change(changeWidth);
+
+        $(".highligther").click(function () {
+            highlighterMode = true;
+            eraserMode = false;
+            penColor = "rgba(255, 0, 132, " + alpha_highliter + ")";
+            $("#pen-icon").css('color', "lightgrey");
+            $(".pen_slider").css('background', "lightgrey");
+            $("#pen-icon").attr("disabled", true);
+            $(".pen_slider").attr("disabled", true);
+        });
+
+        function setPageButtons() {
+            $("#pageCount").html((imageCurrent + 1) + " of " + imageCount);
+            if (imageCurrent === imageCount - 1) {
+                $("#marking_next").attr("disabled", true).removeClass("btn-outline-info").addClass("btn-outline-light");
+
+            } else {
+                $("#marking_next").attr("disabled", false).removeClass("btn-outline-light").addClass("btn-outline-info");
+            }
+
+            if (imageCurrent === 0) {
+                $("#marking_prev").attr("disabled", true).removeClass("btn-outline-info").addClass("btn-outline-light");
+            } else {
+                $("#marking_prev").attr("disabled", false).removeClass("btn-outline-light").addClass("btn-outline-info");
+            }
+        }
+
+        $("#marking_prev").click(function () {
+            if (imageCurrent > 0) {
+                save_marking();
+                {#Save first then change#}
+                imageCurrent -= 1;
+                load_images();
+                draw_images();
+                setPageButtons();
+            }
+        });
+
+        $("#marking_next").click(function () {
+            if (imageCurrent < imageCount - 1) {
+                save_marking();
+                {#Save first then change#}
+                imageCurrent += 1;
+                load_images();
+                draw_images();
+                setPageButtons();
+            }
+        });
+
+        function load_images() {
+            $.ajax({
+                type: "GET",
+                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data, student_id=form.student_id.data) }}",
+                success: function (images, status) {
+                    Object.keys(images).forEach(function (key) {
+                        var writing_id = key + "_writing";
+                        var marking_id = key + "_marking";
+                        $("#" + writing_id).attr("name", images[key]['writing']).attr("src", images[key]['writing'] + "?" + Date.now());
+                        if (images[key]['marking'])
+                            $("#" + marking_id).attr("name", images[key]['marking']).attr("src", images[key]['marking'] + "?" + Date.now());
+                    });
+                }
+            })
+        }
+
+        function save_marking(quiet) {
+            var marking_path = null;
+            var img = marking_layer.toDataURL("image/png");
+            var confirmed = true;
+            if (oldMarking !== img) {
+                if (!quiet) {
+                    if (!confirm("Marking changed. Do you want to save?"))
+                        confirmed = false;
+                }
+
+                if (confirmed) {
+                    var notification = function () {
+                        $("#marking_alert").html("Marking saved successfully");
+                        $("#marking_alert").fadeTo(2000, 500).fadeOut();
+                        oldMarking = img;
+                    }
+
+                    if (markings.item(imageCurrent))
+                        markeing_path = markings.item(imageCurrent).name
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('writing.marking_onscreen_save') }}",
+                        data: JSON.stringify({
+                            "writing_id": "{{ form.marking_writing_id.data }}",
+                            "student_id": "{{ form.student_id.data }}",
+                            "key": images.item(imageCurrent).id.replace('_writing', ''),
+                            "writing_path": images.item(imageCurrent).name,
+                            "marking_path": marking_path,
+                            "marking_image": img
+                        }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: notification,
+                        error: function () {
+                            alert('Failed to save marking');
+                        }
+                    });
+                }
+            }
+        }
+
+        $("#marking_save").click(function () {
+            save_marking(true);
+        });
+
+
+        function drawSlides() {
+            $("#weight_mapping span input").each(function (i, v) {
+                index = i + 1;
+                var marking = $(this)[0];
+                var value = parseFloat(marking.value);
+                var handle = $('div[name="custom-handle' + index + '"]');
+                $("#slider" + index).slider({
+                    value: value,
+                    orientation: "horizontal",
+                    min: 0.0,
+                    max: 10.0,
+                    range: "max",
+                    animate: true,
+                    create: function () {
+                        {#handle.text(value);#}
+                    },
+                    slide: function (event, ui) {
+                        {#handle.text(ui.value);#}
+                        marking.value = ui.value;
+                    }
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            draw_images();
+            init_marker();
+            setPageButtons();
+            drawSlides()
+        })
+
+    </script>
+{% endblock scripts %}
+
+

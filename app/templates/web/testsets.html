@@ -15,19 +15,31 @@
                         <div class="col">
                             <input type="hidden" name="assessment_guid" value="{{ assessment_guid }}">
                             <table id="testsets" class="display table table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th><th>Test Set</th><th>Status</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                 {% for ts in testsets %}
                                     <tr>
                                         <td>
-                                            <input type="button" class="btn btn-success btn-block"
-                                                   data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
-                                                   {% if ts.enrolled %}disabled{% endif %}>
+                                            {{ loop.index }}
                                         </td>
                                         <td>
                                             {% if ts.enrolled %}
-                                                 <input type="button" class="btn btn-primary btn-block" value="Finished" disabled>
+                                                <input type="button" class="btn btn-light btn-block"
+                                                   data-testset-id="{{ ts.id }}" value="{{ ts.name }}" disabled>
                                             {% else %}
-                                                 <input type="button" class="btn btn-primary btn-block" value="" style="display: none" disabled>
+                                                <input type="button" class="btn btn-success btn-block"
+                                                   data-testset-id="{{ ts.id }}" value="{{ ts.name }}" disabled>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if ts.enrolled %}
+                                                 <input type="button" class="btn btn-secondary btn-block" value="Finished" disabled>
+                                            {% else %}
+                                                 <input type="button" class="btn btn-primary btn-block start" data-testset-id="{{ ts.id }}" value="Start">
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -47,7 +59,7 @@
     {{ super() }}
     <script>
         $(document).ready(function () {
-            $('#testsets input').on('click', function () {
+            $('#testsets input.start').on('click', function () {
                 var student_id = $('#student_id').val();
                 var testset_id = $(this).data('testset-id');
                 var assessment_guid = $('input[name="assessment_guid"]').val();

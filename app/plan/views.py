@@ -264,13 +264,11 @@ def add_detail():
     return redirect(url_for('plan.manage'))
 
 
-'''Manage Education Plan Page - rendering template'''
-
-
 @plan.route('/manage', methods=['GET'])
 @login_required
 @permission_required(Permission.ADMIN)
 def manage():
+    '''Manage Education Plan Page - rendering template'''
     plan_name = request.args.get("plan_name")
     year = request.args.get("year")
     test_type = request.args.get("test_type")
