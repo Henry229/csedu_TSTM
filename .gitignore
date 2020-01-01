@@ -13,3 +13,4 @@ __pycache__/
 *.log
 app/static/report/naplan_result/
 passwords.txt
+app/static/writing/img/

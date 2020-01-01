@@ -157,10 +157,12 @@ else {
     $result['correctResponses'] = json_encode($correctResponses);
 }
 // The item session variables and their values can be accessed by their identifier.
+$response_key = isset($id) ? $id: 'RESPONSE';
+
 if ($result['result'] == 'success') {
     $result["numAttempts"] = (int)strval($itemSession['numAttempts']);
     $result["completionStatus"] = strval($itemSession['completionStatus']);
-    $result["RESPONSE"] = strval($itemSession['RESPONSE']);
+    $result["RESPONSE"] = strval($itemSession[$response_key]);
     $result["SCORE"] = (float)strval($itemSession['SCORE']);
 }
 else {
