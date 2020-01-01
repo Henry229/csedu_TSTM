@@ -1,12 +1,13 @@
 import os
+from collections import namedtuple
 
 from PIL import Image, ImageDraw
 from flask import current_app, render_template
-from .. import db
+
 from app.api import api
 from app.decorators import permission_required
 from app.models import Permission, refresh_mviews, Codebook
-from collections import namedtuple
+from .. import db
 
 '''Student Naplan Report - graph mapping for drawing picture '''
 graph_mapping = {
@@ -68,6 +69,8 @@ graph_mapping = {
 }
 
 '''Student Naplan Report - draw picture '''
+
+
 def draw_report(result):
     # Read base image
     if not os.path.exists(current_app.config['NAPLAN_RESULT_DIR']):
@@ -137,8 +140,9 @@ def draw_report(result):
     return file_name
 
 
-
 '''Student UI - Student Naplan Report : Query data and return image file_name generated '''
+
+
 def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, assessment_GUID, grade):
     column_names = ['assessment_id',
                     'testset_id',
@@ -229,6 +233,8 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
 
 
 '''Student UI: Query My Report List for each Student'''
+
+
 def query_my_report_list_v(student_id):
     column_names = ['id',
                     'assessment_id',
@@ -252,9 +258,9 @@ def query_my_report_list_v(student_id):
     return rows
 
 
-
-
 '''Student UI: Query My Report (subject) Header for each Student'''
+
+
 def query_my_report_header(assessment_id, ts_id, student_id):
     column_names = ['rank_v as student_rank',
                     'total_students',
@@ -273,6 +279,8 @@ def query_my_report_header(assessment_id, ts_id, student_id):
 
 
 '''Student UI: Query My Report (subject) Body for each Student'''
+
+
 def query_my_report_body(assessment_enroll_id, ts_id):
     column_names_1 = ['assessment_enroll_id',
                       'testset_id',
@@ -297,6 +305,8 @@ def query_my_report_body(assessment_enroll_id, ts_id):
 
 
 '''Student UI: Query My Report (subject) Footer for each Student'''
+
+
 def query_my_report_footer(assessment_id, student_id):
     column_names_2 = ['code_name as category',
                       "to_char(score,'999.99') as score",
@@ -316,6 +326,8 @@ def query_my_report_footer(assessment_id, student_id):
 
 
 '''Admin UI: Query all subject report data including assessment, plan(package)'''
+
+
 def query_all_report_data(test_type, test_center, year):
     column_names = ['plan_id',
                     'plan_name',
@@ -350,6 +362,8 @@ def query_all_report_data(test_type, test_center, year):
 
 
 '''Admin UI: Query individual progress summary report list'''
+
+
 def query_individual_progress_summary_report_list():
     column_names_1 = ['plan_id',
                       'plan_name',
@@ -366,6 +380,8 @@ def query_individual_progress_summary_report_list():
 
 
 '''Admin UI: Query individual progress summary report header'''
+
+
 def query_individual_progress_summary_report_header(plan_id):
     column_names_1 = ['year',
                       'grade',
@@ -380,6 +396,8 @@ def query_individual_progress_summary_report_header(plan_id):
 
 
 '''Admin UI: Query individual progress summary report by assessment'''
+
+
 def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
     column_names_all = ['p.plan_id', 'p."order"', 'p.assessment_id',
                         'p.student_id',
@@ -399,6 +417,8 @@ def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
 
 
 '''Admin UI: Query individual progress summary report - plan information'''
+
+
 def query_individual_progress_summary_report_by_plan(plan_id, student_id):
     column_names = ['p.plan_id', 'p."order"', 'p.assessment_id',
                     'p.testset_id',
@@ -423,6 +443,8 @@ def query_individual_progress_summary_report_by_plan(plan_id, student_id):
 
 
 '''Admin UI: Query individual progress summary report by subject'''
+
+
 def query_individual_progress_summary_by_subject_v(plan_id, student_id):
     column_names = ['plan_id', 'testset_id', 'student_id',
                     'rank_v',
@@ -443,6 +465,8 @@ def query_individual_progress_summary_by_subject_v(plan_id, student_id):
 
 
 '''Admin UI: Query individual progress summary report by plan'''
+
+
 def query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_assessments):
     column_names = ['plan_id', 'student_id',
                     'rank_v',
@@ -461,6 +485,8 @@ def query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_asse
 
 
 '''Admin UI: Query Test Ranking report - subject list )'''
+
+
 def query_test_ranking_subject_list(assessment_id):
     column_names = ['att.testset_id',
                     '(select cb.code_name ' \
@@ -480,6 +506,8 @@ def query_test_ranking_subject_list(assessment_id):
 
 
 '''Admin UI: Query Test Ranking report - student rank list )'''
+
+
 def query_test_ranking_data(subjects, assessment_id):
     # ##
     # Original SQL Statement for student_ranking report
@@ -590,6 +618,7 @@ def query_test_ranking_data(subjects, assessment_id):
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
 
+
 def build_test_ranking_excel_response(subjects, test_summaries, year, test_type, sequence):
     """
     test_result_summary 를 받아서 엑셀로 export 하는 response object 를 만듭니다.
@@ -661,15 +690,14 @@ def build_test_ranking_excel_response(subjects, test_summaries, year, test_type,
 
 
 def build_test_ranking_pdf_response(template_file_name, image_file_path, year, test_type, sequence,
-                           subject_names, test_summaries, now):
-
+                                    subject_names, test_summaries, now):
     from zipfile import ZipFile
     from flask import send_file
 
     rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path,
-                           year=year, test_type=test_type, sequence=sequence,
-                           subject_names=subject_names,
-                           test_summaries=test_summaries, now=now)
+                                            year=year, test_type=test_type, sequence=sequence,
+                                            subject_names=subject_names,
+                                            test_summaries=test_summaries, now=now)
     from weasyprint import HTML, CSS
     from weasyprint.fonts import FontConfiguration
     font_config = FontConfiguration()
@@ -690,20 +718,19 @@ def build_test_ranking_pdf_response(template_file_name, image_file_path, year, t
                    presentational_hints=True)
     file_paths = get_all_files(pdf_dir_path)
 
-    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+    with ZipFile('%s.zip' % pdf_dir_path, 'w') as zip:
         for file in file_paths:
             zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
-    rsp =  send_file(
-                zfile,
-                mimetype='application/zip',
-                as_attachment=True,
-                attachment_filename='zfile')
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'], pdf_dir_path)
+    rsp = send_file(
+        zfile,
+        mimetype='application/zip',
+        as_attachment=True,
+        attachment_filename='%s.zip' % pdf_dir_path)
     return rsp
 
 
 def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_id):
-
     rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path)
     from weasyprint import HTML, CSS
     from weasyprint.fonts import FontConfiguration
@@ -735,26 +762,29 @@ def build_test_results_zipper(assessment_GUID):
     pdf_dir_path = 'test_report_pdf_%s' % (assessment_GUID)
     os.chdir(current_app.config['IMPORT_TEMP_DIR'])
     file_paths = get_all_files(pdf_dir_path)
-    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+    with ZipFile('%s.zip' % pdf_dir_path, 'w') as zip:
         for file in file_paths:
             zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
-    rsp =  send_file(
-                zfile,
-                mimetype='application/zip',
-                as_attachment=True,
-                attachment_filename='zfile')
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'], pdf_dir_path)
+    rsp = send_file(
+        zfile,
+        mimetype='application/zip',
+        as_attachment=True,
+        attachment_filename='%s.zip' % pdf_dir_path)
     return rsp
 
 
 '''Admin UI individual_progress Report by_subject - draw picture '''
+
+
 def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
     import numpy as np
     import seaborn as sns
     import matplotlib.pyplot as plt
     sns.set(style="whitegrid")
-    f, axes = plt.subplots(len(score_summaries), 1, figsize=(3*len(score_summaries), len(score_summaries)), sharex=True)
-    y = np.array(["My Score","Avg"])
+    f, axes = plt.subplots(len(score_summaries), 1, figsize=(3 * len(score_summaries), len(score_summaries)),
+                           sharex=True)
+    y = np.array(["My Score", "Avg"])
 
     arr_x = []
     index = 0
@@ -765,7 +795,7 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
         _total_score = float(score.get('total_score'))
         # _my_avg_range = float(score.get('my_avg_range'))
         _avg = float(score.get('average'))
-        arr_x.append(np.array([_my_score,_avg]))
+        arr_x.append(np.array([_my_score, _avg]))
         axes[index].set_ylabel(_subject)
         axes[index].set(xlim=(0, _total_score))
         index += 1
@@ -781,6 +811,8 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
 
 
 '''Admin UI individual_progress Report by_set - draw picture '''
+
+
 def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_id):
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -792,8 +824,8 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     for i in range(0, len(my_set_score)):
         # score = [my_set_score[i], avg_set_score[i]]
         values.append([my_set_score[i], avg_set_score[i]])
-        tests.append('Test%s'%str(i+1))
-    df = pd.DataFrame(values, tests, columns=['My Score','Avg Score'])
+        tests.append('Test%s' % str(i + 1))
+    df = pd.DataFrame(values, tests, columns=['My Score', 'Avg Score'])
     sns.lineplot(data=df, palette="tab10", linewidth=2.5)
     # plt.show()
     file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_id)
@@ -808,13 +840,14 @@ def build_individual_progress_pdf_response(template_file_name, logo_file_name,
                                            avg_set_score, my_set_rank, score_summaries, plan_id,
                                            plan_GUID, student_id):
     rendered_template_pdf = render_template(template_file_name, logo_file_name=logo_file_name,
-                                            by_subject_file_name=by_subject_file_name, by_set_file_name=by_set_file_name,
-                                            ts_header = ts_header,
-                                            num_of_assessments = num_of_assessments, num_of_subjects = num_of_subjects,
-                                            subject_names = subject_names,
-                                            subjects = subjects, my_set_score = my_set_score,
-                                            avg_set_score = avg_set_score, my_set_rank = my_set_rank,
-                                            score_summaries = score_summaries, plan_id = plan_id
+                                            by_subject_file_name=by_subject_file_name,
+                                            by_set_file_name=by_set_file_name,
+                                            ts_header=ts_header,
+                                            num_of_assessments=num_of_assessments, num_of_subjects=num_of_subjects,
+                                            subject_names=subject_names,
+                                            subjects=subjects, my_set_score=my_set_score,
+                                            avg_set_score=avg_set_score, my_set_rank=my_set_rank,
+                                            score_summaries=score_summaries, plan_id=plan_id
                                             )
 
     from weasyprint import HTML, CSS
@@ -847,15 +880,15 @@ def build_individual_progress_zipper(plan_GUID):
     pdf_dir_path = 'individual_progress_report_pdf_%s' % (plan_GUID)
     os.chdir(current_app.config['IMPORT_TEMP_DIR'])
     file_paths = get_all_files(pdf_dir_path)
-    with ZipFile('%s.zip' % pdf_dir_path,'w') as zip:
+    with ZipFile('%s.zip' % pdf_dir_path, 'w') as zip:
         for file in file_paths:
             zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'],pdf_dir_path)
-    rsp =  send_file(
-                zfile,
-                mimetype='application/zip',
-                as_attachment=True,
-                attachment_filename='zfile')
+    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'], pdf_dir_path)
+    rsp = send_file(
+        zfile,
+        mimetype='application/zip',
+        as_attachment=True,
+        attachment_filename='%s.zip' % pdf_dir_path)
     return rsp
 
 
@@ -869,6 +902,8 @@ def get_all_files(directory):
 
 
 '''Admin UI: Item Score Summary report data '''
+
+
 def query_item_score_summary_data(item_id):
     # grouping : 'by_item_assessment', 'by_item'
     column_names = ['item_id',
@@ -889,11 +924,11 @@ def query_item_score_summary_data(item_id):
 
 
 '''Refresh Mview for generating Report'''
+
+
 @api.route('/gen_report/', methods=['POST'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def gen_report():
     refresh_mviews()
     print('Finish refresh mviews')
     return 'True'
-
-
