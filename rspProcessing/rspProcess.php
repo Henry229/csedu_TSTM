@@ -86,11 +86,13 @@ $variables = array();
 $filler = new VariableFiller($item);
 
 // Convert client-side data as QtiSm Runtime Variables.
+$response_ids = [];
 foreach ($jsonPayload['response'] as $id => $response) {
 
     try {
         $var  = $filler->fill($id, $response);
         $variables[] = $var;
+        $response_ids[] = $id;
     }
     catch (OutOfRangeException $e) {
         // A variable value could not be converted, ignore it.
@@ -157,12 +159,19 @@ else {
     $result['correctResponses'] = json_encode($correctResponses);
 }
 // The item session variables and their values can be accessed by their identifier.
-$response_key = isset($id) ? $id: 'RESPONSE';
-
 if ($result['result'] == 'success') {
     $result["numAttempts"] = (int)strval($itemSession['numAttempts']);
     $result["completionStatus"] = strval($itemSession['completionStatus']);
-    $result["RESPONSE"] = strval($itemSession[$response_key]);
+    if (count($response_ids) == 1) {
+        $result["RESPONSE"] = strval($itemSession[$response_ids[0]]);
+    }
+    else {
+        $response_val = [];
+        foreach ($response_ids as $response_key) {
+            $response_val[$response_key] = strval($itemSession[$response_key]);
+        }
+        $result["RESPONSE"] = json_encode($response_val);
+    }
     $result["SCORE"] = (float)strval($itemSession['SCORE']);
 }
 else {

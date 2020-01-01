@@ -162,9 +162,19 @@ var TestRunner = (function () {
             return true;
         if (typeof answer === "string")
             answer = [answer];
-        for (var i = 0; i < answer.length; i++) {
-            if (answer[i] !== '')
-                return true;
+        if (Array.isArray(answer)) {
+            for (var i = 0; i < answer.length; i++) {
+                if (answer[i] !== '')
+                    return true;
+            }
+        }
+        else {
+            for (var key in answer) {
+                if (answer.hasOwnProperty(key)) {
+                    if (answer[key] !== '')
+                        return true;
+                }
+            }
         }
         return false;
     }

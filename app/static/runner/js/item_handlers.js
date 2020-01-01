@@ -485,7 +485,14 @@ var ItemHandlers = (function () {
             var interactions = $('.qti-interaction');
             for (var i = 0; i < interactions.length; i++) {
                 var $interaction = $(interactions[i]);
-                $interaction.val(answer[i]);
+                var id_key = $interaction.data('identifier');
+                if (Array.isArray(answer)) {
+                    $interaction.val(answer[i]);
+                }
+                else {
+                    var val = answer[id_key] || '';
+                    $interaction.val(val);
+                }
             }
         };
 
@@ -493,20 +500,22 @@ var ItemHandlers = (function () {
             var interactions = $('.qti-interaction');
             var response = {};
             var results = [];
+            var base = {};
             for (var i = 0; i < interactions.length; i++) {
-                var base = {};
+                base = {};
                 var $interaction = $(interactions[i]);
                 var identifier = $interaction.data('identifier');
                 var baseType = $interaction.data('base-type');
                 results.push($interaction.val());
+                base[baseType] = $interaction.val();
                 response[identifier] = {'base': base};
             }
             if (this.cardinality === 'multiple') {
                 base[baseType] = results;
                 response[identifier] = {'list': base};
             } else if (this.cardinality === 'single') {
-                base[baseType] = results[0];
-                response[identifier] = {'base': base};
+                // base[baseType] = results[0];
+                // response[identifier] = {'base': base};
             }
             return response;
         };
@@ -792,11 +801,17 @@ var ItemHandlers = (function () {
             var interactions = $('.qti-interaction');
             var response = {};
             var results = [];
+            var identifier = '';
+            var baseType = '';
             for (var i = 0; i < interactions.length; i++) {
                 var base = {};
                 var $interaction = $(interactions[i]);
-                var identifier = $interaction.data('identifier');
-                var baseType = $interaction.data('base-type');
+                var id_temp = $interaction.data('identifier');
+                var base_temp = $interaction.data('base-type');
+                if (id_temp !== undefined && base_temp !== undefined) {
+                    identifier = id_temp;
+                    baseType = base_temp;
+                }
                 results.push($interaction.val());
                 response[identifier] = {'base': base};
             }

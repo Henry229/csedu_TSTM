@@ -561,6 +561,7 @@ def parse_correct_response(correct_response):
 
 
 def parse_processed_response(candidate_response):
+    from json import JSONDecodeError
     candidate_response = candidate_response.strip()
     if candidate_response != '' and candidate_response[0] == '[':
         responses = candidate_response[1:-1].replace("'", "").split(';')
@@ -568,6 +569,15 @@ def parse_processed_response(candidate_response):
         for r in responses:
             r = r.strip()
             candidate_response.append(r)
+    elif candidate_response != '':
+        try:
+            rsp = json.loads(candidate_response)
+            if type(rsp) == dict:
+                candidate_response = rsp
+        except TypeError:
+            pass
+        except JSONDecodeError:
+            pass
     return candidate_response
 
 
