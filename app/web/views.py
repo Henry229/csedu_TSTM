@@ -145,7 +145,7 @@ def process_inward():
 
     member = get_student_info(student_id)
     if is_authorised(member, session_timeout):
-        registered_student = Student.query.filter_by(student_id=student_id).first()
+        registered_student = Student.query.filter_by(user_id=student_id).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
@@ -174,7 +174,7 @@ def process_inward():
         update_campus_info()
         db.session.commit()
         login_user(student_user)
-        # student_data = get_member_info(student_id)
+        # student_data = get_member_info(student_user_id)
         if assessment_guid:
             return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
         else:
@@ -224,7 +224,7 @@ def testset_list():
         tsets.enrolled = tsets.id in testset_enrolled
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
-    return render_template('web/testsets.html', student_id=student.id, assessment_guid=assessment_guid,
+    return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
                            testsets=sorted_testsets)
 
 
@@ -269,9 +269,9 @@ def testing():
         return page_not_found()
     context = {
         'session_id': session_id,
-        'student_id': student.user_id,
-        'student_external_id': student.student_user_id,
-        'student_branch': student.getCSCampusName(student.student_user_id)
+        'student_user_id': student.user_id,
+        'student_external_id': student.student_id,
+        'student_branch': student.getCSCampusName(student.user_id)
     }
 
     if testset_id is not None:

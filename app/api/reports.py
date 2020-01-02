@@ -135,7 +135,7 @@ def draw_report(result):
     del dctx
     img.format = "PNG"
     # img.show()
-    file_name = 'naplan-grade-%s_%s_%s.png' % (result["grade"], result["student_id"], result["assessment_GUID"])
+    file_name = 'naplan-grade-%s_%s_%s.png' % (result["grade"], result["student_user_id"], result["assessment_GUID"])
     img.save('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
     return file_name
 
@@ -143,10 +143,10 @@ def draw_report(result):
 '''Student UI - Student Naplan Report : Query data and return image file_name generated '''
 
 
-def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, assessment_GUID, grade):
+def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_id, assessment_GUID, grade):
     column_names = ['assessment_id',
                     'testset_id',
-                    'student_id',
+                    'student_user_id',
                     'percentile_score',
                     'median',
                     'percentile_20',
@@ -154,7 +154,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
                     ]
     sql_stmt = 'SELECT {columns} ' \
                'FROM test_summary_mview ' \
-               'WHERE student_id = :student_id ' \
+               'WHERE student_user_id = :student_user_id ' \
                'AND assessment_id = :assessment_id ' \
                'AND testset_id = :testset_id '.format(columns=','.join(column_names))
     assessment_json = {}
@@ -162,7 +162,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
         student_score, average_score = 0, 0
         testset_id = assessment.testset_id
         cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id, 'testset_id': testset_id,
-                                               'student_id': student_id})
+                                               'student_user_id': student_user_id})
         Record = namedtuple('Record', cursor.keys())
         rows = [Record(*r) for r in cursor.fetchall()]
         for row in rows:
@@ -182,12 +182,12 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
                                     ]
                 sql_stmt_sub = 'SELECT {columns} ' \
                                'FROM test_summary_by_category_v ' \
-                               'WHERE student_id = :student_id ' \
+                               'WHERE student_user_id = :student_user_id ' \
                                'AND assessment_id = :assessment_id ' \
                                'AND testset_id = :testset_id '.format(columns=','.join(column_names_sub))
                 cursor_sub = db.session.execute(sql_stmt_sub,
                                                 {'assessment_id': assessment_id, 'testset_id': testset_id,
-                                                 'student_id': student_id})
+                                                 'student_user_id': student_user_id})
                 Record = namedtuple('Record', cursor_sub.keys())
                 sub_rows = [Record(*r) for r in cursor_sub.fetchall()]
                 lc_spelling_score, lc_spelling_average_score, lc_spelling_percentile_20, lc_spelling_percentile_80 = 0, 0, 0, 0
@@ -225,7 +225,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
     scores = {
         "grade": grade,
         "assessment_GUID": assessment_GUID,
-        "student_id": student_id,
+        "student_user_id": student_user_id,
         "assessments": assessment_json
     }
     file_name = draw_report(scores)
@@ -235,10 +235,10 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_id, as
 '''Student UI: Query My Report List for each Student'''
 
 
-def query_my_report_list_v(student_id):
+def query_my_report_list_v(student_user_id):
     column_names = ['id',
                     'assessment_id',
-                    'student_id',
+                    'student_user_id',
                     'year',
                     'test_type',
                     'name',
@@ -251,8 +251,8 @@ def query_my_report_list_v(student_id):
                     ]
     sql_stmt = 'SELECT {columns} ' \
                'FROM my_report_list_v ' \
-               ' WHERE student_id=:student_id'.format(columns=','.join(column_names))
-    cursor = db.session.execute(sql_stmt, {'student_id': student_id})
+               ' WHERE student_user_id=:student_user_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
@@ -261,7 +261,7 @@ def query_my_report_list_v(student_id):
 '''Student UI: Query My Report (subject) Header for each Student'''
 
 
-def query_my_report_header(assessment_id, ts_id, student_id):
+def query_my_report_header(assessment_id, ts_id, student_user_id):
     column_names = ['rank_v as student_rank',
                     'total_students',
                     "to_char(score,'999.99') as score",
@@ -271,9 +271,9 @@ def query_my_report_header(assessment_id, ts_id, student_id):
     sql_stmt = 'SELECT {columns} ' \
                'FROM test_summary_mview ' \
                'WHERE assessment_id=:assessment_id and testset_id=:testset_id ' \
-               'and student_id=:student_id'.format(columns=','.join(column_names))
+               'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
     cursor = db.session.execute(sql_stmt,
-                                {'assessment_id': assessment_id, 'testset_id': ts_id, 'student_id': student_id})
+                                {'assessment_id': assessment_id, 'testset_id': ts_id, 'student_user_id': student_user_id})
     ts_header = cursor.fetchone()
     return ts_header
 
@@ -285,7 +285,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     column_names_1 = ['assessment_enroll_id',
                       'testset_id',
                       'candidate_r_value',
-                      'student_id',
+                      'student_user_id',
                       'grade',
                       "to_char(created_time,'YYYY-MM-DD Dy') as created_time",
                       'is_correct',
@@ -307,7 +307,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
 '''Student UI: Query My Report (subject) Footer for each Student'''
 
 
-def query_my_report_footer(assessment_id, student_id):
+def query_my_report_footer(assessment_id, student_user_id):
     column_names_2 = ['code_name as category',
                       "to_char(score,'999.99') as score",
                       "to_char(total_score,'999.99') as total_score",
@@ -316,10 +316,10 @@ def query_my_report_footer(assessment_id, student_id):
                       ]
     sql_stmt_2 = 'SELECT {columns} ' \
                  'FROM test_summary_by_category_v ' \
-                 'WHERE student_id = :student_id ' \
+                 'WHERE student_user_id = :student_user_id ' \
                  'AND assessment_id = :assessment_id ' \
                  'ORDER BY category'.format(columns=','.join(column_names_2))
-    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_id': student_id})
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor_2.keys())
     rows = [Record(*r) for r in cursor_2.fetchall()]
     return rows
@@ -338,7 +338,7 @@ def query_all_report_data(test_type, test_center, year):
                     'assessment_id',
                     'testset_id',
                     'id as assessment_enroll_id',
-                    'student_id',
+                    'student_user_id',
                     'attempt_count',
                     'test_center',
                     'start_time_client'
@@ -354,7 +354,7 @@ def query_all_report_data(test_type, test_center, year):
     if year:
         sql_stmt_sub = sql_stmt_sub + 'AND "year" = :year '
     sql_stmt = sql_stmt + sql_stmt_sub.replace('AND', 'WHERE', 1)
-    sql_stmt = sql_stmt + ' ORDER BY plan_id, assessment_order, testset_id, test_center,student_id'
+    sql_stmt = sql_stmt + ' ORDER BY plan_id, assessment_order, testset_id, test_center,student_user_id'
     cursor = db.session.execute(sql_stmt, {'test_type': test_type, 'test_center': test_center, 'year': year})
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
@@ -398,7 +398,7 @@ def query_individual_progress_summary_report_header(plan_id):
 '''Admin UI: Query individual progress summary report by assessment'''
 
 
-def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
+def query_individual_progress_summary_report_by_assessment(plan_id, student_user_id):
     column_names_all = ['p.plan_id', 'p."order"', 'p.assessment_id',
                         'p.student_user_id',
                         "to_char(coalesce(p.score,0),'999.99') as my_set_score",
@@ -408,9 +408,9 @@ def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
     sql_stmt_all = 'SELECT DISTINCT {columns} ' \
                    'FROM test_summary_by_assessment_v p ' \
                    ' WHERE p.plan_id = :plan_id ' \
-                   '  AND student_id = :student_id ' \
+                   '  AND student_user_id = :student_user_id ' \
                    ' ORDER BY p.plan_id, p."order" '.format(columns=','.join(column_names_all))
-    cursor_all = db.session.execute(sql_stmt_all, {'plan_id': plan_id, 'student_id': student_id})
+    cursor_all = db.session.execute(sql_stmt_all, {'plan_id': plan_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor_all.keys())
     rows = [Record(*r) for r in cursor_all.fetchall()]
     return rows
@@ -419,7 +419,7 @@ def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
 '''Admin UI: Query individual progress summary report - plan information'''
 
 
-def query_individual_progress_summary_report_by_plan(plan_id, student_id):
+def query_individual_progress_summary_report_by_plan(plan_id, student_user_id):
     column_names = ['p.plan_id', 'p."order"', 'p.assessment_id',
                     'p.testset_id',
                     'ts.student_user_id',
@@ -434,9 +434,9 @@ def query_individual_progress_summary_report_by_plan(plan_id, student_id):
                'FROM csedu_education_plan_v p left join test_summary_mview ts ' \
                ' ON p.assessment_id = ts.assessment_id and p.testset_id = ts.testset_id ' \
                ' WHERE p.plan_id = :plan_id ' \
-               '  AND student_id = :student_id ' \
+               '  AND student_user_id = :student_user_id ' \
                ' ORDER BY p.plan_id, p."order", p.testset_id'.format(columns=','.join(column_names))
-    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
@@ -445,8 +445,8 @@ def query_individual_progress_summary_report_by_plan(plan_id, student_id):
 '''Admin UI: Query individual progress summary report by subject'''
 
 
-def query_individual_progress_summary_by_subject_v(plan_id, student_id):
-    column_names = ['plan_id', 'testset_id', 'student_id',
+def query_individual_progress_summary_by_subject_v(plan_id, student_user_id):
+    column_names = ['plan_id', 'testset_id', 'student_user_id',
                     'rank_v',
                     "to_char(coalesce(subject_avg_my_score,0),'999.99') as subject_avg_my_score,"
                     "to_char(coalesce(subject_avg_avg_score,0),'999.99') as subject_avg_avg_score",
@@ -456,9 +456,9 @@ def query_individual_progress_summary_by_subject_v(plan_id, student_id):
     sql_stmt = 'SELECT {columns} ' \
                'from test_summary_by_subject_v ts' \
                ' WHERE plan_id = :plan_id ' \
-               ' AND student_id =:student_id ' \
+               ' AND student_user_id =:student_user_id ' \
                ' ORDER BY testset_id'.format(columns=','.join(column_names))
-    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
@@ -467,8 +467,8 @@ def query_individual_progress_summary_by_subject_v(plan_id, student_id):
 '''Admin UI: Query individual progress summary report by plan'''
 
 
-def query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_assessments):
-    column_names = ['plan_id', 'student_id',
+def query_individual_progress_summary_by_plan_v(plan_id, student_user_id, num_of_assessments):
+    column_names = ['plan_id', 'student_user_id',
                     'rank_v',
                     "to_char(coalesce(sum_my_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_my_score",
                     "to_char(coalesce(sum_avg_score,0)/" + str(num_of_assessments) + ",'999.99') as sum_avg_score",
@@ -478,8 +478,8 @@ def query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_asse
     sql_stmt = 'SELECT {columns} ' \
                'from test_summary_by_plan_v ts' \
                ' WHERE plan_id = :plan_id ' \
-               ' AND student_id =:student_id '.format(columns=','.join(column_names))
-    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_id': student_id})
+               ' AND student_user_id =:student_user_id '.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt, {'plan_id': plan_id, 'student_user_id': student_user_id})
     row = cursor.fetchone()
     return row
 
@@ -513,7 +513,7 @@ def query_test_ranking_data(subjects, assessment_id):
     # Original SQL Statement for student_ranking report
     # ##
     # sql_stmt = WITH test_result_by_subject AS(
-    #     SELECT test_summary_v.row_name[1] AS student_id,
+    #     SELECT test_summary_v.row_name[1] AS student_user_id,
     #             test_summary_v.row_name[2] AS assessment_id,
     #             test_summary_v."2",
     #             test_summary_v."3",
@@ -521,13 +521,13 @@ def query_test_ranking_data(subjects, assessment_id):
     #             COALESCE(NULLIF(test_summary_v."2", 0::double precision), 0::double precision)
     #             + COALESCE(NULLIF(test_summary_v."3", 0::double precision), 0::double precision)
     #             + COALESCE(NULLIF(test_summary_v."4", 0::double precision), 0::double precision) AS total_mark
-    #     FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score
+    #     FROM crosstab('select ARRAY[student_user_id::integer,assessment_id::integer] as row_name, testset_id, my_score
     #                     from (SELECT m.student_user_id,
     #                             m.assessment_id,
     #                             m.testset_id,
     #                             m.score AS my_score
     #                             FROM marking_summary_360_degree_mview m
-    #                             where student_id is not null
+    #                             where student_user_id is not null
     #                             and m.assessment_id = 2) test_summary_v
     #                     order by 1, 2 ',
     #                     'select distinct att.testset_id
@@ -557,7 +557,7 @@ def query_test_ranking_data(subjects, assessment_id):
     # AND trs.student_user_id = a.student_user_id;
     #
     sql_stmt = ' WITH test_result_by_subject AS( ' \
-               + ' SELECT test_summary_v.row_name[1] AS student_id, ' \
+               + ' SELECT test_summary_v.row_name[1] AS student_user_id, ' \
                + ' test_summary_v.row_name[2] AS assessment_id, '
     for subject in subjects:
         sql_stmt = sql_stmt + ' test_summary_v.' + subject.subject_name + ', '
@@ -570,13 +570,13 @@ def query_test_ranking_data(subjects, assessment_id):
         index += 1
     sql_stmt = sql_stmt + ' AS total_mark '
     sql_stmt = sql_stmt \
-               + " FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score " \
+               + " FROM crosstab('select ARRAY[student_user_id::integer,assessment_id::integer] as row_name, testset_id, my_score " \
                + "                  from (SELECT m.student_user_id, " \
                + "                            m.assessment_id, " \
                + "                             m.testset_id, " \
                + "                            m.score AS my_score " \
                + "                            FROM marking_summary_360_degree_mview m " \
-               + "                            where student_id is not null " \
+               + "                            where student_user_id is not null " \
                + "                            and m.assessment_id = :assessment_id) test_summary_v " \
                + "                        order by 1, 2 ', " \
                + "                        'select distinct att.testset_id " \
@@ -730,7 +730,7 @@ def build_test_ranking_pdf_response(template_file_name, image_file_path, year, t
     return rsp
 
 
-def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_id):
+def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_user_id):
     rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path)
     from weasyprint import HTML, CSS
     from weasyprint.fonts import FontConfiguration
@@ -748,7 +748,7 @@ def build_test_results_pdf_response(template_file_name, image_file_path, assessm
     os.chdir(current_app.config['IMPORT_TEMP_DIR'])
     if not os.path.exists(pdf_dir_path):
         os.makedirs(pdf_dir_path)
-    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_id)
+    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_user_id)
     html.write_pdf(target=pdf_file_path,
                    presentational_hints=True)
     os.chdir(curr_dir)
@@ -777,7 +777,7 @@ def build_test_results_zipper(assessment_GUID):
 '''Admin UI individual_progress Report by_subject - draw picture '''
 
 
-def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
+def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user_id):
     import numpy as np
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -805,7 +805,7 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
         sns.barplot(x=x, y=y, palette="deep", ax=axes[index])
         index += 1
 
-    file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_id)
+    file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_user_id)
     f.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
     return file_name
 
@@ -813,7 +813,7 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id):
 '''Admin UI individual_progress Report by_set - draw picture '''
 
 
-def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_id):
+def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_user_id):
     import seaborn as sns
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -828,7 +828,7 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     df = pd.DataFrame(values, tests, columns=['My Score', 'Avg Score'])
     sns.lineplot(data=df, palette="tab10", linewidth=2.5)
     # plt.show()
-    file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_id)
+    file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_user_id)
     fig.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
     return file_name
 
@@ -838,7 +838,7 @@ def build_individual_progress_pdf_response(template_file_name, logo_file_name,
                                            ts_header, num_of_assessments, num_of_subjects,
                                            subject_names, subjects, my_set_score,
                                            avg_set_score, my_set_rank, score_summaries, plan_id,
-                                           plan_GUID, student_id):
+                                           plan_GUID, student_user_id):
     rendered_template_pdf = render_template(template_file_name, logo_file_name=logo_file_name,
                                             by_subject_file_name=by_subject_file_name,
                                             by_set_file_name=by_set_file_name,
@@ -866,7 +866,7 @@ def build_individual_progress_pdf_response(template_file_name, logo_file_name,
     os.chdir(current_app.config['IMPORT_TEMP_DIR'])
     if not os.path.exists(pdf_dir_path):
         os.makedirs(pdf_dir_path)
-    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_id)
+    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_user_id)
     html.write_pdf(target=pdf_file_path,
                    presentational_hints=True)
     os.chdir(curr_dir)

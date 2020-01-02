@@ -431,7 +431,7 @@
         function load_images() {
             $.ajax({
                 type: "GET",
-                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data, student_id=form.student_user_id.data) }}",
+                url: "{{ url_for('writing.marking_onscreen_load', marking_writing_id=form.marking_writing_id.data, student_user_id=form.student_user_id.data) }}",
                 success: function (images, status) {
                     Object.keys(images).forEach(function (key) {
                         var writing_id = key + "_writing";
@@ -469,7 +469,7 @@
                         url: "{{ url_for('writing.marking_onscreen_save') }}",
                         data: JSON.stringify({
                             "writing_id": "{{ form.marking_writing_id.data }}",
-                            "student_id": "{{ form.student_user_id.data }}",
+                            "student_user_id": "{{ form.student_user_id.data }}",
                             "key": images.item(imageCurrent).id.replace('_writing', ''),
                             "writing_path": images.item(imageCurrent).name,
                             "marking_path": marking_path,

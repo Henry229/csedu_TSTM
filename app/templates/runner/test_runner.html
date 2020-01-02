@@ -133,7 +133,7 @@
     {% else %}
         <input type="hidden" name="assessment_guid" value="{{ assessment_guid }}">
         <input type="hidden" name="testset_id" value="{{ testset.id }}">
-        <input type="hidden" name="student_id" value="{{ student_id }}">
+        <input type="hidden" name="student_user_id" value="{{ student_user_id }}">
         <input type="hidden" name="student_ip">
         <input type="hidden" name="student_external_id" value="{{ student_external_id }}">
 
@@ -205,14 +205,14 @@
                 $('.tools-ruler').hide();
                 $('.tools-protractor').hide();
             {% else %}
-                var student_id = $('input[name="student_id"]').val();
+                var student_user_id = $('input[name="student_user_id"]').val();
                 var student_external_id = $('input[name="student_external_id"]').val();
                 var assessment_guid = $('input[name="assessment_guid"]').val();
                 $('.start-yes-btn').on('click', function () {
                     var options = {
                         assessment_guid: assessment_guid,
                         testset_id: $('input[name="testset_id"]').val(),
-                        student_id: student_id,
+                        student_user_id: student_user_id,
                         session_cb: function (session_id) {
                             window.location = "/testing?session=" + session_id;
                         }

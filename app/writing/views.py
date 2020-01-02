@@ -134,21 +134,21 @@ def manage():
 
 @login_required
 @permission_required(Permission.ADMIN)
-@writing.route('/marking/<int:marking_writing_id>/<int:student_id>', methods=['GET'])
+@writing.route('/marking/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
 @login_required
-def marking(marking_writing_id, student_id):
+def marking(marking_writing_id, student_user_id):
     """
     Menu Writing > Marking > Click 'search writing' > Click 'link to Marking' page
     :param marking_writing_id:
-    :param student_id:
+    :param student_user_id:
     :return: the specific student's writing information for marking by marker
     """
     form = WritingMarkingForm()
     form.marking_writing_id.data = marking_writing_id
-    form.student_user_id.data = student_id
+    form.student_user_id.data = student_user_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
-        web_img_links = marking_onscreen_load(marking_writing_id, student_id)
+        web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
                 populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
@@ -163,7 +163,7 @@ def marking(marking_writing_id, student_id):
 
 def populate_criteria_form(form, criteria_detail=None):
     """
-    Call from writing.marking(marking_writing_id, student_id) to populate form - fieldList Criteria information
+    Call from writing.marking(marking_writing_id, student_user_id) to populate form - fieldList Criteria information
     :param form:
     :param criteria_detail:
     :return:
@@ -228,7 +228,7 @@ def writing_ui():
     """
     form = StartOnlineTestForm()
     assessment_guid = request.args.get("assessment_guid")
-    st_id = request.args.get("student_id")
+    st_id = request.args.get("student_user_id")
     if st_id is None:
         st_id = current_user.id
     form.assessment_guid.data = assessment_guid
@@ -252,29 +252,29 @@ def writing_ui():
 
 @login_required
 @permission_required(Permission.ADMIN)
-@writing.route('/marking_onscreen/<int:marking_writing_id>/<int:student_id>', methods=['GET'])
+@writing.route('/marking_onscreen/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
 @login_required
-def marking_onscreen_load(marking_writing_id, student_id):
+def marking_onscreen_load(marking_writing_id, student_user_id):
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     web_img_links = {}
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             if file_name:
-                file_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id), file_name)
+                file_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id), file_name)
                 if os.path.exists(file_path):
                     web_img_links[key] = {
-                        'writing': '/static/writing/img/%s/%s' % (student_id, file_name)}
+                        'writing': '/static/writing/img/%s/%s' % (student_user_id, file_name)}
                 if marking_writing.marked_file_link:
                     if key in marking_writing.marked_file_link.keys():
                         if os.path.exists(
-                                os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id),
+                                os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
                                              marking_writing.marked_file_link[key])):
                             web_img_links[key]['marking'] = '/static/writing/img/%s/%s' % (
-                                student_id, marking_writing.marked_file_link[key])
+                                student_user_id, marking_writing.marked_file_link[key])
     return web_img_links
 
 
-def text_to_images(student_id, file_path):
+def text_to_images(student_user_id, file_path):
     file_name = os.path.basename(file_path)
     image_x = 1200
     image_y = 1596
@@ -307,7 +307,7 @@ def text_to_images(student_id, file_path):
             d = ImageDraw.Draw(img)
             d.multiline_text((10, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0))
             saved_file_name = os.path.splitext(file_name)[0] + str(count) + ".jpg"
-            img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id),
+            img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
                                   saved_file_name))
             count += 1
             file_names.append(saved_file_name)
@@ -325,7 +325,7 @@ def marking_onscreen_save():
     """
     if request:
         writing_id = request.json["writing_id"]
-        student_id = request.json["student_id"]
+        student_user_id = request.json["student_user_id"]
         key = request.json["key"];
         writing_path = request.json["writing_path"]
         marking_path = request.json["marking_path"]
@@ -337,7 +337,7 @@ def marking_onscreen_save():
             if not marking_file_name:
                 writing_file_name = os.path.splitext(os.path.basename(writing_path))[0]
                 marking_file_name = writing_file_name + "_marking.png"
-            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id,
+            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id,
                                                   marking_file_name).replace('\\', '/')
 
             # Save image
@@ -404,7 +404,7 @@ def upload_writing():
         text = form.w_text.data
         file_names = saveWritingFile(filefield_name, text, assessment_guid, st_id)
         insertMarkingForWriting(marking_id, file_names)
-    return redirect(url_for('writing.writing_ui', assessment_guid=assessment_guid, student_id=st_id))
+    return redirect(url_for('writing.writing_ui', assessment_guid=assessment_guid, student_user_id=st_id))
 
 
 def insertMarkingForWriting(marking_id, file_names):
@@ -428,17 +428,17 @@ def insertMarkingForWriting(marking_id, file_names):
     flash("Writing is saved successfully.")
 
 
-def saveWritingFile(filefield_name, text, assessment_guid, student_id):
+def saveWritingFile(filefield_name, text, assessment_guid, student_user_id):
     """
     Call from writing.upload_writing - save student's writing to current_app.config['WRITING_UPLOAD_FOLDER']
     :param filefield_name:
     :param text:
     :param assessment_guid:
-    :param student_id:
+    :param student_user_id:
     :return: filenames saved to current_app.config['WRITING_UPLOAD_FOLDER']
     """
-    if not os.path.exists(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id)):
-        os.makedirs(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id))
+    if not os.path.exists(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id)):
+        os.makedirs(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id))
 
     my_files = request.files.getlist(filefield_name)
     file_names = []
@@ -446,8 +446,8 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
         for f in my_files:
             f_file_name = f.filename
             if f and allowed_file(f.filename):
-                file_name = student_id + '_' + assessment_guid + '_' + secure_filename(f.filename)
-                item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
+                file_name = student_user_id + '_' + assessment_guid + '_' + secure_filename(f.filename)
+                item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id, file_name)
                 f.save(item_file)
                 flash("File %s uploaded as %s. " % (f_file_name, file_name))
                 file_names.append(file_name)
@@ -456,12 +456,12 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_id):
     else:
         text = text
         if text:
-            file_name = student_id + '_' + assessment_guid + '_writing.txt'
-            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_id, file_name)
+            file_name = student_user_id + '_' + assessment_guid + '_writing.txt'
+            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id, file_name)
             f = open(item_file, "w")
             f.write(text)
             f.close()
-            file_names = text_to_images(student_id, item_file)
+            file_names = text_to_images(student_user_id, item_file)
             flash("Writing Texts are uploaded into %s. " % (", ".join(file_names)))
     return file_names
 

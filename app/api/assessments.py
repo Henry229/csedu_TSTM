@@ -363,7 +363,6 @@ def response_process(item_id):
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request()
-    student_id = student.id
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
@@ -484,14 +483,14 @@ def response_process_file(item_id):
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request()
-    student_id = student.id
-    save_writing_data(student_id, marking_id, writing_files=writing_files, writing_text=writing_text,
+    student_user_id = student.id
+    save_writing_data(student_user_id, marking_id, writing_files=writing_files, writing_text=writing_text,
                       has_files=has_files)
 
     return success({"result": "success"})
 
 
-def save_writing_data(student_id, marking_id, writing_files=None, writing_text=None, has_files=False):
+def save_writing_data(student_user_id, marking_id, writing_files=None, writing_text=None, has_files=False):
     if writing_files is None:
         writing_files = []
     file_names = []
@@ -499,8 +498,8 @@ def save_writing_data(student_id, marking_id, writing_files=None, writing_text=N
     for writing_file in writing_files:
         file_name = writing_file.filename if writing_file is not None else 'writing.txt'
         random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
-        new_file_name = 'file_' + str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
-        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        new_file_name = 'file_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id))
         item_file = os.path.join(writing_upload_dir, new_file_name)
         if not os.path.exists(writing_upload_dir):
             os.makedirs(writing_upload_dir)
@@ -519,8 +518,8 @@ def save_writing_data(student_id, marking_id, writing_files=None, writing_text=N
     if writing_text is not None:
         file_name = 'writing.txt'
         random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
-        new_file_name = 'writing_' + str(student_id) + '_' + random_name + '_' + secure_filename(file_name)
-        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_id))
+        new_file_name = 'writing_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id))
         item_file = os.path.join(writing_upload_dir, new_file_name)
         if not os.path.exists(writing_upload_dir):
             os.makedirs(writing_upload_dir)

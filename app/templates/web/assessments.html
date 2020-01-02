@@ -12,7 +12,7 @@
                 {% for assessment in assessments %}
                     <div class="card-body">
                         <h5 class="card-title">{{ assessment.name }}</h5>
-                        <input type="hidden" id="student_id" value="{{ student_id }}">
+                        <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
                         <div class="row">
                             <div class="col">
                                 <input type="hidden" name="assessment_guid"
@@ -46,11 +46,11 @@
     <script>
         $(document).ready(function () {
             $('#testsets input').on('click', function () {
-                var student_id = $('#student_id').val();
+                var student_user_id = $('#student_user_id').val();
                 var testset_id = $(this).data('testset-id');
                 var assessment_guid = $(this).data('assessment-guid');
                 window.location = '/testing?assessment=' + assessment_guid + '&testset_id='
-                    + testset_id + '&student_id=' + student_id;
+                    + testset_id + '&student_user_id=' + student_user_id;
             });
         });
     </script>

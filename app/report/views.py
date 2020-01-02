@@ -32,19 +32,19 @@ from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Educati
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def list_my_report():
-    student_id = current_user.id
+    student_user_id = current_user.id
     error = request.args.get("error")
     if error:
         flash(error)
 
-    # My Report List : 'id', 'assessment_id', 'student_id', 'year', 'test_type', 'name', 'branch_id',
+    # My Report List : 'id', 'assessment_id', 'student_user_id', 'year', 'test_type', 'name', 'branch_id',
     #                'subject_1', 'subject_2', 'subject_3', 'subject_4', 'subject_5'
-    rows = query_my_report_list_v(student_id)
+    rows = query_my_report_list_v(student_user_id)
     return render_template("report/my_report_list.html", assessment_enrolls=rows)
 
 
 ''' 
- @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_id>', methods=['GET'])
+ @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_user_id>', methods=['GET'])
  my_report() : Student Login > My Report > Report 
     - Execute: Provide link to Subject Report 
 '''
@@ -68,7 +68,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
-    #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_id', 'grade',
+    #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
     markings = query_my_report_body(assessment_enroll_id, ts_id)
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
@@ -79,7 +79,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 
 
 ''' 
- @report.route('/student/set/<int:assessment_id>/<int:student_id>', methods=['GET'])
+ @report.route('/student/set/<int:assessment_id>/<int:student_user_id>', methods=['GET'])
  my_student_set_report() : Student Login > My Report > Student Report 
     - Execute: Provide link to Student Report by assessment (all subject)
 '''
@@ -148,7 +148,7 @@ def manage():
     rows, reports, students, testsets, test_summaries = [], [], [], [], []
     if flag:
         # Query Report : 'plan_id', 'plan_name', 'assessment_year', 'grade', 'test_type','assessment_order',
-        #                 'assessment_id', 'testset_id', 'assessment_enroll_id', 'student_id', 'attempt_count',
+        #                 'assessment_id', 'testset_id', 'assessment_enroll_id', 'student_user_id', 'attempt_count',
         #                 'test_center', 'start_time_client'
         rows = query_all_report_data(test_type, test_center, year)
         # Re-construct "Reports" with query result
@@ -202,7 +202,7 @@ def manage():
                        }
         reports.append(json_string)
 
-        # Test Summary Report list for All Students: 'student_id','plan_id','plan_name',
+        # Test Summary Report list for All Students: 'student_user_id','plan_id','plan_name',
         #                           'year','grade','test_type'
         test_summaries = query_individual_progress_summary_report_list()
     return render_template('report/manage.html', form=search_form, reports=reports,
@@ -224,7 +224,7 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
     subjects = query_test_ranking_subject_list(assessment_id)
 
     # rank students from all test candidates
-    #            data : 'student_id', 'cs_student_id', 'student_name', 'assessment_id',
+    #            data : 'student_user_id', 'cs_student_id', 'student_name', 'assessment_id',
     #            'test_center', 'subject_1', 'subject_2', 'subject_3', 'total_mark', 'student_rank'
     rows = query_test_ranking_data(subjects, assessment_id)
 
@@ -291,7 +291,7 @@ def summary_report(plan_id, branch_id):
         return 'Invalid Request: No data for current user'
 
 
-def individual_progress_summary_report(plan_id, student_id):
+def individual_progress_summary_report(plan_id, student_user_id):
     plan_GUID = (EducationPlan.query.filter_by(id=plan_id).first()).GUID
     # ##
     # Header - 'year', 'grade', 'test_type'
@@ -307,8 +307,8 @@ def individual_progress_summary_report(plan_id, student_id):
     #                     'avg_score', 'percentile_score', 'rank_v', 'total_students'
     # ##
     # Construct 'my_assessment' - 'my_testset' which are displayed as individual subject score on report
-    rows_all = query_individual_progress_summary_report_by_assessment(plan_id, student_id)
-    rows = query_individual_progress_summary_report_by_plan(plan_id, student_id)
+    rows_all = query_individual_progress_summary_report_by_assessment(plan_id, student_user_id)
+    rows = query_individual_progress_summary_report_by_plan(plan_id, student_user_id)
 
     my_assessment, my_subject_score, avg_subject_score = [], [], [] # my_score by subject, avg_score
     my_set_score, my_set_rank, avg_set_score = [], [], []
@@ -358,14 +358,14 @@ def individual_progress_summary_report(plan_id, student_id):
 
     # ##
     # Graph - Summary Report by subject( 학생이 친 시험 과목별 평균점수, rank, 최저점, 최고점 )
-    #               'plan_id', 'testset_id', 'student_id', 'rank_v', 'subject_avg_my_score',
+    #               'plan_id', 'testset_id', 'student_user_id', 'rank_v', 'subject_avg_my_score',
     #               'subject_avg_avg_score', 'subject_avg_min_score', 'subject_avg_max_score'
     #         Summary Report by plan( 학생이 친 시험 전체(plan package단위) 점수, rank, 최저점, 최고점 )
-    #               'plan_id', 'student_id', 'rank_v', 'sum_my_score',
+    #               'plan_id', 'student_user_id', 'rank_v', 'sum_my_score',
     #               'sum_avg_score', 'sum_min_score', 'sum_max_score'
     # ##
-    total_subject_scores = query_individual_progress_summary_by_subject_v(plan_id, student_id)
-    total_score = query_individual_progress_summary_by_plan_v(plan_id, student_id, num_of_assessments)
+    total_subject_scores = query_individual_progress_summary_by_subject_v(plan_id, student_user_id)
+    total_score = query_individual_progress_summary_by_plan_v(plan_id, student_user_id, num_of_assessments)
 
     # #
     # re-construct data "score_summaries" to display properly on the template html page
@@ -400,8 +400,8 @@ def individual_progress_summary_report(plan_id, student_id):
                             "rank": total_score.rank_v})
 
     plan_GUID = (EducationPlan.query.filter_by(id=plan_id).first()).GUID
-    by_subject_file_name = draw_individual_progress_by_subject(score_summaries, plan_GUID, student_id)
-    by_set_file_name = draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_id)
+    by_subject_file_name = draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user_id)
+    by_set_file_name = draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_user_id)
 
     template_file_name = 'report/individual_progress_' + test_type_string + '.html'
     logo_web_path = os.path.join(current_app.config['CSEDU_IMG_DIR'].lstrip('app'), 'CSEducation.png')
@@ -424,7 +424,7 @@ def individual_progress_summary_report(plan_id, student_id):
                            subject_names=subject_names,
                            subjects=subjects, my_set_score=my_set_score,
                            avg_set_score=avg_set_score, my_set_rank=my_set_rank,
-                           score_summaries=score_summaries, plan_id=plan_id, plan_GUID=plan_GUID, student_id=student_id)
+                           score_summaries=score_summaries, plan_id=plan_id, plan_GUID=plan_GUID, student_user_id=student_user_id)
 
     if success != 'success':
         return None # plan_GUID
@@ -483,7 +483,7 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
                 local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
                                                         current_app.config['NAPLAN_RESULT_DIR'],
                                                         file_name)
-                success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_id=student_user_id)
+                success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_user_id=student_user_id)
                 if success != 'success':
                     return redirect(url_for('report.manage', error='Error during generating pdf files'))
             else:

@@ -11,7 +11,7 @@ from sqlalchemy.orm import load_only
 @permission_required(Permission.ADMIN)
 def get_writing_item_list():
     assessment_guid = request.args.get('assessment_guid', '01', type=str)
-    student_user_id = request.args.get('student_id', 0, type=int)
+    student_user_id = request.args.get('student_user_id', 0, type=int)
 
     marking_writing_list = []
     assessment_enroll = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid).filter_by(student_user_id=student_user_id).all()
