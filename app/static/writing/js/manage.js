@@ -1,3 +1,7 @@
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+});
+
 $(document).ready(function () {
     $("#w_table").hide();
 
@@ -12,7 +16,6 @@ $(document).ready(function () {
     $("#dataModalSub").on("hidden.bs.modal", function () {
         $("#w_table").show();
     });
-
 });
 
 /**
@@ -95,13 +98,39 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
 
     var span_marking = document.createElement("span");
     span_marking.id = 'marking' + marking_writing_id;
+    span_marking.className = "btn btn-light btn-square btn-sm";
+    span_marking.setAttribute("data-toggle","tooltip");
+    span_marking.setAttribute("data-placement","top");
+    span_marking.setAttribute("data-original-title","link to marking");
+    span_marking.setAttribute("title","link to marking");
     var anchor = document.createElement("a");
     anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_id;
     anchor.target = '_blank';
     var i2 = document.createElement("i");
-    i2.className = "icons cui-task";
+    i2.className = "c-icon c-icon-2xl cil-pen-nib";
+    i2.style = "color: red";
+
     anchor.appendChild(i2);
     span_marking.appendChild(anchor);
+
+    var span_report = document.createElement("span");
+    span_report = document.createElement("span");
+    span_report.id = 'report' + marking_writing_id;
+    span_report.className = "btn btn-light btn-square btn-sm";
+    span_report.setAttribute("data-toggle","tooltip");
+    span_report.setAttribute("data-placement","top");
+    span_report.setAttribute("data-original-title","link to report");
+    span_report.setAttribute("title","link to report");
+
+    var anchor = document.createElement("a");
+    anchor.href = '/writing/report/'+marking_writing_id+'/'+student_id;
+    anchor.target = '_blank';
+    var i3 = document.createElement("i");
+    i3.className = "c-icon c-icon-2xl cil-print";
+    i3.style = "color: blue";
+
+    anchor.appendChild(i3);
+    span_report.appendChild(anchor);
 
     cell1.innerHTML = assessment_enroll_id;
     cell2.innerHTML = assessment_name;
@@ -117,6 +146,7 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     else
         cell7.innerHTML = 'N';
     cell8.appendChild(span_marking);
+    cell8.appendChild(span_report);
     $('#detail' + item_id).attr("onclick", "invokeModalItem(" + item_id + ")");
     $('#detail' + item_id).attr("data-toggle", "modal");
     $('#detail' + item_id).attr("data-target", "#dataModal");

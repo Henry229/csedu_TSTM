@@ -29,9 +29,8 @@
                     <small class="text-muted">Item Search</small>
                     <br>
 
-                    <form action="edit/search" method="post" class="form inline" role="form">
+                    <form action="{{url_for('item.manage')}}" method="get" class="form inline" role="form">
                         {{ search_form.hidden_tag() }}
-                        {{ search_form.csrf_token }}
                         {{ search_form.grade.label }}
                         {{ search_form.grade }}
                         {% for error in search_form.grade.errors %}
@@ -157,7 +156,7 @@
                             </table>
                             <p>
                                 {{ item_form.submit(class="btn btn-danger btn-sm", id="save", value="Save") }}
-                                <a href="{{ url_for('item.item_edit') }}"
+                                <a href="{{ url_for('item.manage') }}"
                                    class="btn btn-outline-danger btn-sm">Cancel</a>
                             </p>
                         </form>

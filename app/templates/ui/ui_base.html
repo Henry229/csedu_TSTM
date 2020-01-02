@@ -70,7 +70,7 @@
                 {% endif %}
                 {% if current_user.can(Permission.ITEM_MANAGE) %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/item/edit">
+                        <a class="nav-link" href="/item/manage">
                             <i class="nav-icon icons cui-layers"></i>Item Manage</a>
                     </li>
                 {% endif %}
@@ -255,6 +255,7 @@
     <script src="/static/ui/vendors/@coreui/coreui/js/coreui.min.js"></script>
     <script src="/static/ui/vendors/DataTables/datatables.min.js" type="text/javascript"></script>
     <script src="/static/ui/js/main.js"></script>
+    <script type="text/javascript" src="/static/ui/js/tooltips.js" class="view-script"></script>
     <!-- Plugins and scripts required by this view-->
     <script type="text/javascript">
         $(document).ready(function () {

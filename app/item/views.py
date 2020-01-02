@@ -288,125 +288,6 @@ def item_list():
     return render_template('item/item_list.html', form=search_form, items=items)
 
 
-@item.route('/edit', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.ITEM_MANAGE)
-def item_edit():
-    grade = request.args.get('grade')
-    subject = request.args.get('subject')
-    level = request.args.get('level')
-    category = request.args.get('category')
-    subcategory = request.args.get('subcategory')
-
-    items = request.args.get('items')
-    error = request.args.get('error')
-
-    default_choices = Choices()
-    search_form = ItemSearchForm()
-    search_form.grade.choices = default_choices.grade_choices
-    search_form.subject.choices = default_choices.subject_choices
-    search_form.level.choices = default_choices.level_choices
-    if subject:
-        search_form.category.choices = set_choices_child(subject)
-    else:
-        search_form.category.choices = [(0, ' ')]
-    if category:
-        search_form.subcategory.choices = set_choices_child(category)
-    else:
-        search_form.subcategory.choices = [(0, ' ')]
-
-    if error:
-        flash(error)
-
-    search_form.grade.default = grade
-    search_form.subject.default = subject
-    search_form.level.default = level
-    search_form.category.default = category
-    search_form.subcategory.default = subcategory
-    search_form.process()
-
-    if items:
-        item_form = ItemEditForm()
-        item_form.grade.choices = default_choices.grade_choices
-        item_form.subject.choices = default_choices.subject_choices
-        item_form.level.choices = default_choices.level_choices
-
-        if subject:
-            item_form.category.choices = set_choices_child(subject)
-        else:
-            item_form.category.choices = [(0, ' ')]
-        if category:
-            item_form.subcategory.choices = set_choices_child(category)
-        else:
-            item_form.subcategory.choices = [(0, ' ')]
-
-        item_form.grade.default = grade
-        item_form.subject.default = subject
-        item_form.level.default = level
-        item_form.category.default = category
-        item_form.subcategory.default = subcategory
-        item_form.process()
-
-        item_list = items.split(',')
-        item_db = Item.query.filter(Item.id.in_(item_list)).all()
-        item_form = populate_item_edit_form(item_form, item_db)
-    else:
-        item_form = None
-
-    return render_template('item/item_edit.html', item_form=item_form, search_form=search_form)
-
-
-@item.route('/edit/search', methods=['POST'])
-@login_required
-@permission_required(Permission.ITEM_MANAGE)
-def item_edit_search():
-    default_choices = Choices()
-
-    search_form = ItemSearchForm()
-    search_form.grade.choices = default_choices.grade_choices
-    search_form.subject.choices = default_choices.subject_choices
-    search_form.level.choices = default_choices.level_choices
-    if search_form.category.data == 0:
-        search_form.category.choices = [(0, ' ')]
-    else:
-        search_form.category.choices = default_choices.category_choices
-    if search_form.subcategory.data == 0:
-        search_form.subcategory.choices = [(0, ' ')]
-    else:
-        search_form.subcategory.choices = default_choices.subcategory_choices
-
-    if search_form.validate_on_submit():
-        query = Item.query.options(load_only("id"))
-        if search_form.grade.data:
-            query = query.filter_by(grade=search_form.grade.data)
-        if search_form.subject.data:
-            query = query.filter_by(subject=search_form.subject.data)
-        if search_form.level.data:
-            query = query.filter_by(level=search_form.level.data)
-        if search_form.category.data:
-            query = query.filter_by(category=search_form.category.data)
-        if search_form.subcategory.data:
-            query = query.filter_by(subcategory=search_form.subcategory.data)
-        if search_form.byme.data:
-            query = query.filter_by(byme=search_form.byme.data)
-        if search_form.active.data:
-            query = query.filter_by(active=search_form.active.data)
-
-        items = query.order_by(Item.modified_time.desc()).all()
-        item_list_string = [str(i.id) for i in items]
-        item_list_string = ','.join(item_list_string)
-
-        flash('Found {} item(s)'.format(len(items)))
-        return redirect(url_for('item.item_edit',
-                                grade=search_form.grade.data,
-                                subject=search_form.subject.data,
-                                level=search_form.level.data,
-                                category=search_form.category.data,
-                                subcategory=search_form.subcategory.data,
-                                items=item_list_string))
-    return redirect(url_for('item.item_edit', error="Search item - Form validation error"))
-
-
 @item.route('/edit/edit', methods=['POST'])
 @login_required
 @permission_required(Permission.ITEM_MANAGE)
@@ -449,8 +330,93 @@ def item_edit_edit():
         else:
             flash("No items are modified. Please search again and try to edit.")
 
-        return redirect(url_for('item.item_edit'))
-    return redirect(url_for('item.item_edit', error="Item Edit - Form validation error"))
+        return redirect(url_for('item.manage'))
+    return redirect(url_for('item.manage', error="Item Edit - Form validation error"))
+
+
+@item.route('/manage', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_MANAGE)
+def manage():
+    grade = request.args.get('grade')
+    subject = request.args.get('subject')
+    level = request.args.get('level')
+    category = request.args.get('category')
+    subcategory = request.args.get('subcategory')
+    byme = request.args.get('byme')
+    active = request.args.get('active')
+    submit = request.args.get('submit')
+
+    error = request.args.get('error')
+
+    default_choices = Choices()
+    search_form = ItemSearchForm()
+    search_form.grade.choices = default_choices.grade_choices
+    search_form.subject.choices = default_choices.subject_choices
+    search_form.level.choices = default_choices.level_choices
+    if subject:
+        search_form.category.choices = set_choices_child(subject)
+    else:
+        search_form.category.choices = [(0, ' ')]
+    if category:
+        search_form.subcategory.choices = set_choices_child(category)
+    else:
+        search_form.subcategory.choices = [(0, ' ')]
+    if error:
+        flash(error)
+    search_form.grade.default = grade
+    search_form.subject.default = subject
+    search_form.level.default = level
+    search_form.category.default = category
+    search_form.subcategory.default = subcategory
+    search_form.process()
+    item_form = None
+    if submit:
+        query = Item.query.options(load_only("id"))
+        if grade != '0':
+            query = query.filter_by(grade=grade)
+        if subject != '0':
+            query = query.filter_by(subject=subject)
+        if level != '0':
+            query = query.filter_by(level=level)
+        if category != '0':
+            query = query.filter_by(category=category)
+        if subcategory != '0':
+            query = query.filter_by(subcategory=subcategory)
+        if byme == 'y':
+            query = query.filter_by(imported_by=current_user.id)
+        if active == 'y':
+            query = query.filter_by(active=active)
+        items = query.order_by(Item.modified_time.desc()).all()
+        if items:
+            flash('Found {} item(s)'.format(len(items)))
+            item_form = ItemEditForm()
+            item_form.grade.choices = default_choices.grade_choices
+            item_form.subject.choices = default_choices.subject_choices
+            item_form.level.choices = default_choices.level_choices
+
+            if subject:
+                item_form.category.choices = set_choices_child(subject)
+            else:
+                item_form.category.choices = [(0, ' ')]
+            if category:
+                item_form.subcategory.choices = set_choices_child(category)
+            else:
+                item_form.subcategory.choices = [(0, ' ')]
+
+            item_form.grade.default = grade
+            item_form.subject.default = subject
+            item_form.level.default = level
+            item_form.category.default = category
+            item_form.subcategory.default = subcategory
+            item_form.process()
+            #
+            # item_db = Item.query.filter(Item.id.in_(item_list)).all()
+            # item_form = populate_item_edit_form(item_form, item_db)
+            item_form = populate_item_edit_form(item_form, items)
+        else:
+            item_form = None
+    return render_template('item/manage.html', item_form=item_form, search_form=search_form)
 
 
 @item.route('/export', methods=['GET'])
@@ -772,8 +738,8 @@ def extended_update(item_id):
             db.session.add(explanation)
             flash("Item Explanation has been updated.")
         db.session.commit()
-        return redirect(url_for('item.item_edit', grade=explanation.item.grade, subject=explanation.item.subject))
-    return redirect(url_for('item.item_edit', error="Item Edit Explanation- Form validation error"))
+        return redirect(url_for('item.manage', grade=explanation.item.grade, subject=explanation.item.subject))
+    return redirect(url_for('item.manage', error="Item Edit Explanation- Form validation error"))
 
 
 def set_choices_child(parent_id):
