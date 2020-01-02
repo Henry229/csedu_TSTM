@@ -6,6 +6,7 @@ import urllib
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
+from sqlalchemy import or_
 from sqlalchemy.orm import load_only
 from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.utils import secure_filename
@@ -228,6 +229,8 @@ def writing_ui():
     form = StartOnlineTestForm()
     assessment_guid = request.args.get("assessment_guid")
     st_id = request.args.get("student_id")
+    if st_id is None:
+        st_id = current_user.id
     form.assessment_guid.data = assessment_guid
     form.student_id.data = st_id
     if assessment_guid:
@@ -238,7 +241,9 @@ def writing_ui():
         test_form = []
 
     guid_list = [(a.GUID) for a in Assessment.query.distinct(Assessment.GUID). \
-        filter(Assessment.name.ilike('%{}%'.format('writing'))).all()]
+        filter(Assessment.name.ilike('%{}%'.format('writing'))). \
+        filter(Assessment.active.is_(True)). \
+        filter(or_(Assessment.delete.is_(False), Assessment.delete.is_(None))).all()]
     student = Student.query.filter_by(user_id=st_id).first()
     if student is None:
         return page_not_found()
