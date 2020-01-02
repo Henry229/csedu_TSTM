@@ -454,7 +454,6 @@ def saveWritingFile(filefield_name, text, assessment_guid, student_user_id):
             else:
                 flash("Reject {} file importing".format(f.filename))
     else:
-        text = text
         if text:
             file_name = student_user_id + '_' + assessment_guid + '_writing.txt'
             item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id, file_name)

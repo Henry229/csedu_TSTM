@@ -22,7 +22,7 @@ from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request
 from .. import db
 from ..models import Item, Codebook
-
+from ..writing.views import text_to_images
 
 # Assessment > Testsets search Modal > Testsets return for apply
 @api.route('/testset_list/')
@@ -525,7 +525,7 @@ def save_writing_data(student_user_id, marking_id, writing_files=None, writing_t
             os.makedirs(writing_upload_dir)
         with open(item_file, "w") as f:
             f.write(writing_text)
-        file_names.append(new_file_name)
+        file_names += text_to_images(student_user_id, item_file)
 
     # 2. Create a record in MarkingForWriting
     index = 1
