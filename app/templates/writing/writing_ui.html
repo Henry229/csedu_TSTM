@@ -24,7 +24,7 @@
                                 {{ form.assessment_guid() }} <br>
                                 ex)
                                 {% for _guid in guid_list %}
-                                    {{ _guid }} , <br>
+                                    <a href='{{ url_for("web.testset_list") }}?assessment_guid={{ _guid }}' target="_blank">{{ _guid }}</a><br>
                                 {% endfor %}
                             </p>
                             <p>{{ form.submit() }}
