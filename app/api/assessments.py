@@ -204,15 +204,15 @@ def create_session():
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request()
-    student_id = student.id
+    student_user_id = student.user_id
 
     # 2. check if the student went through the testset.
     # ToDo: What should we do if he already did?
     # If we only handle single test, it's time to check count and proceed or stop processing.
-    did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=student_id).count()
+    did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id).count()
 
     # 3. Find out the test attempt count.
-    last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=student_id) \
+    last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id) \
         .order_by(desc(AssessmentEnroll.attempt_count)).first()
     if last_attempt is None:
         attempt_count = 1
@@ -222,7 +222,7 @@ def create_session():
 
     # 4. Create a new enroll
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
-                                student_id=student_id, attempt_count=attempt_count)
+                                student_user_id=student_user_id, attempt_count=attempt_count)
     if student_ip:
         enrolled.start_ip = student_ip
     elif 'HTTP_X_FORWARDED_FOR' in request.headers.environ:

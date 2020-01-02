@@ -3,7 +3,7 @@ AS WITH org_score AS (
          SELECT m.assessment_id,
             m.testset_id,
             m.code_name,
-            m.student_id,
+            m.student_user_id,
             m.score,
             m.total_score,
             m.score * 100::double precision / m.total_score AS percentile_score
@@ -13,9 +13,9 @@ AS WITH org_score AS (
          SELECT org_score.assessment_id,
             org_score.testset_id,
             org_score.code_name,
-            org_score.student_id,
+            org_score.student_user_id,
             org_score.percentile_score,
-            count(org_score.student_id) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id, org_score.code_name) AS total_students,
+            count(org_score.student_user_id) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id, org_score.code_name) AS total_students,
             avg(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id, org_score.code_name) AS avg_score,
             max(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id, org_score.code_name) AS max_score,
             min(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id, org_score.code_name) AS min_score,
@@ -36,7 +36,7 @@ AS WITH org_score AS (
  SELECT t1.assessment_id,
     t1.testset_id,
     t1.code_name,
-    t1.student_id,
+    t1.student_user_id,
     t1.score,
     t1.total_score,
     t1.percentile_score,
@@ -53,7 +53,7 @@ AS WITH org_score AS (
    FROM org_score t1,
     statical_score t2,
     calculated_score t3
-  WHERE t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.code_name::text = t2.code_name::text AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_id = t3.student_id AND t1.code_name::text = t3.code_name::text;
+  WHERE t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.code_name::text = t2.code_name::text AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_user_id = t3.student_user_id AND t1.code_name::text = t3.code_name::text;
 
 -- Permissions
 

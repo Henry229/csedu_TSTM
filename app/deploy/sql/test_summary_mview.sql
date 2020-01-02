@@ -3,7 +3,7 @@ TABLESPACE pg_default
 AS WITH org_score AS (
          SELECT marking_summary_360_degree_mview.assessment_id,
             marking_summary_360_degree_mview.testset_id,
-            marking_summary_360_degree_mview.student_id,
+            marking_summary_360_degree_mview.student_user_id,
             marking_summary_360_degree_mview.score,
             marking_summary_360_degree_mview.total_score,
             marking_summary_360_degree_mview.score * 100::double precision / marking_summary_360_degree_mview.total_score AS percentile_score,
@@ -22,9 +22,9 @@ AS WITH org_score AS (
         ), calculated_score AS (
          SELECT org_score.assessment_id,
             org_score.testset_id,
-            org_score.student_id,
+            org_score.student_user_id,
             org_score.percentile_score,
-            count(org_score.student_id) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id) AS total_students,
+            count(org_score.student_user_id) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id) AS total_students,
             avg(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id) AS avg_score,
             max(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id) AS max_score,
             min(org_score.percentile_score) OVER (PARTITION BY org_score.assessment_id, org_score.testset_id) AS min_score,
@@ -43,7 +43,7 @@ AS WITH org_score AS (
         )
  SELECT t1.assessment_id,
     t1.testset_id,
-    t1.student_id,
+    t1.student_user_id,
     t1.score,
     t1.total_score,
     t1.percentile_score,
@@ -62,7 +62,7 @@ AS WITH org_score AS (
    FROM org_score t1,
     statical_score t2,
     calculated_score t3
-  WHERE t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_id = t3.student_id
+  WHERE t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_user_id = t3.student_user_id
 WITH DATA;
 
 -- Permissions

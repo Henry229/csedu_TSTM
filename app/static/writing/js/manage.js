@@ -43,7 +43,7 @@ function searchWritings(assessment_guid) {
             i = 0;
             removeItemList();
             result.forEach(function (item) {
-                drawItemList(data.student_id, item.assessment_enroll_id, item.assessment_name,
+                drawItemList(data.student_user_id, item.assessment_enroll_id, item.assessment_name,
                     item.item_id, item.marking_id, item.marking_writing_id, item.start_time,
                     item.is_candidate_file,item.is_marked);
                 i++;

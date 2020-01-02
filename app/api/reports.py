@@ -400,7 +400,7 @@ def query_individual_progress_summary_report_header(plan_id):
 
 def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
     column_names_all = ['p.plan_id', 'p."order"', 'p.assessment_id',
-                        'p.student_id',
+                        'p.student_user_id',
                         "to_char(coalesce(p.score,0),'999.99') as my_set_score",
                         "p.rank_v",
                         "to_char(coalesce(p.avg_score,0),'999.99') as avg_set_score"
@@ -422,7 +422,7 @@ def query_individual_progress_summary_report_by_assessment(plan_id, student_id):
 def query_individual_progress_summary_report_by_plan(plan_id, student_id):
     column_names = ['p.plan_id', 'p."order"', 'p.assessment_id',
                     'p.testset_id',
-                    'ts.student_id',
+                    'ts.student_user_id',
                     "to_char(coalesce(ts.score,0),'999.99') as score",
                     "to_char(coalesce(ts.total_score,0),'999.99') as total_score",
                     "to_char(coalesce(ts.avg_score,0),'999.99') as avg_score",
@@ -522,7 +522,7 @@ def query_test_ranking_data(subjects, assessment_id):
     #             + COALESCE(NULLIF(test_summary_v."3", 0::double precision), 0::double precision)
     #             + COALESCE(NULLIF(test_summary_v."4", 0::double precision), 0::double precision) AS total_mark
     #     FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score
-    #                     from (SELECT m.student_id,
+    #                     from (SELECT m.student_user_id,
     #                             m.assessment_id,
     #                             m.testset_id,
     #                             m.score AS my_score
@@ -537,9 +537,9 @@ def query_test_ranking_data(subjects, assessment_id):
     #                         order by 1')
     #     AS test_summary_v(row_name integer[], "2" double precision, "3" double precision, "4" double precision)
     # )
-    # SELECT trs.student_id,
-    #     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id,
-    #       (select u.username from users u where u.id=trs.student_id) AS student_name,
+    # SELECT trs.student_user_id,
+    #     (select s.student_user_id from student s where s.user_id=trs.student_user_id) AS cs_student_id,
+    #       (select u.username from users u where u.id=trs.student_user_id) AS student_name,
     #     trs.assessment_id,
     #     a.test_center,
     #     trs."2" as subject_1,
@@ -550,11 +550,11 @@ def query_test_ranking_data(subjects, assessment_id):
     # FROM
     # test_result_by_subject trs,
     #     (SELECT DISTINCT assessment_enroll.assessment_id,
-    #     assessment_enroll.student_id,
+    #     assessment_enroll.student_user_id,
     #     assessment_enroll.test_center
     #     FROM assessment_enroll) a
     # WHERE trs.assessment_id = a.assessment_id
-    # AND trs.student_id = a.student_id;
+    # AND trs.student_user_id = a.student_user_id;
     #
     sql_stmt = ' WITH test_result_by_subject AS( ' \
                + ' SELECT test_summary_v.row_name[1] AS student_id, ' \
@@ -571,7 +571,7 @@ def query_test_ranking_data(subjects, assessment_id):
     sql_stmt = sql_stmt + ' AS total_mark '
     sql_stmt = sql_stmt \
                + " FROM crosstab('select ARRAY[student_id::integer,assessment_id::integer] as row_name, testset_id, my_score " \
-               + "                  from (SELECT m.student_id, " \
+               + "                  from (SELECT m.student_user_id, " \
                + "                            m.assessment_id, " \
                + "                             m.testset_id, " \
                + "                            m.score AS my_score " \
@@ -593,9 +593,9 @@ def query_test_ranking_data(subjects, assessment_id):
         index += 1
     sql_stmt = sql_stmt + ') )'
     sql_stmt = sql_stmt \
-               + " SELECT trs.student_id, " \
-               + "     (select s.student_id from student s where s.user_id=trs.student_id) AS cs_student_id, " \
-               + "     (select u.username from users u where u.id=trs.student_id) AS student_name, " \
+               + " SELECT trs.student_user_id, " \
+               + "     (select s.student_user_id from student s where s.user_id=trs.student_user_id) AS cs_student_id, " \
+               + "     (select u.username from users u where u.id=trs.student_user_id) AS student_name, " \
                + "     trs.assessment_id, " \
                + "      a.test_center, "
     index = 1
@@ -607,11 +607,11 @@ def query_test_ranking_data(subjects, assessment_id):
                + ' rank() OVER(PARTITION BY trs.assessment_id ORDER BY trs.total_mark DESC) AS student_rank ' \
                + ' FROM test_result_by_subject trs, ' \
                + ' (SELECT DISTINCT assessment_enroll.assessment_id, ' \
-               + '     assessment_enroll.student_id, ' \
+               + '     assessment_enroll.student_user_id, ' \
                + '     assessment_enroll.test_center ' \
                + '     FROM assessment_enroll) a ' \
                + ' WHERE trs.assessment_id = a.assessment_id ' \
-               + ' AND trs.student_id = a.student_id '
+               + ' AND trs.student_user_id = a.student_user_id '
 
     cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id})
     Record = namedtuple('Record', cursor.keys())

@@ -48,23 +48,23 @@ def list_my_report():
  my_report() : Student Login > My Report > Report 
     - Execute: Provide link to Subject Report 
 '''
-@report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_id>', methods=['GET'])
+@report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def my_report(assessment_id, ts_id, student_id):
+def my_report(assessment_id, ts_id, student_user_id):
     # Todo: Check accessibility to get report
     refresh_mviews()
     row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
-        filter_by(student_id=student_id).order_by(AssessmentEnroll.id.desc()).first()
+        filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.id.desc()).first()
     if row is None:
         return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
-    ts_header = query_my_report_header(assessment_id, ts_id, student_id)
+    ts_header = query_my_report_header(assessment_id, ts_id, student_user_id)
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
@@ -73,7 +73,7 @@ def my_report(assessment_id, ts_id, student_id):
     markings = query_my_report_body(assessment_enroll_id, ts_id)
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
-    ts_by_category = query_my_report_footer(assessment_id, student_id)
+    ts_by_category = query_my_report_footer(assessment_id, student_user_id)
     return render_template("report/my_report.html", assessment_name=assessment_name, rank=rank,
                            score=score, markings=markings, ts_by_category=ts_by_category)
 
@@ -83,13 +83,13 @@ def my_report(assessment_id, ts_id, student_id):
  my_student_set_report() : Student Login > My Report > Student Report 
     - Execute: Provide link to Student Report by assessment (all subject)
 '''
-@report.route('/student/set/<int:assessment_id>/<int:student_id>', methods=['GET'])
+@report.route('/student/set/<int:assessment_id>/<student_user_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def my_student_set_report(assessment_id, student_id):
+def my_student_set_report(assessment_id, student_user_id):
     # ToDO: Check accessbility to get Report
     assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
-        student_id=student_id).all()
+        student_user_id=student_user_id).all()
     if assessment_enrolls:
         grade = EducationPlanDetail.get_grade(assessment_id)
         assessment_GUID = assessment_enrolls[0].assessment_guid
@@ -97,7 +97,7 @@ def my_student_set_report(assessment_id, student_id):
         if test_type_string == 'Naplan':
             # Student Report : Generate image file for  Naplan student Report
             #                   saved into /static/report/naplan_result/naplan-*.png
-            file_name = make_naplan_student_report(assessment_enrolls, assessment_id, student_id, assessment_GUID, grade)
+            file_name = make_naplan_student_report(assessment_enrolls, assessment_id, student_user_id, assessment_GUID, grade)
         else:
             # For selective test or other test type
             test_type_string = 'other'
@@ -175,7 +175,7 @@ def manage():
                     testsets = []
                 students = []
 
-            students.append(row.student_id)
+            students.append(row.student_user_id)
             _assessment_year = row.assessment_year
             _grade = row.grade
             _test_type = row.test_type
@@ -270,7 +270,7 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
 def summary_report(plan_id, branch_id):
     plan_GUID, test_type_string, grade = '', '', ''
     assessment_ids = [row.assessment_id for row in EducationPlanDetail.query.filter_by(plan_id=plan_id).all()]
-    query = db.session.query(AssessmentEnroll.student_id).distinct()
+    query = db.session.query(AssessmentEnroll.student_user_id).distinct()
     # Todo: Need to check if current_user have access right on queried data
     test_center = Codebook.get_testcenter_of_current_user()
     if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
@@ -281,8 +281,8 @@ def summary_report(plan_id, branch_id):
         query = query.filter(AssessmentEnroll.assessment_id.in_(assessment_ids))
         enrolled_students = query.all()
         for enrolled_student in enrolled_students:
-            student_id = enrolled_student.student_id
-            plan_GUID = individual_progress_summary_report(plan_id, student_id)
+            student_user_id = enrolled_student.student_user_id
+            plan_GUID = individual_progress_summary_report(plan_id, student_user_id)
             if plan_GUID is None:
                 return redirect(url_for('report.manage', error='Error during generating pdf files'))
         rsp = build_individual_progress_zipper(plan_GUID)
@@ -301,9 +301,9 @@ def individual_progress_summary_report(plan_id, student_id):
         test_type_string = 'other'
     # ##
     # Body - Summary Report by assessment/test - 'p.plan_id', 'p."order"', 'p.assessment_id',
-    #                     'p.student_id', 'my_set_score', 'p.rank_v', 'avg_set_score'
+    #                     'p.student_user_id', 'my_set_score', 'p.rank_v', 'avg_set_score'
     #        Summary Report by plan - 'p.plan_id', 'p."order"', 'p.assessment_id',
-    #                     'p.testset_id', 'ts.student_id', 'score', 'total_score'
+    #                     'p.testset_id', 'ts.student_user_id', 'score', 'total_score'
     #                     'avg_score', 'percentile_score', 'rank_v', 'total_students'
     # ##
     # Construct 'my_assessment' - 'my_testset' which are displayed as individual subject score on report
@@ -446,7 +446,7 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
     # Get Assessment Enrolled Students list "enrolled_students" enrolled at test_center
     # If students, Get Assessment general information for report
     assessment_GUID, test_type_string, grade = '', '', ''
-    query = db.session.query(AssessmentEnroll.student_id).distinct()
+    query = db.session.query(AssessmentEnroll.student_user_id).distinct()
     # Todo: Need to check if current_user have access right on queried data
     test_center = Codebook.get_testcenter_of_current_user()
     if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
@@ -466,14 +466,14 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
             return redirect(url_for('report.manage', error='Not found enroll data'))
 
         for enrolled_student in enrolled_students:
-            student_id = enrolled_student.student_id
+            student_user_id = enrolled_student.student_user_id
             enrollment = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
-                student_id=student_id).all()
+                student_user_id=student_user_id).all()
             if enrollment:
                 if test_type_string == 'Naplan':
                     # Student Report : Generate image file for  Naplan student Report
                     #                   saved into /static/report/naplan_result/naplan-*.png
-                    file_name = make_naplan_student_report(enrollment, assessment_id, student_id, assessment_GUID, grade)
+                    file_name = make_naplan_student_report(enrollment, assessment_id, student_user_id, assessment_GUID, grade)
 
                 else:
                     # For selective test or other test type
@@ -483,7 +483,7 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
                 local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
                                                         current_app.config['NAPLAN_RESULT_DIR'],
                                                         file_name)
-                success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_id=student_id)
+                success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_id=student_user_id)
                 if success != 'success':
                     return redirect(url_for('report.manage', error='Error during generating pdf files'))
             else:

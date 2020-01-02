@@ -119,14 +119,14 @@ def manage():
 
         rows = query.order_by(Assessment.id.desc()).all()
         for r in rows:
-            student_ids = [sub.student_id for sub in db.session.query(AssessmentEnroll.student_id).filter(
+            student_user_ids = [sub.student_user_id for sub in db.session.query(AssessmentEnroll.student_user_id).filter(
                 AssessmentEnroll.assessment_id == r.id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
                                    "name": r.name,
                                    "test_center": r.branch_id,
-                                   "students": student_ids
+                                   "students": student_user_ids
                                    }
             assessments.append(assessment_json_str)
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
@@ -145,7 +145,7 @@ def marking(marking_writing_id, student_id):
     """
     form = WritingMarkingForm()
     form.marking_writing_id.data = marking_writing_id
-    form.student_id.data = student_id
+    form.student_user_id.data = student_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
         web_img_links = marking_onscreen_load(marking_writing_id, student_id)
@@ -232,11 +232,11 @@ def writing_ui():
     if st_id is None:
         st_id = current_user.id
     form.assessment_guid.data = assessment_guid
-    form.student_id.data = st_id
+    form.student_user_id.data = st_id
     if assessment_guid:
         test_form = WritingTestForm()
         test_form.assessment_guid.data = assessment_guid
-        test_form.student_id.data = st_id
+        test_form.student_user_id.data = st_id
     else:
         test_form = []
 
@@ -370,7 +370,7 @@ def upload_writing():
     """
     form = WritingTestForm()
     assessment_guid = form.assessment_guid.data
-    st_id = form.student_id.data
+    st_id = form.student_user_id.data
     if form.validate_on_submit():
         # Todo: change real data for assessment_id, testset_id and assessment_enroll_id
         # Step for assessment_enroll
@@ -381,7 +381,7 @@ def upload_writing():
         assessment_enroll = AssessmentEnroll(assessment_guid=assessment_guid,
                                              assessment_id=assessment_id,
                                              testset_id=testset_id,
-                                             student_id=st_id)
+                                             student_user_id=st_id)
         db.session.add(assessment_enroll)
         db.session.commit()
         assessment_enroll_id = assessment_enroll.id

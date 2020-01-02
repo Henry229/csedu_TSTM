@@ -90,7 +90,7 @@ host    all             all             127.0.0.1/32            md5
 ```
 #### SQLALCHEMY_DATABASE_URI 
 ```
-postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored
+postgresql+psycopg2://tailored:P@ssword1@localhost/tailored
 ```
 # Application
 #### Clone the repo

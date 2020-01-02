@@ -1,7 +1,7 @@
 CREATE OR REPLACE VIEW public.my_report_body_v
 AS SELECT m.assessment_enroll_id,
     m.testset_id,
-    e.student_id,
+    e.student_user_id,
     e.grade,
     m.created_time,
     m.candidate_r_value,

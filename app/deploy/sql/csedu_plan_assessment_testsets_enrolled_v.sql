@@ -9,13 +9,13 @@ AS SELECT cepv.plan_id,
     cepv.testset_id,
     cepv.subject,
     ae.id,
-    ae.student_id,
+    ae.student_user_id,
     ae.attempt_count,
     ae.test_center,
     ae.start_time_client
    FROM csedu_education_plan_v cepv
      LEFT JOIN assessment_enroll ae ON ae.assessment_id = cepv.assessment_id AND ae.testset_id = cepv.testset_id
-  ORDER BY cepv.plan_id, cepv."order", cepv.testset_id, ae.test_center, ae.student_id;
+  ORDER BY cepv.plan_id, cepv."order", cepv.testset_id, ae.test_center, ae.student_user_id;
 
 -- Permissions
 

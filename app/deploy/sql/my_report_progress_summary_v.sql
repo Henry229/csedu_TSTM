@@ -1,5 +1,5 @@
 CREATE OR REPLACE VIEW public.my_report_progress_summary_v
-AS SELECT e.student_id,
+AS SELECT e.student_user_id,
     p.id AS plan_id,
     d."order" AS assessment_order,
     p.name AS plan_name,
@@ -9,7 +9,7 @@ AS SELECT e.student_id,
     p.test_type
    FROM education_plan p,
     education_plan_details d,
-    ( SELECT DISTINCT a.student_id,
+    ( SELECT DISTINCT a.student_user_id,
             a.assessment_id
            FROM assessment_enroll a) e
   WHERE p.id = d.plan_id AND d.assessment_id = e.assessment_id

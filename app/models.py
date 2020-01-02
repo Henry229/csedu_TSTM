@@ -668,7 +668,7 @@ class AssessmentEnroll(db.Model):
     # Each assessment version has its own id.
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
     testset_id = db.Column(db.Integer, db.ForeignKey('testset.id'))
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))  # user table - id
+    student_user_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))  # user table - id
     attempt_count = db.Column(db.Integer)
     grade = db.Column(db.String(10))
     test_center = db.Column(db.Integer)
@@ -915,7 +915,7 @@ class Student(db.Model):
     __tablename__ = 'student'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
     student_id = db.Column(db.String(64), index=True)
     branch = db.Column(db.String(5), index=True)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
@@ -927,27 +927,27 @@ class Student(db.Model):
 
     @staticmethod
     def getCSStudentId(id):
-        return (Student.query.filter_by(user_id=id).first()).student_id
+        return (Student.query.filter_by(user_id=id).first()).student_user_id
 
     # @staticmethod
     # def getCSStudentId(id):
-    #     return (Student.query.filter_by(id=id).first()).student_id
+    #     return (Student.query.filter_by(id=id).first()).student_user_id
 
     @staticmethod
     def getCSStudentName(user_id):
         return (User.query.filter_by(id=user_id).first()).username
 
     @staticmethod
-    def getCSCampusName(id):
-        if id:
-            branch_id = Student.query.filter_by(student_id=id).first().branch
+    def getCSCampusName(user_id):
+        if user_id:
+            branch_id = Student.query.filter_by(student_user_id=user_id).first().branch
             branch = Codebook.query.filter(Codebook.code_type == 'test_center',
                                            Codebook.additional_info.contains({"campus_prefix": branch_id})).first()
             if branch:
                 return branch.code_name
 
     def __repr__(self):
-        return '<Student {}>'.format(self.student_id)
+        return '<Student {}>'.format(self.student_user_id)
 
 
 class Codebook(db.Model):
