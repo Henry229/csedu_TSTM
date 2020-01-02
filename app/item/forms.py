@@ -7,6 +7,9 @@ from wtforms.validators import length
 
 
 class ItemSearchForm(FlaskForm):
+    class Meta:
+        csrf = False
+
     grade = SelectField('Grade', coerce=int)
     subject = SelectField('Subject', id='select_subject', coerce=int)
     level = SelectField('Level', coerce=int)
