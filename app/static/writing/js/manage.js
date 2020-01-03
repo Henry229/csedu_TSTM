@@ -107,7 +107,7 @@ function drawItemList(student_user_id, assessment_enroll_id, assessment_name,
     anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_user_id;
     anchor.target = '_blank';
     var i2 = document.createElement("i");
-    i2.className = "c-icon c-icon-2xl cil-pen-nib";
+    i2.className = "fas fa-pen-nib";
     i2.style = "color: red";
 
     anchor.appendChild(i2);
@@ -126,7 +126,7 @@ function drawItemList(student_user_id, assessment_enroll_id, assessment_name,
     anchor.href = '/writing/report/'+marking_writing_id+'/'+student_user_id;
     anchor.target = '_blank';
     var i3 = document.createElement("i");
-    i3.className = "c-icon c-icon-2xl cil-print";
+    i3.className = "fas fa-print";
     i3.style = "color: blue";
 
     anchor.appendChild(i3);
