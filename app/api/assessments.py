@@ -483,7 +483,7 @@ def response_process_file(item_id):
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request()
-    student_user_id = student.id
+    student_user_id = student.user_id
     save_writing_data(student_user_id, marking_id, writing_files=writing_files, writing_text=writing_text,
                       has_files=has_files)
 

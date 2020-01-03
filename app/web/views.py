@@ -145,7 +145,7 @@ def process_inward():
 
     member = get_student_info(student_id)
     if is_authorised(member, session_timeout):
-        registered_student = Student.query.filter_by(user_id=student_id).first()
+        registered_student = Student.query.filter_by(student_id=student_id).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
