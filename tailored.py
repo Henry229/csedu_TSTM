@@ -141,6 +141,7 @@ def deploy():
                                      "Maths-Estimation", "GA-Figure Sequence", "GA-Odd One Out",
                                      "GA-Logic", "English-Finding", "English-Summarizing",
                                      "English-Drawing", "Math-Area")
+    Codebook.create_default_category("Writing")
 
     Codebook.create_default_category("Addtion", "Sub1", "Sub2")
     Codebook.create_default_category("English-Drawing", "Sub1", "Sub2")
@@ -158,6 +159,11 @@ def deploy():
 
     print('Inserting Test Center into Codebook table')
     Codebook.create_default_codeset(None, "test_center", "CS Online School", "Norwest", "Castle Hill", "All")
+
+    print('Inserting Writing Criteria into Codebook table')
+    Codebook.create_default_codeset(None, "criteria", "Audience", "Text structure", "Ideas", "Persuasive devices",
+                                    "Vocabulary", "Cohesion", "Paragraphing", "Sentence structure", "Punctuation",
+                                    "Spelling")
 
     # Create DB views
     create_views()

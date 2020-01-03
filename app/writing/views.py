@@ -246,7 +246,7 @@ def writing_ui():
         filter(or_(Assessment.delete.is_(False), Assessment.delete.is_(None))).all()]
     student = Student.query.filter_by(user_id=st_id).first()
     if student is None:
-        return page_not_found()
+        return page_not_found("No available writing found. Please create a writing assessment")
     return render_template('writing/writing_ui.html', form=form, guid_list=guid_list, test_form=test_form)
 
 
