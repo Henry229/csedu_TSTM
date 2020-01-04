@@ -5,6 +5,11 @@
     <link rel="stylesheet" href="/static/csedu_style.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
+        /* Disable intrinsic user agent touch behaviors (such as panning or zooming) */
+        canvas {
+            touch-action: none;
+        }
+
         .pen_slider {
             -webkit-appearance: none;
             width: 100px;
