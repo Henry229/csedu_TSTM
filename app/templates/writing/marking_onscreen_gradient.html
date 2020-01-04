@@ -44,7 +44,7 @@
         }
 
         #weight_mapping .slider {
-            width: 20em;
+            width: 15em;
             float: left;
             margin-left: 1.0em;
             margin-right: 1.5em;
@@ -248,18 +248,18 @@
             return Math.atan2(point2.x - point1.x, point2.y - point1.y);
         }
 
-        marking_layer.onmousedown = function (e) {
+        marking_layer.onpointerdown = function (e) {
             isDrawing = true;
             var d = marking_layer.getBoundingClientRect();
             lastPoint = {x: e.clientX - d.left, y: e.clientY - d.top};
         };
 
-        marking_layer.onmousemove = function (e) {
+        marking_layer.onpointermove = function (e) {
             var lineWidth = penWidth;
             var cursorColor = color_pen;
             var d = marking_layer.getBoundingClientRect();
-            var mouse_x = e.clientX - d.left;
-            var mouse_y = e.clientY - d.top;
+            var pointer_x = e.clientX - d.left;
+            var pointer_y = e.clientY - d.top;
 
             if (eraserMode) {
                 lineWidth = eraserWidth;
@@ -276,12 +276,12 @@
             cursor_ctx.clearRect(0, 0, marking_layer.width, marking_layer.height);
 
             cursor_ctx.beginPath();
-            cursor_ctx.arc(mouse_x, mouse_y, lineWidth, 0, 2 * Math.PI);
+            cursor_ctx.arc(pointer_x, pointer_y, lineWidth, 0, 2 * Math.PI);
             cursor_ctx.stroke();
 
             if (!isDrawing) return;
 
-            var currentPoint = {x: mouse_x, y: mouse_y};
+            var currentPoint = {x: pointer_x, y: pointer_y};
             var dist = getDistance(lastPoint, currentPoint);
             var angle = getAngle(lastPoint, currentPoint);
 
@@ -290,7 +290,7 @@
                 marking_ctx.globalCompositeOperation = 'destination-out';
                 marking_ctx.fillStyle = "White";
                 marking_ctx.beginPath();
-                marking_ctx.arc(mouse_x, mouse_y, eraserWidth, 0, 2 * Math.PI);
+                marking_ctx.arc(pointer_x, pointer_y, eraserWidth, 0, 2 * Math.PI);
                 marking_ctx.fill();
             } else {
                 marking_ctx.globalCompositeOperation = 'source-over';
@@ -309,7 +309,7 @@
             lastPoint = currentPoint;
         };
 
-        marking_layer.onmouseup = function () {
+        marking_layer.onpointerup = function () {
             isDrawing = false;
             cursor_ctx.clearRect(0, 0, marking_layer.width, marking_layer.height);
         };
@@ -505,10 +505,10 @@
                     range: "max",
                     animate: true,
                     create: function () {
-                        {#handle.text(value);#}
+                        handle.text(value);
                     },
                     slide: function (event, ui) {
-                        {#handle.text(ui.value);#}
+                        handle.text(ui.value);
                         marking.value = ui.value;
                     }
                 });
