@@ -174,7 +174,7 @@ def process_inward():
         update_campus_info()
         db.session.commit()
         login_user(student_user)
-        # student_data = get_member_info(student_id)
+        # student_data = get_member_info(student_user_id)
         if assessment_guid:
             return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
         else:
@@ -215,7 +215,7 @@ def testset_list():
         return page_not_found()
 
     # Get all assessment enroll to get testsets the student enrolled in already.
-    enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=student.id).all()
+    enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student.user_id).all()
     testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
     # Get all testset the assessment has
@@ -224,7 +224,7 @@ def testset_list():
         tsets.enrolled = tsets.id in testset_enrolled
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
-    return render_template('web/testsets.html', student_id=student.id, assessment_guid=assessment_guid,
+    return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
                            testsets=sorted_testsets)
 
 
@@ -246,7 +246,7 @@ def assessment_list():
             return page_not_found()
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=current_user.id).all()
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=current_user.id).all()
         testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
         # Get all testset the assessment has
@@ -269,9 +269,9 @@ def testing():
         return page_not_found()
     context = {
         'session_id': session_id,
-        'student_id': student.user_id,
+        'student_user_id': student.user_id,
         'student_external_id': student.student_id,
-        'student_branch': student.getCSCampusName(student.student_id)
+        'student_branch': student.getCSCampusName(student.user_id)
     }
 
     if testset_id is not None:
@@ -290,7 +290,7 @@ def testing():
 def start_test_manager():
     form = StartOnlineTestForm()
     assessment_guid = form.assessment_guid.data
-    st_id = form.student_id.data
+    st_id = form.student_user_id.data
     testsets = []
     guid_list = [(a.GUID) for a in Assessment.query.distinct(Assessment.GUID).all()]
     if form.validate_on_submit():
@@ -305,7 +305,7 @@ def start_test_manager():
             return page_not_found()
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_id=st_id).all()
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=st_id).all()
         testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
         # Get all testset the assessment has

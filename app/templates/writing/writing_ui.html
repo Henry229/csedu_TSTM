@@ -16,15 +16,15 @@
                     <div class="col-4">
                         <form action="" method="get">
                             <p>
-                                {{ form.student_id.label }}<br>
-                                {{ form.student_id(placeholder='8') }}
+                                {{ form.student_user_id.label }}<br>
+                                {{ form.student_user_id(placeholder='8') }}
                             </p>
                             <p>
                                 {{ form.assessment_guid.label }}<br>
                                 {{ form.assessment_guid() }} <br>
                                 ex)
                                 {% for _guid in guid_list %}
-                                    {{ _guid }} , <br>
+                                    <a href='{{ url_for("web.testset_list") }}?assessment_guid={{ _guid }}' target="_blank">{{ _guid }}</a><br>
                                 {% endfor %}
                             </p>
                             <p>{{ form.submit() }}

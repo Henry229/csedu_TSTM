@@ -12,7 +12,7 @@ from ..models import Choices, EducationPlan, Codebook, User, Role
 
 class StartOnlineTestForm(FlaskForm):
     assessment_guid = StringField('Assessment GUID', validators=[DataRequired()])
-    student_id = StringField('Student ID', validators=[DataRequired()])
+    student_user_id = StringField('Student ID', validators=[DataRequired()])
     submit = SubmitField('Start')
 
 
@@ -20,7 +20,7 @@ class WritingTestForm(FlaskForm):
     w_image = MultipleFileField('Writing File')
     w_text = TextAreaField('Writing Text')
     assessment_guid = HiddenField('Assessment GUID', validators=[DataRequired()])
-    student_id = HiddenField('Student ID', validators=[DataRequired()])
+    student_user_id = HiddenField('Student ID', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     def validate_image(form, field):
@@ -77,7 +77,7 @@ class WritingMMForm(FlaskForm):
 
 class WritingMarkingForm(FlaskForm):
     marking_writing_id = HiddenField('Id', default='')
-    student_id = HiddenField('Student Id', default='')
+    student_user_id = HiddenField('Student Id', default='')
     markers_comment = TextAreaField("Marker's comment")
     markings = FieldList(FormField(WritingMMForm))  # marking mapping
     submit = SubmitField('Save')

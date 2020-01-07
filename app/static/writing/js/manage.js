@@ -26,7 +26,7 @@ function searchWritings(assessment_guid) {
     var $btn = $('#search_item');
     var data = {
         assessment_guid: assessment_guid,
-        student_id: $("#select_student option:selected").val()
+        student_user_id: $("#select_student option:selected").val()
     };
     if (data.assessment_guid == null) return false;
     $.ajax({
@@ -43,7 +43,7 @@ function searchWritings(assessment_guid) {
             i = 0;
             removeItemList();
             result.forEach(function (item) {
-                drawItemList(data.student_id, item.assessment_enroll_id, item.assessment_name,
+                drawItemList(data.student_user_id, item.assessment_enroll_id, item.assessment_name,
                     item.item_id, item.marking_id, item.marking_writing_id, item.start_time,
                     item.is_candidate_file,item.is_marked);
                 i++;
@@ -69,13 +69,13 @@ function searchWritings(assessment_guid) {
  * @param is_marked
  * @returns {boolean}
  */
-function drawItemList(student_id, assessment_enroll_id, assessment_name,
+function drawItemList(student_user_id, assessment_enroll_id, assessment_name,
                             item_id, marking_id, marking_writing_id, start_time,
                             is_candidate_file,is_marked) {
     var tbody = document.getElementById("w_table_body");
     var row = tbody.insertRow(0);
     var cell1 = row.insertCell(0);
-    if ((student_id==null)&&(assessment_enroll_id==null)) {
+    if ((student_user_id==null)&&(assessment_enroll_id==null)) {
         cell1.colSpan = 8;
         cell1.innerHTML = "No data found.";
         return true;
@@ -104,10 +104,10 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     span_marking.setAttribute("data-original-title","link to marking");
     span_marking.setAttribute("title","link to marking");
     var anchor = document.createElement("a");
-    anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_id;
+    anchor.href = '/writing/marking/'+marking_writing_id+'/'+student_user_id;
     anchor.target = '_blank';
     var i2 = document.createElement("i");
-    i2.className = "c-icon c-icon-2xl cil-pen-nib";
+    i2.className = "fas fa-pen-nib";
     i2.style = "color: red";
 
     anchor.appendChild(i2);
@@ -123,10 +123,10 @@ function drawItemList(student_id, assessment_enroll_id, assessment_name,
     span_report.setAttribute("title","link to report");
 
     var anchor = document.createElement("a");
-    anchor.href = '/writing/report/'+marking_writing_id+'/'+student_id;
+    anchor.href = '/writing/report/'+marking_writing_id+'/'+student_user_id;
     anchor.target = '_blank';
     var i3 = document.createElement("i");
-    i3.className = "c-icon c-icon-2xl cil-print";
+    i3.className = "fas fa-print";
     i3.style = "color: blue";
 
     anchor.appendChild(i3);

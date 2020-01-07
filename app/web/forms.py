@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired
 
 class StartOnlineTestForm(FlaskForm):
     assessment_guid = StringField('Assessment GUID', validators=[DataRequired()])
-    student_id = StringField('Student ID', validators=[DataRequired()])
+    student_user_id = StringField('Student ID', validators=[DataRequired()])
     submit = SubmitField('Start')
 
 

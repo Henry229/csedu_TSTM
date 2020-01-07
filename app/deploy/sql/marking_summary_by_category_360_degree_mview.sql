@@ -4,9 +4,9 @@ AS WITH marking_summary AS (
          SELECT e.assessment_id,
             m.testset_id,
             i.code_name,
-            e.student_id,
-            GROUPING(e.assessment_id, m.testset_id, i.code_name, e.student_id) AS "grouping",
-            count(DISTINCT e.student_id) AS number_of_candidates,
+            e.student_user_id,
+            GROUPING(e.assessment_id, m.testset_id, i.code_name, e.student_user_id) AS "grouping",
+            count(DISTINCT e.student_user_id) AS number_of_candidates,
             sum(m.candidate_mark * m.weight) AS score,
             sum(m.outcome_score * m.weight) AS total_score
            FROM marking m,
@@ -17,13 +17,13 @@ AS WITH marking_summary AS (
                     item i_1
                   WHERE c.id = i_1.category) i
           WHERE m.assessment_enroll_id = e.id AND m.item_id = i.item_id
-          GROUP BY ROLLUP(e.assessment_id, m.testset_id, i.code_name, e.student_id)
-          ORDER BY e.assessment_id, m.testset_id, e.student_id
+          GROUP BY ROLLUP(e.assessment_id, m.testset_id, i.code_name, e.student_user_id)
+          ORDER BY e.assessment_id, m.testset_id, e.student_user_id
         )
  SELECT marking_summary.assessment_id,
     marking_summary.testset_id,
     marking_summary.code_name,
-    marking_summary.student_id,
+    marking_summary.student_user_id,
         CASE
             WHEN marking_summary."grouping" = 0 THEN 'by_student'::text
             WHEN marking_summary."grouping" = 1 THEN 'by_subject'::text

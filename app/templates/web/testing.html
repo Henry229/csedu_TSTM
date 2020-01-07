@@ -19,8 +19,8 @@
                         <form action="" method="post">
                             {{ form.hidden_tag() }}
                             <p>
-                                {{ form.student_id.label }}<br>
-                                {{ form.student_id(placeholder='100') }}
+                                {{ form.student_user_id.label }}<br>
+                                {{ form.student_user_id(placeholder='100') }}
                             </p>
                             <p>
                                 {{ form.assessment_enroll_id.label }}<br>
@@ -57,7 +57,7 @@
     <script>
         $(document).ready(function () {
             $('input[name="btn_mock_test"]').click(function () {
-                $('input[name="student_id"]').val('100');
+                $('input[name="student_user_id"]').val('100');
                 $('input[name="assessment_enroll_id"]').val('1');
             });
 
