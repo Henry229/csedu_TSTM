@@ -9,7 +9,17 @@
         <title>CS Education</title>
         {%- block styles %}
             <!-- Icons-->
+            <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/@coreui/icons/css/free.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
             <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+            <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+            <link href="/static/ui/vendors/DataTables/datatables.min.css" rel="stylesheet" type="text/css"/>
+            <!-- Main styles for this application-->
+            <link href="/static/ui/css/style.css" rel="stylesheet">
+            <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+            <!-- QTI Item -->
+            <link href="/static/runner/css/test_runner.css" rel="stylesheet">
         {%- endblock styles %}
     {%- endblock head %}
 </head>
@@ -17,11 +27,10 @@
 <header class="app-header navbar">
     <div class="header-summary">
         <img class="navbar-brand-minimized" src="/static/ui/img/CSEducation.png" alt="CSEducation">
-        <hr/>
     </div>
 </header>
 <div class="app-body">
-    <main class="main">
+    <main class="main mt-4">
         {% block content %}
             <div class="container">
                 {% for message in get_flashed_messages() %}
@@ -35,7 +44,7 @@
         {% endblock %}
     </main>
 </div>
-<footer class="app-footer">
+<footer class="app-footer ml-0">
     <div>
         <span>Tailored Testing System</span>
     </div>

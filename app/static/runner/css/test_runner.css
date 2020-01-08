@@ -36,6 +36,8 @@ textarea.text-container.text-plain.solid {
     -webkit-transition: 0.5s;
     transition: 0.5s;
     outline: none;
+    width: 80%;
+    height: 300px;
 }
 
 textarea:focus.qti-item.qti-interaction.solid {

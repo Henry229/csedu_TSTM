@@ -1,0 +1,47 @@
+{% extends "ui/ui_empty.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <div class="card card-accent-info">
+        <div class="card-header"><i class="fas fa-pencil-alt" style="color: #339af0;"></i><strong>Marking</strong>
+
+        </div>
+        <div class="card-body">
+            <h1><span class="badge badge-danger">Completed. Please close this tab</span></h1>
+            <table class="table table-info">
+                <thead>
+                <th width="40%">{{ data["student"] }}</th>
+                <th>Comments</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <table class="table table-borderless">
+                            {% for criterion, mark  in data["marking"].items() %}
+                                <tr>
+                                    <td style="width: 50%; padding: 0; margin: 0;"><h4><span class="badge badge-primary">{{ criterion }}</span></h4></td>
+                                    <td style="width: 50%; padding: 0; margin: 0; align: left;"><h4>{{ mark }}</h4></td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td>
+                        <textarea style="width: 40em; height: 20em;" readonly>{{ data["comments"] }}</textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/writing/js/manage.js"></script>
+{% endblock scripts %}
+
+
+
