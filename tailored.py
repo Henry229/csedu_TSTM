@@ -221,3 +221,9 @@ def destroy():
                 shutil.rmtree(folder, ignore_errors=True)
         except:
             pass
+
+'''Command: $ flask change-roles'''
+@app.cli.command()
+def change_roles():
+    print('Updating roles into Roles table')
+    Role.insert_roles()

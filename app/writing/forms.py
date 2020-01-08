@@ -7,7 +7,7 @@ from wtforms import SelectField, SubmitField, HiddenField, StringField, Multiple
 from wtforms.validators import DataRequired
 
 from .. import db
-from ..models import Choices, EducationPlan, Codebook, User, Role
+from ..models import Choices, EducationPlan, Codebook, User, MarkerBranch, Role
 
 
 class StartOnlineTestForm(FlaskForm):
@@ -86,12 +86,22 @@ class WritingMarkingForm(FlaskForm):
 class MarkerAssignForm(FlaskForm):
     assessment_id = HiddenField('Id', default='')
     markers = SelectMultipleField('To', id='marker_ids', coerce=int)
+    year = HiddenField('year')
+    test_type = HiddenField('test_type')
+    test_center = HiddenField('test_center')
+
     submit = SubmitField('Assign')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, branch_id, *args, **kwargs):
         super(MarkerAssignForm, self).__init__(*args, **kwargs)
-        role = Role.query.filter_by(name='Writing_marker').first()
-        self.markers.choices = [(u.id, u.username)
-                                for u in
-                                db.session.query(User.id, User.username).filter(User.role == role).distinct().order_by(
-                                    User.username).all()]
+        branch_name = Codebook.get_code_name(branch_id)
+        if (branch_name=='All'):
+            role = Role.query.filter_by(name='Writing_marker').first()
+            self.markers.choices = [(u.id, u.username)
+                                    for u in
+                                    db.session.query(User.id, User.username).filter(User.role == role).filter(User.delete.isnot(True)).distinct().order_by(
+                                        User.username).all()]
+        else:
+            marker_ids = [sub.marker_id for sub in db.session.query(MarkerBranch.marker_id).filter(
+                MarkerBranch.branch_id == branch_id).filter(MarkerBranch.delete.isnot(True)).all()]
+            self.markers.choices = [(id, User.getUserName(id)) for id in marker_ids]

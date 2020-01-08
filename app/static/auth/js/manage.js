@@ -34,4 +34,9 @@ $(document).ready(function () {
         var id = $('input[name="r_tl"]:checked').val();
         $('input[name="user_id"]').val(id);
     });
+
+    $('#u_role').on('change', function () {
+        alert('test');
+        alert(this.val());
+    });
 });

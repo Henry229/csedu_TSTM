@@ -123,7 +123,7 @@
                                         <td class="user_id"> {{ user.id }}</td>
                                         <td class="user_username"> {{ user.username }}</td>
                                         <td class="user_email" id="{{ user.email }}"> {{ user.email }} </td>
-                                        <td class="user_role_id" id="{{ user.role.id }}"> {{ user.role.name }} </td>
+                                        <td class="user_role_id" id="{{ user.role.id }}"> {{ user.role.name }}</td>
                                         {% if user.last_seen %}
                                             <td class="user_last_seen"> {{ user.last_seen.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         {% endif %}
