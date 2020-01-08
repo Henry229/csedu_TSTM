@@ -70,6 +70,15 @@
         #weight_mapping tr {
             height: 3.0em;
         }
+
+        #marking_tools {
+            z-index: 100;
+            background: white;
+            opacity: 0.97;
+            border-radius: 5px;
+            border: 2px solid lightpink;
+            padding: 10px;
+        }
     </style>
 {% endblock %}
 {% block app_content %}
@@ -522,6 +531,31 @@
                 });
             });
         }
+
+        function locate_toolbar() {
+            mainHtml = document.getElementsByTagName('html');
+            marking = document.getElementById('marking');
+            var h = mainHtml[0].getBoundingClientRect();
+            var m = marking.getBoundingClientRect();
+            var t = $("#marking_tools");
+            if (h.top <= 0) {
+                if (m.top > 150) {
+                    t.offset({top: m.top - 70 + (h.top * -1)});
+                    t.css("border-color", "lightpink");
+                } else {
+                    t.offset({top: 100 + (h.top * -1)});
+                    t.css("border-color", "deeppink");
+                }
+            }
+        }
+
+        $('div.app-body').scroll(function () {
+            locate_toolbar();
+        });
+
+        $(document).scroll(function () {
+            locate_toolbar();
+        });
 
         $(document).ready(function () {
             draw_images();
