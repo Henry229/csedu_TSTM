@@ -219,7 +219,7 @@ def populate_criteria_form(form, criteria_detail=None):
 
 @writing.route('/marking_complete', methods=['GET'])
 @login_required
-@permission_required_or_multiple(Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE)
+@permission_required(Permission.WRITING_READ)
 def marking_complete():
     data = json.loads(request.args.get("data"))
     return render_template('writing/marking_complete.html', data=data)
