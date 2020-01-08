@@ -189,6 +189,14 @@ def populate_criteria_form(form, criteria_detail=None):
     return form
 
 
+@writing.route('/marking_complete', methods=['GET'])
+@login_required
+@permission_required_or_multiple(Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE)
+def marking_complete():
+    data = json.loads(request.args.get("data"))
+    return render_template('writing/marking_complete.html', data=data)
+
+
 @login_required
 @permission_required(Permission.ADMIN)
 @writing.route('/marking', methods=['POST'])
@@ -212,8 +220,10 @@ def marking_edit():
         row.candidate_mark_detail = json_str
         db.session.add(row)
         db.session.commit()
-        flash('Marking for Writing updated.')
-        return redirect(url_for('writing.manage'))
+        data = {"student": Student.getCSStudentName(form.student_user_id.data),
+                "marking": json_str,
+                "comments": form.markers_comment.data}
+        return redirect(url_for('writing.marking_complete', data=json.dumps(data)))
     return redirect(url_for('writing.manage', error="Marking Edit - Form validation Error"))
 
 
