@@ -992,8 +992,7 @@ class Codebook(db.Model):
     parent_code = db.Column(db.Integer, db.ForeignKey('codebook.id'))
     additional_info = db.Column(JSONB) # {"state":"", "suburb":"", "address":"", "country":"", "hq_flag":"", "postcode": "",
                                         # "centre_type": "", "contact_fax": "", "contact_tel": "", "campus_title": "",
-                                        # "activate_flag": "", "campus_prefix": "", "email_address": "",
-                                        # "marker_ids":[...]}
+                                        # "activate_flag": "", "campus_prefix": "", "email_address": ""}
 
     def get_parent_name(self):
         v_parent = Codebook.query.filter_by(id=self.parent_code).first()
