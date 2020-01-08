@@ -45,10 +45,10 @@
                             <th>Test Type</th>
                             <th>Test Name</th>
                             <th>Test Center</th>
-                            {% if current_user.can(Permission.ASSESSMENT_MANAGE) %}
-                                <th>Marker Assign</th>
+                            {% if current_user.can(Permission.WRITING_MANAGE) %}
+                                <th>Marker Assigned</th>
                             {% endif %}
-                            {% if current_user.can(Permission.ASSESSMENT_READ) and current_user.can(Permission.ITEM_EXEC) %}
+                            {% if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) %}
                                 <th>Student ID</th>
                             {% endif %}
                         </tr>
@@ -63,14 +63,18 @@
                                     id="{{ w.test_type }}"> {{ Codebook.get_code_name(w.test_type) }}</td>
                                 <td class="a_name" id="{{ w.name }}"> {{ w.name }}</td>
                                 <td class="a_test_center" id="{{ w.test_center }}"> {{ Codebook.get_code_name(w.test_center) }}</td>
-                                {% if current_user.can(Permission.ADMIN) %}
+                                {% if current_user.can(Permission.WRITING_MANAGE) %}
                                     <td>
                                         <a name="modalButtonAssign"
                                         href="{{ url_for('writing.assign', assessment_guid=w.assessment_guid) }}" data-toggle="modal"
                                         data-target="#dataModalMedium"> <i class="icons cui-user-follow"></i> </a>
+                                       {% for marker in w.markers %}
+                                           {{ User.getUserName(marker) }}
+                                           {% if loop.index!=w.markers|length %},{% endif %}
+                                       {% endfor %}
                                     </td>
                                 {% endif %}
-                                {% if current_user.can(Permission.ASSESSMENT_READ) and current_user.can(Permission.ITEM_EXEC) %}
+                                {% if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) %}
                                     <td>
                                         <select id="select_student">
                                         {% for student in w.students %}

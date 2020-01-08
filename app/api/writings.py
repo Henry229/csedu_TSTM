@@ -2,13 +2,13 @@ import os
 from flask import jsonify
 from flask import request, current_app
 from app.api import api
-from app.decorators import permission_required
+from app.decorators import permission_required, permission_required_or_multiple
 from app.models import Item, Permission, Codebook, Testlet, AssessmentEnroll, MarkingForWriting
 from sqlalchemy.orm import load_only
 
 # Writing > Assessment List > search writings > Items return for listing
 @api.route('/writing_item_list/')
-@permission_required(Permission.ADMIN)
+@permission_required_or_multiple(Permission.WRITING_READ, Permission.WRITING_MANAGE)
 def get_writing_item_list():
     assessment_guid = request.args.get('assessment_guid', '01', type=str)
     student_user_id = request.args.get('student_user_id', 0, type=int)

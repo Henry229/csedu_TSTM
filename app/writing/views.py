@@ -3,6 +3,9 @@ import os
 import time
 import urllib
 
+from datetime import datetime
+import pytz
+
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
@@ -18,12 +21,12 @@ from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, W
 from .. import db
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
-    MarkingForWriting, AssessmentHasTestset, Testset, EducationPlanDetail
+    MarkingForWriting, AssessmentHasTestset, Testset, MarkerAssigned
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_MANAGE)
 def assign(assessment_guid):
     """
     Menu Writing > Assign main page
@@ -33,39 +36,58 @@ def assign(assessment_guid):
     if not assessment:
         return redirect(
             url_for('writing.manage', error="Invalid Request - assessment information not found"))
-    form = MarkerAssignForm()
+    form = MarkerAssignForm(branch_id=assessment.branch_id)
     form.assessment_id.data = assessment.id
-    ep = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
-    form.markers.data = ep.marker_ids["ids"]
+    form.year.data = assessment.year
+    form.test_center.data = assessment.branch_id
+    form.test_type.data = assessment.test_type
+    marker_ids = [sub.marker_id for sub in db.session.query(MarkerAssigned.marker_id).filter(
+        MarkerAssigned.assessment_id == assessment.id).filter(MarkerAssigned.delete.isnot(True)).all()]
+    form.markers.data = marker_ids
     return render_template('writing/assign.html', form=form, assessment=assessment)
 
 
 @writing.route('/assign', methods=['POST'])
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_MANAGE)
 def assign_marker():
     """
     Requested from Menu Writing > Assign
     :return: assign marker and return manage
     """
-    form = MarkerAssignForm()
+    test_center = request.form.get('test_center')
+    form = MarkerAssignForm(branch_id=test_center)
     if form.validate_on_submit():
         marker_ids = form.markers.data
-        row = EducationPlanDetail.query.filter_by(assessment_id=form.assessment_id.data).first()
-        if row is None:
-            return redirect(
-                url_for('writing.manage', error="Fail to assign - Please register assessment to Education Plan first"))
-        row.marker_ids = {"ids": marker_ids}
-        db.session.add(row)
+        assessment_id = form.assessment_id.data
+        for id in marker_ids:
+            row = MarkerAssigned.query.filter_by(assessment_id=assessment_id).\
+                filter_by(marker_id=id).first()
+            if row:
+                if row.delete==True:
+                    row.delete = False
+                    row.modified_time = datetime.now(pytz.utc)
+                    db.session.add(row)
+            else:
+                ma = MarkerAssigned(marker_id=id,assessment_id=assessment_id)
+                db.session.add(ma)
+
+        d_ids = MarkerAssigned.query.filter_by(assessment_id=assessment_id).\
+                filter(MarkerAssigned.marker_id.notin_(marker_ids)).\
+                filter(MarkerAssigned.delete.isnot(True)).all()
+        for row in d_ids:
+            row.delete = True
+            row.modified_time = datetime.now(pytz.utc)
+            db.session.add(row)
         db.session.commit()
         flash('Marker assigned successfully.')
-        return redirect(url_for('writing.manage'))
+        return redirect(url_for('writing.manage', year=form.year.data, test_type=form.test_type.data, test_center=form.test_center.data))
     return redirect(url_for('writing.manage', error="Marker Assign - Form validation Error"))
 
 
 @writing.route('/manage', methods=['GET'])
 @login_required
-@permission_required_or_multiple(Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE)
+@permission_required_or_multiple(Permission.WRITING_READ, Permission.WRITING_MANAGE)
 def manage():
     """
     Menu Writing > Marking main page
@@ -95,12 +117,15 @@ def manage():
     rows = None
     assessments = []
     query = Assessment.query.filter_by(active=True)
+    if current_user.role.name == 'Writing_marker':
+        ids = [sub.assessment_id for sub in db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
+        query = query.filter(Assessment.id.in_(ids))
     if flag:
         if assessment_name:
             query = query.filter(Assessment.name.ilike('%{}%'.format(assessment_name)))
         if year:
             query = query.filter_by(year=year)
-        if test_type:
+        if test_type!=0:
             query = query.filter_by(test_type=test_type)
         if test_center:
             # Todo: Need to check if current_user have access right on queried data
@@ -119,6 +144,8 @@ def manage():
 
         rows = query.order_by(Assessment.id.desc()).all()
         for r in rows:
+            marker_ids = [sub.marker_id for sub in db.session.query(MarkerAssigned.marker_id).filter(
+                MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
             student_user_ids = [sub.student_user_id for sub in db.session.query(AssessmentEnroll.student_user_id).filter(
                 AssessmentEnroll.assessment_id == r.id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
@@ -126,6 +153,7 @@ def manage():
                                    "test_type": r.test_type,
                                    "name": r.name,
                                    "test_center": r.branch_id,
+                                   "markers": marker_ids,
                                    "students": student_user_ids
                                    }
             assessments.append(assessment_json_str)
@@ -133,7 +161,7 @@ def manage():
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_READ)
 @writing.route('/marking/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
 @login_required
 def marking(marking_writing_id, student_user_id):
@@ -198,7 +226,7 @@ def marking_complete():
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_READ)
 @writing.route('/marking', methods=['POST'])
 @login_required
 def marking_edit():
@@ -228,7 +256,7 @@ def marking_edit():
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_READ)
 @writing.route('/writing_ui', methods=['GET'])
 @login_required
 def writing_ui():
@@ -256,12 +284,13 @@ def writing_ui():
         filter(or_(Assessment.delete.is_(False), Assessment.delete.is_(None))).all()]
     student = Student.query.filter_by(user_id=st_id).first()
     if student is None:
-        return page_not_found("No available writing found. Please create a writing assessment")
+        if not current_user.is_administrator():
+            return page_not_found("No available writing found. Please create a writing assessment")
     return render_template('writing/writing_ui.html', form=form, guid_list=guid_list, test_form=test_form)
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_READ)
 @writing.route('/marking_onscreen/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
 @login_required
 def marking_onscreen_load(marking_writing_id, student_user_id):
@@ -325,7 +354,7 @@ def text_to_images(student_user_id, file_path):
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_READ)
 @writing.route('/marking_onscreen', methods=['POST'])
 @login_required
 def marking_onscreen_save():
@@ -370,7 +399,7 @@ def marking_onscreen_save():
 
 
 @login_required
-@permission_required(Permission.ADMIN)
+@permission_required(Permission.WRITING_MANAGE)
 @writing.route('/upload_writing', methods=['POST'])
 @login_required
 def upload_writing():

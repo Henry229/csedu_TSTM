@@ -21,14 +21,16 @@ from config import Config
 
 # permission 변경시 Role class에 영향
 class Permission:
-    ITEM_EXEC = 0x01  # 1
-    ITEM_MANAGE = 0x02  # 2
-    TESTLET_MANAGE = 0x04  # 4
-    TESTSET_READ = 0x08  # 8
-    TESTSET_MANAGE = 0x10  # 16
-    ASSESSMENT_READ = 0x20  # 32
-    ASSESSMENT_MANAGE = 0x40  # 64
-    ADMIN = 0x80  # 128
+    ITEM_EXEC = 0x0001  # 1
+    ITEM_MANAGE = 0x0002  # 2
+    TESTLET_MANAGE = 0x0004  # 4
+    TESTSET_READ = 0x0008  # 8
+    TESTSET_MANAGE = 0x0010  # 16
+    ASSESSMENT_READ = 0x0020  # 32
+    ASSESSMENT_MANAGE = 0x0040  # 64
+    WRITING_READ = 0x0080 # 128
+    WRITING_MANAGE = 0x0100 # 256
+    ADMIN = 0x8000  # 32768
 
 
 class User(UserMixin, db.Model):
@@ -59,6 +61,7 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(name='Administrator').first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
@@ -158,6 +161,14 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return created_users
 
+    @staticmethod
+    def getUserName(id):
+        user = User.query.filter_by(id=id).first()
+        if user:
+            return user.username
+        else:
+            return 'Anonymous'
+
     def ping(self):
         self.last_seen = datetime.now(pytz.utc)
         db.session.commit()
@@ -190,13 +201,15 @@ class Role(db.Model):
             'Itembank_manager': [Permission.ITEM_EXEC, Permission.ITEM_MANAGE, Permission.TESTLET_MANAGE,
                                  Permission.TESTSET_MANAGE],
             'Moderator': [Permission.ITEM_EXEC, Permission.ASSESSMENT_MANAGE,
+                          Permission.WRITING_MANAGE,
                           Permission.ITEM_MANAGE, Permission.TESTSET_MANAGE],
             'Administrator': [Permission.ITEM_EXEC, Permission.ASSESSMENT_MANAGE,
                               Permission.ITEM_MANAGE, Permission.TESTLET_MANAGE, Permission.TESTSET_READ,
-                              Permission.TESTSET_MANAGE,
-                              Permission.ASSESSMENT_READ, Permission.ADMIN],
-            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE],
-            'Writing_marker': [Permission.ITEM_EXEC, Permission.ASSESSMENT_READ]
+                              Permission.TESTSET_MANAGE, Permission.ASSESSMENT_READ,
+                              Permission.WRITING_READ, Permission.WRITING_MANAGE,
+                              Permission.ADMIN],
+            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE, Permission.WRITING_READ, Permission.WRITING_MANAGE],
+            'Writing_marker': [Permission.WRITING_READ]
         }
         default_role = 'Test_taker'
 
@@ -737,7 +750,7 @@ class EducationPlanDetail(db.Model):
     order = db.Column(db.Integer, index=True)
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
     plan_id = db.Column(db.Integer, db.ForeignKey('education_plan.id'))
-    marker_ids = db.Column(JSONB)  # {'ids': [...] }
+    # marker_ids = db.Column(JSONB)  # {'ids': [...] }
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
@@ -881,15 +894,33 @@ class MarkingForWriting(db.Model):
 class MarkerAssigned(db.Model):
     """Marker assigned for writing Model: """
     __tablename__ = 'marker_assigned'
+    __table_args__ = (UniqueConstraint('marker_id', 'assessment_id', name='marker_assessment_unique'),)
 
     id = db.Column(db.Integer, primary_key=True)
     marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
+    delete = db.Column(db.Boolean)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
     def __repr__(self):
-        return '<Marker Assigned For Writing {}>'.format(self.id)
+        return '<Marker Assigned For Writing Assessment {}>'.format(self.assessment_id)
+
+
+class MarkerBranch(db.Model):
+    """Marker linked to branch Model: """
+    __tablename__ = 'marker_branch'
+    __table_args__ = (UniqueConstraint('marker_id', 'branch_id', name='marker_branch_unique'),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    branch_id = db.Column(db.Integer, db.ForeignKey('codebook.id'))
+    delete = db.Column(db.Boolean)
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    def __repr__(self):
+        return '<Marker linked To Branch {}>'.format(self.branch_id)
 
 
 class ScoreSummary(db.Model):
@@ -959,7 +990,10 @@ class Codebook(db.Model):
     code_type = db.Column(db.String(255), index=True)
     code_name = db.Column(db.String(255))
     parent_code = db.Column(db.Integer, db.ForeignKey('codebook.id'))
-    additional_info = db.Column(JSONB)
+    additional_info = db.Column(JSONB) # {"state":"", "suburb":"", "address":"", "country":"", "hq_flag":"", "postcode": "",
+                                        # "centre_type": "", "contact_fax": "", "contact_tel": "", "campus_title": "",
+                                        # "activate_flag": "", "campus_prefix": "", "email_address": "",
+                                        # "marker_ids":[...]}
 
     def get_parent_name(self):
         v_parent = Codebook.query.filter_by(id=self.parent_code).first()

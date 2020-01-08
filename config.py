@@ -84,7 +84,7 @@ class Config(metaclass=MetaFlaskEnv):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://dbuser:P@ssword1@localhost/tailored'
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:P@ssword1@localhost/tailored'
     # SQLALCHEMY_ECHO = True
     PREFERRED_URL_SCHEME = 'https'
 
@@ -98,8 +98,7 @@ class TestingConfig(Config):
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-                              'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:P@ssword1@localhost/production'
 
     @classmethod
     def init_app(cls, app):

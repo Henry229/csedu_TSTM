@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import pytz
 import requests
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_required, login_user, logout_user, current_user
@@ -9,11 +9,11 @@ from common.logger import log
 from config import Config
 from . import auth
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileAdminForm, SearchUserForm, \
-    ResetPasswordRequestForm, ResetPasswordForm
+    ResetPasswordRequestForm, ResetPasswordForm, MarkerLinkForm
 from .. import db
 from ..decorators import permission_required, admin_required
 from ..email import send_email, send_password_reset_email
-from ..models import User, Permission, Role, Codebook
+from ..models import User, Permission, Role, Codebook, MarkerBranch
 
 
 @auth.before_app_request
@@ -112,13 +112,20 @@ def user_edit_profile(id):
         user.username = form.username.data
         user.confirmed = form.confirmed.data
         user.role = Role.query.get(form.role.data)  # Role.relationship.backref=role
-        flash('The profile has been updated.')
         db.session.commit()
+
+        if form.branch.data:
+            link_marker(user.id, form.branch.data)
+        flash('The profile has been updated.')
         return redirect(url_for('auth.user_manage'))
     form.email.data = user.email
     form.username.data = user.username
     form.confirmed.data = user.confirmed
     form.role.data = user.role_id
+
+    branch_ids = [sub.branch_id for sub in db.session.query(MarkerBranch.branch_id).filter(
+        MarkerBranch.marker_id == user.id).filter(MarkerBranch.delete.isnot(True)).all()]
+    form.branch.data = branch_ids
     return render_template('auth/edit_profile.html', form=form, user=user)
 
 
@@ -171,6 +178,10 @@ def register():
                     active=True)
         db.session.add(user)
         db.session.commit()
+
+        if form.branch.data:
+            link_marker(user.id, form.branch.data)
+
         if form.u_role.data[1] == 'Test_center':
             test_center = Codebook.query.filter_by(code_type='test_center').filter_by(
                 code_name=form.u_name.data).first()
@@ -290,3 +301,34 @@ def get_campuses():
     info = requests.get(Config.CS_API_URL + "/campus",
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
     return info
+
+
+def link_marker(marker_id, branch_ids):
+
+    # branch_ids = form.branch.data
+    # for branch in branch_ids:
+    #     mb = MarkerBranch(marker_id=user.id, branch_id=branch)
+    #     db.session.add(mb)
+    # db.session.commit()
+
+    for branch_id in branch_ids:
+        row = MarkerBranch.query.filter_by(marker_id=marker_id).filter_by(branch_id=branch_id).first()
+        if row:
+            if row.delete == True:
+                row.delete = False
+                row.modified_time = datetime.now(pytz.utc)
+                db.session.add(row)
+        else:
+            ma = MarkerBranch(marker_id=marker_id, branch_id=branch_id)
+            db.session.add(ma)
+
+    d_ids = MarkerBranch.query.filter_by(marker_id=marker_id). \
+        filter(MarkerBranch.branch_id.notin_(branch_ids)). \
+        filter(MarkerBranch.delete.isnot(True)).all()
+    for row in d_ids:
+        row.delete = True
+        row.modified_time = datetime.now(pytz.utc)
+        db.session.add(row)
+    flash('Marker has been successfully assigned to the branch(es).')
+    db.session.commit()
+    return True

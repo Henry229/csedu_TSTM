@@ -35,6 +35,12 @@
                     <button type="button" class="btn btn-outline-warning btn-sm" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
+            <small>( Current assigned:
+                {% for marker in form.markers.data %}
+                    {{ User.getUserName(marker) }}
+                    {% if loop.index!=form.markers.data|length %},{% endif %}
+                {% endfor %}
+            ) </small>
         </div>
     </div>
 </form>

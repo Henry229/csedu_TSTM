@@ -15,6 +15,7 @@
     <link href="/static/ui/css/style.css" rel="stylesheet">
     <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
     <script src="/static/ui/vendors/moment.js/js/moment.js"></script>
+    <script src="/static/auth/js/user.js"></script>
 </head>
 <body>
 <form name="modalForm" action="{{ url_for('auth.user_edit_profile', id=user.id) }}" id="user_profile_form" method="POST"
@@ -24,8 +25,36 @@
             Update</strong></div>
         <div class="card-body">
             <table>
-                {% import "bootstrap/wtf.html" as wtf %}
-                {{ wtf.quick_form(form) }}
+                {{ form.hidden_tag() }}
+                <tr>
+                    <th>{{ form.email.label }}</th>
+                    <td>{{ form.email(size=30) }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.username.label }}</th>
+                    <td>{{ form.username(size=30) }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.confirmed.label }}</th>
+                    <td>{{ form.confirmed }}   </td>
+                </tr>
+                <tr>
+                    <th>{{ form.role.label }}</th>
+                    <td>{{ form.role }}  </td>
+                </tr>
+                <tr>
+                    <th><span class="select_branch">{{ form.branch.label }}</span></th>
+                    <td><span class="select_branch">{{ form.branch(size=10) }}<br>
+                            <small>(Current Assigned Branch(es):
+                                {% for branch in form.branch.data %}
+                                    {{ Codebook.get_code_name(branch) }}
+                                    {% if loop.index!=form.branch.data|length %},{% endif %}
+                                {% endfor %}
+                            )</small>
+                        </span>
+
+                    </td>
+                </tr>
             </table>
             <br>
             <div>
