@@ -5,6 +5,7 @@ from app.api import api
 from app.api.errors import forbidden
 from app.decorators import permission_required
 from app.models import Item, Permission, Codebook
+from app.models import sort_codes
 
 
 @api.route('/_get_child_codes/')
@@ -16,13 +17,13 @@ def _get_child_codes():
     return jsonify(child)
 
 
-def sort_codes(codesets):
-    if len(codesets) > 1:
-        if (codesets[1][1].startswith('Y') or codesets[1][1].startswith('K') or codesets[1][1].startswith('L')):
-            codesets = sorted(codesets, key=lambda x: int(x[1].strip('YKL').replace('', '0')))
-        else:
-            codesets = sorted(codesets, key=lambda x: x[1])
-    return codesets
+# def sort_codes(codesets):
+#     if len(codesets) > 1:
+#         if (codesets[1][1].startswith('Y') or codesets[1][1].startswith('K') or codesets[1][1].startswith('L')):
+#             codesets = sorted(codesets, key=lambda x: int(x[1].strip('YKL').replace('', '0')))
+#         else:
+#             codesets = sorted(codesets, key=lambda x: x[1])
+#     return codesets
 
 
 @api.route('/items/<int:id>')

@@ -4,6 +4,7 @@ from app.api import api
 from app.decorators import permission_required
 from app.models import Permission, Codebook, Assessment, EducationPlanDetail
 from .. import db
+from app.models import sort_codes
 
 
 # EducationPlan > Add Assessments > Assessment search > Assessments return for apply
@@ -83,10 +84,10 @@ def add_codebook():
     return jsonify(child)
 
 
-def sort_codes(codesets):
-    if len(codesets) > 1:
-        if (codesets[1][1].startswith('Y') or codesets[1][1].startswith('K') or codesets[1][1].startswith('L')):
-            codesets = sorted(codesets, key=lambda x: int(x[1].strip('YKL').replace('', '0')))
-        else:
-            codesets = sorted(codesets, key=lambda x: x[1])
-    return codesets
+# def sort_codes(codesets):
+#     if len(codesets) > 1:
+#         if (codesets[1][1].startswith('Y') or codesets[1][1].startswith('K') or codesets[1][1].startswith('L')):
+#             codesets = sorted(codesets, key=lambda x: int(x[1].strip('YKL').replace('', '0')))
+#         else:
+#             codesets = sorted(codesets, key=lambda x: x[1])
+#     return codesets

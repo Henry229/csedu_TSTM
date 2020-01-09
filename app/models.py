@@ -1,5 +1,6 @@
 import random
 import string
+import re
 from datetime import datetime
 from time import time
 
@@ -750,7 +751,6 @@ class EducationPlanDetail(db.Model):
     order = db.Column(db.Integer, index=True)
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
     plan_id = db.Column(db.Integer, db.ForeignKey('education_plan.id'))
-    # marker_ids = db.Column(JSONB)  # {'ids': [...] }
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
@@ -767,7 +767,10 @@ class EducationPlanDetail(db.Model):
         plan = (EducationPlanDetail.query. \
                 filter(EducationPlanDetail.assessment_id == assessment_id). \
                 order_by(EducationPlanDetail.modified_time.desc()).first()).master_plan
-        return Codebook.get_code_name(plan.grade)
+        if plan:
+            return Codebook.get_code_name(plan.grade)
+        else:
+            return '-'
 
     def __repr__(self):
         return '<Assessment has Testsets: {}>'.format(self.id)
@@ -1156,14 +1159,25 @@ class Weights:
         else:
             return 1
 
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+
 
 def sort_codes(codesets):
     if len(codesets) > 1:
-        if codesets[1][1].startswith('Y') or codesets[1][1].startswith('K') or codesets[1][1].startswith('L'):
-            codesets = sorted(codesets, key=lambda x: int(x[1].strip('YKL').replace('', '0')))
-        else:
-            codesets = sorted(codesets, key=lambda x: x[1])
+        codesets.sort(key=lambda x: natural_keys(x[1]))
     return codesets
+
+
 
 
 # Refresh materialized views

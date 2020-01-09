@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from wtforms import SelectField, BooleanField, SubmitField
 
 from .. import db
-from ..models import Choices, Codebook, EducationPlan
+from ..models import Choices, Codebook, Assessment
 
 
 def get_test_center():
@@ -38,7 +38,7 @@ class ReportSearchForm(FlaskForm):
         super(ReportSearchForm, self).__init__(*args, **kwargs)
         self.year.choices = [(ts.year, ts.year)
                              for ts in
-                             db.session.query(EducationPlan.year).distinct().order_by(EducationPlan.year).all()]
+                             db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
         self.test_type.choices = Choices.get_codes('test_type')
         self.test_center.choices = get_test_center()
 
