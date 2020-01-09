@@ -1,3 +1,4 @@
+DROP VIEW public.csedu_plan_assessment_testsets_enrolled_v;
 CREATE OR REPLACE VIEW public.csedu_plan_assessment_testsets_enrolled_v
 AS SELECT cepv.plan_id,
     cepv.plan_name,
