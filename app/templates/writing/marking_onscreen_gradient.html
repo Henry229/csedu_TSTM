@@ -82,107 +82,112 @@
     </style>
 {% endblock %}
 {% block app_content %}
-    <form action="{{ url_for('writing.marking_edit') }}" id="marking_form" method="POST" class="form" role="form">
-        {{ form.hidden_tag() }}
-        <div class="card card-accent-info">
-            <div class="card-header"><i class="fas fa-pencil-alt" style="color: #339af0;"></i><strong>Marking</strong>
-                <span class="badge badge-info float-right">Marking of Student Writing</span>
-                {{ Student.getCSStudentName(form.student_user_id.data) }}({{ Student.getCSStudentId(form.student_user_id.data) }})
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="ml-5 mr-5">
-                        {{ form.markers_comment.label }}<p/>
-                        {{ form.markers_comment(rows="8", cols="50") }}
-                    </div>
-                    <table id="weight_mapping" class="table-borderless">
-                        <thead>
-                        <th>Criteria</th>
-                        <th colspan="2">Mark</th>
-                        </thead>
-                        <tbody>
-                        {% for criteria_form in form.markings %}
-                            <tr>
-                                <td>
-                                    {{ criteria_form.criteria(readonly=True) }}
-                                </td>
-                                <td>
+    <div id="feedback">
+        <form action="{{ url_for('writing.marking_edit') }}" id="marking_form" method="POST" class="form" role="form">
+            {{ form.hidden_tag() }}
+            <div class="card card-accent-info">
+                <div class="card-header"><i class="fas fa-pencil-alt"
+                                            style="color: #339af0;"></i><strong>Marking</strong>
+                    <span class="badge badge-info float-right">Marking of Student Writing</span>
+                    {{ Student.getCSStudentName(form.student_user_id.data) }}({{ Student.getCSStudentId(form.student_user_id.data) }})
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="ml-5 mr-5">
+                            {{ form.markers_comment.label }}<p/>
+                            {{ form.markers_comment(rows="8", cols="50") }}
+                        </div>
+                        <table id="weight_mapping" class="table-borderless">
+                            <thead>
+                            <th>Criteria</th>
+                            <th colspan="2">Mark</th>
+                            </thead>
+                            <tbody>
+                            {% for criteria_form in form.markings %}
+                                <tr>
+                                    <td>
+                                        {{ criteria_form.criteria(readonly=True) }}
+                                    </td>
+                                    <td>
                                     <span>
                                         {{ criteria_form.marking(size=2, readonly=True) }}
                                     </span>
-                                </td>
-                                <td>
-                                    <div id="slider{{ loop.index }}" class="slider">
-                                        <div id="custom-handle" name="custom-handle{{ loop.index }}"
-                                             class="ui-slider-handle"></div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="float-right">
-                    <button type="button" class="btn btn-success btn-sm" id="basic_info_submit">Submit</button>
-                    <button type="button" class="btn btn-danger btn-sm" id="basic_info_reset">Reset</button>
+                                    </td>
+                                    <td>
+                                        <div id="slider{{ loop.index }}" class="slider">
+                                            <div id="custom-handle" name="custom-handle{{ loop.index }}"
+                                                 class="ui-slider-handle"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="float-right">
+                        <button type="button" class="btn btn-success btn-sm" id="basic_info_submit">Submit</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="basic_info_reset">Reset</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </form>
-    <div class="card-body">
-        <div id="marking_alert" class="alert alert-info alert-dismissible fade show"></div>
-        <hr>
-        <div id="marking_tools">
-            <button id="marking_save" class="btn btn-warning btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
-                    style="font-weight: bold">Save Marking</span>
-            </button>
-            <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
-                    class="fas fa-caret-square-left ml-1 mr-1"></i></button>
-            <button id="marking_next" class="btn btn-outline-info btn-sm"><i
-                    class="fas fa-caret-square-right ml-1 mr-1"></i></button>
-            <span id="pageCount" class="badge badge-pill badge-primary"></span>
-            <div class="float-right">
-                <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
-                <button class="marking_button btn btn-dark btn-sm" onclick="colorChange(this)">Reset</button>
-                <button class="marking_button btn btn-danger btn-sm" onclick="colorChange(this)">Red</button>
-                <button class="marking_button btn btn-primary btn-sm" onclick="colorChange(this)">Blue</button>
-                <button class="marking_button btn btn-success btn-sm" onclick="colorChange(this)">Green</button>
-                <i id="pen-icon" class="fas fa-pen" style="font-size: 25px"><input id="pen_width" type="range"
-                                                                                   class="pen_slider" max="10"
-                                                                                   min="1"
-                                                                                   value="1"></i>
-                <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
-                <button class="marking_button btn btn-flickr btn-sm highligther">
-                    <i id="highlighter-icon" class="fas fa-highlighter"></i>
-                    <span style="color: white">Highlighter</span>
+        </form>
+    </div>
+    <div id="screen_marking">
+        <div class="card-body">
+            <div id="marking_alert" class="alert alert-info alert-dismissible fade show"></div>
+            <hr>
+            <div id="marking_tools">
+                <button id="marking_save" class="btn btn-warning btn-sm"><i class="fas fa-save ml-1 mr-1"></i><span
+                        style="font-weight: bold">Save Marking</span>
                 </button>
+                <button id="marking_prev" class="btn btn-outline-info btn-sm"><i
+                        class="fas fa-caret-square-left ml-1 mr-1"></i></button>
+                <button id="marking_next" class="btn btn-outline-info btn-sm"><i
+                        class="fas fa-caret-square-right ml-1 mr-1"></i></button>
+                <span id="pageCount" class="badge badge-pill badge-primary"></span>
+                <div class="float-right">
+                    <button id="marking_clear" class="btn btn-outline-danger btn-sm">Clear</button>
+                    <button class="marking_button btn btn-dark btn-sm" onclick="colorChange(this)">Reset</button>
+                    <button class="marking_button btn btn-danger btn-sm" onclick="colorChange(this)">Red</button>
+                    <button class="marking_button btn btn-primary btn-sm" onclick="colorChange(this)">Blue</button>
+                    <button class="marking_button btn btn-success btn-sm" onclick="colorChange(this)">Green</button>
+                    <i id="pen-icon" class="fas fa-pen" style="font-size: 25px"><input id="pen_width" type="range"
+                                                                                       class="pen_slider" max="10"
+                                                                                       min="1"
+                                                                                       value="1"></i>
+                    <button class="marking_button btn btn-light btn-sm" onclick="colorChange(this)">Eraser</button>
+                    <button id="highlighter" class="marking_button btn btn-flickr btn-sm highligther">
+                        <i id="highlighter-icon" class="fas fa-highlighter"></i>
+                        <span style="color: white">Highlighter</span>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div id="images">
-            {% for key, image in web_img_links.items() %}
-                <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
-                     src="{{ image['writing'] }}?{{ timestamp }}">
-                {% if image['marking'] %}
-                    <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
-                         src="{{ image['marking'] }}?{{ timestamp }}">
-                {% else %}
-                    <img id="{{ key }}_marking" class="hidden onscreen_marking">
-                {% endif %}
-            {% endfor %}
-        </div>
-        <div id="canvases" style="position: relative;">
-            <canvas id="writing"
-                    style="z-index: 1; position: absolute; left: 0px; top: 10px;">
-                Student writing
-            </canvas>
-            <canvas id="cursor"
-                    style="z-index: 2; position: absolute; left: 0px; top: 10px;">
-                Cursor
-            </canvas>
-            <canvas id="marking"
-                    style="z-index: 3; position: absolute; left: 0px; top: 10px;">
-                On screen marking
-            </canvas>
+            <div id="images">
+                {% for key, image in web_img_links.items() %}
+                    <img id="{{ key }}_writing" name="{{ image['writing'] }}" class="hidden student_writing"
+                         src="{{ image['writing'] }}?{{ timestamp }}">
+                    {% if image['marking'] %}
+                        <img id="{{ key }}_marking" name="{{ image['marking'] }}" class="hidden onscreen_marking"
+                             src="{{ image['marking'] }}?{{ timestamp }}">
+                    {% else %}
+                        <img id="{{ key }}_marking" class="hidden onscreen_marking">
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div id="canvases" style="position: relative;">
+                <canvas id="writing"
+                        style="z-index: 1; position: absolute; left: 0px; top: 10px;">
+                    Student writing
+                </canvas>
+                <canvas id="cursor"
+                        style="z-index: 2; position: absolute; left: 0px; top: 10px;">
+                    Cursor
+                </canvas>
+                <canvas id="marking"
+                        style="z-index: 3; position: absolute; left: 0px; top: 10px;">
+                    On screen marking
+                </canvas>
+            </div>
         </div>
     </div>
 {% endblock app_content %}
@@ -247,12 +252,23 @@
             eraserMode = false;
             highlighterMode = false;
             marking_ctx.globalCompositeOperation = 'source-over';
+            $('div.app-body').css('overflow', 'hidden');
             $("#pen-icon").css('color', penColor);
             $("#pen-icon").removeClass("fa-eraser").addClass("fa-pen");
             $(".pen_slider").css('background', penColor);
             $("#pen_width").val(penWidth);
             $("#highlighter-icon").css('color', "white");
             $("#marking_alert").hide();
+            <!-- Resize page height to avoid nested scroll bars -->
+            app_body = $('div.app-body');
+            feedback = $('#feedback');
+            screen_marking = $('#screen_marking');
+            bottom_margin = 100;
+            console.log($('#feedback').height(), screen_marking.height(), writing_layer.height, app_body.height());
+            new_height = feedback.height() + screen_marking.height() + writing_layer.height + bottom_margin;
+            if (app_body.height() != new_height) {
+                app_body.css('height', new_height + 'px');
+            }
         }
 
         function getDistance(point1, point2) {
@@ -542,12 +558,22 @@
             var h = mainHtml[0].getBoundingClientRect();
             var m = marking.getBoundingClientRect();
             var t = $("#marking_tools");
+
+            <!-- Change toolbox outline size -->
+            var tools_bottom = $('#highlighter').offset().top + $('#highlighter').height();
+            var toolbox_bottom = $('#marking_tools').offset().top + $('#marking_tools').height();
+            var diff = tools_bottom - toolbox_bottom;
+            if (tools_bottom > toolbox_bottom) {
+                t.height(t.height() + diff);
+            }
+
+            <!-- Adjust toolbox location -->
             if (h.top <= 0) {
                 if (m.top > 150) {
-                    t.offset({top: m.top - 70 + (h.top * -1)});
+                    t.offset({top: m.top - t.height() - 50 + (h.top * -1)});
                     t.css("border-color", "lightpink");
                 } else {
-                    t.offset({top: 100 + (h.top * -1)});
+                    t.offset({top: t.height() + 50 + (h.top * -1)});
                     t.css("border-color", "deeppink");
                 }
             }
