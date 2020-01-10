@@ -37,9 +37,9 @@ def full_report(student_user_id):
         flash(error)
     result = report_data(student_user_id)
 
-    result.headers["Content-Disposition"] = \
-        "attachment;" \
-        "attachment;filename=full_report.json"
+    # result.headers["Content-Disposition"] = \
+    #     "attachment;" \
+    #     "attachment;filename=full_report.json"
     return result
 
 
@@ -56,6 +56,7 @@ def report_data(student_user_id):
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.assessment_guid.asc()).all()
     for assessment_enroll in assessment_enrolls:
         assessment.append(assessment_enroll)
+
     return jsonify(student, assessment)
 
 

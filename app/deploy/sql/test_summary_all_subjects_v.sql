@@ -10,7 +10,7 @@ AS WITH test_result_by_subject AS (
             test_summary_v.subject_4,
             test_summary_v.subject_5,
             COALESCE(NULLIF(test_summary_v.subject_1, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_2, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_3, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_4, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_5, 0::double precision), 0::double precision) AS total_mark
-           FROM crosstab('select ARRAY[student_user_id::integer, cs_student_id::integer, assessment_id::integer] as row_name, testset_id, my_score
+           FROM crosstab('select ARRAY[student_user_id::text, cs_student_id::text, assessment_id::text] as row_name, testset_id, my_score
 						   from (SELECT m.student_user_id,
 						            s.student_id AS cs_student_id,
 						            m.assessment_id,
@@ -19,11 +19,11 @@ AS WITH test_result_by_subject AS (
 						            m.total_score
 						           FROM marking_summary_360_degree_mview m, student s
 						          WHERE m.student_user_id = s.user_id) test_summary_v
-						   order by 1,2'::text) test_summary_v(row_name integer[], subject_1 double precision, subject_2 double precision, subject_3 double precision, subject_4 double precision, subject_5 double precision, total_mark double precision)
+						   order by 1,2'::text) test_summary_v(row_name text[], subject_1 double precision, subject_2 double precision, subject_3 double precision, subject_4 double precision, subject_5 double precision, total_mark double precision)
         )
- SELECT trs.student_user_id,
+ SELECT trs.student_user_id::integer,
     trs.cs_student_id::text AS cs_student_id,
-    trs.assessment_id,
+    trs.assessment_id::integer,
     a.test_center,
     trs.subject_1,
     trs.subject_2,
@@ -37,7 +37,7 @@ AS WITH test_result_by_subject AS (
             assessment_enroll.student_user_id,
             assessment_enroll.test_center
            FROM assessment_enroll) a
-  WHERE trs.assessment_id = a.assessment_id AND trs.student_user_id = a.student_user_id;
+  WHERE trs.assessment_id::integer = a.assessment_id AND trs.student_user_id::integer = a.student_user_id;
 
 -- Permissions
 
