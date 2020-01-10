@@ -317,9 +317,12 @@ def text_to_images(student_user_id, file_path):
     file_name = os.path.basename(file_path)
     image_x = 1200
     image_y = 1596
+    left_margin = 40
+    right_margin = 20
     font_size = 30
     line_space = 10
-    characters_per_line = int(image_x / (font_size / 2.0))
+    width = image_x - left_margin - right_margin
+    characters_per_line = int(width / (font_size / 2.0))
     lines_per_page = int(image_y / (font_size + line_space * 1.5))
     file_names = []
     with open(file_path, "r") as f:
@@ -342,9 +345,9 @@ def text_to_images(student_user_id, file_path):
         count = 1
         for p in pages:
             # Create and save image files
-            img = Image.new('RGB', (image_x, image_y), (255, 255, 255))
+            img = Image.new('RGB', (width, image_y), (255, 255, 255))
             d = ImageDraw.Draw(img)
-            d.multiline_text((10, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0))
+            d.multiline_text((left_margin, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0))
             saved_file_name = os.path.splitext(file_name)[0] + str(count) + ".jpg"
             img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
                                   saved_file_name))

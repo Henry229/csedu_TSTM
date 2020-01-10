@@ -145,7 +145,7 @@ def process_inward():
 
     member = get_student_info(student_id)
     if is_authorised(member, session_timeout):
-        registered_student = Student.query.filter_by(student_id=student_id).first()
+        registered_student = Student.query.filter(Student.student_id.ilike(student_id)).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
@@ -246,7 +246,8 @@ def assessment_list():
             return page_not_found()
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=current_user.id).all()
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
+                                                    student_user_id=current_user.id).all()
         testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
         # Get all testset the assessment has
