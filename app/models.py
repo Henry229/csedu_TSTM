@@ -174,6 +174,9 @@ class User(UserMixin, db.Model):
         self.last_seen = datetime.now(pytz.utc)
         db.session.commit()
 
+    def __json__(self):
+        return ['username', 'email']
+
     def __repr__(self):
         return '<User %r>' % self.username
 
@@ -642,6 +645,9 @@ class Assessment(db.Model):
             return True
         return False
 
+    def __json__(self):
+        return ['GUID', 'name', 'branch_id', 'test_type', 'year']
+
     def __repr__(self):
         return '<Assessment {}>'.format(self.name)
 
@@ -696,6 +702,9 @@ class AssessmentEnroll(db.Model):
     assessment = db.relationship('Assessment', back_populates="enroll")
     student = db.relationship('Student', back_populates="enroll")
     marking = db.relationship('Marking', back_populates="enroll")
+
+    def __json__(self):
+        return ['id', 'assessment_guid', 'testset_id', 'attempt_count', 'start_time_client']
 
     def __repr__(self):
         return '<Assessment Enrol {}>'.format(self.id)
@@ -764,11 +773,11 @@ class EducationPlanDetail(db.Model):
 
     @staticmethod
     def get_grade(assessment_id):
-        plan = (EducationPlanDetail.query. \
+        epd = EducationPlanDetail.query. \
                 filter(EducationPlanDetail.assessment_id == assessment_id). \
-                order_by(EducationPlanDetail.modified_time.desc()).first()).master_plan
-        if plan:
-            return Codebook.get_code_name(plan.grade)
+                order_by(EducationPlanDetail.modified_time.desc()).first()
+        if epd:
+            return Codebook.get_code_name(epd.master_plan.grade)
         else:
             return '-'
 
@@ -789,8 +798,8 @@ class Marking(db.Model):
     correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
     candidate_r_value = db.Column(JSONB)  # Candidate Response Value
     is_correct = db.Column(db.Boolean)
-    outcome_score = db.Column(db.Float)  # SetOutcome Score
-    candidate_mark = db.Column(db.Float)  # Student's score
+    outcome_score = db.Column(db.Float, default=0)  # SetOutcome Score
+    candidate_mark = db.Column(db.Float, default=0)  # Student's score
     duration = db.Column(db.Interval)  # time - time:duration, DB column type:Interval,Python Type: datetime.timedelta?
     # flag = db.Column(db.Boolean)
     is_read = db.Column(db.Boolean, default=False)
@@ -823,6 +832,10 @@ class Marking(db.Model):
                 filter(Marking.testlet_id == testlet_id).first()
 
         return total_score.score
+
+    def __json__(self):
+        return ['question_no', 'testset_id', 'testlet_id', 'item_id', 'weight',\
+                'is_correct', 'correct_r_value', 'candidate_r_value', 'outcome_score', 'candidate_mark']
 
     def __repr__(self):
         return '<Marking {}>'.format(self.id)
@@ -950,6 +963,7 @@ class Student(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
+    user = db.relationship('User', lazy='joined')
     student_id = db.Column(db.String(64), index=True)
     branch = db.Column(db.String(5), index=True)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
@@ -963,10 +977,6 @@ class Student(db.Model):
     def getCSStudentId(user_id):
         return (Student.query.filter_by(user_id=user_id).first()).student_id
 
-    # @staticmethod
-    # def getCSStudentId(id):
-    #     return (Student.query.filter_by(id=id).first()).user_id
-
     @staticmethod
     def getCSStudentName(user_id):
         return (User.query.filter_by(id=user_id).first()).username
@@ -979,6 +989,14 @@ class Student(db.Model):
                                            Codebook.additional_info.contains({"campus_prefix": branch_id})).first()
             if branch:
                 return branch.code_name
+
+    @hybrid_property
+    def branch_name(self):
+        return Codebook.query.filter(Codebook.code_type == 'test_center',
+                              Codebook.additional_info.contains({"campus_prefix": self.branch})).first()
+
+    def __json__(self):
+        return ['user_id', 'student_id', 'branch_name', 'last_access', 'user']
 
     def __repr__(self):
         return '<Student {}>'.format(self.user_id)

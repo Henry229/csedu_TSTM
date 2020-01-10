@@ -2,7 +2,8 @@ import os
 from collections import namedtuple
 from datetime import datetime
 
-from flask import render_template, flash, request, current_app, redirect, url_for
+from flask import render_template, flash, request, current_app, redirect, url_for, Response, jsonify
+from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
 
 from . import report
@@ -19,7 +20,109 @@ from ..api.reports import draw_report, query_my_report_list_v, query_my_report_h
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    refresh_mviews, Item, Marking, EducationPlan
+    refresh_mviews, Item, Marking, EducationPlan, Student
+from ..auth.views import get_student_info
+
+''' 
+ @report.route('/full_report/<int:student_id>', methods=['GET'])
+ full_report() : Administration > User Manage > Student List > request Full_Report 
+'''
+@jsonapi
+@report.route('/full_report/<int:student_user_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def full_report(student_user_id):
+    error = request.args.get("error")
+    if error:
+        flash(error)
+    # student_user_id=15, 54, 58, 1, 73, 74
+    student_json_str = Student.query.filter_by(user_id=58).first()
+
+    json_str=[]
+    # ToDo: Temporarily query guid_list from AssessmentEnroll table. List should be from csonlineschool(API)
+    guid_list = [sub.assessment_guid for sub in db.session.query(AssessmentEnroll.assessment_guid).
+        filter(AssessmentEnroll.student_user_id==student_user_id).all()]
+
+    assessment_enrolls = AssessmentEnroll.query.filter(AssessmentEnroll.assessment_guid.in_(guid_list)).\
+        filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.assessment_guid.asc()).all()
+    for assessment_enroll in assessment_enrolls:
+        json_str.append(assessment_enroll)
+
+        # markings = Marking.query.filter_by(assessment_enroll_id=self.id).order_by(Marking.question_no.asc()).all()
+        # return markings
+
+    # if len(guid_list):
+    #     for a_guid in guid_list:
+    #         es = AssessmentEnroll.query.filter_by(assessment_guid=a_guid).all()
+    #         for e in es:
+    #             json_str.append(e)
+
+    return jsonify(student_json_str, json_str)
+
+
+
+    #     json_str = {"assessments": [
+    #                 {"GUID": "1234fjeksl",
+    #                  "testset":
+    #                      {"id": "1",
+    #                       "testlets":
+    #                           [{
+    #                               "id": "2",
+    #                               "name": "2",
+    #                               "version": "2",
+    #                               "year": "2014"
+    #                           },
+    #                               {
+    #                                   "id": "3",
+    #                                   "name": "3",
+    #                                   "version": "3",
+    #                                   "year": "2014"
+    #                               }]
+    #                       }
+    #                  }
+    #                 ]
+    #             }
+    # if request.args.get('json-download') == "1":
+    #     import json
+    #     return Response(json.dumps(json_str, sort_keys=True),
+    #              mimetype='application/json',
+    #              headers={'Content-Disposition': 'attachment;filename=full_report.json'})
+    # else:
+    #     return json_str
+
+    # member = get_student_info(student_id)
+    # if member['sales']:
+    #     guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
+    #     if len(guid_list):
+    #         json = {"assessment":
+    #                     {"GUID": "1234fjeksl",
+    #                      "testset":
+    #                          {"id": "1",
+    #                           "testlets":
+    #                               [{
+    #                                   "id": "2",
+    #                                   "name": "2",
+    #                                   "version": "2",
+    #                                   "year": "2014"
+    #                               },
+    #                                   {
+    #                                       "id": "3",
+    #                                       "name": "3",
+    #                                       "version": "3",
+    #                                       "year": "2014"
+    #                                   }]
+    #                           }
+    #                      }
+    #                 }
+    #         # return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
+    #         return json
+    #     else:
+    #         return redirect(url_for('web.index'))
+    # else:
+    #     flash("Student information not found")
+    #     return redirect(url_for('web.index'))
+
+
 
 ''' 
  @report.route('/my_report', methods=['GET'])
@@ -273,7 +376,9 @@ def summary_report(plan_id, branch_id):
     query = db.session.query(AssessmentEnroll.student_user_id).distinct()
     # Todo: Need to check if current_user have access right on queried data
     test_center = Codebook.get_testcenter_of_current_user()
-    if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+    # Remove: "not test_center" because of 'admin' user has already registered to test_center 'Castle Hill'
+    # if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+    if (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
         test_center = Codebook.query.filter_by(code_type='test_center').filter_by(code_name='All').first()
     if (test_center.id == branch_id):
         if not (test_center.code_name == 'All'):
@@ -449,7 +554,9 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
     query = db.session.query(AssessmentEnroll.student_user_id).distinct()
     # Todo: Need to check if current_user have access right on queried data
     test_center = Codebook.get_testcenter_of_current_user()
-    if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+    # Remove: condition "not test_center" because of 'admin' user has already registered to test_center 'Castle Hill'
+    # if not test_center and (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
+    if (current_user.role.name == 'Moderator' or current_user.role.name == 'Administrator'):
         test_center = Codebook.query.filter_by(code_type='test_center').filter_by(code_name='All').first()
     if (test_center.id == branch_id):
         if not (test_center.code_name == 'All'):

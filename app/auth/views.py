@@ -304,13 +304,6 @@ def get_campuses():
 
 
 def link_marker(marker_id, branch_ids):
-
-    # branch_ids = form.branch.data
-    # for branch in branch_ids:
-    #     mb = MarkerBranch(marker_id=user.id, branch_id=branch)
-    #     db.session.add(mb)
-    # db.session.commit()
-
     for branch_id in branch_ids:
         row = MarkerBranch.query.filter_by(marker_id=marker_id).filter_by(branch_id=branch_id).first()
         if row:

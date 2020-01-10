@@ -222,8 +222,65 @@ def destroy():
         except:
             pass
 
-'''Command: $ flask change-roles'''
 @app.cli.command()
 def change_roles():
+    '''Command: $ flask change-roles'''
     print('Updating roles into Roles table')
     Role.insert_roles()
+
+
+@app.cli.command()
+def fillout_testcenter():
+    '''Command: $ flask fillout-testcenter'''
+    from app.models import AssessmentEnroll, Student
+    print('Fill out AssessmentEnroll:test_center column')
+    test_centers = Codebook.query.filter(Codebook.code_type == 'test_center').all()
+    for ts in test_centers:
+
+        if ts.additional_info:
+            print("Testcenter {} {} - {}".format(ts.id, ts.code_name, ts.additional_info["campus_prefix"]))
+        else:
+            print("Testcenter {} {} - {}".format(ts.id, ts.code_name,'None'))
+
+    print('Fill out AssessmentEnroll:test_center column')
+
+    aes = AssessmentEnroll.query.all()
+    for ae in aes:
+        student = Student.query.filter_by(user_id=ae.student_user_id).first()
+        if student:
+            test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
+                                     Codebook.additional_info.contains({"campus_prefix": (student.branch).strip()})).first()
+            if test_center:
+                enrolled = ae
+                enrolled.test_center = test_center.id
+                db.session.add(enrolled)
+                db.session.commit()
+                print("Successfully registered branch {} for student <{}>".format(student.branch, ae.student_user_id))
+            else:
+                print("Not found branch {} for student <{}>".format(student.branch, ae.student_user_id))
+        else:
+            print("Not found student <{}>".format(student))
+
+
+
+@app.cli.command()
+def fillout_default_score():
+    '''Command: $ flask fillout-default-score'''
+    from app.models import Marking, refresh_mviews
+
+    print('Fill out Marking:outcome_score, candidate_mark column to default 0')
+    markings = Marking.query.filter(Marking.outcome_score==None).filter(Marking.candidate_mark==None).all()
+    print(len(markings))
+    for marking in markings:
+        print(marking)
+        if marking.outcome_score is None:
+            marking.outcome_score=0
+        if marking.candidate_mark is None:
+            marking.candidate_mark=0
+        db.session.add(marking)
+        db.session.commit()
+        print("Successfully update marking <id:{}> - candidate_mark {}, outcome_score {}".format(marking.id, marking.candidate_mark, marking.outcome_score))
+    refresh_mviews()
+
+
+

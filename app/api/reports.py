@@ -76,6 +76,7 @@ def draw_report(result):
     if not os.path.exists(current_app.config['NAPLAN_RESULT_DIR']):
         os.makedirs(current_app.config['NAPLAN_RESULT_DIR'])
     base = Image.open('%s/../img/naplan-%s.png' % (current_app.config['NAPLAN_RESULT_DIR'], result["grade"]))
+
     base.load()
     img = Image.new("RGB", base.size, (255, 255, 255))
     img.paste(base, mask=base.split()[3])
@@ -193,7 +194,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
                 lc_spelling_score, lc_spelling_average_score, lc_spelling_percentile_20, lc_spelling_percentile_80 = 0, 0, 0, 0
                 lc_other_score, lc_other_average_score, lc_other_percentile_20, lc_other_percentile_80 = 0, 0, 0, 0
                 for sub_row in sub_rows:
-                    if sub_row.code_name == 'spelling':
+                    if sub_row.code_name == 'Spelling':
                         lc_spelling_score = sub_row.percentile_score
                         lc_spelling_average_score = sub_row.median
                         lc_spelling_percentile_20 = sub_row.percentile_20
@@ -489,7 +490,7 @@ def query_individual_progress_summary_by_plan_v(plan_id, student_user_id, num_of
 
 def query_test_ranking_subject_list(assessment_id):
     column_names = ['att.testset_id',
-                    '(select cb.code_name ' \
+                    "'No_'||att.testset_id||'_'||(select cb.code_name " \
                     + ' from testset ts, codebook cb ' \
                     + ' where att.testset_id=ts.id ' \
                     + ' and ts.subject = cb.id ' \
@@ -594,7 +595,7 @@ def query_test_ranking_data(subjects, assessment_id):
     sql_stmt = sql_stmt + ') )'
     sql_stmt = sql_stmt \
                + " SELECT trs.student_user_id, " \
-               + "     (select s.student_user_id from student s where s.user_id=trs.student_user_id) AS cs_student_id, " \
+               + "     (select s.student_id from student s where s.user_id=trs.student_user_id) AS cs_student_id, " \
                + "     (select u.username from users u where u.id=trs.student_user_id) AS student_name, " \
                + "     trs.assessment_id, " \
                + "      a.test_center, "

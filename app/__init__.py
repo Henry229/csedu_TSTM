@@ -83,6 +83,10 @@ def create_app(config_name):
 
     app.session_interface = CustomSessionInterface()
 
+    # json encoding
+    from app.json_encoder import AlchemyEncoder
+    app.json_encoder = AlchemyEncoder
+
     return app
 
 

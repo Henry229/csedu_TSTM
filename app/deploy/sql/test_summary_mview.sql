@@ -1,3 +1,4 @@
+DROP MATERIALIZED VIEW public.test_summary_mview;
 CREATE MATERIALIZED VIEW public.test_summary_mview
 TABLESPACE pg_default
 AS WITH org_score AS (

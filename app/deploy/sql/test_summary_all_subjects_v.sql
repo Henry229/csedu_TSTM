@@ -1,3 +1,4 @@
+DROP VIEW public.test_summary_all_subjects_v;
 CREATE OR REPLACE VIEW public.test_summary_all_subjects_v
 AS WITH test_result_by_subject AS (
          SELECT test_summary_v.row_name[1] AS student_user_id,

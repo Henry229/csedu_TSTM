@@ -1,3 +1,4 @@
+DROP VIEW public.test_summary_by_category_v;
 CREATE OR REPLACE VIEW public.test_summary_by_category_v
 AS WITH org_score AS (
          SELECT m.assessment_id,

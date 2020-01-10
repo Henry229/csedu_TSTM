@@ -1,3 +1,4 @@
+DROP MATERIALIZED VIEW public.marking_summary_by_category_360_degree_mview cascade ;
 CREATE MATERIALIZED VIEW public.marking_summary_by_category_360_degree_mview
 TABLESPACE pg_default
 AS WITH marking_summary AS (
@@ -32,7 +33,10 @@ AS WITH marking_summary AS (
         END AS "grouping",
     marking_summary.number_of_candidates,
     marking_summary.score,
-    marking_summary.total_score
+        CASE
+            WHEN marking_summary.total_score = 0 THEN 0.0001::double precision
+            ELSE marking_summary.total_score
+        END AS total_score
    FROM marking_summary
   WHERE marking_summary.assessment_id IS NOT NULL
 WITH DATA;
