@@ -1,4 +1,3 @@
-DROP VIEW public.my_report_progress_summary_v;
 CREATE OR REPLACE VIEW public.my_report_progress_summary_v
 AS SELECT e.student_user_id,
     p.id AS plan_id,

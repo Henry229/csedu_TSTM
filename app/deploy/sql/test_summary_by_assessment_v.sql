@@ -1,4 +1,3 @@
-DROP VIEW public.test_summary_by_assessment_v;
 CREATE OR REPLACE VIEW public.test_summary_by_assessment_v
 AS WITH org_v AS (
          SELECT p.plan_id,
