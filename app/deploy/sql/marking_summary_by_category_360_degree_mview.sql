@@ -1,4 +1,4 @@
-DROP MATERIALIZED VIEW public.marking_summary_by_category_360_degree_mview cascade ;
+-- DROP MATERIALIZED VIEW public.marking_summary_by_category_360_degree_mview cascade ;
 CREATE MATERIALIZED VIEW public.marking_summary_by_category_360_degree_mview
 TABLESPACE pg_default
 AS WITH marking_summary AS (

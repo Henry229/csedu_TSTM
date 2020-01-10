@@ -35,10 +35,19 @@ def full_report(student_user_id):
     error = request.args.get("error")
     if error:
         flash(error)
-    # student_user_id=15, 54, 58, 1, 73, 74
-    student_json_str = Student.query.filter_by(user_id=58).first()
+    result = report_data(student_user_id)
 
-    json_str=[]
+    result.headers["Content-Disposition"] = \
+        "attachment;" \
+        "attachment;filename=full_report.json"
+    return result
+
+
+def report_data(student_user_id):
+    # student_user_id=15, 54, 58, 1, 73, 74
+    student = Student.query.filter_by(user_id=58).first()
+
+    assessment = []
     # ToDo: Temporarily query guid_list from AssessmentEnroll table. List should be from csonlineschool(API)
     guid_list = [sub.assessment_guid for sub in db.session.query(AssessmentEnroll.assessment_guid).
         filter(AssessmentEnroll.student_user_id==student_user_id).all()]
@@ -46,82 +55,8 @@ def full_report(student_user_id):
     assessment_enrolls = AssessmentEnroll.query.filter(AssessmentEnroll.assessment_guid.in_(guid_list)).\
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.assessment_guid.asc()).all()
     for assessment_enroll in assessment_enrolls:
-        json_str.append(assessment_enroll)
-
-        # markings = Marking.query.filter_by(assessment_enroll_id=self.id).order_by(Marking.question_no.asc()).all()
-        # return markings
-
-    # if len(guid_list):
-    #     for a_guid in guid_list:
-    #         es = AssessmentEnroll.query.filter_by(assessment_guid=a_guid).all()
-    #         for e in es:
-    #             json_str.append(e)
-
-    return jsonify(student_json_str, json_str)
-
-
-
-    #     json_str = {"assessments": [
-    #                 {"GUID": "1234fjeksl",
-    #                  "testset":
-    #                      {"id": "1",
-    #                       "testlets":
-    #                           [{
-    #                               "id": "2",
-    #                               "name": "2",
-    #                               "version": "2",
-    #                               "year": "2014"
-    #                           },
-    #                               {
-    #                                   "id": "3",
-    #                                   "name": "3",
-    #                                   "version": "3",
-    #                                   "year": "2014"
-    #                               }]
-    #                       }
-    #                  }
-    #                 ]
-    #             }
-    # if request.args.get('json-download') == "1":
-    #     import json
-    #     return Response(json.dumps(json_str, sort_keys=True),
-    #              mimetype='application/json',
-    #              headers={'Content-Disposition': 'attachment;filename=full_report.json'})
-    # else:
-    #     return json_str
-
-    # member = get_student_info(student_id)
-    # if member['sales']:
-    #     guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
-    #     if len(guid_list):
-    #         json = {"assessment":
-    #                     {"GUID": "1234fjeksl",
-    #                      "testset":
-    #                          {"id": "1",
-    #                           "testlets":
-    #                               [{
-    #                                   "id": "2",
-    #                                   "name": "2",
-    #                                   "version": "2",
-    #                                   "year": "2014"
-    #                               },
-    #                                   {
-    #                                       "id": "3",
-    #                                       "name": "3",
-    #                                       "version": "3",
-    #                                       "year": "2014"
-    #                                   }]
-    #                           }
-    #                      }
-    #                 }
-    #         # return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
-    #         return json
-    #     else:
-    #         return redirect(url_for('web.index'))
-    # else:
-    #     flash("Student information not found")
-    #     return redirect(url_for('web.index'))
-
+        assessment.append(assessment_enroll)
+    return jsonify(student, assessment)
 
 
 ''' 

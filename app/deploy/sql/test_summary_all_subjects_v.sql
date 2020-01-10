@@ -1,4 +1,4 @@
-DROP VIEW public.test_summary_all_subjects_v;
+-- DROP VIEW public.test_summary_all_subjects_v;
 CREATE OR REPLACE VIEW public.test_summary_all_subjects_v
 AS WITH test_result_by_subject AS (
          SELECT test_summary_v.row_name[1] AS student_user_id,
@@ -12,7 +12,7 @@ AS WITH test_result_by_subject AS (
             COALESCE(NULLIF(test_summary_v.subject_1, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_2, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_3, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_4, 0::double precision), 0::double precision) + COALESCE(NULLIF(test_summary_v.subject_5, 0::double precision), 0::double precision) AS total_mark
            FROM crosstab('select ARRAY[student_user_id::integer, cs_student_id::integer, assessment_id::integer] as row_name, testset_id, my_score
 						   from (SELECT m.student_user_id,
-						            s.student_user_id AS cs_student_id,
+						            s.student_id AS cs_student_id,
 						            m.assessment_id,
 						            m.testset_id,
 						            m.score AS my_score,
