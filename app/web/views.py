@@ -17,7 +17,7 @@ from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
-    User, Role
+    User, Role, EducationPlan, EducationPlanDetail
 
 """sample usage for decorator
     @web.route('/admin')
@@ -93,18 +93,19 @@ def testset_simulator():
 def is_authorised(student, timeout=120):
     # Get session info
     student_session = student['session']
-    # Check IP matching
-    server_public_ip = requests.get('https://api.ipify.org').text
-    public_ip = request.headers.environ[
-        'HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.headers.environ else request.headers.environ[
-        'REMOTE_ADDR']
-    if student_session['IP'] in ("127.0.0.1", "1.158.42.34", public_ip, server_public_ip):
-        # Check session expiration. Default 120min
-        REG_DT = datetime.strptime(student_session['REG_DT'], "%a, %d %b %Y %H:%M:%S %Z")
-        session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
-        session_age = datetime.now(pytz.utc) - session_time
-        if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
-            return True
+    if student_session:
+        # Check IP matching
+        server_public_ip = requests.get('https://api.ipify.org').text
+        public_ip = request.headers.environ[
+            'HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.headers.environ else request.headers.environ[
+            'REMOTE_ADDR']
+        if student_session['IP'] in ("127.0.0.1", "1.158.42.34", public_ip, server_public_ip):
+            # Check session expiration. Default 120min
+            REG_DT = datetime.strptime(student_session['REG_DT'], "%a, %d %b %Y %H:%M:%S %Z")
+            session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
+            session_age = datetime.now(pytz.utc) - session_time
+            if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
+                return True
     return False
 
 
@@ -140,7 +141,7 @@ def process_inward():
 
     args = json.loads(token.decode('UTF-8'))
     student_id = args["sid"]
-    assessment_guid = args["aid"]
+    test_guid = args["aid"]
     session_timeout = int(args["sto"]) if args["sto"] else 120  # Minutes
 
     member = get_student_info(student_id)
@@ -175,16 +176,38 @@ def process_inward():
         db.session.commit()
         login_user(student_user)
         # student_data = get_member_info(student_user_id)
-        if assessment_guid:
-            return redirect(url_for('web.testset_list', assessment_guid=assessment_guid))
+
+        # test_guid can be a plan or an assessment.
+        if test_guid:
+            guids = get_assessment_guids(test_guid)
+            return redirect(url_for('web.assessment_list', guid_list=",".join(guids)))
         else:
             if member['sales']:
                 guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
                 if len(guid_list):
-                    return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
+                    all_guids = []
+                    for guid in guid_list:
+                        all_guids += get_assessment_guids(guid)
+                    return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
                     return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
     return forbidden('Insufficient permissions or no available test')
+
+
+def get_assessment_guids(guid):
+    """
+    Get assessments guids
+    :param guid: GUID of an assessment or a plan
+    :return: list of assessments guids
+    """
+    if Assessment.query.filter_by(GUID=guid).first():
+        return [guid]
+
+    plan = EducationPlan.query.filter_by(GUID=guid).first()
+    if plan:
+        assessments = [item.Assessment for item in db.session.query(Assessment, EducationPlanDetail).filter(
+            EducationPlanDetail.plan_id == plan.id).filter(Assessment.id == EducationPlanDetail.assessment_id).all()]
+        return [assessment.GUID for assessment in assessments]
 
 
 @web.route('/tests/testsets', methods=['GET'])
