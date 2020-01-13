@@ -47,7 +47,19 @@ graph_mapping = {
             "upper_limit": 100,
             "lower_limit": 50
         },
+        "Y4": {
+            "ceiling_score": 80,
+            "floor_score": 50,
+            "upper_limit": 100,
+            "lower_limit": 0
+        },
         "Y5": {
+            "ceiling_score": 80,
+            "floor_score": 50,
+            "upper_limit": 100,
+            "lower_limit": 0
+        },
+        "Y6": {
             "ceiling_score": 80,
             "floor_score": 50,
             "upper_limit": 100,
@@ -57,6 +69,12 @@ graph_mapping = {
             "ceiling_score": 80,
             "floor_score": 50,
             "upper_limit": 100,
+            "lower_limit": 0
+        },
+        "Y8": {
+            "ceiling_score": 80,
+            "floor_score": 50,
+            "upper_limit": 80,
             "lower_limit": 0
         },
         "Y9": {

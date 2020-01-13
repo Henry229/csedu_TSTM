@@ -1,11 +1,8 @@
 import logging
 import os
 import random
-import shutil
 import string
 import time
-from getpass import getpass
-from glob import glob
 from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
@@ -169,6 +166,13 @@ def deploy():
     create_views()
 
 
+@app.cli.command()
+def reset_views():
+    '''Command: $ flask reset-views'''
+    remove_views()
+    create_views()
+
+
 def create_views():
     print('Creating views and function for report ')
     run_sqlfile('csedu_education_plan_v.sql')
@@ -203,24 +207,12 @@ def run_sqlfile(filename):
             pass
 
 
-@app.cli.command()
-def destroy():
-    secret = getpass("This will delete all data files and DB, The secret key: ")
-    if secret == app.config['DELETE_SECRET_KEY']:
-        destroy_sql = run_sqlfile('destroy.sql')
-        for sql in destroy_sql:
-            print('Executing %s' % sql[0])
-            db.engine.execute(sql[0])
-        try:
-            print('Removing the migrations folder')
-            shutil.rmtree('migrations', ignore_errors=True)
-            print('Removing the storage folder')
-            shutil.rmtree('storage', ignore_errors=True)
-            print('Removing the storage.* folders')
-            for folder in glob('storage.*'):
-                shutil.rmtree(folder, ignore_errors=True)
-        except:
-            pass
+def remove_views():
+    destroy_sql = run_sqlfile('drop_views.sql')
+    for sql in destroy_sql:
+        print('Executing %s' % sql[0])
+        db.engine.execute(sql[0])
+
 
 @app.cli.command()
 def change_roles():
@@ -240,7 +232,7 @@ def fillout_testcenter():
         if ts.additional_info:
             print("Testcenter {} {} - {}".format(ts.id, ts.code_name, ts.additional_info["campus_prefix"]))
         else:
-            print("Testcenter {} {} - {}".format(ts.id, ts.code_name,'None'))
+            print("Testcenter {} {} - {}".format(ts.id, ts.code_name, 'None'))
 
     print('Fill out AssessmentEnroll:test_center column')
 
@@ -249,7 +241,8 @@ def fillout_testcenter():
         student = Student.query.filter_by(user_id=ae.student_user_id).first()
         if student:
             test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
-                                     Codebook.additional_info.contains({"campus_prefix": (student.branch).strip()})).first()
+                                                Codebook.additional_info.contains(
+                                                    {"campus_prefix": (student.branch).strip()})).first()
             if test_center:
                 enrolled = ae
                 enrolled.test_center = test_center.id
@@ -262,25 +255,23 @@ def fillout_testcenter():
             print("Not found student <{}>".format(student))
 
 
-
 @app.cli.command()
 def fillout_default_score():
     '''Command: $ flask fillout-default-score'''
     from app.models import Marking, refresh_mviews
 
     print('Fill out Marking:outcome_score, candidate_mark column to default 0')
-    markings = Marking.query.filter(Marking.outcome_score==None).filter(Marking.candidate_mark==None).all()
+    markings = Marking.query.filter(Marking.outcome_score == None).filter(Marking.candidate_mark == None).all()
     print(len(markings))
     for marking in markings:
         print(marking)
         if marking.outcome_score is None:
-            marking.outcome_score=0
+            marking.outcome_score = 0
         if marking.candidate_mark is None:
-            marking.candidate_mark=0
+            marking.candidate_mark = 0
         db.session.add(marking)
         db.session.commit()
-        print("Successfully update marking <id:{}> - candidate_mark {}, outcome_score {}".format(marking.id, marking.candidate_mark, marking.outcome_score))
+        print("Successfully update marking <id:{}> - candidate_mark {}, outcome_score {}".format(marking.id,
+                                                                                                 marking.candidate_mark,
+                                                                                                 marking.outcome_score))
     refresh_mviews()
-
-
-

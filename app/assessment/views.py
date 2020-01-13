@@ -10,8 +10,9 @@ from config import Config
 from . import assessment
 from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestsetCreateForm, TestsetSearchForm
 from .. import db
+from ..api.httpstatus import is_success
 from ..decorators import permission_required
-from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlanDetail
+from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -407,9 +408,27 @@ def register_to_csonlineschool(assessment):
                    "Y12": "1"
                    }
 
-    # TODO - There could be more than one plan. How to handle the case?
-    plan = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
+    # TODO - There could be more than one plan_detail. How to handle the case?
+    plan_detail = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
+    plan = EducationPlan.query.filter_by(id=plan_detail.plan_id).first()
 
+    # Register the Plan if exists. Existence is checked by cs_api so it's okay to request same Plan multiple times
+    if plan:
+        test_type = [{
+            "kind": "tstmp",
+            "testtype": Codebook.get_code_name(plan.test_type),
+            "title": plan.name,
+            "grade": grade_table[Codebook.get_code_name(plan.grade)],
+            "myear": plan.year,
+            "title_a": plan.GUID,
+            "details": []
+        }]
+
+        info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
+        if not is_success(info.ok):
+            return info.ok
+
+    # Register Assessment and Testsets
     items = AssessmentHasTestset.query.filter_by(assessment_id=assessment.id).all()
     if len(items) > 0:
         for item in items:
@@ -417,7 +436,7 @@ def register_to_csonlineschool(assessment):
             test_detail.append(
                 {
                     "test_kind": "objective",
-                    "test_no": Codebook.get_code_name(plan.order) if plan else None,
+                    "test_no": Codebook.get_code_name(plan_detail.order) if plan_detail else None,
                     "title": item.testset.name,
                     "subject": Codebook.get_code_name(item.testset.subject),
                     "myear": assessment.year,

@@ -1,4 +1,3 @@
--- DROP VIEW public.test_summary_by_plan_v;
 CREATE OR REPLACE VIEW public.test_summary_by_plan_v
 AS SELECT subject_t.plan_id,
     subject_t.student_user_id,

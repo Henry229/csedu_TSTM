@@ -1,4 +1,3 @@
--- DROP view my_report_list_v;
 CREATE OR REPLACE VIEW public.my_report_list_v
 AS WITH marked_ts_list AS (
          SELECT crosstab.assessment_id,
