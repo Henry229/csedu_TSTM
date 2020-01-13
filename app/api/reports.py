@@ -297,6 +297,7 @@ def query_my_report_header(assessment_id, ts_id, student_user_id):
     return ts_header
 
 
+
 '''Student UI: Query My Report (subject) Body for each Student'''
 
 
@@ -321,6 +322,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
     return rows
+
 
 
 '''Student UI: Query My Report (subject) Footer for each Student'''

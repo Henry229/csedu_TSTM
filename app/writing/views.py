@@ -21,7 +21,8 @@ from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, W
 from .. import db
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
-    MarkingForWriting, AssessmentHasTestset, Testset, MarkerAssigned
+    MarkingForWriting, AssessmentHasTestset, Testset, MarkerAssigned, refresh_mviews, Item
+from ..api.reports import query_my_report_header
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
@@ -158,6 +159,70 @@ def manage():
                                    }
             assessments.append(assessment_json_str)
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
+
+
+@login_required
+@permission_required(Permission.WRITING_READ)
+@writing.route('/report/<int:assessment_enroll_id>/<int:student_user_id>/<int:marking_writing_id>', methods=['GET'])
+@login_required
+def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
+    """
+    Menu Writing > Marking > Click 'search writing' > Click 'link to Marking' page
+    :param marking_writing_id:
+    :param student_user_id:
+    :return: the specific student's writing information for marking by marker
+    """
+
+    if marking_writing_id==0:
+        marking_writings = MarkingForWriting.query \
+            .join(Marking, Marking.id == MarkingForWriting.marking_id) \
+            .filter(Marking.assessment_enroll_id == assessment_enroll_id) \
+            .all()
+    else:
+        marking_writings = MarkingForWriting.query.filter_by(id=marking_writing_id).all()
+
+    if marking_writings:
+        for marking_writing in marking_writings:
+            marking = Marking.query.filter_by(id=marking_writing.marking_id).\
+                filter_by(assessment_enroll_id=assessment_enroll_id).first()
+
+            # Update Table Marking > candidate_mark
+            candidate_mark_detail = marking_writing.candidate_mark_detail
+            candidate_mark = 0
+            if candidate_mark_detail:
+                for c in candidate_mark_detail:
+                    candidate_mark = candidate_mark + int(candidate_mark_detail[c])
+                marking.candidate_mark = candidate_mark
+                db.session.add(marking)
+                db.session.commit()
+        refresh_mviews()
+
+        # Query Assessment information
+        ts_id = marking.testset_id
+        row = AssessmentEnroll.query.with_entities(AssessmentEnroll.assessment_id, AssessmentEnroll.grade, AssessmentEnroll.start_time_client). \
+            filter_by(id=assessment_enroll_id). \
+            filter_by(testset_id=ts_id). \
+            filter_by(student_user_id=student_user_id).first()
+        if row:
+            # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
+            assessment_name = (
+                Assessment.query.with_entities(Assessment.name).filter_by(id=row.assessment_id).first()).name
+            item_name = (Item.query.with_entities(Item.name).filter_by(id=marking.item_id).first()).name
+            grade = row.grade
+            test_date = row.start_time_client
+
+            ts_header = query_my_report_header(row.assessment_id, ts_id, student_user_id)
+            score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+            rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
+
+            return render_template('writing/my_report_Writing.html',
+                                   assessment_name=assessment_name, item_name=item_name,
+                                   grade = grade, test_date=test_date,
+                                   rank=rank, score=score,
+                                   marking_writings=marking_writings)
+        return redirect(url_for('writing.manage', error='Not found assessment enroll - writing data'))
+    return redirect(url_for('writing.manage', error='Not found Marking for writing data'))
+
 
 
 @login_required
