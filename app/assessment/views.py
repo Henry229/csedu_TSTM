@@ -421,7 +421,7 @@ def register_to_csonlineschool(assessment):
             "grade": grade_table[Codebook.get_code_name(plan.grade)],
             "myear": plan.year,
             "title_a": plan.GUID,
-            "details": []
+            "details": test_detail
         }]
 
         info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
@@ -431,20 +431,23 @@ def register_to_csonlineschool(assessment):
     # Register Assessment and Testsets
     items = AssessmentHasTestset.query.filter_by(assessment_id=assessment.id).all()
     if len(items) > 0:
-        for item in items:
-            grade = grade_table[Codebook.get_code_name(item.testset.grade)]
-            test_detail.append(
-                {
-                    "test_kind": "objective",
-                    "test_no": Codebook.get_code_name(plan_detail.order) if plan_detail else None,
-                    "title": item.testset.name,
-                    "subject": Codebook.get_code_name(item.testset.subject),
-                    "myear": assessment.year,
-                    "grade": grade,
-                    "qn_total": 0,
-                    "test_time": item.testset.test_duration,
-                    "title_a": item.testset.GUID
-                })
+        # Don't need to register testsets as they are not used by csonlineschool
+        # Use the grade of the first item
+        grade = grade_table[Codebook.get_code_name(items[0].testset.grade)]
+        # for item in items:
+        #     grade = grade_table[Codebook.get_code_name(item.testset.grade)]
+        #     test_detail.append(
+        #         {
+        #             "test_kind": "objective",
+        #             "test_no": Codebook.get_code_name(plan_detail.order) if plan_detail else None,
+        #             "title": item.testset.name,
+        #             "subject": Codebook.get_code_name(item.testset.subject),
+        #             "myear": assessment.year,
+        #             "grade": grade,
+        #             "qn_total": 0,
+        #             "test_time": item.testset.test_duration,
+        #             "title_a": item.testset.GUID
+        #         })
 
         test_type = [{
             "kind": "tstm",
