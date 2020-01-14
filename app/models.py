@@ -703,8 +703,13 @@ class AssessmentEnroll(db.Model):
     student = db.relationship('Student', back_populates="enroll")
     marking = db.relationship('Marking', back_populates="enroll")
 
+    @hybrid_property
+    def markings(self):
+        markings = Marking.query.filter_by(assessment_enroll_id=self.id).all()
+        return markings
+
     def __json__(self):
-        return ['id', 'assessment_guid', 'testset_id', 'attempt_count', 'start_time_client']
+        return ['id', 'assessment_guid', 'testset_id', 'attempt_count', 'start_time_client', "markings"]
 
     def __repr__(self):
         return '<Assessment Enrol {}>'.format(self.id)
@@ -835,7 +840,7 @@ class Marking(db.Model):
 
     def __json__(self):
         return ['question_no', 'testset_id', 'testlet_id', 'item_id', 'weight',\
-                'is_correct', 'correct_r_value', 'candidate_r_value', 'outcome_score', 'candidate_mark']
+                'is_correct', 'correct_r_value', 'candidate_r_value', 'scaled_outcome_score', 'candidate_mark']
 
     def __repr__(self):
         return '<Marking {}>'.format(self.id)

@@ -123,7 +123,7 @@ function drawItemList(student_user_id, assessment_enroll_id, assessment_name,
     span_report.setAttribute("title","link to report");
 
     var anchor = document.createElement("a");
-    anchor.href = '/writing/report/'+marking_writing_id+'/'+student_user_id;
+    anchor.href = '/writing/report/'+assessment_enroll_id+'/'+student_user_id+'/'+marking_writing_id;
     anchor.target = '_blank';
     var i3 = document.createElement("i");
     i3.className = "fas fa-print";

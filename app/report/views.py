@@ -20,7 +20,7 @@ from ..api.reports import draw_report, query_my_report_list_v, query_my_report_h
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    refresh_mviews, Item, Marking, EducationPlan, Student
+    refresh_mviews, Item, Marking, EducationPlan, Student, Testset
 from ..auth.views import get_student_info
 
 ''' 
@@ -35,10 +35,19 @@ def full_report(student_user_id):
     error = request.args.get("error")
     if error:
         flash(error)
-    # student_user_id=15, 54, 58, 1, 73, 74
-    student_json_str = Student.query.filter_by(user_id=58).first()
+    result = full_report_data(student_user_id)
 
-    json_str=[]
+    # result.headers["Content-Disposition"] = \
+    #     "attachment;" \
+    #     "attachment;filename=full_report.json"
+    return result
+
+
+def full_report_data(student_user_id):
+    # student_user_id=15, 54, 58, 1, 73, 74
+    student = Student.query.filter_by(user_id=58).first()
+
+    assessment = []
     # ToDo: Temporarily query guid_list from AssessmentEnroll table. List should be from csonlineschool(API)
     guid_list = [sub.assessment_guid for sub in db.session.query(AssessmentEnroll.assessment_guid).
         filter(AssessmentEnroll.student_user_id==student_user_id).all()]
@@ -46,82 +55,9 @@ def full_report(student_user_id):
     assessment_enrolls = AssessmentEnroll.query.filter(AssessmentEnroll.assessment_guid.in_(guid_list)).\
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.assessment_guid.asc()).all()
     for assessment_enroll in assessment_enrolls:
-        json_str.append(assessment_enroll)
-
-        # markings = Marking.query.filter_by(assessment_enroll_id=self.id).order_by(Marking.question_no.asc()).all()
-        # return markings
-
-    # if len(guid_list):
-    #     for a_guid in guid_list:
-    #         es = AssessmentEnroll.query.filter_by(assessment_guid=a_guid).all()
-    #         for e in es:
-    #             json_str.append(e)
-
-    return jsonify(student_json_str, json_str)
-
-
-
-    #     json_str = {"assessments": [
-    #                 {"GUID": "1234fjeksl",
-    #                  "testset":
-    #                      {"id": "1",
-    #                       "testlets":
-    #                           [{
-    #                               "id": "2",
-    #                               "name": "2",
-    #                               "version": "2",
-    #                               "year": "2014"
-    #                           },
-    #                               {
-    #                                   "id": "3",
-    #                                   "name": "3",
-    #                                   "version": "3",
-    #                                   "year": "2014"
-    #                               }]
-    #                       }
-    #                  }
-    #                 ]
-    #             }
-    # if request.args.get('json-download') == "1":
-    #     import json
-    #     return Response(json.dumps(json_str, sort_keys=True),
-    #              mimetype='application/json',
-    #              headers={'Content-Disposition': 'attachment;filename=full_report.json'})
-    # else:
-    #     return json_str
-
-    # member = get_student_info(student_id)
-    # if member['sales']:
-    #     guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
-    #     if len(guid_list):
-    #         json = {"assessment":
-    #                     {"GUID": "1234fjeksl",
-    #                      "testset":
-    #                          {"id": "1",
-    #                           "testlets":
-    #                               [{
-    #                                   "id": "2",
-    #                                   "name": "2",
-    #                                   "version": "2",
-    #                                   "year": "2014"
-    #                               },
-    #                                   {
-    #                                       "id": "3",
-    #                                       "name": "3",
-    #                                       "version": "3",
-    #                                       "year": "2014"
-    #                                   }]
-    #                           }
-    #                      }
-    #                 }
-    #         # return redirect(url_for('web.assessment_list', guid_list=",".join(guid_list)))
-    #         return json
-    #     else:
-    #         return redirect(url_for('web.index'))
-    # else:
-    #     flash("Student information not found")
-    #     return redirect(url_for('web.index'))
-
+        assessment.append(assessment_enroll)
+    my_report_list = query_my_report_list_v(student_user_id)
+    return jsonify(student, assessment, my_report_list)
 
 
 ''' 
@@ -157,7 +93,7 @@ def list_my_report():
 def my_report(assessment_id, ts_id, student_user_id):
     # Todo: Check accessibility to get report
     refresh_mviews()
-    row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id). \
+    row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.id.desc()).first()
@@ -166,6 +102,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+    test_subject_string = Codebook.get_code_name((Testset.query.with_entities(Testset.subject).filter_by(id=row.testset_id).first()).subject)
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
     ts_header = query_my_report_header(assessment_id, ts_id, student_user_id)
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
@@ -177,7 +114,12 @@ def my_report(assessment_id, ts_id, student_user_id):
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
     ts_by_category = query_my_report_footer(assessment_id, student_user_id)
-    return render_template("report/my_report.html", assessment_name=assessment_name, rank=rank,
+    if test_subject_string == 'Writing':
+        marking_writing_id = 0
+        url_i = url_for('writing.w_report',assessment_enroll_id=assessment_enroll_id,
+                                student_user_id=student_user_id, marking_writing_id=marking_writing_id)
+        return redirect(url_i)
+    return render_template('report/my_report.html', assessment_name=assessment_name, rank=rank,
                            score=score, markings=markings, ts_by_category=ts_by_category)
 
 
@@ -200,7 +142,10 @@ def my_student_set_report(assessment_id, student_user_id):
         if test_type_string == 'Naplan':
             # Student Report : Generate image file for  Naplan student Report
             #                   saved into /static/report/naplan_result/naplan-*.png
-            file_name = make_naplan_student_report(assessment_enrolls, assessment_id, student_user_id, assessment_GUID, grade)
+            if grade=='-':
+                return redirect(url_for('report.list_my_report', error='No report generated due to lack of information - grade'))
+            else:
+                file_name = make_naplan_student_report(assessment_enrolls, assessment_id, student_user_id, assessment_GUID, grade)
         else:
             # For selective test or other test type
             test_type_string = 'other'

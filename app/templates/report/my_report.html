@@ -16,15 +16,26 @@
     <link href="/static/ui/css/style.css" rel="stylesheet">
     <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
     <style>
-        #t_student_info th {
+        #t_header th {
+            width: 85%;
+            text-align: center;
+        }
+
+        #t_header td {
             width: 15%;
             text-align: right;
+        }
+        #t_student_info th {
+            width: 15%;
+            text-align: center;
+            border: 1px solid #0f0f0f;
         }
 
         #t_student_info td {
             width: 35%;
             text-align: left;
-            border: 5px solid #f0f3f5;
+            border: 1px solid #0f0f0f;
+            padding: 5px;
         }
 
         #t_mark_info th {
@@ -76,11 +87,20 @@
 {% endif %}
 <div class="container">
     <br><br>
-    <div class="card card-accent-success">
-        <div align="right"><img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo"></div>
-        <div align="center"><h3 style="color:#397e38"> {{ assessment_name }} </h3></div>
-
+    <div class="card">
         <div class="card-header">
+            <table style="width:100%" id="t_header">
+                <tr>
+                    <th colspan="3">
+                        <h3 style="color:#397e38"> {{ assessment_name }} </h3>
+                    </th>
+                    <td>
+                        <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="card-body">
             <table style="width:100%" id="t_student_info">
                 <tr>
                     <th> Student Name:</th>
@@ -101,8 +121,7 @@
                     <td> {{ marking_rep.created_time }}.</td>
                 </tr>
             </table>
-        </div>
-        <div class="card-body">
+            <br><br>
             {% if markings %}
                 <div class="row">
                     <div class="col">
