@@ -2,10 +2,9 @@ import json
 import os
 import time
 import urllib
-
 from datetime import datetime
-import pytz
 
+import pytz
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
@@ -19,10 +18,10 @@ from . import writing
 from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
     MarkerAssignForm
 from .. import db
+from ..api.reports import query_my_report_header
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
     MarkingForWriting, AssessmentHasTestset, Testset, MarkerAssigned, refresh_mviews, Item
-from ..api.reports import query_my_report_header
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
@@ -62,27 +61,28 @@ def assign_marker():
         marker_ids = form.markers.data
         assessment_id = form.assessment_id.data
         for id in marker_ids:
-            row = MarkerAssigned.query.filter_by(assessment_id=assessment_id).\
+            row = MarkerAssigned.query.filter_by(assessment_id=assessment_id). \
                 filter_by(marker_id=id).first()
             if row:
-                if row.delete==True:
+                if row.delete == True:
                     row.delete = False
                     row.modified_time = datetime.now(pytz.utc)
                     db.session.add(row)
             else:
-                ma = MarkerAssigned(marker_id=id,assessment_id=assessment_id)
+                ma = MarkerAssigned(marker_id=id, assessment_id=assessment_id)
                 db.session.add(ma)
 
-        d_ids = MarkerAssigned.query.filter_by(assessment_id=assessment_id).\
-                filter(MarkerAssigned.marker_id.notin_(marker_ids)).\
-                filter(MarkerAssigned.delete.isnot(True)).all()
+        d_ids = MarkerAssigned.query.filter_by(assessment_id=assessment_id). \
+            filter(MarkerAssigned.marker_id.notin_(marker_ids)). \
+            filter(MarkerAssigned.delete.isnot(True)).all()
         for row in d_ids:
             row.delete = True
             row.modified_time = datetime.now(pytz.utc)
             db.session.add(row)
         db.session.commit()
         flash('Marker assigned successfully.')
-        return redirect(url_for('writing.manage', year=form.year.data, test_type=form.test_type.data, test_center=form.test_center.data))
+        return redirect(url_for('writing.manage', year=form.year.data, test_type=form.test_type.data,
+                                test_center=form.test_center.data))
     return redirect(url_for('writing.manage', error="Marker Assign - Form validation Error"))
 
 
@@ -119,14 +119,15 @@ def manage():
     assessments = []
     query = Assessment.query.filter_by(active=True)
     if current_user.role.name == 'Writing_marker':
-        ids = [sub.assessment_id for sub in db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
+        ids = [sub.assessment_id for sub in
+               db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
         query = query.filter(Assessment.id.in_(ids))
     if flag:
         if assessment_name:
             query = query.filter(Assessment.name.ilike('%{}%'.format(assessment_name)))
         if year:
             query = query.filter_by(year=year)
-        if test_type!=0:
+        if test_type != 0:
             query = query.filter_by(test_type=test_type)
         if test_center:
             # Todo: Need to check if current_user have access right on queried data
@@ -147,8 +148,9 @@ def manage():
         for r in rows:
             marker_ids = [sub.marker_id for sub in db.session.query(MarkerAssigned.marker_id).filter(
                 MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
-            student_user_ids = [sub.student_user_id for sub in db.session.query(AssessmentEnroll.student_user_id).filter(
-                AssessmentEnroll.assessment_id == r.id).distinct()]
+            student_user_ids = [sub.student_user_id for sub in
+                                db.session.query(AssessmentEnroll.student_user_id).filter(
+                                    AssessmentEnroll.assessment_id == r.id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
@@ -173,7 +175,7 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     :return: the specific student's writing information for marking by marker
     """
 
-    if marking_writing_id==0:
+    if marking_writing_id == 0:
         marking_writings = MarkingForWriting.query \
             .join(Marking, Marking.id == MarkingForWriting.marking_id) \
             .filter(Marking.assessment_enroll_id == assessment_enroll_id) \
@@ -183,8 +185,24 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
 
     if marking_writings:
         for marking_writing in marking_writings:
-            marking = Marking.query.filter_by(id=marking_writing.marking_id).\
+            marking = Marking.query.filter_by(id=marking_writing.marking_id). \
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
+
+            # Create merged writing markings
+            marking_writing.marked_images = []
+            for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
+                c_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id), v))
+                # Merge only when marking is available
+                if k in marking_writing.marked_file_link.keys():
+                    m_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
+                                                      marking_writing.marked_file_link[k]))
+                    c_image.paste(m_image, (0, 0), m_image)
+                    saved_file_name = v.replace('.jpg', '_merged.jpg')
+                    c_image.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
+                                              saved_file_name))
+                else:
+                    saved_file_name = v
+                marking_writing.marked_images.append('/static/writing/img/%s/%s' % (student_user_id, saved_file_name))
 
             # Update Table Marking > candidate_mark
             candidate_mark_detail = marking_writing.candidate_mark_detail
@@ -195,11 +213,15 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                 marking.candidate_mark = candidate_mark
                 db.session.add(marking)
                 db.session.commit()
+            if marking.item_id:
+                item = Item.query.filter_by(id=marking.item_id).first()
+                marking_writing.item_name = item.name
         refresh_mviews()
 
         # Query Assessment information
         ts_id = marking.testset_id
-        row = AssessmentEnroll.query.with_entities(AssessmentEnroll.assessment_id, AssessmentEnroll.grade, AssessmentEnroll.start_time_client). \
+        row = AssessmentEnroll.query.with_entities(AssessmentEnroll.assessment_id, AssessmentEnroll.grade,
+                                                   AssessmentEnroll.start_time_client). \
             filter_by(id=assessment_enroll_id). \
             filter_by(testset_id=ts_id). \
             filter_by(student_user_id=student_user_id).first()
@@ -217,12 +239,11 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
 
             return render_template('writing/my_report_Writing.html',
                                    assessment_name=assessment_name, item_name=item_name,
-                                   grade = grade, test_date=test_date,
+                                   grade=grade, test_date=test_date,
                                    rank=rank, score=score,
                                    marking_writings=marking_writings)
         return redirect(url_for('writing.manage', error='Not found assessment enroll - writing data'))
     return redirect(url_for('writing.manage', error='Not found Marking for writing data'))
-
 
 
 @login_required

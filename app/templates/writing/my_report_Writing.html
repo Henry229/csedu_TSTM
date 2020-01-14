@@ -15,6 +15,9 @@
     <link href="/static/runner/css/test_runner.css" rel="stylesheet">
     <link href="/static/ui/css/style.css" rel="stylesheet">
     <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <!-- Slide for writings -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
+
     <style>
         #t_header th {
             width: 85%;
@@ -25,6 +28,7 @@
             width: 15%;
             text-align: right;
         }
+
         #t_student_info th {
             width: 15%;
             text-align: center;
@@ -79,7 +83,7 @@
             </table>
             <br><br>
             {% for marking_writing in marking_writings %}
-                <h4>[ Item : {{ item_name }}]</h4>
+                <h4>[ Item : {{ marking_writing.item_name }}]</h4>
                 {% if marking_writing.candidate_mark_detail %}
                     <table class="table table-hover" style="width:100%">
                         <thead>
@@ -95,11 +99,11 @@
                             {% if loop.index%2 != 0 %}
                                 <tr>
                             {% endif %}
-                            <td>{{ marking }}</td>
-                            <td>{{ marking_writing.candidate_mark_detail[marking] }}</td>
-                            {% if loop.index%2 == 0 %}
-                                </tr>
-                            {% endif %}
+                        <td>{{ marking }}</td>
+                        <td>{{ marking_writing.candidate_mark_detail[marking] }}</td>
+                        {% if loop.index%2 == 0 %}
+                            </tr>
+                        {% endif %}
                         {% endfor %}
                         <tr class="table-warning">
                             <th align="center" colspan="4">Marker's comment</th>
@@ -109,12 +113,21 @@
                                 {{ marking_writing.markers_comment }}
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="4">
+                                <div class="bxslider">
+                                    {% for image in marking_writing.marked_images %}
+                                        <div><img src="{{ image }}"></div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 {% else %}
                     <table class="table table-hover" style="width:100%">
                         <tr class="table-warning">
-                            <td>Not found "Marked" data </td>
+                            <td>Not found "Marked" data</td>
                         </tr>
                     </table>
                 {% endif %}
@@ -160,7 +173,16 @@
 <script src="/static/runner/js/item_runner.js"></script>
 <script src="/static/runner/js/item_handlers.js"></script>
 <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+<script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
 <script type="text/javascript">
+    $(function () {
+        $('.bxslider').bxSlider({
+            mode: 'horizontal',
+            touchEnabled: true,
+            hideControlOnEnd: true
+        });
+    });
+
     $(document).ready(function () {
         ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
     });
