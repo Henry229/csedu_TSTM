@@ -203,20 +203,9 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                 else:
                     saved_file_name = v
                 marking_writing.marked_images.append('/static/writing/img/%s/%s' % (student_user_id, saved_file_name))
-
-            # Update Table Marking > candidate_mark
-            candidate_mark_detail = marking_writing.candidate_mark_detail
-            candidate_mark = 0
-            if candidate_mark_detail:
-                for c in candidate_mark_detail:
-                    candidate_mark = candidate_mark + int(candidate_mark_detail[c])
-                marking.candidate_mark = candidate_mark
-                db.session.add(marking)
-                db.session.commit()
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
-        refresh_mviews()
 
         # Query Assessment information
         ts_id = marking.testset_id
@@ -325,54 +314,28 @@ def marking_edit():
         row = MarkingForWriting.query.filter_by(id=form.marking_writing_id.data).first()
         if row is None:
             return redirect(url_for('writing.manage', error="Invalid Request - marking information not found"))
+        # Update MarkingForWriting table
         row.markers_comment = form.markers_comment.data
         row.marker_id = current_user.id
         # json_str = { 'entry' : form.markings.data }
         json_str = {}
+        candidate_mark = 0
         for entry in form.markings.data:
             json_str[entry['criteria']] = str(entry['marking'])
+            candidate_mark = candidate_mark + int(entry['marking'])
         row.candidate_mark_detail = json_str
         db.session.add(row)
+        # Update Marking table > candidate_mark
+        marking = Marking.query.filter_by(id=row.marking_id).first()
+        marking.candidate_mark = candidate_mark / len(form.markings.data)
+        db.session.add(marking)
         db.session.commit()
+
         data = {"student": Student.getCSStudentName(form.student_user_id.data),
                 "marking": json_str,
                 "comments": form.markers_comment.data}
         return redirect(url_for('writing.marking_complete', data=json.dumps(data)))
     return redirect(url_for('writing.manage', error="Marking Edit - Form validation Error"))
-
-
-@login_required
-@permission_required(Permission.WRITING_READ)
-@writing.route('/writing_ui', methods=['GET'])
-@login_required
-def writing_ui():
-    """
-    Temporary Usage / Menu Writing > Testing UI main page
-    :return: search form and Writing upload form
-    """
-    form = StartOnlineTestForm()
-    assessment_guid = request.args.get("assessment_guid")
-    st_id = request.args.get("student_user_id")
-    if st_id is None:
-        st_id = current_user.id
-    form.assessment_guid.data = assessment_guid
-    form.student_user_id.data = st_id
-    if assessment_guid:
-        test_form = WritingTestForm()
-        test_form.assessment_guid.data = assessment_guid
-        test_form.student_user_id.data = st_id
-    else:
-        test_form = []
-
-    guid_list = [(a.GUID) for a in Assessment.query.distinct(Assessment.GUID). \
-        filter(Assessment.name.ilike('%{}%'.format('writing'))). \
-        filter(Assessment.active.is_(True)). \
-        filter(or_(Assessment.delete.is_(False), Assessment.delete.is_(None))).all()]
-    student = Student.query.filter_by(user_id=st_id).first()
-    if student is None:
-        if not current_user.is_administrator():
-            return page_not_found("No available writing found. Please create a writing assessment")
-    return render_template('writing/writing_ui.html', form=form, guid_list=guid_list, test_form=test_form)
 
 
 @login_required
@@ -485,119 +448,3 @@ def marking_onscreen_save():
             return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
             # except:
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
-
-
-@login_required
-@permission_required(Permission.WRITING_MANAGE)
-@writing.route('/upload_writing', methods=['POST'])
-@login_required
-def upload_writing():
-    """
-    Temporary Usage / Menu Writing > Testing UI > upload writing
-    :return:
-    """
-    form = WritingTestForm()
-    assessment_guid = form.assessment_guid.data
-    st_id = form.student_user_id.data
-    if form.validate_on_submit():
-        # Todo: change real data for assessment_id, testset_id and assessment_enroll_id
-        # Step for assessment_enroll
-        assessment = Assessment.query.options(load_only("id")).filter_by(GUID=assessment_guid).first()
-        assessment_id = assessment.id
-        testset_id = assessment.testsets[0].id
-
-        assessment_enroll = AssessmentEnroll(assessment_guid=assessment_guid,
-                                             assessment_id=assessment_id,
-                                             testset_id=testset_id,
-                                             student_user_id=st_id)
-        db.session.add(assessment_enroll)
-        db.session.commit()
-        assessment_enroll_id = assessment_enroll.id
-        # Todo: change real data for testlet_id, item_id and marking_id
-        # Step for marking
-        testlet_id = assessment.testsets[0].getFirstStageTestletID()
-        item_id = (TestletHasItem.query.options(load_only("item_id")).filter_by(testlet_id=testlet_id).first()).item_id
-        marking = Marking(question_no=1,
-                          testset_id=testset_id,
-                          testlet_id=testlet_id,
-                          item_id=item_id,
-                          weight=1.0,
-                          assessment_enroll_id=assessment_enroll_id)
-        db.session.add(marking)
-        db.session.commit()
-        marking_id = marking.id
-
-        # Step for marking_writing
-        filefield_name = "w_image"
-        text = form.w_text.data
-        file_names = saveWritingFile(filefield_name, text, assessment_guid, st_id)
-        insertMarkingForWriting(marking_id, file_names)
-    return redirect(url_for('writing.writing_ui', assessment_guid=assessment_guid, student_user_id=st_id))
-
-
-def insertMarkingForWriting(marking_id, file_names):
-    """
-    Call from writing.upload_writing - update marking_writing table set candidate_file_link
-    :param marking_id:
-    :param file_names: list of file names
-    :return: true
-    """
-
-    index = 1
-    candidate_file_link_json = {}
-    for file_name in file_names:
-        candidate_file_link_json["file%s" % index] = file_name
-        index += 1
-
-    marking_writing = MarkingForWriting(candidate_file_link=candidate_file_link_json,
-                                        marking_id=marking_id)
-    db.session.add(marking_writing)
-    db.session.commit()
-    flash("Writing is saved successfully.")
-
-
-def saveWritingFile(filefield_name, text, assessment_guid, student_user_id):
-    """
-    Call from writing.upload_writing - save student's writing to current_app.config['WRITING_UPLOAD_FOLDER']
-    :param filefield_name:
-    :param text:
-    :param assessment_guid:
-    :param student_user_id:
-    :return: filenames saved to current_app.config['WRITING_UPLOAD_FOLDER']
-    """
-    if not os.path.exists(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id)):
-        os.makedirs(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id))
-
-    my_files = request.files.getlist(filefield_name)
-    file_names = []
-    if len(my_files[0].filename) > 0:
-        for f in my_files:
-            f_file_name = f.filename
-            if f and allowed_file(f.filename):
-                file_name = student_user_id + '_' + assessment_guid + '_' + secure_filename(f.filename)
-                item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id, file_name)
-                f.save(item_file)
-                flash("File %s uploaded as %s. " % (f_file_name, file_name))
-                file_names.append(file_name)
-            else:
-                flash("Reject {} file importing".format(f.filename))
-    else:
-        if text:
-            file_name = student_user_id + '_' + assessment_guid + '_writing.txt'
-            item_file = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id, file_name)
-            f = open(item_file, "w")
-            f.write(text)
-            f.close()
-            file_names = text_to_images(student_user_id, item_file)
-            flash("Writing Texts are uploaded into %s. " % (", ".join(file_names)))
-    return file_names
-
-
-def allowed_file(filename):
-    """
-    Call from writing.saveWritingFile to check file extension allowed
-    :param filename:
-    :return:
-    """
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']

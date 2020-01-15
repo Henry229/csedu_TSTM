@@ -161,7 +161,6 @@ def deploy():
     Codebook.create_default_codeset(None, "criteria", "Audience", "Text structure", "Ideas", "Persuasive devices",
                                     "Vocabulary", "Cohesion", "Paragraphing", "Sentence structure", "Punctuation",
                                     "Spelling")
-
     # Create DB views
     create_views()
 
@@ -368,7 +367,6 @@ def verify_views():
         except Exception as e:
             print("Error: ", e)
             pass
-
 
 
 @app.cli.command()

@@ -35,7 +35,13 @@
                             {{ form.test_center.label }}
                             {{ form.test_center }}
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search</button>
+                            &nbsp;&nbsp;&nbsp;
+                            {% if current_user.can(Permission.ADMIN) %}
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Generate Data for Report</span><br><br>
+                            {% endif %}
                         </form>
+                        <p/>
+                        <div id="status" class="alert alert-success" role="alert"></div>
                     </div>
                     <table class="display table table-hover" style="width:100%">
                         <thead>
@@ -130,6 +136,28 @@
                         </tbody>
                     </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-generate" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">
+                        Generate Data for Report
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-text">
+                        Are you sure to generate data for Report ?
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
+                            onclick="gen_report('confirm-generate');">Generate
+                    </button>
                 </div>
             </div>
         </div>

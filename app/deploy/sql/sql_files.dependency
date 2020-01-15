@@ -1,0 +1,89 @@
+Dependencies between tables, views and Mviews, and  ordering for creation objects
+    1. marking_summary_360_degree_mview
+        - marking
+        - assessment_enroll
+
+    2. marking_summary_by_category_360_degree_mview
+        - marking
+        - assessment_enroll
+        - codebook
+
+    3. test_summary_mview
+        - marking_summary_360_degree_mview
+            - marking
+            - assessment_enroll
+
+    4. csedu_education_plan_v
+        - education_plan
+        - education_plan_details
+        - assessment_testsets
+        - testset
+
+    5. csedu_plan_assessment_testsets_enrolled_v
+        - csedu_education_plan_v
+            - education_plan
+            - education_plan_details
+            - assessment_testsets
+            - testset
+        - assessment_enroll
+
+    6. Others
+    item_score_summary_v
+        - marking
+        - assessment_enroll
+        - assessment
+    my_report_body_v
+        - marking
+        - assessment_enroll
+        - item
+    my_report_list_v
+        - marking
+        - assessment_enroll
+    my_report_progress_summary_v
+        - education_plan
+        - education_plan_details
+        - assessment_enroll
+    test_summary_all_subjects_v
+        - marking_summary_360_degree_mview
+            - marking
+            - assessment_enroll
+        - student
+    test_summary_by_assessment_v
+        - csedu_education_plan_v
+            - education_plan
+            - education_plan_details
+            - assessment_testsets
+            - testset
+        - test_summary_mview
+            - marking_summary_360_degree_mview
+                - marking
+                - assessment_enroll
+    test_summary_by_category_v
+        - marking_summary_by_category_360_degree_mview
+            - marking
+            - assessment_enroll
+            - codebook
+    test_summary_by_center_v
+        - education_plan
+        - education_plan_details
+        - assessment
+    test_summary_by_plan_v
+        - csedu_education_plan_v
+            - education_plan
+            - education_plan_details
+            - assessment_testsets
+            - testset
+        - test_summary_mview
+            - marking_summary_360_degree_mview
+                - marking
+                - assessment_enroll
+    test_summary_by_subject_v
+        - csedu_education_plan_v
+            - education_plan
+            - education_plan_details
+            - assessment_testsets
+            - testset
+        - test_summary_mview
+            - marking_summary_360_degree_mview
+                - marking
+                - assessment_enroll
