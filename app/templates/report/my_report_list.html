@@ -11,14 +11,14 @@
             <i class="icons cui-magnifying-glass"></i> My Enrollments
         </div>
         <div class="card-body">
-            <span class="badge badge-info"> CS Education Student ID: {{ Student.getCSStudentId(current_user.id) }}</span>
+            <h2><span class="badge badge-info">Student: {{ Student.getCSStudentName(current_user.id) }}</span></h2>
             <table id="enrollments" class="display table table-hover" style="width:100%">
                 <thead>
                 <tr>
                     <th>ID</th>
                     <th>Assessment Type</th>
                     <th>Assessment Name</th>
-                    <th>Test Center</th>
+                    <th>Test Centre</th>
                     <th>Test Set</th>
                 </tr>
                 </thead>

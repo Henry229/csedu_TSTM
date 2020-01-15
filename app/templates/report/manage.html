@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/csedu_style.css">
 {% endblock %}
 {% block app_content %}
-    <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report by Center </h3>
+    <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report by Centre </h3>
     <div class="accordion" id="accordion">
         <div class="card card-accent-success">
             <div class="card-header" id="headingOne">
@@ -37,7 +37,7 @@
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search</button>
                             &nbsp;&nbsp;&nbsp;
                             {% if current_user.can(Permission.ADMIN) %}
-                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Generate Data for Report</span><br><br>
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span><br><br>
                             {% endif %}
                         </form>
                         <p/>
@@ -80,7 +80,7 @@
                             <th>Grade</th>
                             <th>Test Type</th>
                             <th>Test No.</th>
-                            <th>Test Name / Test Center / Students</th>
+                            <th>Test Name / Test Centre / Students</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -169,7 +169,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">
-                        Generate Data for Report
+                        Refresh Collected Report Data
                     </h4>
                 </div>
                 <div class="modal-body">
