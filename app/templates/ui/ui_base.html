@@ -136,10 +136,6 @@
                 <li class="nav-title">Writing</li>
                 {% if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/writing/writing_ui">
-                            <i class="icons cui-monitor nav-icon"></i> Testing UI </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/writing/manage">
                             <i class="icons cui-monitor nav-icon"></i> Marking </a>
                     </li>

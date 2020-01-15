@@ -161,7 +161,6 @@ def deploy():
     Codebook.create_default_codeset(None, "criteria", "Audience", "Text structure", "Ideas", "Persuasive devices",
                                     "Vocabulary", "Cohesion", "Paragraphing", "Sentence structure", "Punctuation",
                                     "Spelling")
-
     # Create DB views
     create_views()
 
@@ -171,26 +170,121 @@ def reset_views():
     '''Command: $ flask reset-views'''
     remove_views()
     create_views()
+    verify_views()
 
 
 def create_views():
+    '''
+    Dependencies between tables, views and Mviews, and  ordering for creation objects
+        1. marking_summary_360_degree_mview
+            - marking
+            - assessment_enroll
+
+        2. marking_summary_by_category_360_degree_mview
+            - marking
+            - assessment_enroll
+            - codebook
+
+        3. test_summary_mview
+            - marking_summary_360_degree_mview
+                - marking
+                - assessment_enroll
+
+        4. csedu_education_plan_v
+            - education_plan
+            - education_plan_details
+            - assessment_testsets
+            - testset
+
+        5. csedu_plan_assessment_testsets_enrolled_v
+            - csedu_education_plan_v
+                - education_plan
+                - education_plan_details
+                - assessment_testsets
+                - testset
+            - assessment_enroll
+
+        6. Others
+        item_score_summary_v
+            - marking
+            - assessment_enroll
+            - assessment
+        my_report_body_v
+            - marking
+            - assessment_enroll
+            - item
+        my_report_list_v
+            - marking
+            - assessment_enroll
+        my_report_progress_summary_v
+            - education_plan
+            - education_plan_details
+            - assessment_enroll
+        test_summary_all_subjects_v
+            - marking_summary_360_degree_mview
+                - marking
+                - assessment_enroll
+            - student
+        test_summary_by_assessment_v
+            - csedu_education_plan_v
+                - education_plan
+                - education_plan_details
+                - assessment_testsets
+                - testset
+            - test_summary_mview
+                - marking_summary_360_degree_mview
+                    - marking
+                    - assessment_enroll
+        test_summary_by_category_v
+            - marking_summary_by_category_360_degree_mview
+                - marking
+                - assessment_enroll
+                - codebook
+        test_summary_by_center_v
+            - education_plan
+            - education_plan_details
+            - assessment
+        test_summary_by_plan_v
+            - csedu_education_plan_v
+                - education_plan
+                - education_plan_details
+                - assessment_testsets
+                - testset
+            - test_summary_mview
+                - marking_summary_360_degree_mview
+                    - marking
+                    - assessment_enroll
+        test_summary_by_subject_v
+            - csedu_education_plan_v
+                - education_plan
+                - education_plan_details
+                - assessment_testsets
+                - testset
+            - test_summary_mview
+                - marking_summary_360_degree_mview
+                    - marking
+                    - assessment_enroll
+    '''
     print('Creating views and function for report ')
-    run_sqlfile('csedu_education_plan_v.sql')
-    run_sqlfile('csedu_plan_assessment_testsets_enrolled_v.sql')
-    run_sqlfile('function_get_marking_item_percentile.sql')
-    run_sqlfile('item_score_summary_v.sql')
     run_sqlfile('marking_summary_360_degree_mview.sql')
     run_sqlfile('marking_summary_by_category_360_degree_mview.sql')
     run_sqlfile('test_summary_mview.sql')
-    run_sqlfile('test_summary_all_subjects_v.sql')
-    run_sqlfile('test_summary_by_assessment_v.sql')
-    run_sqlfile('test_summary_by_category_v.sql')
-    run_sqlfile('test_summary_by_plan_v.sql')
-    run_sqlfile('test_summary_by_subject_v.sql')
+
+    run_sqlfile('csedu_education_plan_v.sql')
+    run_sqlfile('csedu_plan_assessment_testsets_enrolled_v.sql')
+    run_sqlfile('function_get_marking_item_percentile.sql')
+
+    run_sqlfile('item_score_summary_v.sql')
     run_sqlfile('my_report_body_v.sql')
     run_sqlfile('my_report_list_v.sql')
     run_sqlfile('my_report_progress_summary_v.sql')
+
+    run_sqlfile('test_summary_all_subjects_v.sql')
+    run_sqlfile('test_summary_by_assessment_v.sql')
+    run_sqlfile('test_summary_by_category_v.sql')
     run_sqlfile('test_summary_by_center_v.sql')
+    run_sqlfile('test_summary_by_plan_v.sql')
+    run_sqlfile('test_summary_by_subject_v.sql')
 
 
 def run_sqlfile(filename):
@@ -212,6 +306,67 @@ def remove_views():
     for sql in destroy_sql:
         print('Executing %s' % sql[0])
         db.engine.execute(sql[0])
+
+
+def verify_views():
+    mview_names = []
+    mview_names.append('marking_summary_360_degree_mview')
+    mview_names.append('marking_summary_by_category_360_degree_mview')
+    mview_names.append('test_summary_mview')
+
+    view_names = []
+    view_names.append('csedu_education_plan_v')
+    view_names.append('csedu_plan_assessment_testsets_enrolled_v')
+
+    view_names.append('item_score_summary_v')
+    view_names.append('my_report_body_v')
+    view_names.append('my_report_list_v')
+    view_names.append('my_report_progress_summary_v')
+
+    view_names.append('test_summary_all_subjects_v')
+    view_names.append('test_summary_by_assessment_v')
+    view_names.append('test_summary_by_category_v')
+    view_names.append('test_summary_by_center_v')
+    view_names.append('test_summary_by_plan_v')
+    view_names.append('test_summary_by_subject_v')
+
+    print("Verify Materialized View object existence from DB: ")
+    for object_name in mview_names:
+        sql_stmt = 'SELECT  ' \
+                   'EXISTS(SELECT matviewname' \
+                   ' FROM pg_matviews ' \
+                   " WHERE matviewname = '{}')".format(object_name)
+
+        try:
+            cursor = db.session.execute(sql_stmt)
+            row = cursor.fetchone()
+            if row.exists:
+                print("   MView {} exists.".format(object_name))
+            else:
+                print(" * MView {} not exists.".format(object_name))
+        except Exception as e:
+            print("Error: ", e)
+            pass
+
+
+    print("Verify View object existence from DB: ")
+    for object_name in view_names:
+        sql_stmt = 'SELECT  ' \
+                   'EXISTS(SELECT table_name' \
+                   ' FROM information_schema.tables ' \
+                   " WHERE table_name = '{}')".format(object_name)
+
+        # Try to return where there is a return value
+        try:
+            cursor = db.session.execute(sql_stmt)
+            row = cursor.fetchone()
+            if row.exists:
+                print("   View {} exists.".format(object_name))
+            else:
+                print(" * View {} not exists.".format(object_name))
+        except Exception as e:
+            print("Error: ", e)
+            pass
 
 
 @app.cli.command()

@@ -4,6 +4,7 @@ $(function () {
 
 $(document).ready(function () {
     $("#w_table").hide();
+    $("#status").hide();
 
     $('a[name="modalButtonAssign"]').click(function () {
         var url = $(this).attr("href");
