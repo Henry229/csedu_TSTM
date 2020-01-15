@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from PIL import Image, ImageDraw
 from flask import current_app, render_template
+from flask_login import current_user
 
 from app.api import api
 from app.decorators import permission_required
@@ -91,9 +92,10 @@ graph_mapping = {
 
 def draw_report(result):
     # Read base image
-    if not os.path.exists(current_app.config['NAPLAN_RESULT_DIR']):
-        os.makedirs(current_app.config['NAPLAN_RESULT_DIR'])
-    base = Image.open('%s/../img/naplan-%s.png' % (current_app.config['NAPLAN_RESULT_DIR'], result["grade"]))
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    if not os.path.exists(naplan_folder):
+        os.makedirs(naplan_folder)
+    base = Image.open('%s/static/report/img/naplan-%s.png' % (current_app.root_path, result["grade"]))
 
     base.load()
     img = Image.new("RGB", base.size, (255, 255, 255))
@@ -155,7 +157,8 @@ def draw_report(result):
     img.format = "PNG"
     # img.show()
     file_name = 'naplan-grade-%s_%s_%s.png' % (result["grade"], result["student_user_id"], result["assessment_GUID"])
-    img.save('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    img.save(os.path.join(naplan_folder, file_name))
     return file_name
 
 
@@ -827,7 +830,8 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user
         index += 1
 
     file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_user_id)
-    f.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    f.savefig(os.path.join(naplan_folder, file_name))
     return file_name
 
 
@@ -850,7 +854,8 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     sns.lineplot(data=df, palette="tab10", linewidth=2.5)
     # plt.show()
     file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_user_id)
-    fig.savefig('%s/%s' % (current_app.config['NAPLAN_RESULT_DIR'], file_name))
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    fig.savefig(os.path.join(naplan_folder, file_name))
     return file_name
 
 

@@ -191,15 +191,15 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             # Create merged writing markings
             marking_writing.marked_images = []
             for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                c_image = Image.open(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", v))
+                c_image = Image.open(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", v))
                 # Merge only when marking is available
                 if marking_writing.marked_file_link:
                     if k in marking_writing.marked_file_link.keys():
-                        m_image = Image.open(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                        m_image = Image.open(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id),
                                                           "writing", marking_writing.marked_file_link[k]))
                         c_image.paste(m_image, (0, 0), m_image)
                         saved_file_name = v.replace('.jpg', '_merged.jpg')
-                        c_image.save(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                        c_image.save(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id),
                                                   "writing", saved_file_name))
                     else:
                         saved_file_name = v

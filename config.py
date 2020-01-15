@@ -41,9 +41,6 @@ class Config(metaclass=MetaFlaskEnv):
     # TEST DATA folder
     DEPLOY_DATA_DIR = os.environ.get('DEPLOY_DATA_DIR') or 'app/deploy'
 
-    # NAPLAN individual Report folder
-    NAPLAN_RESULT_DIR = os.environ.get('NAPLAN_RESULT_DIR') or 'app/static/report/naplan_result'
-
     # QTI XML 을 저장하는 폴더
     STORAGE_DIR = os.path.join(basedir, 'storage')
 

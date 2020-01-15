@@ -151,7 +151,7 @@ def my_student_set_report(assessment_id, student_user_id):
             test_type_string = 'other'
         template_html_name = 'report/my_report_' + test_type_string + '.html'
         grade = EducationPlanDetail.get_grade(assessment_id)
-        web_file_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), file_name)
+        web_file_path = url_for("api.get_naplan", file=file_name)
         return render_template(template_html_name, image_file_path=web_file_path, grade=grade)
     else:
         return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
@@ -454,17 +454,19 @@ def individual_progress_summary_report(plan_id, student_user_id):
     by_set_file_name = draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_user_id)
 
     template_file_name = 'report/individual_progress_' + test_type_string + '.html'
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+
     logo_web_path = os.path.join(current_app.config['CSEDU_IMG_DIR'].lstrip('app'), 'CSEducation.png')
     logo_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
                                             current_app.config['CSEDU_IMG_DIR'],
                                             'CSEducation.png')
-    by_subject_web_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), by_subject_file_name)
+    by_subject_web_path = url_for("api.get_naplan", file=by_subject_file_name)
     by_subject_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
-                                                  current_app.config['NAPLAN_RESULT_DIR'],
+                                                  naplan_folder,
                                                   by_subject_file_name)
-    by_set_web_path = os.path.join(current_app.config['NAPLAN_RESULT_DIR'].lstrip('app'), by_set_file_name)
+    by_set_web_path = url_for("api.get_naplan", file=by_set_file_name)
     by_set_local_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
-                                              current_app.config['NAPLAN_RESULT_DIR'],
+                                              naplan_folder,
                                               by_set_file_name)
 
     success = build_individual_progress_pdf_response(template_file_name, logo_file_name=logo_local_path,
@@ -531,9 +533,10 @@ def report_results_pdf(year, test_type, sequence, assessment_id, branch_id):
                     # For selective test or other test type
                     test_type_string = 'other'
                 template_file_name = 'report/my_report_' + test_type_string + '.html'
+                naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
 
                 local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
-                                                        current_app.config['NAPLAN_RESULT_DIR'],
+                                                        naplan_folder,
                                                         file_name)
                 success = build_test_results_pdf_response(template_file_name, image_file_path=local_file_path, assessment_GUID=assessment_GUID, student_user_id=student_user_id)
                 if success != 'success':
