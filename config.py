@@ -27,7 +27,6 @@ class Config(metaclass=MetaFlaskEnv):
     ALLOWED_EXTENSIONS = {'xml', 'xls', 'xlsx', 'zip'}
 
     USER_DATA_FOLDER = os.environ.get('USER_DATA_FOLDER') or 'userdata'
-    WRITING_UPLOAD_FOLDER = os.path.join(USER_DATA_FOLDER, 'writing')
     WRITING_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'txt'}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

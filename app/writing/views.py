@@ -191,19 +191,19 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             # Create merged writing markings
             marking_writing.marked_images = []
             for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                c_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id), v))
+                c_image = Image.open(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", v))
                 # Merge only when marking is available
                 if marking_writing.marked_file_link:
                     if k in marking_writing.marked_file_link.keys():
-                        m_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                                          marking_writing.marked_file_link[k]))
+                        m_image = Image.open(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                                                          "writing", marking_writing.marked_file_link[k]))
                         c_image.paste(m_image, (0, 0), m_image)
                         saved_file_name = v.replace('.jpg', '_merged.jpg')
-                        c_image.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                                  saved_file_name))
+                        c_image.save(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                                                  "writing", saved_file_name))
                     else:
                         saved_file_name = v
-                marking_writing.marked_images.append(url_for('api.get_writing', file=saved_file_name))
+                    marking_writing.marked_images.append(url_for('api.get_writing', file=saved_file_name))
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
@@ -349,15 +349,15 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             if file_name:
-                file_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id), file_name)
+                file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", file_name)
                 if os.path.exists(file_path):
                     web_img_links[key] = {
                         'writing': url_for('api.get_writing', file=file_name)}
                 if marking_writing.marked_file_link:
                     if key in marking_writing.marked_file_link.keys():
                         if os.path.exists(
-                                os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                             marking_writing.marked_file_link[key])):
+                                os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                                             "writing", marking_writing.marked_file_link[key])):
                             web_img_links[key]['marking'] = url_for('api.get_writing',
                                                                     file=marking_writing.marked_file_link[key])
     return web_img_links
@@ -399,8 +399,8 @@ def text_to_images(student_user_id, file_path):
             d = ImageDraw.Draw(img)
             d.multiline_text((left_margin, 10), p, font=fnt, spacing=line_space, fill=(0, 0, 0))
             saved_file_name = os.path.splitext(file_name)[0] + str(count) + ".jpg"
-            img.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                  saved_file_name))
+            img.save(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
+                                  "writing", saved_file_name))
             count += 1
             file_names.append(saved_file_name)
     return file_names
@@ -429,7 +429,7 @@ def marking_onscreen_save():
             if not marking_file_name:
                 writing_file_name = os.path.splitext(os.path.basename(writing_path))[0]
                 marking_file_name = writing_file_name + "_marking.png"
-            marking_file_save_path = os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], student_user_id,
+            marking_file_save_path = os.path.join(current_app.config['USER_DATA_FOLDER'], student_user_id, "writing",
                                                   marking_file_name).replace('\\', '/')
 
             # Save image

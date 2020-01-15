@@ -15,5 +15,5 @@ def get_userdata(file):
 @api.route('/userdata/writing/<string:file>', methods=['GET'])
 @login_required
 def get_writing(file):
-    p = os.path.join(os.path.dirname(current_app.root_path), current_app.config['WRITING_UPLOAD_FOLDER'], str(current_user.id))
+    p = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(current_user.id), "writing")
     return send_from_directory(p, file)
