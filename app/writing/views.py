@@ -193,15 +193,16 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
                 c_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id), v))
                 # Merge only when marking is available
-                if k in marking_writing.marked_file_link.keys():
-                    m_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                                      marking_writing.marked_file_link[k]))
-                    c_image.paste(m_image, (0, 0), m_image)
-                    saved_file_name = v.replace('.jpg', '_merged.jpg')
-                    c_image.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
-                                              saved_file_name))
-                else:
-                    saved_file_name = v
+                if marking_writing.marked_file_link:
+                    if k in marking_writing.marked_file_link.keys():
+                        m_image = Image.open(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
+                                                          marking_writing.marked_file_link[k]))
+                        c_image.paste(m_image, (0, 0), m_image)
+                        saved_file_name = v.replace('.jpg', '_merged.jpg')
+                        c_image.save(os.path.join(current_app.config['WRITING_UPLOAD_FOLDER'], str(student_user_id),
+                                                  saved_file_name))
+                    else:
+                        saved_file_name = v
                 marking_writing.marked_images.append(url_for('api.get_writing', file=saved_file_name))
 
             # Update Table Marking > candidate_mark
