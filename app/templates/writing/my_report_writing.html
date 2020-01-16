@@ -60,7 +60,9 @@
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
-                        <button class="badge badge-danger" name="Rewrite" data-toggle="modal" data-target="#dataModal">Rewrite</button>
+                        <button class="badge badge-danger" name="Rewrite" data-toggle="modal" data-target="#dataModal">
+                            Rewrite
+                        </button>
                         {% if pdf_url %}
                             <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
                         {% endif %}
@@ -151,14 +153,18 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Rewrite</h5>
+                <h3 class="modal-title" id="dataModalLabel"><span class="badge badge-info">Try again? Good on you! Enjoy and don't forget to Submit</span>
+                </h3>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <form>
-                    <textarea id="rewriting" rows="20" cols="72">Good on you! Replace me with your own writing. Don't forget to Submit</textarea>
+                    {% for marking_writing in marking_writings %}
+                        Topic {{ loop.index }}: {{ marking_writing.item_name }}
+                        <textarea class="rewriting" name="{{ marking_writing.item_name }}" id="{{ marking_writing.marking_id }}" rows="10" cols="73"></textarea>
+                    {% endfor %}
                 </form>
             </div>
             <div class="modal-footer">
@@ -194,7 +200,7 @@
         });
     });
 
-    $("#submit_rewrite").click(function (){
+    $("#submit_rewrite").click(function () {
         var content = $("#rewriting").val();
         alert(content);
     });
