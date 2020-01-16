@@ -50,7 +50,7 @@
     <div class="accordion" id="accordion">
         <div class="card card-accent-info">
             <div class="card-header" id="headingTwo">
-                <i class="icons cui-list"></i> Report List
+                <i class="icons cui-list"></i> By Assessment: Report List
                 <div class="card-header-actions">
                     <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
                        aria-expanded="false" aria-controls="collapseTwo">
@@ -59,6 +59,93 @@
                 </div>
             </div>
             <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    <br><br>
+                    <table class="display table table-hover" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Year</th>
+                            <th>Assessment Name</th>
+                            <th>Test Type</th>
+                            <th>Test Center</th>
+                            <th>Subject / Students</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if assessment_r_list %}
+                            {% for rpt in assessment_r_list %}
+                                {% if rpt.assessment_id %}
+                                    <tr>
+                                        <td> {{ loop.index }} </td>
+                                        <td> {{ rpt.year }}</td>
+                                        <td> {{ rpt.assessment_name }}</td>
+                                        <td> {{ Codebook.get_code_name(rpt.test_type) }}</td>
+                                        <td> {{ Codebook.get_code_name(rpt.test_center) }}</td>
+                                        <td>
+                                            <table>
+                                                {% for testset in rpt.testsets %}
+                                                    {% if loop.index0==0 %}
+                                                        <tr>
+                                                            <td>All Subjects</td>
+                                                            <td>
+                                                                <select id="select_0_student_{{ rpt.assessment_id }}">
+                                                                {% for student_user_id in rpt.all_subject_student_list %}
+                                                                    {% if student_user_id %}
+                                                                        <option value="{{ student_user_id }}">{{ Student.getCSStudentName(student_user_id)}}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                </select>
+                                                                <a class="badge badge-secondary" href="" name="btnTestReport"
+                                                                           onclick="getAssessmentReport({{ rpt.assessment_id }},0)" target="_blank"> Assessment Report</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    <tr>
+                                                        <td>{{ Codebook.get_subject_name(testset.testset_id) }}</td>
+                                                        <td>
+                                                            {% if not testset.students %} - {% endif %}
+                                                            <select id="select_1_student_{{ rpt.assessment_id }}_{{ testset.testset_id }}">
+                                                            {% for student in testset.students %}
+                                                                {% if student %}
+                                                                    <option value="{{ student.student_user_id }}">#{{ student.assessment_enroll_id }}:{{ Student.getCSStudentName(student.student_user_id) }}@{{ student.test_time }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            </select>
+                                                            <a class="badge badge-secondary" href="" name="btnTestReport"
+                                                                       onclick="getTestReport({{ rpt.assessment_id }},{{ testset.testset_id }},1)" target="_blank"> Test Report</a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="10"> No Data Found. </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-info">
+            <div class="card-header" id="headingThree">
+                <i class="icons cui-list"></i> By Plan: Report List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseThree"
+                       aria-expanded="false" aria-controls="collapseThree">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseThree" class="collapse show" aria-labelledby="headingThree" data-parent="#accordion">
                 <div class="card-body">
                     {% if current_user.can(Permission.ADMIN) %}
                         <string>Individual Progress Summary Report: </string>
@@ -112,15 +199,15 @@
                                                         <tr>
                                                             <td colspan="2">All Subjects</td>
                                                             <td>
-                                                                <select id="select_student">
+                                                                <select id="select_2_student_{{ rpt.get("assessment_id") }}">
                                                                 {% for student in testset.get("students") %}
                                                                     {% if student %}
-                                                                        <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                                                        <option value="{{ student.student_user_id }}">{{ Student.getCSStudentName(student.student_user_id)}}</option>
                                                                     {% endif %}
                                                                 {% endfor %}
                                                                 </select>
                                                                 {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"
-                                                                           onclick="getAssessmentReport({{ rpt.get("assessment_id") }})" target="_blank"> Assessment Report</a>
+                                                                           onclick="getAssessmentReport({{ rpt.get("assessment_id") }},2)" target="_blank"> Assessment Report</a>
                                                                 {% endif %}
                                                             </td>
                                                         </tr>
@@ -131,15 +218,15 @@
                                                             {% if testset.get("test_center") %}{{ Codebook.get_code_name(testset.get("test_center")) }}{% else %}-{% endif %}</td>
                                                         <td>
                                                             {% if not testset.get("students") %} - {% endif %}
-                                                            <select id="select_student">
+                                                            <select id="select_3_student_{{ rpt.get("assessment_id") }}_{{ testset.get("testset_id") }}">
                                                             {% for student in testset.get("students") %}
                                                                 {% if student %}
-                                                                    <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                                                    <option value="{{ student.student_user_id }}">#{{ student.assessment_enroll_id }}: {{ Student.getCSStudentName(student.student_user_id)}}</option>
                                                                 {% endif %}
                                                             {% endfor %}
                                                             </select>
                                                             {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"
-                                                                       onclick="getTestReport({{ rpt.get("assessment_id") }},{{ testset.get("testset_id") }})" target="_blank"> Test Report</a>
+                                                                       onclick="getTestReport({{ rpt.get("assessment_id") }},{{ testset.get("testset_id") }},3)" target="_blank"> Test Report</a>
                                                             {% endif %}
 {#                                                            {% if testset.get("test_center") %} <a class="badge badge-secondary" href="" name="btnTestReport"#}
 {#                                                                       onclick="getAssessmentReport({{ rpt.get("assessment_id") }})" target="_blank"> Assessment Report</a>#}

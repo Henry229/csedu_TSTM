@@ -56,13 +56,18 @@ $(document).ready(function () {
 
 });
 
-function getTestReport(assessment_id, testset_id) {
-    var url = '/report/ts/'+assessment_id+'/'+testset_id+'/'+$("#select_student option:selected").val();
+function getTestReport(assessment_id, testset_id, num) {
+    var select_option = $("#select_"+num+"_student_"+assessment_id+"_"+testset_id+" option:selected");
+    var select_option_text = select_option.text();
+    var n = select_option_text.indexOf(":");
+    var assessment_enroll_id = select_option_text.substring(1,n);
+    var url = '/report/ts/'+assessment_enroll_id+'/'+assessment_id+'/'+testset_id+'/'+select_option.val();
     $('a[name="btnTestReport"]').attr("href",url);
 }
 
-function getAssessmentReport(assessment_id) {
-    var url = '/report/student/set/'+assessment_id+'/'+$("#select_student option:selected").val();
+function getAssessmentReport(assessment_id,num) {
+
+    var url = '/report/student/set/'+assessment_id+'/'+$("#select_"+num+"_student_"+assessment_id+" option:selected").val();
     $('a[name="btnTestReport"]').attr("href",url);
 }
 

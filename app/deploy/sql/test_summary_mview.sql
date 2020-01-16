@@ -1,7 +1,8 @@
 CREATE MATERIALIZED VIEW public.test_summary_mview
 TABLESPACE pg_default
 AS WITH org_score AS (
-         SELECT marking_summary_360_degree_mview.assessment_id,
+         SELECT marking_summary_360_degree_mview.assessment_enroll_id,
+         	marking_summary_360_degree_mview.assessment_id,
             marking_summary_360_degree_mview.testset_id,
             marking_summary_360_degree_mview.student_user_id,
             marking_summary_360_degree_mview.score,
@@ -20,7 +21,8 @@ AS WITH org_score AS (
            FROM marking_summary_360_degree_mview
           WHERE marking_summary_360_degree_mview."grouping" = 'by_student'::text
         ), calculated_score AS (
-         SELECT org_score.assessment_id,
+         SELECT org_score.assessment_enroll_id,
+         	org_score.assessment_id,
             org_score.testset_id,
             org_score.student_user_id,
             org_score.percentile_score,
@@ -41,7 +43,8 @@ AS WITH org_score AS (
            FROM org_score
           GROUP BY org_score.assessment_id, org_score.testset_id
         )
- SELECT t1.assessment_id,
+ SELECT t1.assessment_enroll_id,
+ 	t1.assessment_id,
     t1.testset_id,
     t1.student_user_id,
     t1.score,
@@ -62,7 +65,7 @@ AS WITH org_score AS (
    FROM org_score t1,
     statical_score t2,
     calculated_score t3
-  WHERE t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_user_id = t3.student_user_id
+  WHERE t1.assessment_enroll_id = t3.assessment_enroll_id AND t1.assessment_id = t2.assessment_id AND t1.testset_id = t2.testset_id AND t1.assessment_id = t3.assessment_id AND t1.testset_id = t3.testset_id AND t1.student_user_id = t3.student_user_id
 WITH DATA;
 
 -- Permissions

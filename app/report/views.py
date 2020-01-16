@@ -1,5 +1,4 @@
 import os
-from collections import namedtuple
 from datetime import datetime
 
 from flask import render_template, flash, request, current_app, redirect, url_for, Response, jsonify
@@ -20,7 +19,7 @@ from ..api.reports import draw_report, query_my_report_list_v, query_my_report_h
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    refresh_mviews, Item, Marking, EducationPlan, Student, Testset
+    refresh_mviews, Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset
 from ..auth.views import get_student_info
 
 ''' 
@@ -82,18 +81,19 @@ def list_my_report():
     return render_template("report/my_report_list.html", assessment_enrolls=rows)
 
 
-''' 
- @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_user_id>', methods=['GET'])
- my_report() : Student Login > My Report > Report 
-    - Execute: Provide link to Subject Report 
-'''
-@report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@report.route('/ts/<int:assessment_enroll_id>/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def my_report(assessment_id, ts_id, student_user_id):
+def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
+    '''
+     @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_user_id>', methods=['GET'])
+     my_report() : Student Login > My Report > Report
+        - Execute: Provide link to Subject Report
+    '''
     # Todo: Check accessibility to get report
-    refresh_mviews()
+    # refresh_mviews()
     row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
+        filter_by(id=assessment_enroll_id). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.id.desc()).first()
@@ -104,7 +104,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
     test_subject_string = Codebook.get_code_name((Testset.query.with_entities(Testset.subject).filter_by(id=row.testset_id).first()).subject)
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
-    ts_header = query_my_report_header(assessment_id, ts_id, student_user_id)
+    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
@@ -120,23 +120,40 @@ def my_report(assessment_id, ts_id, student_user_id):
                                 student_user_id=student_user_id, marking_writing_id=marking_writing_id)
         return redirect(url_i)
     return render_template('report/my_report.html', assessment_name=assessment_name, rank=rank,
-                           score=score, markings=markings, ts_by_category=ts_by_category)
+                           score=score, markings=markings, ts_by_category=ts_by_category, student_user_id=student_user_id)
 
-
-''' 
- @report.route('/student/set/<int:assessment_id>/<int:student_user_id>', methods=['GET'])
- my_student_set_report() : Student Login > My Report > Student Report 
-    - Execute: Provide link to Student Report by assessment (all subject)
-'''
 @report.route('/student/set/<int:assessment_id>/<student_user_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def my_student_set_report(assessment_id, student_user_id):
+    '''
+     @report.route('/student/set/<int:assessment_id>/<int:student_user_id>', methods=['GET'])
+     my_student_set_report() : Student Login > My Report > Student Report
+        - Execute: Provide link to Student Report by assessment (all subject)
+    '''
     # ToDO: Check accessbility to get Report
-    assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).filter_by(
-        student_user_id=student_user_id).all()
+    # ToDo: when tester attempt to test multiple, the latest one will be taken for report
+    latest_attempt_tests = db.session.query(AssessmentEnroll.assessment_id,
+                                         AssessmentEnroll.testset_id,
+                                         AssessmentEnroll.student_user_id,
+                                         db.func.max(AssessmentEnroll.attempt_count).label("attempt_count")).\
+                        group_by(AssessmentEnroll.assessment_id,
+                                         AssessmentEnroll.testset_id,
+                                         AssessmentEnroll.student_user_id).subquery()
+    assessment_enrolls = AssessmentEnroll.query.join(latest_attempt_tests,
+                                         AssessmentEnroll.assessment_id==latest_attempt_tests.c.assessment_id). \
+                        filter(AssessmentEnroll.testset_id == latest_attempt_tests.c.testset_id,
+                              AssessmentEnroll.student_user_id == latest_attempt_tests.c.student_user_id). \
+                        filter_by(assessment_id=assessment_id).\
+                        filter_by(student_user_id=student_user_id).\
+                        order_by(AssessmentEnroll.testset_id.asc(), AssessmentEnroll.attempt_count.desc()).all()
+
     if assessment_enrolls:
-        grade = EducationPlanDetail.get_grade(assessment_id)
+        # ToDo: Decide which grade should be taken
+        # grade = EducationPlanDetail.get_grade(assessment_id)
+        # grade = assessment_enrolls[0].grade
+        grade = Codebook.get_code_name(((AssessmentHasTestset.query.filter_by(assessment_id=assessment_id).first()).testset).grade)
+
         assessment_GUID = assessment_enrolls[0].assessment_guid
         test_type_string = Codebook.get_code_name(assessment_enrolls[0].assessment.test_type)
         if test_type_string == 'Naplan':
@@ -150,26 +167,25 @@ def my_student_set_report(assessment_id, student_user_id):
             # For selective test or other test type
             test_type_string = 'other'
         template_html_name = 'report/my_report_' + test_type_string + '.html'
-        grade = EducationPlanDetail.get_grade(assessment_id)
         web_file_path = url_for("api.get_naplan", file=file_name)
-        return render_template(template_html_name, image_file_path=web_file_path, grade=grade)
+        return render_template(template_html_name, image_file_path=web_file_path, grade=grade, student_user_id=student_user_id)
     else:
         return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
 
 
-''' 
- @report.route('/manage', methods=['GET'])
- manage() : Report user Login > Report By Center 
-    - Search Report 
-    - Provide link to Test Summary Report by test package (all assessments)
-    - Provide link to Download: Test Summary report for all students    
-    - Provide link to Test Ranking Report by assessment 
-    - Provide link to Download: individual Subject Report for all students    
-'''
 @report.route('/manage', methods=['GET'])
 @login_required
 @permission_required(Permission.ASSESSMENT_READ)
 def manage():
+    '''
+     @report.route('/manage', methods=['GET'])
+     manage() : Report user Login > Report By Center
+        - Search Report
+        - Provide link to Test Summary Report by test package (all assessments)
+        - Provide link to Download: Test Summary report for all students
+        - Provide link to Test Ranking Report by assessment
+        - Provide link to Download: individual Subject Report for all students
+    '''
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
     year = request.args.get("year")
@@ -195,18 +211,85 @@ def manage():
     search_form.year.data = year
     rows, reports, students, testsets, test_summaries = [], [], [], [], []
     if flag:
+        #
+        # By Assessment: Report List
+        #
+        query = Assessment.query.join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
+            filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
+            filter(Assessment.test_type == test_type)
+        if Codebook.get_code_name(test_center)!='All':
+            query = query + filter(AssessmentEnroll.test_center==test_center)
+        assessments = query.order_by(Assessment.id.asc()).all()
+        assessment_r_list = []
+        all_subject_r_list = []
+        for assessment in assessments:
+            assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id).order_by(AssessmentEnroll.testset_id.asc()).all()
+            #
+            # all_subjects data
+            #
+            all_subject_student_list = []
+            for assessment_enroll in assessment_enrolls:
+                all_subject_student_list.append(assessment_enroll.student_user_id)
+                # if x!=0:)
+            all_subject_student_list.sort()
+            all_subject_student_list = list(set(all_subject_student_list))
+
+            #
+            # individual_subjects data
+            #
+            old_testset_id, testset_id = 0, 0
+            testset_json_str = {}
+            student_list = []
+            testset_list = []
+            for assessment_enroll in assessment_enrolls:
+                testset_id = assessment_enroll.testset_id
+
+                if old_testset_id != testset_id:
+                    if old_testset_id > 0:
+                        testset_json_str["students"]=student_list
+                        testset_list.append(testset_json_str)
+                        student_list = []
+                        testset_json_str = []
+
+                    old_testset_id = testset_id
+                    testset_json_str = {"testset_id":testset_id}
+                    student_list.append({"student_user_id": assessment_enroll.student_user_id,
+                                    "assessment_enroll_id": assessment_enroll.id,
+                                    "test_time": assessment_enroll.start_time_client})
+                else:
+                    # student_json_str = {"student_user_id": assessment_enroll.student_user_id,
+                    #                     "assessment_enroll_id": assessment_enroll.id,
+                    #                     "test_time": assessment_enroll.start_time_client}
+                    student_list.append({"student_user_id": assessment_enroll.student_user_id,
+                                        "assessment_enroll_id": assessment_enroll.id,
+                                        "test_time": assessment_enroll.start_time_client})
+
+            testset_json_str["students"] = student_list
+            testset_list.append(testset_json_str)
+            assessment_json_str = { "year": assessment.year,
+                                    "assessment_id": assessment.id,
+                                  "assessment_name": assessment.name,
+                                  "test_type": assessment.test_type,
+                                  "test_center": assessment.branch_id,
+                                    "all_subject_student_list": all_subject_student_list,
+                                    "testsets": testset_list}
+            assessment_r_list.append(assessment_json_str)
+        #
+        # By Plan: Report List
+        #
         # Query Report : 'plan_id', 'plan_name', 'assessment_year', 'grade', 'test_type','assessment_order',
         #                 'assessment_id', 'testset_id', 'assessment_enroll_id', 'student_user_id', 'attempt_count',
         #                 'test_center', 'start_time_client'
         rows = query_all_report_data(test_type, test_center, year)
         # Re-construct "Reports" with query result
         index = 0
-        _assessment_enroll_id, _testset_id, _test_center, _assessment_year, _assessment_order = 0, 0, 0, 0, 0
+        _testset_id, _test_center, _assessment_year, _assessment_order =  0, 0, 0, 0
         _assessment_id, _grade, _test_type = 0, 0, 0
         for row in rows:
             if index > 0 and \
                     (_testset_id != row.testset_id or row.assessment_enroll_id is None):
                 testset_json_string = {"testset_id": _testset_id,
+
                                        "test_center": _test_center,
                                        "students": students
                                        }
@@ -223,16 +306,12 @@ def manage():
                     testsets = []
                 students = []
 
-            students.append(row.student_user_id)
+            students.append({"student_user_id": row.student_user_id,"assessment_enroll_id": row.assessment_enroll_id})
             _assessment_year = row.assessment_year
             _grade = row.grade
             _test_type = row.test_type
             _assessment_order = row.assessment_order
             _assessment_id = row.assessment_id
-            if row.assessment_enroll_id:
-                _assessment_enroll_id = row.assessment_enroll_id
-            else:
-                _assessment_enroll_id = 0
             _testset_id = row.testset_id
             _test_center = row.test_center
             index += 1
@@ -253,7 +332,7 @@ def manage():
         # Test Summary Report list for All Students: 'student_user_id','plan_id','plan_name',
         #                           'year','grade','test_type'
         test_summaries = query_individual_progress_summary_report_list()
-    return render_template('report/manage.html', form=search_form, reports=reports,
+    return render_template('report/manage.html', form=search_form, assessment_r_list=assessment_r_list, reports=reports,
                            test_summaries=test_summaries, test_center=test_center)
 
 
@@ -307,15 +386,15 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
                            test_summaries=test_summaries, now=datetime.utcnow())
 
 
-''' 
- @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
- summary_report() : Report user Login > Report By Center > Search
-    - Execute: Provide link to Download: individual Subject Report for all students 
-'''
 @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def summary_report(plan_id, branch_id):
+    '''
+     @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
+     summary_report() : Report user Login > Report By Center > Search
+        - Execute: Provide link to Download: individual Subject Report for all students
+    '''
     plan_GUID, test_type_string, grade = '', '', ''
     assessment_ids = [row.assessment_id for row in EducationPlanDetail.query.filter_by(plan_id=plan_id).all()]
     query = db.session.query(AssessmentEnroll.student_user_id).distinct()

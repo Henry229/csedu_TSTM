@@ -283,7 +283,7 @@ def query_my_report_list_v(student_user_id):
 '''Student UI: Query My Report (subject) Header for each Student'''
 
 
-def query_my_report_header(assessment_id, ts_id, student_user_id):
+def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id):
     column_names = ['rank_v as student_rank',
                     'total_students',
                     "to_char(score,'999.99') as score",
@@ -292,10 +292,11 @@ def query_my_report_header(assessment_id, ts_id, student_user_id):
                     ]
     sql_stmt = 'SELECT {columns} ' \
                'FROM test_summary_mview ' \
-               'WHERE assessment_id=:assessment_id and testset_id=:testset_id ' \
+               'WHERE assessment_enroll_id=:assessment_enroll_id ' \
+               'and assessment_id=:assessment_id and testset_id=:testset_id ' \
                'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
     cursor = db.session.execute(sql_stmt,
-                                {'assessment_id': assessment_id, 'testset_id': ts_id, 'student_user_id': student_user_id})
+                                {'assessment_enroll_id':assessment_enroll_id, 'assessment_id': assessment_id, 'testset_id': ts_id, 'student_user_id': student_user_id})
     ts_header = cursor.fetchone()
     return ts_header
 

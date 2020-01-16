@@ -984,7 +984,11 @@ class Student(db.Model):
 
     @staticmethod
     def getCSStudentName(user_id):
-        return (User.query.filter_by(id=user_id).first()).username
+        user = User.query.filter_by(id=user_id).first()
+        if user:
+            return user.username
+        else:
+            return 'Unknown User'
 
     @staticmethod
     def getCSCampusName(user_id):
