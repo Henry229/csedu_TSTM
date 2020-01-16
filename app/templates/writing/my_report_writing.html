@@ -52,10 +52,13 @@
             <table style="width:100%" id="t_header">
                 <tr>
                     <th colspan="3">
-                        <h3 style="color:#397e38"> {{ assessment_name }} </h3>
+                        <h1 style="color:#397e38"> {{ assessment_name }} </h1>
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                        {% if pdf_url %}
+                            <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
+                        {% endif %}
                     </td>
                 </tr>
             </table>

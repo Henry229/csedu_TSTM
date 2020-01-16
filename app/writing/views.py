@@ -172,6 +172,7 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     """
 
     pdf = False
+    pdf_url = "%s?type=pdf" % request.url
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
@@ -245,7 +246,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                                                     grade=grade, test_date=test_date,
                                                     rank=rank, score=score,
                                                     marking_writings=marking_writings,
-                                                    static_folder=current_app.static_folder)
+                                                    static_folder=current_app.static_folder,
+                                                    pdf_url=pdf_url)
             if not pdf:
                 return rendered_template_pdf
             # PDF download
