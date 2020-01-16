@@ -41,6 +41,10 @@
             border: 1px solid #0f0f0f;
             padding: 5px;
         }
+
+        textarea {
+            font-size: large;
+        }
     </style>
 </head>
 <body>
@@ -56,6 +60,7 @@
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                        <button class="badge badge-danger" name="Rewrite" data-toggle="modal" data-target="#dataModal">Rewrite</button>
                         {% if pdf_url %}
                             <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
                         {% endif %}
@@ -146,15 +151,18 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                <h5 class="modal-title" id="dataModalLabel">Rewrite</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Loading... Try again if the contents not shown
+                <form>
+                    <textarea id="rewriting" rows="20" cols="72">Good on you! Replace me with your own writing. Don't forget to Submit</textarea>
+                </form>
             </div>
             <div class="modal-footer">
+                <button id="submit_rewrite" type="button" class="btn btn-success">Submit</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -184,6 +192,11 @@
             touchEnabled: true,
             hideControlOnEnd: true
         });
+    });
+
+    $("#submit_rewrite").click(function (){
+        var content = $("#rewriting").val();
+        alert(content);
     });
 
     $(document).ready(function () {
