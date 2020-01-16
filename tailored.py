@@ -154,7 +154,7 @@ def deploy():
     print('Inserting <Naplan> - Level  into Codebook table')
     Codebook.create_default_codeset("Naplan", "level", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10")
 
-    print('Inserting Test Center into Codebook table')
+    print('Inserting Test Centre into Codebook table')
     Codebook.create_default_codeset(None, "test_center", "CS Online School", "Norwest", "Castle Hill", "All")
 
     print('Inserting Writing Criteria into Codebook table')

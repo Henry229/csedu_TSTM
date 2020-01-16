@@ -37,7 +37,7 @@
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search</button>
                             &nbsp;&nbsp;&nbsp;
                             {% if current_user.can(Permission.ADMIN) %}
-                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Generate Data for Report</span><br><br>
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span><br><br>
                             {% endif %}
                         </form>
                         <p/>
@@ -50,7 +50,7 @@
                             <th>Year</th>
                             <th>Test Type</th>
                             <th>Test Name</th>
-                            <th>Test Center</th>
+                            <th>Test Centre</th>
                             {% if current_user.can(Permission.WRITING_MANAGE) %}
                                 <th>Marker Assigned</th>
                             {% endif %}
@@ -145,7 +145,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">
-                        Generate Data for Report
+                        Refresh Collected Report Data
                     </h4>
                 </div>
                 <div class="modal-body">

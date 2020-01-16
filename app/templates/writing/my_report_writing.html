@@ -41,6 +41,10 @@
             border: 1px solid #0f0f0f;
             padding: 5px;
         }
+
+        textarea {
+            font-size: large;
+        }
     </style>
 </head>
 <body>
@@ -52,10 +56,16 @@
             <table style="width:100%" id="t_header">
                 <tr>
                     <th colspan="3">
-                        <h3 style="color:#397e38"> {{ assessment_name }} </h3>
+                        <h1 style="color:#397e38"> {{ assessment_name }} </h1>
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                        <button class="badge badge-danger" name="Rewrite" data-toggle="modal" data-target="#dataModal">
+                            Rewrite
+                        </button>
+                        {% if pdf_url %}
+                            <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
+                        {% endif %}
                     </td>
                 </tr>
             </table>
@@ -143,15 +153,22 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                <h3 class="modal-title" id="dataModalLabel"><span class="badge badge-info">Try again? Good on you! Enjoy and don't forget to Submit</span>
+                </h3>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Loading... Try again if the contents not shown
+                <form>
+                    {% for marking_writing in marking_writings %}
+                        Topic {{ loop.index }}: {{ marking_writing.item_name }}
+                        <textarea class="rewriting" name="{{ marking_writing.item_name }}" id="{{ marking_writing.marking_id }}" rows="10" cols="73"></textarea>
+                    {% endfor %}
+                </form>
             </div>
             <div class="modal-footer">
+                <button id="submit_rewrite" type="button" class="btn btn-success">Submit</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -181,6 +198,11 @@
             touchEnabled: true,
             hideControlOnEnd: true
         });
+    });
+
+    $("#submit_rewrite").click(function () {
+        var content = $("#rewriting").val();
+        alert(content);
     });
 
     $(document).ready(function () {

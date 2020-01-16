@@ -36,7 +36,7 @@
                         {{ form.active.label }}
                         {{ form.submit(class="btn btn-success btn-sm", id="search") }}
                         {% if current_user.can(Permission.ADMIN) %}
-                            <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Generate Data for Report</span><br><br>
+                            <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span><br><br>
                         {% endif %}
                     </form>
                     <p/>
@@ -128,7 +128,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">
-                        Generate Data for Report
+                        Refresh Collected Report Data
                     </h4>
                 </div>
                 <div class="modal-body">

@@ -67,7 +67,7 @@ class CodebookForm(FlaskForm):
 
     test_type = SelectField('Test Type', id="select_test_type", coerce=int)
     level = SelectField('Level', id="select_level", coerce=int)
-    test_center = SelectField('Test Center', id='select_test_center', coerce=int)
+    test_center = SelectField('Test Centre', id='select_test_center', coerce=int)
     grade = SelectField('Grade', id='select_grade', coerce=int)
     subject = SelectField('Subject', id='select_subject', coerce=int)
     category = SelectField('Category', id='select_category', coerce=int)

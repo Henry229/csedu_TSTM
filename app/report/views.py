@@ -98,7 +98,7 @@ def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.id.desc()).first()
     if row is None:
-        return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
+        return redirect(url_for('report.list_my_report', error='Report data not available'))
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
@@ -170,22 +170,22 @@ def my_student_set_report(assessment_id, student_user_id):
         web_file_path = url_for("api.get_naplan", file=file_name)
         return render_template(template_html_name, image_file_path=web_file_path, grade=grade, student_user_id=student_user_id)
     else:
-        return redirect(url_for('report.list_my_report', error='Not found assessment enroll data'))
+        return redirect(url_for('report.list_my_report', error='Report data not available'))
 
 
+''' 
+ @report.route('/manage', methods=['GET'])
+ manage() : Report user Login > Report By Centre 
+    - Search Report 
+    - Provide link to Test Summary Report by test package (all assessments)
+    - Provide link to Download: Test Summary report for all students    
+    - Provide link to Test Ranking Report by assessment 
+    - Provide link to Download: individual Subject Report for all students    
+'''
 @report.route('/manage', methods=['GET'])
 @login_required
 @permission_required(Permission.ASSESSMENT_READ)
 def manage():
-    '''
-     @report.route('/manage', methods=['GET'])
-     manage() : Report user Login > Report By Center
-        - Search Report
-        - Provide link to Test Summary Report by test package (all assessments)
-        - Provide link to Download: Test Summary report for all students
-        - Provide link to Test Ranking Report by assessment
-        - Provide link to Download: individual Subject Report for all students
-    '''
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
     year = request.args.get("year")
@@ -289,7 +289,6 @@ def manage():
             if index > 0 and \
                     (_testset_id != row.testset_id or row.assessment_enroll_id is None):
                 testset_json_string = {"testset_id": _testset_id,
-
                                        "test_center": _test_center,
                                        "students": students
                                        }
@@ -339,7 +338,7 @@ def manage():
 ''' 
  @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
               methods=['GET'])
- test_ranking_report() : Report user Login > Report By Center > Search
+ test_ranking_report() : Report user Login > Report By Centre > Search
     - Execute: Provide link to Test Ranking Report by assessment 
 '''
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
@@ -386,15 +385,15 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
                            test_summaries=test_summaries, now=datetime.utcnow())
 
 
+''' 
+ @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
+ summary_report() : Report user Login > Report By Centre > Search
+    - Execute: Provide link to Download: individual Subject Report for all students 
+'''
 @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def summary_report(plan_id, branch_id):
-    '''
-     @report.route('/summary/<int:plan_id>/<int:branch_id>', methods=['GET'])
-     summary_report() : Report user Login > Report By Center > Search
-        - Execute: Provide link to Download: individual Subject Report for all students
-    '''
     plan_GUID, test_type_string, grade = '', '', ''
     assessment_ids = [row.assessment_id for row in EducationPlanDetail.query.filter_by(plan_id=plan_id).all()]
     query = db.session.query(AssessmentEnroll.student_user_id).distinct()
@@ -565,7 +564,7 @@ def individual_progress_summary_report(plan_id, student_user_id):
 ''' 
  @report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',
               methods=['GET'])
- report_results_pdf() : Report user Login > Report By Center 
+ report_results_pdf() : Report user Login > Report By Centre 
     - Execute: Provide link to Download: Test Summary report for all students    
 '''
 @report.route('/results/pdf/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:branch_id>',

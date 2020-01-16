@@ -6,22 +6,18 @@ from datetime import datetime
 
 import pytz
 from PIL import Image, ImageDraw, ImageFont
-from flask import render_template, flash, request, redirect, url_for, current_app
+from flask import render_template, flash, request, redirect, url_for, current_app, send_file
 from flask_login import login_required, current_user
-from sqlalchemy import or_
-from sqlalchemy.orm import load_only
 from sqlalchemy.orm.attributes import flag_modified
-from werkzeug.utils import secure_filename
 
-from app.web.errors import page_not_found
 from . import writing
-from .forms import StartOnlineTestForm, WritingTestForm, AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
+from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
     MarkerAssignForm
 from .. import db
 from ..api.reports import query_my_report_header
 from ..decorators import permission_required, permission_required_or_multiple
-from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, TestletHasItem, \
-    MarkingForWriting, AssessmentHasTestset, Testset, MarkerAssigned, refresh_mviews, Item
+from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
+    AssessmentHasTestset, Testset, MarkerAssigned, Item
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
@@ -175,6 +171,11 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     :return: the specific student's writing information for marking by marker
     """
 
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
     if marking_writing_id == 0:
         marking_writings = MarkingForWriting.query \
             .join(Marking, Marking.id == MarkingForWriting.marking_id) \
@@ -191,19 +192,28 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             # Create merged writing markings
             marking_writing.marked_images = []
             for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                c_image = Image.open(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", v))
+                c_image = Image.open(
+                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id), "writing", v))
                 # Merge only when marking is available
                 if marking_writing.marked_file_link:
                     if k in marking_writing.marked_file_link.keys():
-                        m_image = Image.open(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id),
-                                                          "writing", marking_writing.marked_file_link[k]))
+                        m_image = Image.open(
+                            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                         str(student_user_id),
+                                         "writing", marking_writing.marked_file_link[k]))
                         c_image.paste(m_image, (0, 0), m_image)
-                        saved_file_name = v.replace('.jpg', '_merged.jpg')
-                        c_image.save(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'], str(student_user_id),
-                                                  "writing", saved_file_name))
-                    else:
-                        saved_file_name = v
-                    marking_writing.marked_images.append(url_for('api.get_writing', file=saved_file_name))
+                saved_file_name = v.replace('.jpg', '_merged.png')
+                c_image.save(
+                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "writing", saved_file_name), "PNG")
+                marked_writing_path = url_for('api.get_writing', file=saved_file_name)
+                if pdf:
+                    marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
+                        os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                        str(student_user_id), saved_file_name)
+                marking_writing.marked_images.append(marked_writing_path)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
@@ -227,11 +237,34 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
             rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
 
-            return render_template('writing/my_report_Writing.html',
-                                   assessment_name=assessment_name, item_name=item_name,
-                                   grade=grade, test_date=test_date,
-                                   rank=rank, score=score,
-                                   marking_writings=marking_writings)
+            template_file = 'writing/my_report_writing.html'
+            if pdf:
+                template_file = 'writing/my_report_writing_pdf.html',
+
+            rendered_template_pdf = render_template(template_file,
+                                                    assessment_name=assessment_name, item_name=item_name,
+                                                    grade=grade, test_date=test_date,
+                                                    rank=rank, score=score,
+                                                    marking_writings=marking_writings,
+                                                    static_folder=current_app.static_folder,
+                                                    pdf_url=pdf_url)
+            if not pdf:
+                return rendered_template_pdf
+            # PDF download
+            from weasyprint import HTML
+            html = HTML(string=rendered_template_pdf)
+
+            pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                         str(student_user_id),
+                                         "writing",
+                                         "%s_%s_%s.pdf" % (assessment_enroll_id, student_user_id, marking_writing_id))
+            html.write_pdf(target=pdf_file_path, presentational_hints=True)
+            rsp = send_file(
+                pdf_file_path,
+                mimetype='application/pdf',
+                as_attachment=True,
+                attachment_filename=pdf_file_path)
+            return rsp
         return redirect(url_for('writing.manage', error='Not found assessment enroll - writing data'))
     return redirect(url_for('writing.manage', error='Not found Marking for writing data'))
 
@@ -349,7 +382,8 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             if file_name:
-                file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", file_name)
+                file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
+                                         file_name)
                 if os.path.exists(file_path):
                     web_img_links[key] = {
                         'writing': url_for('api.get_writing', file=file_name)}
