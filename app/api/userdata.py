@@ -28,5 +28,10 @@ def get_writing(file):
 def get_naplan(file):
     p = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
                      str(current_user.id), "naplan")
-    return send_from_directory(p, file)
+    mimetype = None
+    if file.find('.png') > 0:
+        mimetype = "application/png"
+    elif file.find('.jpg') > 0:
+        mimetype = "application/jpg"
+    return send_from_directory(p, file, mimetype=mimetype)
 

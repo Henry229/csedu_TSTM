@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <link href="file:///{{ static_folder }}/report/css/writing.css" rel="stylesheet">
+</head>
+<body>
+<div class="header">
+    <table>
+        <tr>
+            <td>
+                <h1 style="color:#397e38"> {{ assessment_name }} </h1>
+            </td>
+            <td align="right">
+                <img src="file:///{{ static_folder }}/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="student_info">
+    <table id="t_student_info">
+        <tr>
+            <th> Student Name:</th>
+            <td> {{ current_user.username }} </td>
+            <th> Rank:</th>
+            <td> {{ rank }} </td>
+        </tr>
+        <tr>
+            <th> Student ID:</th>
+            <td> {{ Student.getCSStudentId(current_user.id) }}</td>
+            <th> Assessment Score:</th>
+            <td> {{ score }} </td>
+        </tr>
+        <tr>
+            <th> Grade:</th>
+            <td> {{ grade }}</td>
+            <th> Test Date:</th>
+            <td> {{ test_date }}.</td>
+        </tr>
+    </table>
+</div>
+<div class="writing">
+    {% for marking_writing in marking_writings %}
+        <h2>{{ marking_writing.item_name }}</h2>
+        {% if marking_writing.candidate_mark_detail %}
+            <table id="t_writing">
+                <thead>
+                <tr>
+                    <th>Mark Criteria</th>
+                    <th>Mark</th>
+                    <th>Mark Criteria</th>
+                    <th>Mark</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for marking in marking_writing.candidate_mark_detail %}
+                    {% if loop.index%2 != 0 %}
+                        <tr>
+                    {% endif %}
+                <td>{{ marking }}</td>
+                <td>{{ marking_writing.candidate_mark_detail[marking] }}</td>
+                {% if loop.index%2 == 0 %}
+                    </tr>
+                {% endif %}
+                {% endfor %}
+                <tr>
+                    <th colspan="4">Marker's comment</th>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        {{ marking_writing.markers_comment }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            {% for image in marking_writing.marked_images %}
+                <img class="writing_image" src="{{ image }}">
+            {% endfor %}
+        {% else %}
+            <table>
+                <tr>
+                    <td>The wrining hasn't been marked yet</td>
+                </tr>
+            </table>
+        {% endif %}
+    {% endfor %}
+</div>
+</body>
+</html>
