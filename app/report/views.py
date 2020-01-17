@@ -218,12 +218,14 @@ def manage():
             filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
             filter(Assessment.test_type == test_type)
         if Codebook.get_code_name(test_center)!='All':
-            query = query + filter(AssessmentEnroll.test_center==test_center)
+            query = query.filter(AssessmentEnroll.test_center==test_center)
         assessments = query.order_by(Assessment.id.asc()).all()
         assessment_r_list = []
         all_subject_r_list = []
         for assessment in assessments:
-            assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id).order_by(AssessmentEnroll.testset_id.asc()).all()
+            assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id).\
+                filter_by(test_center=test_center).\
+                order_by(AssessmentEnroll.testset_id.asc()).all()
             #
             # all_subjects data
             #

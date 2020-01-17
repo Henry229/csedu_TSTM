@@ -81,7 +81,8 @@
                                         <td> {{ rpt.year }}</td>
                                         <td> {{ rpt.assessment_name }}</td>
                                         <td> {{ Codebook.get_code_name(rpt.test_type) }}</td>
-                                        <td> {{ Codebook.get_code_name(rpt.test_center) }}</td>
+{#                                        <td> {{ Codebook.get_code_name(rpt.test_center) }}</td>#}
+                                        <td> {{ Codebook.get_code_name(test_center) }}</td>
                                         <td>
                                             <table>
                                                 {% for testset in rpt.testsets %}
