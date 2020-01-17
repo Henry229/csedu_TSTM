@@ -96,6 +96,9 @@
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                        {% if pdf_url %}
+                            <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
+                        {% endif %}
                     </td>
                 </tr>
             </table>

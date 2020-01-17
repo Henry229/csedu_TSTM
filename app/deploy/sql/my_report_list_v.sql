@@ -15,6 +15,7 @@ AS WITH marked_ts_list AS (
         )
  SELECT DISTINCT a.id,
     m.assessment_id,
+    e.id as assessment_enroll_id,
     e.student_user_id,
     to_char(a.session_date, 'YYYY'::text) AS year,
     a.test_type,

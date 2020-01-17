@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import render_template, flash, request, current_app, redirect, url_for, Response, jsonify
+from flask import render_template, flash, request, current_app, redirect, url_for, Response, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
 
@@ -14,7 +14,7 @@ from ..api.reports import draw_report, query_my_report_list_v, query_my_report_h
     query_item_score_summary_data, query_individual_progress_summary_report_header, \
     query_individual_progress_summary_report_by_assessment, query_individual_progress_summary_report_by_plan, \
     query_individual_progress_summary_by_subject_v, query_individual_progress_summary_by_plan_v, \
-    build_test_ranking_pdf_response, build_test_results_pdf_response, build_test_results_zipper, \
+    build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
@@ -92,6 +92,12 @@ def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
     '''
     # Todo: Check accessibility to get report
     # refresh_mviews()
+
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
     row = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
         filter_by(id=assessment_enroll_id). \
         filter_by(assessment_id=assessment_id). \
@@ -119,8 +125,47 @@ def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
         url_i = url_for('writing.w_report',assessment_enroll_id=assessment_enroll_id,
                                 student_user_id=student_user_id, marking_writing_id=marking_writing_id)
         return redirect(url_i)
-    return render_template('report/my_report.html', assessment_name=assessment_name, rank=rank,
-                           score=score, markings=markings, ts_by_category=ts_by_category, student_user_id=student_user_id)
+
+    template_file = 'report/my_report.html'
+    if pdf:
+        template_file = 'report/my_report_pdf.html',
+
+    rendered_template_pdf = render_template(template_file, assessment_name=assessment_name, rank=rank,
+                                            score=score, markings=markings, ts_by_category=ts_by_category,
+                                            student_user_id=student_user_id, static_folder=current_app.static_folder,
+                                            pdf_url=pdf_url)
+    if not pdf:
+        # return render_template('report/my_report.html', assessment_name=assessment_name, rank=rank,
+        #                        score=score, markings=markings, ts_by_category=ts_by_category,
+        #                        student_user_id=student_user_id, static_folder=current_app.static_folder,
+        #                        pdf_url=pdf_url)
+        return rendered_template_pdf
+    # PDF download
+    from weasyprint import HTML
+
+    html = HTML(string=rendered_template_pdf)
+
+
+    pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "report",
+                                 "test_report_%s_%s_%s_%s.pdf" % (assessment_enroll_id, assessment_id, ts_id, student_user_id))
+
+    os.chdir(current_app.config['USER_DATA_FOLDER'])
+    if not os.path.exists(str(student_user_id)):
+        os.makedirs(str(student_user_id))
+    os.chdir(str(student_user_id))
+    if not os.path.exists("report"):
+        os.makedirs("report")
+
+    html.write_pdf(target=pdf_file_path, presentational_hints=True)
+    rsp = send_file(
+        pdf_file_path,
+        mimetype='application/pdf',
+        as_attachment=True,
+        attachment_filename=pdf_file_path)
+    return rsp
+
 
 @report.route('/student/set/<int:assessment_id>/<student_user_id>', methods=['GET'])
 @login_required
@@ -210,6 +255,7 @@ def manage():
     search_form.test_center.data = test_center
     search_form.year.data = year
     rows, reports, students, testsets, test_summaries = [], [], [], [], []
+    assessment_r_list = []
     if flag:
         #
         # By Assessment: Report List
@@ -220,12 +266,16 @@ def manage():
         if Codebook.get_code_name(test_center)!='All':
             query = query.filter(AssessmentEnroll.test_center==test_center)
         assessments = query.order_by(Assessment.id.asc()).all()
-        assessment_r_list = []
+
         all_subject_r_list = []
         for assessment in assessments:
-            assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id).\
-                filter_by(test_center=test_center).\
-                order_by(AssessmentEnroll.testset_id.asc()).all()
+            if Codebook.get_code_name(test_center) == 'All':
+                assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id). \
+                    order_by(AssessmentEnroll.testset_id.asc()).all()
+            else:
+                assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id).\
+                    filter_by(test_center=test_center).\
+                    order_by(AssessmentEnroll.testset_id.asc()).all()
             #
             # all_subjects data
             #
@@ -337,17 +387,18 @@ def manage():
                            test_summaries=test_summaries, test_center=test_center)
 
 
-''' 
- @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
-              methods=['GET'])
- test_ranking_report() : Report user Login > Report By Centre > Search
-    - Execute: Provide link to Test Ranking Report by assessment 
-'''
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
               methods=['GET'])
 @login_required
 @permission_required(Permission.ASSESSMENT_READ)
 def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
+    '''
+     @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
+                  methods=['GET'])
+     test_ranking_report() : Report user Login > Report By Centre > Search
+        - Execute: Provide link to Test Ranking Report by assessment
+    '''
+
     # Test Ranking Report - subject list : 'testset_id', 'subject_name'
     subjects = query_test_ranking_subject_list(assessment_id)
 
@@ -366,25 +417,35 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
             break
         if r.test_center == test_center:
             test_summaries.append(r)
-    template_file_name = 'report/test_result_' + Codebook.get_code_name(test_type) + '.html'
+    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
 
-    web_file_path = os.path.join(current_app.config['CSEDU_IMG_DIR'].lstrip('app'), 'CSEducation.png')
-    local_file_path = 'file:///%s/%s/%s' % (os.path.dirname(current_app.instance_path).replace('\\', '/'),
-                                            current_app.config['CSEDU_IMG_DIR'],
-                                            'CSEducation.png')
+    template_file = 'report/test_result_' + Codebook.get_code_name(test_type) + '.html'
+    if request.args.get('pdf-download') == "1":
+        template_file = 'report/test_result_' + Codebook.get_code_name(test_type) + '_pdf.html'
+    rendered_template_pdf = render_template(template_file,
+                                            year=year, test_type=test_type, sequence=sequence,
+                                            assessment_name=assessment_name, subject_names=subjects,
+                                            test_summaries=test_summaries, now=datetime.utcnow(),
+                                            static_folder=current_app.static_folder)
+
+    if request.args.get('pdf-download') == "1":
+        from weasyprint import HTML
+        html = HTML(string=rendered_template_pdf)
+        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     str(current_user.id),
+                                     "test_ranking",
+                                     "%s_%s.pdf" % (assessment_id, sequence))
+        html.write_pdf(target=pdf_file_path, presentational_hints=True)
+        rsp = send_file(
+            pdf_file_path,
+            mimetype='application/pdf',
+            as_attachment=True,
+            attachment_filename=pdf_file_path)
+        return rsp
     if request.args.get('excel-download') == "1":
         rsp = build_test_ranking_excel_response(subjects, test_summaries, year, test_type, sequence)
         return rsp
-    if request.args.get('pdf-download') == "1":
-        rsp = build_test_ranking_pdf_response(template_file_name, image_file_path=local_file_path,
-                           year=year, test_type=test_type, sequence=sequence,
-                           subject_names=subjects,
-                           test_summaries=test_summaries, now=datetime.utcnow())
-        return rsp
-    return render_template(template_file_name, image_file_path=web_file_path,
-                           year=year, test_type=test_type, sequence=sequence,
-                           subject_names=subjects,
-                           test_summaries=test_summaries, now=datetime.utcnow())
+    return rendered_template_pdf
 
 
 ''' 
@@ -533,7 +594,7 @@ def individual_progress_summary_report(plan_id, student_user_id):
     by_subject_file_name = draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user_id)
     by_set_file_name = draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, student_user_id)
 
-    template_file_name = 'report/individual_progress_' + test_type_string + '.html'
+    template_file_name = 'report/individual_progress_' + test_type_string + '_pdf.html'
     naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
 
     logo_web_path = os.path.join(current_app.config['CSEDU_IMG_DIR'].lstrip('app'), 'CSEducation.png')
@@ -549,7 +610,7 @@ def individual_progress_summary_report(plan_id, student_user_id):
                                               naplan_folder,
                                               by_set_file_name)
 
-    success = build_individual_progress_pdf_response(template_file_name, logo_file_name=logo_local_path,
+    success = build_individual_progress_pdf_response(template_file_name, static_folder=current_app.static_folder,
                            by_subject_file_name=by_subject_local_path, by_set_file_name=by_set_local_path,
                            ts_header=ts_header,
                            num_of_assessments=num_of_assessments, num_of_subjects=num_of_subjects,

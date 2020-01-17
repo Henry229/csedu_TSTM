@@ -40,29 +40,27 @@
 <div class="container">
     <br><br>
     <div class="row">
-        {% if not image_file_path  %}
-            <div class="col">
-                <strong>Test Results</strong> &nbsp;
-                {% if current_user.can(Permission.ADMIN) %}
-                    <form action=""  method="GET">
-                    <input type="hidden" id="excel-download" name="excel-download" value="0">
-                    <input type="hidden" id="pdf-download" name="pdf-download" value="0">
-                    <input class="btn btn-success" id="submit" name="submit" type="submit" value="" style="visibility: hidden">
-                    <input class="btn btn-primary" id="export" type="button" value="Excel Download">
-                    <input class="btn btn-info" id="export-pdf" type="button" value="PDF Download">
-                    </form>
-                {% endif %}
-            </div>
-        {% endif %}
+        <div class="col">
+            <h3><strong>Test Results: {{ assessment_name }}</strong></h3>
+            {% if current_user.can(Permission.ADMIN) %}
+                <form action=""  method="GET">
+                <input type="hidden" id="excel-download" name="excel-download" value="0">
+                <input type="hidden" id="pdf-download" name="pdf-download" value="0">
+                <input class="btn btn-success" id="submit" name="submit" type="submit" value="" style="visibility: hidden">
+                <input class="btn btn-primary" id="export" type="button" value="Excel Download">
+                <input class="btn btn-info" id="export-pdf" type="button" value="PDF Download">
+                </form>
+            {% endif %}
+        </div>
         <div class="col" align="right">
-            <img src={{ image_file_path }} width="150" height="20" alt="CSEdu Logo"></div>
+            <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
         </div>
         <br>
         <div class="card">
             <div class="card-body">
                 <div class="clearfix">
-                    <span class="float-left">{{ year }} {{ Codebook.get_code_name(test_type) }} - No. {{ sequence }}</span>
-                    <span class="float-right"><h3>{{ now.day }}/{{ now.month }}/{{ now.year }}</h3></span>
+                    <span class="float-left"> No. {{ sequence }}</span>
+                    <span class="float-right"> {{ now.day }}/{{ now.month }}/{{ now.year }} </span>
                 </div>
                 <table style="width:100%" id="sub_t_report">
                     <thead>

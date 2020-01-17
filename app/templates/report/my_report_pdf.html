@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <link href="file:///{{ static_folder }}/report/css/my_report.css" rel="stylesheet">
+
+</head>
+<body>
+
+{% if markings %}
+    {% set marking_rep = markings[0] %}
+{% else %}
+    {% set marking_rep = None %}
+{% endif %}
+
+<div class="header">
+    <table>
+        <tr>
+            <td>
+                <h1 style="color:#397e38"> {{ assessment_name }} </h1>
+            </td>
+            <td align="right">
+                <img src="file:///{{ static_folder }}/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="student_info">
+    <table id="t_student_info">
+        <tr>
+            <th> Student Name:</th>
+            <td> {{ Student.getCSStudentName(student_user_id) }} </td>
+            <th> Rank:</th>
+            <td> {{ rank }} </td>
+        </tr>
+        <tr>
+            <th> Student ID:</th>
+            <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+            <th> Score:</th>
+            <td> {{ score }} </td>
+        </tr>
+        <tr>
+            <th> Grade:</th>
+            <td> {{ marking_rep.grade }}</td>
+            <th> Test Date:</th>
+            <td> {{ marking_rep.created_time }}.</td>
+        </tr>
+    </table>
+</div>
+<div class="report_content">
+    {% if markings %}
+        <div class="row">
+            <div class="col">
+                <table class="table" style="width:100%" id="t_mark_info">
+                    <thead>
+                    <tr>
+                        <th align="center" colspan="5">Mark</th>
+                        <th align="center">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for marking in markings %}
+                        {% if loop.index<=20 %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ marking.candidate_r_value }}</td>
+                                <td>{% if marking.is_correct %}
+                                    <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                                    <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                                <td>{% if not marking.is_correct %}{{ marking.correct_r_value }}{% endif %}</td>
+                                <td>{{ marking.item_percentile }}%</td>
+                                <td>{{ Codebook.get_code_name(marking.category) }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <table class="table" style="width:100%" id="t_mark_info">
+                    <thead>
+                    <tr>
+                        <th align="center" colspan="5">Mark</th>
+                        <th align="center">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for marking in markings %}
+                        {% if loop.index>20 %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ marking.candidate_r_value }}</td>
+                                <td>{% if marking.is_correct %}
+                                    <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                                    <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                                <td>{% if not marking.is_correct %}{{ marking.correct_r_value }}{% endif %}</td>
+                                <td>{{ marking.item_percentile }}%</td>
+                                <td>{{ Codebook.get_code_name(marking.category) }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<div class="report_chart">
+    {% if ts_by_category %}
+        <table id="t_assessment_info">
+            <tr>
+                <th align="center"> Category</th>
+                <th align="center"> Weaker &nbsp;&nbsp;<i class="icons cui-arrow-left"></i> &nbsp;&nbsp;Average
+                    &nbsp;&nbsp;<i class="icons cui-arrow-right"></i>&nbsp;&nbsp; Stronger
+                </th>
+            </tr>
+            {% for ts in ts_by_category %}
+                <tr>
+                    <td><strong>{{ ts.category }}</strong></td>
+                    <td>
+                        <table id="t_graph">
+                            <tr>
+                                <td width="15%"><small>My Score</small></td>
+                                <td width="75%">
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                             style="width: {{ ts.percentile_score }}%"
+                                             aria-valuenow="{{ ts.percentile_score }}" aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                                <td width="10%"><small> {{ ts.percentile_score }} </small></td>
+                            </tr>
+                            <tr>
+                                <td width="15%"><small>Average</small></td>
+                                <td width="75%">
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-danger" role="progressbar"
+                                             style="width: {{ ts.avg_score }}%" aria-valuenow="{{ ts.avg_score }}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                                <td width="10%"><small> {{ ts.avg_score }} </small></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+</body>
+</html>

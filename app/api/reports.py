@@ -260,6 +260,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
 def query_my_report_list_v(student_user_id):
     column_names = ['id',
                     'assessment_id',
+                    'assessment_enroll_id',
                     'student_user_id',
                     'year',
                     'test_type',
@@ -714,47 +715,6 @@ def build_test_ranking_excel_response(subjects, test_summaries, year, test_type,
     return rsp
 
 
-def build_test_ranking_pdf_response(template_file_name, image_file_path, year, test_type, sequence,
-                                    subject_names, test_summaries, now):
-    from zipfile import ZipFile
-    from flask import send_file
-
-    rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path,
-                                            year=year, test_type=test_type, sequence=sequence,
-                                            subject_names=subject_names,
-                                            test_summaries=test_summaries, now=now)
-    from weasyprint import HTML, CSS
-    from weasyprint.fonts import FontConfiguration
-    font_config = FontConfiguration()
-    css = CSS(string='''
-        @font-face {
-            font-family: Gentium;
-            src: url(http://example.com/fonts/Gentium.otf);
-        }
-        h1 { font-family: Gentium }''', font_config=font_config)
-    html = HTML(string=rendered_template_pdf)
-
-    pdf_dir_path = 'test_ranking_pdf_%s_%s_%s' % (year, test_type, sequence)
-    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
-    os.makedirs(pdf_dir_path)
-    file_num = 1
-    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, file_num)
-    html.write_pdf(target=pdf_file_path,
-                   presentational_hints=True)
-    file_paths = get_all_files(pdf_dir_path)
-
-    with ZipFile('%s.zip' % pdf_dir_path, 'w') as zip:
-        for file in file_paths:
-            zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'], pdf_dir_path)
-    rsp = send_file(
-        zfile,
-        mimetype='application/zip',
-        as_attachment=True,
-        attachment_filename='%s.zip' % pdf_dir_path)
-    return rsp
-
-
 def build_test_results_pdf_response(template_file_name, image_file_path, assessment_GUID, student_user_id):
     rendered_template_pdf = render_template(template_file_name, image_file_path=image_file_path)
     from weasyprint import HTML, CSS
@@ -860,13 +820,13 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     return file_name
 
 
-def build_individual_progress_pdf_response(template_file_name, logo_file_name,
+def build_individual_progress_pdf_response(template_file_name, static_folder,
                                            by_subject_file_name, by_set_file_name,
                                            ts_header, num_of_assessments, num_of_subjects,
                                            subject_names, subjects, my_set_score,
                                            avg_set_score, my_set_rank, score_summaries, plan_id,
                                            plan_GUID, student_user_id):
-    rendered_template_pdf = render_template(template_file_name, logo_file_name=logo_file_name,
+    rendered_template_pdf = render_template(template_file_name, static_folder=static_folder,
                                             by_subject_file_name=by_subject_file_name,
                                             by_set_file_name=by_set_file_name,
                                             ts_header=ts_header,
@@ -877,25 +837,26 @@ def build_individual_progress_pdf_response(template_file_name, logo_file_name,
                                             score_summaries=score_summaries, plan_id=plan_id
                                             )
 
-    from weasyprint import HTML, CSS
-    from weasyprint.fonts import FontConfiguration
-    font_config = FontConfiguration()
-    css = CSS(string='''
-        @font-face {
-            font-family: Gentium;
-            src: url(http://example.com/fonts/Gentium.otf);
-        }
-        h1 { font-family: Gentium }''', font_config=font_config)
+    from weasyprint import HTML
     html = HTML(string=rendered_template_pdf)
-
-    pdf_dir_path = 'individual_progress_report_pdf_%s' % (plan_GUID)
     curr_dir = os.getcwd()
-    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
-    if not os.path.exists(pdf_dir_path):
-        os.makedirs(pdf_dir_path)
-    pdf_file_path = '%s/%s_%s.pdf' % (pdf_dir_path, pdf_dir_path, student_user_id)
-    html.write_pdf(target=pdf_file_path,
-                   presentational_hints=True)
+
+    pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(current_user.id),
+                                 "individual_progress_report",
+                                 plan_GUID,
+                                 "%s_%s.pdf" % (plan_GUID, student_user_id))
+
+    os.chdir(current_app.config['USER_DATA_FOLDER'])
+    if not os.path.exists(str(current_user.id)):
+        os.makedirs(str(current_user.id))
+    os.chdir(str(current_user.id))
+    if not os.path.exists("individual_progress_report"):
+        os.makedirs("individual_progress_report")
+    os.chdir("individual_progress_report")
+    if not os.path.exists(plan_GUID):
+        os.makedirs(plan_GUID)
+    html.write_pdf(target=pdf_file_path, presentational_hints=True)
     os.chdir(curr_dir)
     return 'success'
 
@@ -904,18 +865,25 @@ def build_individual_progress_zipper(plan_GUID):
     from zipfile import ZipFile
     from flask import send_file
 
-    pdf_dir_path = 'individual_progress_report_pdf_%s' % (plan_GUID)
-    os.chdir(current_app.config['IMPORT_TEMP_DIR'])
-    file_paths = get_all_files(pdf_dir_path)
-    with ZipFile('%s.zip' % pdf_dir_path, 'w') as zip:
+    pdf_dir_path = os.path.join(str(current_user.id),
+                                 "individual_progress_report",
+                                plan_GUID)
+    os.chdir('%s/%s/%s' % (current_app.config['USER_DATA_FOLDER'],str(current_user.id),"individual_progress_report"))
+    file_paths = get_all_files(plan_GUID)
+
+    with ZipFile('%s.zip' % plan_GUID, 'w') as zip:
         for file in file_paths:
             zip.write(file)
-    zfile = '%s/%s.zip' % (current_app.config['IMPORT_TEMP_DIR'], pdf_dir_path)
+
+    zfile = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(current_user.id),
+                                 "individual_progress_report",
+                                 "%s.zip" % (plan_GUID))
     rsp = send_file(
         zfile,
         mimetype='application/zip',
         as_attachment=True,
-        attachment_filename='%s.zip' % pdf_dir_path)
+        attachment_filename=zfile)
     return rsp
 
 

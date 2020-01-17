@@ -42,17 +42,17 @@
                                 {% if assessment.subject_1 %}
                                     <li>{{ Codebook.get_subject_name(assessment.subject_1) }}
                                     <a class="badge badge-pill badge-danger"
-                                       href='/report/ts/{{ assessment.id }}/{{ assessment.subject_1 }}/{{ current_user.id }}' target="_blank">Report</a>
+                                       href='/report/ts/{{ assessment.assessment_enroll_id }}/{{ assessment.id }}/{{ assessment.subject_1 }}/{{ current_user.id }}' target="_blank">Report</a>
                                 {% endif %}
                                 {% if assessment.subject_2 %}
                                     <li>{{ Codebook.get_subject_name(assessment.subject_2) }}
                                     <a class="badge badge-pill badge-danger"
-                                       href='/report/ts/{{ assessment.id }}/{{ assessment.subject_2 }}/{{ current_user.id }}' target="_blank">Report</a>
+                                       href='/report/ts/{{ assessment.assessment_enroll_id }}/{{ assessment.id }}/{{ assessment.subject_2 }}/{{ current_user.id }}' target="_blank">Report</a>
                                 {% endif %}
                                 {% if assessment.subject_3 %}
                                     <li>{{ Codebook.get_subject_name(assessment.subject_3) }}
                                     <a class="badge badge-pill badge-danger"
-                                       href='/report/ts/{{ assessment.id }}/{{ assessment.subject_3 }}/{{ current_user.id }}' target="_blank">Report</a>
+                                       href='/report/ts/{{ assessment.assessment_enroll_id }}/{{ assessment.id }}/{{ assessment.subject_3 }}/{{ current_user.id }}' target="_blank">Report</a>
                                 {% endif %}
                                 {% if assessment.subject_4 %}
                                     <li>{{ Codebook.get_subject_name(assessment.subject_4) }}
@@ -62,7 +62,7 @@
                                 {% if assessment.subject_5 %}
                                     <li>{{ Codebook.get_subject_name(assessment.subject_5) }}
                                     <a class="badge badge-pill badge-danger"
-                                       href='/report/ts/{{ assessment.id }}/{{ assessment.subject_5 }}/{{ current_user.id }}' target="_blank">Report</a>
+                                       href='/report/ts/{{ assessment.assessment_enroll_id }}/{{ assessment.id }}/{{ assessment.subject_5 }}/{{ current_user.id }}' target="_blank">Report</a>
                                 {% endif %}
                             </ul>
                         </td>

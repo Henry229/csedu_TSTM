@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <link href="file:///{{ static_folder }}/report/css/test_result.css" rel="stylesheet">
+</head>
+<body>
+<div class="header">
+    <table>
+        <tr>
+            <td>
+                <h1 style="color:#397e38"> Test Summary Report: {{ ts_header.year }} {{ Codebook.get_code_name(ts_header.test_type) }}  </h1>
+            </td>
+            <td align="right">
+                <img src="file:///{{ static_folder }}/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="student_info">
+    <table id="t_student_info">
+        <tr>
+            <th> Student Name:</th>
+            <td> {{ current_user.username }} </td>
+            <th> Grade:</th>
+            <td> {{ ts_header.grade }}</td>
+            <th> Student ID:</th>
+            <td> {{ Student.getCSStudentId(current_user.id) }}</td>
+        </tr>
+    </table>
+</div>
+<div class="report_content">
+    {% if subjects %}
+        <strong>Summary Report(Subject)</strong>
+        <table class="table" id="t_mark_info">
+            <tr>
+                <th> Category</th>
+                {% for i in range(0,num_of_assessments) %}
+                    <th>Test{{ loop.index }}</th>
+                {% endfor %}
+            </tr>
+            {% for line in subjects %}
+                {% set outer_loop = loop.index0 %}
+                <tr>
+                    <th>{% if subject_names[outer_loop].endswith('Average') %}
+                        <small>{{ subject_names[outer_loop] }}</small>
+                    {% else %}{{ subject_names[outer_loop] }}{% endif %}</th>
+                    {% for i in range(0,num_of_assessments) %}
+                        <td>{{ line[i] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            <tr>
+                <td><small>Student Average</small></td>
+                {% for score in my_set_score %}
+                    <td>{{ score }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td><small>Test Average</small></td>
+                {% for score in avg_set_score %}
+                    <td>{{ score }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td><small>Student Rank</small></td>
+                {% for rank in my_set_rank %}
+                    <td>{{ rank }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td><small>Test Entrants</small></td>
+                {% for i in range(0,num_of_assessments) %}
+                    <td> -</td>
+                {% endfor %}
+            </tr>
+        </table>
+    {% endif %}
+
+    {% if subjects %}
+        <strong>Strength/Weakness Report(Subject)</strong>
+        <table class="table" id="t_mark_info">
+            <tr>
+                <th>Subject</th>
+                <th>Performance Chart</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Rank</th>
+            </tr>
+            {% for score in score_summaries %}
+                <tr>
+                    <td>{{ score.subject }}</td>
+                    {% if loop.index0==0 %}
+                    <td rowspan="{{score_summaries|length}}"><img src=" {{ by_subject_file_name }}" width="600" height="200" alt="by subject chart"></td>
+                    {% endif %}
+                    <td>{{ score.min }}</td>
+                    <td>{{ score.max }}</td>
+                    <td>{{ score.rank }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <strong>Summary Progress Report</strong>
+        <table class="table" border=1 id="t_mark_info">
+            <tr>
+                <td><img src=" {{ by_set_file_name }}" alt="by set chart" width="400" height="300" ></td>
+            </tr>
+        </table>
+    {% endif %}
+</div>
+</body>
+</html>
