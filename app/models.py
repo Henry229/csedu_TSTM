@@ -905,6 +905,7 @@ class MarkingForWriting(db.Model):
     marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
     markers_comment = db.Column(db.String(2048))
     marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    additional_info = db.Column(JSONB)  # JSON type
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 

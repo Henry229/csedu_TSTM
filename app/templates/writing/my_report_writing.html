@@ -60,7 +60,7 @@
                     </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
-                        <button class="badge badge-danger" name="Rewrite" data-toggle="modal" data-target="#dataModal">
+                        <button id="rewrite_button" class="badge badge-danger" name="Rewrite">
                             Rewrite
                         </button>
                         {% if pdf_url %}
@@ -160,12 +160,14 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form>
+                <div id="rewriting_content">
                     {% for marking_writing in marking_writings %}
                         Topic {{ loop.index }}: {{ marking_writing.item_name }}
-                        <textarea class="rewriting" name="{{ marking_writing.item_name }}" id="{{ marking_writing.marking_id }}" rows="10" cols="73"></textarea>
+                        <textarea class="rewriting" name="{{ marking_writing.item_name }}"
+                                  id="{{ marking_writing.id }}" rows="10"
+                                  cols="73">{{ marking_writing.rewrite }}</textarea>
                     {% endfor %}
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="submit_rewrite" type="button" class="btn btn-success">Submit</button>
@@ -200,9 +202,50 @@
         });
     });
 
+    $("#rewrite_button").click(function () {
+        var rewritings = document.getElementsByClassName('rewriting');
+        var data = [];
+        var i;
+        for (i = 0; i < rewritings.length; i++) {
+            data.push(rewritings[i].id)
+        }
+
+        $.post({
+            url: '/writing/rewrite/load/{{ current_user.id }}',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                for (const [key, value] of Object.entries(response)) {
+                    $("TextArea#" + key).val(value);
+                }
+                $("#dataModal").modal('show');
+            }
+        })
+    });
+
     $("#submit_rewrite").click(function () {
-        var content = $("#rewriting").val();
-        alert(content);
+        var rewritings = document.getElementsByClassName('rewriting');
+        var data = [];
+        var i;
+        for (i = 0; i < rewritings.length; i++) {
+            data.push({
+                marking_id: rewritings[i].id,
+                rewriting: rewritings[i].value
+            })
+        }
+        $.ajax({
+            url: '/writing/rewrite/save/{{ current_user.id }}',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            complete: function () {
+            },
+            success: function () {
+                alert("Rewriting saved successfully")
+                $("#dataModal").modal('hide');
+            }
+        });
     });
 
     $(document).ready(function () {
