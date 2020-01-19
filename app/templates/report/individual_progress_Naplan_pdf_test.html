@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <link href="file:////home/mykangkr/myProjects/tailored/app/static/report/css/individual_progress.css" rel="stylesheet">
+</head>
+<body>
+<div class="header">
+    <table>
+        <tr>
+            <td>
+                <h1 style="color:#397e38"> Test Summary Report: 2020 Naplan  </h1>
+            </td>
+            <td align="right">
+                <img src="file:////home/mykangkr/myProjects/tailored/app/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="student_info">
+    <table id="t_student_info">
+        <tr>
+            <th> Student Name:</th>
+            <td> admin </td>
+            <th> Grade:</th>
+            <td> 69 </td>
+            <th> Student ID:</th>
+            <td> admin </td>
+        </tr>
+    </table>
+</div>
+<div class="report_content">
+    <table id="t_mark"><tr><th>Summary Report(Subject)</th></tr></table>
+    <table class="table" id="t_mark_info">
+        <tr>
+            <th> Category</th>
+            {% set num_of_assessments = 3 %}
+            {% for i in range(0,num_of_assessments) %}
+                <th>Test{{ loop.index }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th> LC </th>
+            <td>10</td>
+            <td>11</td>
+            <td>12</td>
+        </tr>
+        <tr>
+            <th class="small"> LC Average </th>
+            <td>5</td>
+            <td>5.1</td>
+            <td>5.2</td>
+        </tr>
+        <tr>
+            <th> Math </th>
+            <td>10</td>
+            <td>11</td>
+            <td>12</td>
+        </tr>
+        <tr>
+            <th class="small"> Math Average </th>
+            <td>5</td>
+            <td>5.1</td>
+            <td>5.2</td>
+        </tr>
+        <tr>
+            <th> RC </th>
+            <td>10</td>
+            <td>11</td>
+            <td>12</td>
+        </tr>
+        <tr>
+            <th class="small"> RC Average </th>
+            <td>5</td>
+            <td>5.1</td>
+            <td>5.2</td>
+        </tr>
+        <tr>
+            <td class="small"> Student Average</td>
+            <td>4</td>
+            <td>4.1</td>
+            <td>4.2</td>
+        </tr>
+        <tr>
+            <td class="small"> Test Average</td>
+            <td>4</td>
+            <td>4.1</td>
+            <td>4.2</td>
+        </tr>
+        <tr>
+            <td class="small"> Student Rank</td>
+            <td>2</td>
+            <td>2</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td class="small"> Test Entrants</td>
+            <td>3</td>
+            <td>3</td>
+            <td>3</td>
+        </tr>
+    </table>
+
+    <table id="t_mark"><tr><th>Strength/Weakness Report(Subject)</th></tr></table>
+    <table class="table" id="t_mark_info">
+        <tr>
+            <td rowspan="5"><img src='file:////home/mykangkr/myProjects/tailored/userdata/1/individual_progress_report/individual_progress_by_subject_ac10d8e7-bfbd-4ecc-9c13-16e09abc88a8_74.png' width="500" height="200" alt="by subject chart"></td>
+        </tr>
+        <tr>
+            <th>Subject</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>Rank</th>
+        </tr>
+        <tr>
+            <td> LC </td>
+            <td>2</td>
+            <td>10</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td> Math </td>
+            <td>2</td>
+            <td>10</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td> RC </td>
+            <td>2</td>
+            <td>10</td>
+            <td>2</td>
+        </tr>
+
+    </table>
+
+    <table id="t_mark"><tr><th>Summary Progress Report</th></tr></table>
+    <table class="table" border=1 id="t_mark_info">
+        <tr>
+            <td><img src='file:////home/mykangkr/myProjects/tailored/userdata/1/individual_progress_report/individual_progress_by_set_ac10d8e7-bfbd-4ecc-9c13-16e09abc88a8_74.png' alt="by set chart" width="400" height="300" ></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
