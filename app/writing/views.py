@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytz
 from PIL import Image, ImageDraw, ImageFont
-from flask import render_template, flash, request, redirect, url_for, current_app, send_file
+from flask import render_template, flash, request, redirect, url_for, current_app, send_file, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -15,6 +15,7 @@ from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
     MarkerAssignForm
 from .. import db
 from ..api.reports import query_my_report_header
+from ..api.response import success, bad_request
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
     AssessmentHasTestset, Testset, MarkerAssigned, Item
@@ -157,6 +158,40 @@ def manage():
                                    }
             assessments.append(assessment_json_str)
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)
+
+
+@login_required
+@permission_required(Permission.WRITING_READ)
+@writing.route('/rewrite/load/<int:student_user_id>', methods=['POST'])
+def load_rewrite(student_user_id):
+    if student_user_id == current_user.id:
+        rewritings = {}
+        for marking_writing_id in request.json:
+            marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
+            if marking_writing:
+                if marking_writing.additional_info:
+                    additional_info = json.loads(marking_writing.additional_info)
+                    rewritings[marking_writing_id] = additional_info['rewriting']
+        return jsonify(rewritings)
+    return bad_request()
+
+
+@login_required
+@permission_required(Permission.WRITING_READ)
+@writing.route('/rewrite/save/<int:student_user_id>', methods=['POST'])
+def save_rewrite(student_user_id):
+    if student_user_id == current_user.id:
+        for rewrite in request.json:
+            marking_writing = MarkingForWriting.query.filter_by(id=rewrite['marking_id']).first()
+            if marking_writing:
+                additional_info = {}
+                if marking_writing.additional_info:
+                    additional_info = json.loads(marking_writing.additional_info)
+                additional_info['rewriting'] = rewrite['rewriting']
+                marking_writing.additional_info = json.dumps(additional_info)
+                db.session.commit()
+        return success()
+    return bad_request()
 
 
 @login_required
