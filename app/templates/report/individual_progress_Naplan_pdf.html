@@ -35,7 +35,7 @@
 </div>
 <div class="report_content">
     {% if subjects %}
-        <strong>Summary Report(Subject)</strong>
+        <table id="t_mark"><tr><th>Summary Report(Subject)</th></tr></table>
         <table class="table" id="t_mark_info">
             <tr>
                 <th> Category</th>
@@ -46,34 +46,34 @@
             {% for line in subjects %}
                 {% set outer_loop = loop.index0 %}
                 <tr>
-                    <th>{% if subject_names[outer_loop].endswith('Average') %}
-                        <small>{{ subject_names[outer_loop] }}</small>
-                    {% else %}{{ subject_names[outer_loop] }}{% endif %}</th>
+                    {% if subject_names[outer_loop].endswith('Average') %}
+                        <th class="small">{{ subject_names[outer_loop] }}
+                    {% else %}<th>{{ subject_names[outer_loop] }}{% endif %}</th>
                     {% for i in range(0,num_of_assessments) %}
                         <td>{{ line[i] }}</td>
                     {% endfor %}
                 </tr>
             {% endfor %}
             <tr>
-                <td><small>Student Average</small></td>
+                <td class="small">Student Average</td>
                 {% for score in my_set_score %}
                     <td>{{ score }}</td>
                 {% endfor %}
             </tr>
             <tr>
-                <td><small>Test Average</small></td>
+                <td class="small">Test Average</td>
                 {% for score in avg_set_score %}
                     <td>{{ score }}</td>
                 {% endfor %}
             </tr>
             <tr>
-                <td><small>Student Rank</small></td>
+                <td class="small">Student Rank</td>
                 {% for rank in my_set_rank %}
                     <td>{{ rank }}</td>
                 {% endfor %}
             </tr>
             <tr>
-                <td><small>Test Entrants</small></td>
+                <td class="small">Test Entrants</td>
                 {% for i in range(0,num_of_assessments) %}
                     <td> -</td>
                 {% endfor %}
@@ -82,7 +82,7 @@
     {% endif %}
 
     {% if subjects %}
-        <strong>Strength/Weakness Report(Subject)</strong>
+        <table id="t_mark"><tr><th>Strength/Weakness Report(Subject)</th></tr></table>
         <table class="table" id="t_mark_info">
             <tr>
                 <th>Subject</th>
@@ -93,17 +93,19 @@
             </tr>
             {% for score in score_summaries %}
                 <tr>
-                    <td>{{ score.subject }}</td>
                     {% if loop.index0==0 %}
-                    <td rowspan="{{score_summaries|length}}"><img src=" {{ by_subject_file_name }}" width="600" height="200" alt="by subject chart"></td>
+                    <td rowspan="{{score_summaries|length}}"><img src=" {{ by_subject_file_name }}" width="500" height="200" alt="by subject chart"></td>
                     {% endif %}
+                </tr>
+                <tr>
+                    <td>{{ score.subject }}</td>
                     <td>{{ score.min }}</td>
                     <td>{{ score.max }}</td>
                     <td>{{ score.rank }}</td>
                 </tr>
             {% endfor %}
         </table>
-        <strong>Summary Progress Report</strong>
+        <table id="t_mark"><tr><th>Summary Progress Report</th></tr></table>
         <table class="table" border=1 id="t_mark_info">
             <tr>
                 <td><img src=" {{ by_set_file_name }}" alt="by set chart" width="400" height="300" ></td>

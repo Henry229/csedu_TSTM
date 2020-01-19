@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>CS Education</title>
-    <link href="file:///{{ static_folder }}/report/css/individual_progress.css" rel="stylesheet">
+    <link href="file:///{{ static_folder }}/report/css/test_result.css" rel="stylesheet">
 </head>
 <body>
 <div class="header">
@@ -22,14 +22,10 @@
     </table>
 </div>
 <div class="report_header">
-    <table>
+    <table id="r_info">
         <tr>
-            <td>
-                No. {{ sequence }}
-            </td>
-            <td>
-                <h3>{{ now.day }}/{{ now.month }}/{{ now.year }}</h3>
-            </td>
+            <td>No. {{ sequence }} </td>
+            <td class="aright">{{ now.day }}/{{ now.month }}/{{ now.year }}</td>
         </tr>
     </table>
 </div>

@@ -56,11 +56,11 @@ html table#t_student_info td {
     font-weight: 400;
 }
 
-html table#t_writing {
+html table#t_mark {
     width: 100%;
 }
 
-html table#t_writing th {
+html table#t_mark th{
     background-color: #ffe8a1;
     vertical-align: bottom;
     border-top: 1px solid #c8ced3;
@@ -68,41 +68,26 @@ html table#t_writing th {
     border-color: #ffdf7e;
 }
 
-html table#t_writing td {
+html table#t_mark_info {
+    width: 100%;
+}
+
+html table#t_mark_info th {
+    vertical-align: bottom;
+    border-top: 1px solid #c8ced3;
+}
+
+html table#t_mark_info td {
     vertical-align: top;
     border-top: 1px solid #c8ced3;
 }
 
-html img.writing_image {
+html table#t_mark_info th.small, td.small {
+    font-size: 8pt;
+}
+
+html img.t_mark_info_image {
     border: 2px solid #c8ced3;
     width: 100%;
     margin-left: 5px;
 }
-
-    /*<style>*/
-    /*    #t_student_info th {*/
-    /*        width: 10%;*/
-    /*        text-align: right;*/
-    /*    }*/
-
-    /*    #t_student_info td {*/
-    /*        width: 20%;*/
-    /*        text-align: left;*/
-    /*        border: 5px solid #f0f3f5;*/
-    /*    }*/
-
-    /*    #t_mark_info th {*/
-    /*        padding: 3px;*/
-    /*        vertical-align: middle;*/
-    /*        text-align: left;*/
-    /*        border: 1px solid #c8ced3;*/
-    /*    }*/
-
-    /*    #t_mark_info td {*/
-    /*        border: 0px black;*/
-    /*        padding: 0px;*/
-    /*        font-size: small;*/
-    /*        text-align: center;*/
-    /*        border: 1px solid #c8ced3;*/
-    /*    }*/
-    /*</style>*/

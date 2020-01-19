@@ -773,3 +773,40 @@ def score_summary(item_id):
             by_assessment.append(row)
     item = Item.query.filter_by(id=item_id).first()
     return render_template('report/score_summary.html', by_item=by_item, by_assessment=by_assessment, item=item)
+
+
+@report.route('/report_test/<string:type>', methods=['GET'])
+@login_required
+@permission_required(Permission.ASSESSMENT_READ)
+def report_test(type):
+    '''
+        Report Test
+    '''
+    from weasyprint import HTML
+    if type=='individual_progress_report':
+        template_file = 'report/individual_progress_Naplan_pdf_test.html'
+        rendered_template_pdf = render_template(template_file)
+
+        html = HTML(string=rendered_template_pdf)
+
+        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     "report_test",
+                                     "individual_progress_Naplan_pdf_test.pdf")
+    elif type=='test_ranking':
+        template_file = 'report/test_result_Naplan_pdf_test.html'
+        rendered_template_pdf = render_template(template_file)
+
+        html = HTML(string=rendered_template_pdf)
+
+        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     "report_test",
+                                     "test_ranking_pdf_test.pdf")
+    else:
+        return 'Unknown report type'
+    html.write_pdf(target=pdf_file_path, presentational_hints=True)
+    rsp = send_file(
+        pdf_file_path,
+        mimetype='application/pdf',
+        as_attachment=True,
+        attachment_filename=pdf_file_path)
+    return rsp

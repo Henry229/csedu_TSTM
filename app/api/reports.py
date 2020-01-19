@@ -791,8 +791,8 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user
         index += 1
 
     file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_user_id)
-    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
-    f.savefig(os.path.join(naplan_folder, file_name))
+    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "individual_progress_report")
+    f.savefig(os.path.join(report_folder, file_name))
     return file_name
 
 
@@ -815,8 +815,8 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     sns.lineplot(data=df, palette="tab10", linewidth=2.5)
     # plt.show()
     file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_user_id)
-    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
-    fig.savefig(os.path.join(naplan_folder, file_name))
+    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "individual_progress_report")
+    fig.savefig(os.path.join(report_folder, file_name))
     return file_name
 
 

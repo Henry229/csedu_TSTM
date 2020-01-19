@@ -43,24 +43,19 @@ html table {
     width: 100%;
 }
 
-html table#t_student_info th {
-    border: .1mm solid #a9a;
-    font-size: 10pt;
-    font-weight: 400;
-    text-transform: uppercase;
+html table#r_info td {
+    text-align: left;
 }
 
-html table#t_student_info td {
-    border: .1mm solid #a9a;
-    font-weight: bold;
-    font-weight: 400;
+html table#r_info td.aright {
+    text-align: right;
 }
 
-html table#t_writing {
+html table#sub_t_report {
     width: 100%;
 }
 
-html table#t_writing th {
+html table#sub_t_report th {
     background-color: #ffe8a1;
     vertical-align: bottom;
     border-top: 1px solid #c8ced3;
@@ -68,13 +63,8 @@ html table#t_writing th {
     border-color: #ffdf7e;
 }
 
-html table#t_writing td {
+html table#sub_t_report td {
     vertical-align: top;
     border-top: 1px solid #c8ced3;
 }
 
-html img.writing_image {
-    border: 2px solid #c8ced3;
-    width: 100%;
-    margin-left: 5px;
-}writing.css
