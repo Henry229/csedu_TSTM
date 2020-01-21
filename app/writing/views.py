@@ -269,6 +269,10 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             test_date = row.start_time_client
 
             ts_header = query_my_report_header(assessment_enroll_id, row.assessment_id, ts_id, student_user_id)
+            if ts_header is None:
+                url = request.referrer
+                flash('Marking data not available')
+                return redirect(url)
             score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
             rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
 

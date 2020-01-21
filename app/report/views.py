@@ -104,13 +104,25 @@ def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id).order_by(AssessmentEnroll.id.desc()).first()
     if row is None:
-        return redirect(url_for('report.list_my_report', error='Report data not available'))
+        url = request.referrer
+        flash('Assessment Enroll data not available')
+        return redirect(url)
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
     test_subject_string = Codebook.get_code_name((Testset.query.with_entities(Testset.subject).filter_by(id=row.testset_id).first()).subject)
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
+    if ts_header is None:
+        url = request.referrer
+        flash('Marking data not available')
+        return redirect(url)
+
+    # test_type = request.args.get("test_type")
+    # test_center = request.args.get("test_center")
+    # year = request.args.get("year")
+    # https: // tstm.csonlineschool.com.au / report / manage?year = 2020 & test_type = 76 & test_center = 90
+
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
