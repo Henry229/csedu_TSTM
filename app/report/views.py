@@ -118,11 +118,6 @@ def my_report(assessment_enroll_id, assessment_id, ts_id, student_user_id):
         flash('Marking data not available')
         return redirect(url)
 
-    # test_type = request.args.get("test_type")
-    # test_center = request.args.get("test_center")
-    # year = request.args.get("year")
-    # https: // tstm.csonlineschool.com.au / report / manage?year = 2020 & test_type = 76 & test_center = 90
-
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
