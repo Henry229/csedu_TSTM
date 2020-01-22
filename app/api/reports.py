@@ -187,6 +187,8 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
                                                'student_user_id': student_user_id})
         Record = namedtuple('Record', cursor.keys())
         rows = [Record(*r) for r in cursor.fetchall()]
+        if len(rows)==0:
+            return None
         for row in rows:
             student_score = row.percentile_score
             average_score = row.median

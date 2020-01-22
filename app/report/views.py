@@ -215,6 +215,10 @@ def my_student_set_report(assessment_id, student_user_id):
                 return redirect(url_for('report.list_my_report', error='No report generated due to lack of information - grade'))
             else:
                 file_name = make_naplan_student_report(assessment_enrolls, assessment_id, student_user_id, assessment_GUID, grade)
+                if file_name is None:
+                    url = request.referrer
+                    flash('Marking data not available')
+                    return redirect(url)
         else:
             # For selective test or other test type
             test_type_string = 'other'
