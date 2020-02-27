@@ -410,23 +410,24 @@ def register_to_csonlineschool(assessment):
 
     # TODO - There could be more than one plan_detail. How to handle the case?
     plan_detail = EducationPlanDetail.query.filter_by(assessment_id=assessment.id).first()
-    plan = EducationPlan.query.filter_by(id=plan_detail.plan_id).first()
+    if plan_detail:
+        plan = EducationPlan.query.filter_by(id=plan_detail.plan_id).first()
 
-    # Register the Plan if exists. Existence is checked by cs_api so it's okay to request same Plan multiple times
-    if plan:
-        test_type = [{
-            "kind": "tstmp",
-            "testtype": Codebook.get_code_name(plan.test_type),
-            "title": plan.name,
-            "grade": grade_table[Codebook.get_code_name(plan.grade)],
-            "myear": plan.year,
-            "title_a": plan.GUID,
-            "details": test_detail
-        }]
+        # Register the Plan if exists. Existence is checked by cs_api so it's okay to request same Plan multiple times
+        if plan:
+            test_type = [{
+                "kind": "tstmp",
+                "testtype": Codebook.get_code_name(plan.test_type),
+                "title": plan.name,
+                "grade": grade_table[Codebook.get_code_name(plan.grade)],
+                "myear": plan.year,
+                "title_a": plan.GUID,
+                "details": test_detail
+            }]
 
-        info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
-        if not is_success(info.ok):
-            return info.ok
+            info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
+            if not is_success(info.ok):
+                return info.ok
 
     # Register Assessment and Testsets
     items = AssessmentHasTestset.query.filter_by(assessment_id=assessment.id).all()

@@ -243,7 +243,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                     os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "writing", saved_file_name), "PNG")
-                marked_writing_path = url_for('api.get_writing', file=saved_file_name)
+                marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing_id,
+                                              student_user_id=student_user_id, file=saved_file_name)
                 if pdf:
                     marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
                         os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
@@ -425,13 +426,16 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
                                          file_name)
                 if os.path.exists(file_path):
                     web_img_links[key] = {
-                        'writing': url_for('api.get_writing', file=file_name)}
+                        'writing': url_for('api.get_writing', marking_writing_id=marking_writing_id,
+                                           student_user_id=student_user_id, file=file_name)}
                 if marking_writing.marked_file_link:
                     if key in marking_writing.marked_file_link.keys():
                         if os.path.exists(
                                 os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id),
                                              "writing", marking_writing.marked_file_link[key])):
                             web_img_links[key]['marking'] = url_for('api.get_writing',
+                                                                    marking_writing_id=marking_writing_id,
+                                                                    student_user_id=student_user_id,
                                                                     file=marking_writing.marked_file_link[key])
     return web_img_links
 
