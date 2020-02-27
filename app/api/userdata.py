@@ -35,12 +35,12 @@ def get_writing(marking_writing_id, student_user_id, file):
     return forbidden("Not authorised to get the resource requested")
 
 
-@api.route('/userdata/naplan/<int:user_id>/<string:file>', methods=['GET'])
+@api.route('/userdata/naplan/<int:student_user_id>/<string:file>', methods=['GET'])
 @login_required
-def get_naplan(user_id, file):
-    if current_user.can(Permission.ADMIN) or current_user.id == user_id:
+def get_naplan(student_user_id, file):
+    if current_user.can(Permission.ADMIN) or current_user.id == student_user_id:
         p = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                         str(user_id), "naplan")
+                         str(student_user_id), "naplan")
         mimetype = None
         if file.find('.png') > 0:
             mimetype = "application/png"
