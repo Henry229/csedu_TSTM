@@ -413,7 +413,7 @@ class Testlet(db.Model):
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
     weights = db.relationship('TestletWeight', backref='testlet', lazy='dynamic', order_by='TestletWeight.level.asc()')
-    items = db.relationship('Item', secondary='testlet_items')
+    items = db.relationship('Item', secondary='testlet_items', order_by='TestletHasItem.order.asc()')
 
     def versioning(self):
         new_tl = Testlet()

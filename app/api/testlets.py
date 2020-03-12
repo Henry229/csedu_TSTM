@@ -41,7 +41,7 @@ def _get_testlet_items():
 @api.route('/item_list/')
 @permission_required(Permission.TESTLET_MANAGE)
 def get_item_list():
-    id = request.args.get('testlet_id', '01', type=int)
+    id = request.args.get('testlet_id', 0, type=int)
     testlet = Testlet.query.filter_by(id=id).first()
     no_items = testlet.no_of_items
     items = testlet.items
