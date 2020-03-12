@@ -226,6 +226,7 @@
         if (marking)
             marking.addEventListener("load", draw_images, false);
 
+
         function draw_images() {
             card_body = $("div.card-body");
             img = images.item(imageCurrent);
@@ -240,6 +241,20 @@
                 marking_ctx.drawImage(marking, 0, 0, marking.width, marking.height, 0, 0, marking_layer.width, marking_layer.height);
             }
             oldMarking = marking_layer.toDataURL("image/png");
+            resize_height();
+        }
+
+        function resize_height() {
+            <!-- Resize page height to avoid nested scroll bars -->
+            var app_body = $('div.app-body');
+            var feedback = $('#feedback');
+            var screen_marking = $('#screen_marking');
+            var bottom_margin = 100;
+            console.log($('#feedback').height(), screen_marking.height(), writing_layer.height, app_body.height());
+            var new_height = feedback.height() + screen_marking.height() + writing_layer.height + bottom_margin;
+            if (app_body.height() != new_height) {
+                app_body.css('height', new_height + 'px');
+            }
         }
 
         function init_marker() {
@@ -259,16 +274,7 @@
             $("#pen_width").val(penWidth);
             $("#highlighter-icon").css('color', "white");
             $("#marking_alert").hide();
-            <!-- Resize page height to avoid nested scroll bars -->
-            app_body = $('div.app-body');
-            feedback = $('#feedback');
-            screen_marking = $('#screen_marking');
-            bottom_margin = 100;
-            console.log($('#feedback').height(), screen_marking.height(), writing_layer.height, app_body.height());
-            new_height = feedback.height() + screen_marking.height() + writing_layer.height + bottom_margin;
-            if (app_body.height() != new_height) {
-                app_body.css('height', new_height + 'px');
-            }
+            resize_height();
         }
 
         function getDistance(point1, point2) {
@@ -598,8 +604,8 @@
         });
 
         $(document).ready(function () {
-            draw_images();
             init_marker();
+            draw_images();
             setPageButtons();
             drawSlides()
         })
