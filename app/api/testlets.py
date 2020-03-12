@@ -28,7 +28,7 @@ def _get_testlet_items():
         query = query.filter_by(subject=search_subject[0])
     if search_category[0] != '0':
         query = query.filter_by(category=search_category[0])
-    if search_byme=='true':
+    if search_byme == 'true':
         query = query.filter_by(modified_by=current_user.id)
     query = query.filter_by(active=True)
     items = query.order_by(Item.modified_time.desc()).all()
