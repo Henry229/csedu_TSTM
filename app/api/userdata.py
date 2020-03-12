@@ -34,4 +34,3 @@ def get_naplan(file):
     elif file.find('.jpg') > 0:
         mimetype = "application/jpg"
     return send_from_directory(p, file, mimetype=mimetype)
-
