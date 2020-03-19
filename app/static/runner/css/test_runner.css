@@ -178,6 +178,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 .qti-item label input[type="radio"], .qti-item label input[type="checkbox"] {
     position: absolute;
     top: 0;
+    left: 2px;
 }
 
 .qti-item input[type="checkbox"], .qti-item input[type="radio"] {
