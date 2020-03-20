@@ -31,7 +31,8 @@ XSI = "http://www.w3.org/2001/XMLSchema-instance"
 class ItemLoader:
 
     def __init__(self, file_path):
-        self.etree = etree.parse(file_path)
+        parser = etree.XMLParser(ns_clean=True)
+        self.etree = etree.parse(file_path, parser)
         self.item = None
         self.root = self.etree.getroot()
         self.namespace = self.root.nsmap.get(None)
@@ -117,8 +118,16 @@ class ItemLoader:
         if self.item is None:
             for node in self.query_xpath('namespace::*'):
                 name = node.nodeName.replace('/xmlns(:)?/', '')
-                urk = node.value
-        # ToDo : not implemented
+                uri = node.value
+                if ns_fragment in uri:
+                    name_space = name
+                    break
+        else:
+            name_spaces = self.item.get_namespaces()
+            for name, uri in name_spaces.items():
+                if ns_fragment in uri:
+                    name_space = name
+                    break
 
         return name_space
 
@@ -158,7 +167,7 @@ class ItemLoader:
             # Split namespaces and schema locations ; use strip to remove leading
             # and trailing whitespace.
             namespaces_locations = schema_location.strip().split()
-            # Import all found namspace/schema location pairs
+            # Import all found namespace/schema location pairs
             for namespace, location in zip(*[iter(namespaces_locations)] * 2):
                 self.item.add_schema_location(namespace, location)
 
@@ -189,6 +198,9 @@ class ItemLoader:
         else:
             body_data = data.text
         body_data += ''.join(children_data)
+        if remove_namespace:
+            body_data = re.sub(r'<\s*\w*:', "<", body_data, flags=re.IGNORECASE)
+            body_data = re.sub(r'</\s*\w*:', "</", body_data, flags=re.IGNORECASE)
         return body_data
 
     @staticmethod
@@ -267,7 +279,7 @@ class ItemLoader:
                 annotations[encoding] = str_value
                 self.delete_node(node)
 
-        math = Math(self.extract_attributes(data))
+        math = Math(self.extract_attributes(data), self.item)
         body = self.get_body_data(data, True)
         math.set_mathml(body)
         math.set_annotations(annotations)
@@ -577,6 +589,9 @@ class ItemLoader:
         ns = self.get_math_namespace()
         ns = ns + ':' if ns else ''
         math_nodes = self.query_xpath(".//*[name(.)='" + ns + "math']", data)
+        if len(math_nodes) is 0 and ns != '':
+            ns = ''
+            math_nodes = self.query_xpath(".//*[name(.)='" + ns + "math']", data)
         for node in math_nodes:
             math = self.build_math(node)
             if math is not None:
