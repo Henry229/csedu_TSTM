@@ -37,6 +37,8 @@ from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll
 @web.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
+    if current_user.is_student():
+        return redirect(url_for('report.list_my_report'))
     return render_template('index.html')
 
 
@@ -248,7 +250,7 @@ def testset_list():
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
-                           testsets=sorted_testsets)
+                           testsets=sorted_testsets, assessment_id=assessment.id)
 
 
 @web.route('/tests/assessments', methods=['GET'])
@@ -259,14 +261,14 @@ def assessment_list():
     guid_list = request.args.get("guid_list").split(",")
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
-        return page_not_found()
+        return page_not_found(e="Login user not registered as student")
 
     assessments = []
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
         if assessment is None:
-            return page_not_found()
+            return page_not_found(e="Invalid request - assessment enroll information")
 
         # Get all assessment enroll to get testsets the student enrolled in already.
         enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
@@ -278,7 +280,7 @@ def assessment_list():
             tset.enrolled = tset.id in testset_enrolled
         assessments.append(assessment)
 
-    return render_template('web/assessments.html', student_id=current_user.id, assessments=assessments)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments )
 
 
 @web.route('/testing', methods=['GET'])
@@ -290,7 +292,7 @@ def testing():
     assessment_guid = request.args.get("assessment")
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
-        return page_not_found()
+        return page_not_found(e="Login user not registered as student")
     context = {
         'session_id': session_id,
         'student_user_id': student.user_id,
@@ -321,12 +323,12 @@ def start_test_manager():
         # Parameter check
         student = Student.query.filter_by(user_id=st_id).first()
         if student is None:
-            return page_not_found()
+            return page_not_found(e="Invalid request - not found student information")
 
         # Check if there is an assessment with the guid
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
         if assessment is None:
-            return page_not_found()
+            return page_not_found(e="Invalid request - not found assessment information")
 
         # Get all assessment enroll to get testsets the student enrolled in already.
         enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=st_id).all()

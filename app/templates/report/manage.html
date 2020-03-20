@@ -35,9 +35,10 @@
                             {{ form.test_center.label }}
                             {{ form.test_center }}
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search</button>
-                            &nbsp;&nbsp;&nbsp;
                             {% if current_user.can(Permission.ADMIN) %}
-                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span><br><br>
+                                <hr>
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span>
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-reset-test">Reset Test</span>
                             {% endif %}
                         </form>
                         <p/>
@@ -269,6 +270,32 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
                             onclick="gen_report('confirm-generate');">Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-reset-test" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">
+                        Are you sure to reset test ?
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-text">
+                        Please enter your value:  <br><br>
+
+                        Assessment GUID: <input type="text"><br>
+                        CS Student ID: <input type="text"><br>
+                        Testset ID: <input type="text"><br>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
+                            onclick="reset_test('confirm-reset-test');">Reset Test
                     </button>
                 </div>
             </div>

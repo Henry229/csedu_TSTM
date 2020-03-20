@@ -206,6 +206,10 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     :return: the specific student's writing information for marking by marker
     """
 
+    if current_user.id == student_user_id:
+        redirect_url_for_name = 'report.list_my_report'
+    else:
+        redirect_url_for_name = 'writing.manage'
     pdf = False
     pdf_url = "%s?type=pdf" % request.url
     if 'type' in request.args.keys():
@@ -227,9 +231,13 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
             # Create merged writing markings
             marking_writing.marked_images = []
             for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                c_image = Image.open(
-                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                 str(student_user_id), "writing", v))
+                try:
+                    c_image = Image.open(
+                        os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     str(student_user_id), "writing", v))
+                except FileNotFoundError:
+                    return redirect(url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
+
                 # Merge only when marking is available
                 if marking_writing.marked_file_link:
                     if k in marking_writing.marked_file_link.keys():
@@ -305,8 +313,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                 as_attachment=True,
                 attachment_filename=pdf_file_path)
             return rsp
-        return redirect(url_for('writing.manage', error='Not found assessment enroll - writing data'))
-    return redirect(url_for('writing.manage', error='Not found Marking for writing data'))
+        return redirect(url_for(redirect_url_for_name, error='Not found assessment enroll - writing data'))
+    return redirect(url_for(redirect_url_for_name, error='Not found Marking for writing data'))
 
 
 @login_required
