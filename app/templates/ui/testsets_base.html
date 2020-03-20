@@ -27,16 +27,24 @@
     <button class="navbar-toggler sidebar-toggler d-lg-none mr-auto" type="button" data-toggle="sidebar-show">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="/">
-        <div class="navbar-brand-full">
-            <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
-        </div>
-        <img class="navbar-brand-minimized" src="/static/ui/img/CSEducationLogo.png" width="36" height="20"
-             alt="CSEdu Logo">
-    </a>
+    {% if not current_user.is_student() %}
+        <a class="navbar-brand" href="/">
+            <div class="navbar-brand-full">
+                <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </div>
+            <img class="navbar-brand-minimized" src="/static/ui/img/CSEducationLogo.png" width="36" height="20"
+                 alt="CSEdu Logo">
+        </a>
+    {% else %}
+        <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+    {% endif %}
     <ul class="nav navbar-nav ml-auto">
         <li class="nav-item d-md-down-none">
-            <a class="btn btn btn-outline-warning" href="/auth/logout"><i class="fas fa-sign-out-alt nav-icon"></i>Logout</a>
+            {% if not current_user.is_student() %}
+                <a class="btn btn btn-outline-warning" href="/auth/logout"><i class="fas fa-sign-out-alt nav-icon"></i>Logout</a>
+            {% else %}
+                <h3><span class="badge badge-dark">Close browser when finish</span></h3>
+            {% endif %}
         </li>
     </ul>
 </header>
@@ -65,7 +73,7 @@
     </div>
     <div class="ml-auto">
         <a href="http://www.cseducation.com.au">CS Education</a>
-        <span>&copy; 2019 CS Education</span>
+        <span>&copy; 2020 CS Education</span>
     </div>
 </footer>
 {%- block scripts %}
