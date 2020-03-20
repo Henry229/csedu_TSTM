@@ -412,6 +412,7 @@ def virtual_omr(assessment_id):
                 'answers': answers
             }
             ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
+            print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
             responses.append({'testset_name': testset.name,
                               'testset_guid': testset.GUID,
                               'student_id': enroll.student.student_id,
