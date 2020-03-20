@@ -248,7 +248,7 @@ def testset_list():
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
-                           testsets=sorted_testsets)
+                           testsets=sorted_testsets, assessment_id=assessment.id)
 
 
 @web.route('/tests/assessments', methods=['GET'])
@@ -278,7 +278,7 @@ def assessment_list():
             tset.enrolled = tset.id in testset_enrolled
         assessments.append(assessment)
 
-    return render_template('web/assessments.html', student_id=current_user.id, assessments=assessments)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments )
 
 
 @web.route('/testing', methods=['GET'])

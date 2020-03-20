@@ -2,6 +2,7 @@ import os
 
 from flask import send_from_directory, current_app
 from flask_login import current_user, login_required
+from sqlalchemy.orm import load_only
 
 from app.api import api
 from ..models import Permission, MarkingForWriting, Marking, MarkerAssigned
