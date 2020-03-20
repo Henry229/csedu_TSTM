@@ -21,6 +21,8 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews
+from ..web.errors import page_not_found
+from ..web.views import assessment_list
 
 ''' 
  @report.route('/full_report/<int:student_id>', methods=['GET'])
@@ -79,10 +81,19 @@ def list_my_report():
     if error:
         flash(error)
 
-    # My Report List : 'id', 'assessment_id', 'student_user_id', 'year', 'test_type', 'name', 'branch_id',
-    #                'subject_1', 'subject_2', 'subject_3', 'subject_4', 'subject_5'
-    rows = query_my_report_list_v(student_user_id)
-    return render_template("report/my_report_list.html", assessment_enrolls=rows)
+    # Change My Report page to sync with assessment_list
+    #
+    #     My Report List : 'id', 'assessment_id', 'student_user_id', 'year', 'test_type', 'name', 'branch_id',
+    #                    'subject_1', 'subject_2', 'subject_3', 'subject_4', 'subject_5'
+    #     rows = query_my_report_list_v(student_user_id)
+    #     return render_template("report/my_report_list.html", assessment_enrolls=rows)
+    #
+    rows = db.session.query(AssessmentEnroll.assessment_guid).distinct().filter_by(student_user_id=student_user_id).all()
+    if not rows:
+        return page_not_found(e="Invalid request - not found assessment enrolled by [{}]".format(Student.getCSStudentName(student_user_id)))
+    guid_list = [row.assessment_guid for row in rows]
+    guid_list = ','.join(guid_list)
+    return redirect(url_for('web.assessment_list', guid_list=guid_list))
 
 
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
