@@ -1,0 +1,44 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Virtual ORM{% endblock %}
+{% block app_content %}
+    <h3><i class="fa fa-sync font-2xl mr-3" style="color: #339af0;"></i>Sync Results - {{ name }}</h3>
+    <h5>{{ guid }}</h5>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <table class="display table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>Testset</th>
+                                    <th>Testset GUID</th>
+                                    <th>Student ID</th>
+                                    <th>Result</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for r in responses %}
+                                        <tr>
+                                            <td>{{ r['testset_name'] }}</td>
+                                            <td>{{ r['testset_guid'] }}</td>
+                                            <td>{{ r['student_id'] }}</td>
+                                            <td>{{ r['response'].text }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/assessment/js/list.js"></script>
+{% endblock scripts %}
