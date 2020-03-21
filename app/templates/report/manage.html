@@ -286,15 +286,24 @@
                 <div class="modal-body">
                     <div class="modal-text">
                         Please enter your value:  <br><br>
-
-                        Assessment GUID: <input type="text"><br>
-                        CS Student ID: <input type="text"><br>
-                        Testset ID: <input type="text"><br>
+                        Assessment GUID:
+                            <select name="guid">
+                                {% for enroll in enroll_in_session %}
+                                    <option value="{{ enroll.assessment_guid }}">{{ enroll.assessment_name }}</option>
+                                {% endfor %}
+                            </select><br>
+                        Testset ID:
+                            <select name="testset_id">
+                                {% for testset in tests_in_session %}
+                                    <option value="{{ testset.testset_id }}">{{ testset.testset_name }}</option>
+                                {% endfor %}
+                            </select><br>
+                        CS Student ID: <input type="text" name="cs_student_id"><br>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger danger" data-dismiss="modal" data-toggle="modal"
+                    <button class="btn btn-danger danger" data-toggle="modal"
                             onclick="reset_test('confirm-reset-test');">Reset Test
                     </button>
                 </div>

@@ -82,22 +82,36 @@ function invokeModalItem(id) {
 }
 
 function reset_test() {
+    var data = {
+        'guid': $('SELECT[name="guid"] option:selected').val(),
+        'testset_id': $('SELECT[name="testset_id"] option:selected').val(),
+        'cs_student_id': $('INPUT[name="cs_student_id"]').val()
+    };
+    $.ajax({
+        url: '/api/reset_test/',
+        method: 'POST',
+        data: data,
+        beforeSend: function () {
 
-    // $.ajax({
-    //     url: '/api/gen_report/',
-    //     method: 'POST',
-    //     beforeSend: function () {
-    //
-    //     },
-    //     complete: function () {
-    //
-    //     },
-    //     success: function (response) {
-    //         console.log(response);
-    //         $("#status").show();
-    //         $("#status").html("Report generated successfully").fadeOut(3000, function () {
-    //             $(this).hide()
-    //         });
-    //     }
-    // });
+        },
+        complete: function () {
+
+        },
+        error: function(xhr, status, error) {
+            $('#confirm-reset-test').modal("hide");
+            var errorMessage = xhr.status + ': ' + xhr.error;
+            $("#status").show();
+            $("#status").html('Error - ' + errorMessage).fadeOut(3000, function () {
+                $(this).hide();
+            });
+        },
+        success: function (response) {
+            $('#confirm-reset-test').modal("hide");
+            console.log(response);
+            $("#status").show();
+            $("#status").html("Reset test successfully").fadeOut(3000, function () {
+                $(this).hide()
+            });
+        }
+    });
 }

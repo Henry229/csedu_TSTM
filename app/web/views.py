@@ -227,22 +227,22 @@ def testset_list():
     if assessment_guid is None:
         session_id = request.args.get("session")
         if session_id is None:
-            return page_not_found()
+            return page_not_found(e="Invalid request - session")
         assessment_session = AssessmentSession(key=session_id)
         if assessment_session.assessment is None:
-            return page_not_found()
+            return page_not_found(e="Invalid request - assessment information")
         enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
         assessment_guid = enroll.assessment_guid
 
     # Parameter check
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
-        return page_not_found()
+        return page_not_found(e="Login user not registered as student")
 
     # Check if there is an assessment with the guid
     assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
     if assessment is None:
-        return page_not_found()
+        return page_not_found(e="Invalid request - assessment information")
 
     # Get all assessment enroll to get testsets the student enrolled in already.
     enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student.user_id).all()
