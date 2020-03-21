@@ -86,6 +86,9 @@ var TestRunner = (function () {
         $('#finishModal .finish-test').on('click', function () {
             _finishTest();
         });
+        $('.footer-finish .footer-finish-btn').on('click', function () {
+            _finishTest();
+        });
         document.addEventListener("contextmenu", function(e){
             e.preventDefault();
         }, false);
@@ -346,6 +349,7 @@ var TestRunner = (function () {
                 _session = rsp_data.session;
                 $('#finishModal .modal-body').html(rsp_data.html);
                 $('#finishModal').modal('show');
+                $('.item-footer .footer-finish').show();
             }
         }
     };

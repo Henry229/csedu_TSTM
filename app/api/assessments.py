@@ -673,8 +673,8 @@ def finish_test():
     session_key = request.json.get('session')
     assessment_session = AssessmentSession(key=session_key)
     # check session status
-    if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
-        return bad_request(message='Session status is wrong.')
+    # if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
+    #     return bad_request(message='Session status is wrong.')
 
     assessment_session.set_status(AssessmentSession.STATUS_TEST_SUBMITTED)
 
