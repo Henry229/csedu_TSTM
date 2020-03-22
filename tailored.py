@@ -23,6 +23,7 @@ if os.environ.get('FLASK_COVERAGE'):
 import click
 from flask import request, g
 from flask_migrate import Migrate
+from flask_login import current_user
 from app import create_app, db
 from app.models import User, Role, Permission, Codebook
 
@@ -30,13 +31,13 @@ app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db, compare_type=True)
 
 r_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'request.log'), when='W0')
-e_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'error.log'), when='W0')
 request_logger = logging.getLogger('__name__')
 request_logger.setLevel(logging.ERROR)
 request_logger.addHandler(r_handler)
-error_logger = logging.getLogger('__name__' + 'error')
-error_logger.setLevel(logging.ERROR)
-error_logger.addHandler(e_handler)
+# e_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'error.log'), when='W0')
+# error_logger = logging.getLogger('__name__' + 'error')
+# error_logger.setLevel(logging.ERROR)
+# error_logger.addHandler(e_handler)
 
 
 @app.before_request
@@ -49,8 +50,64 @@ def before_request():
 
 @app.after_request
 def after_request(response):
-    if request.path.startswith('/static'):
+    import json
+    if request.path.startswith('/static') or request.path.startswith('/itemstatic'):
         return response
+
+    ts = time.strftime('%Y-%m-%d %H:%M')
+    public_ip = (request.headers.environ['HTTP_X_FORWARDED_FOR']
+                 if 'HTTP_X_FORWARDED_FOR' in request.headers.environ
+                 else request.headers.environ['REMOTE_ADDR']
+                 )
+    start_time = g.get('start_time') or 0
+    lapsed_time = time.time() - start_time
+    user_id = current_user.id if not current_user.is_anonymous else 0
+    if 'tailored_id' in request.cookies:
+        tailored_id = request.cookies.get('tailored_id')
+    else:
+        tailored_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=32))
+        response.set_cookie('tailored_id', tailored_id)
+    try:
+        log_msg = {
+            'time': ts,
+            'ip': public_ip,
+            'tailored_id': tailored_id,
+            'user_id': user_id,
+            'start_time': g.start_time,
+            'lapsed_time': lapsed_time,
+            'method': request.method,
+            'path': request.path,
+            'param': request.args,
+            'content_type': request.content_type,
+            'user_agent': request.user_agent.string,
+            'response_status': response.status_code,
+            'body': {},
+            'files': {},
+        }
+        if request.method == 'POST' or request.method == 'PUT':
+            if request.is_json:
+                log_msg['body'] = request.json
+            else:
+                log_msg['body'] = request.form.to_dict()
+                log_msg['files'] = {f.name: f.filename for f in request.files.values()}
+
+        if log_msg['body'].get('password'):
+            log_msg['body']['password'] = '********'
+        msg = json.dumps(log_msg)
+    except TypeError as e:
+        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, '\
+              '"method": %s, "response_status": %s, ' \
+              '"log_error": "%s"}' \
+              % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
+                 response.status_code, e)
+    except Exception as e:
+        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, '\
+              '"method": %s, "response_status": %s, ' \
+              '"log_error": "%s"}' \
+              % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
+                 response.status_code, e)
+
+    request_logger.error(msg)
     return response
 
 
