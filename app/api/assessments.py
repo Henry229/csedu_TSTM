@@ -1,9 +1,9 @@
 import json
 import os
-import subprocess
-from datetime import datetime
 import random
 import string
+import subprocess
+from datetime import datetime
 from time import time
 
 import pytz
@@ -23,6 +23,7 @@ from .response import success, bad_request
 from .. import db
 from ..models import Item, Codebook
 from ..writing.views import text_to_images
+
 
 # Assessment > Testsets search Modal > Testsets return for apply
 @api.route('/testset_list/')
@@ -55,10 +56,11 @@ def _search_testsets():
 def _get_testsets():
     id = request.args.get('id', 0, int)
     assessment = Assessment.query.filter_by(id=id).first()
+    rows = []
     if assessment is not None:
         rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
                 row in assessment.testsets]
-        return jsonify(rows)
+    return jsonify(rows)
 
 
 # Simulator
@@ -209,7 +211,8 @@ def create_session():
     # 2. check if the student went through the testset.
     # ToDo: What should we do if he already did?
     # If we only handle single test, it's time to check count and proceed or stop processing.
-    did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id).count()
+    did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
+                                                        student_user_id=student_user_id).count()
 
     # 3. Find out the test attempt count.
     last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id) \
@@ -391,7 +394,8 @@ def response_process(item_id):
         return bad_request(message="Processing response error")
 
     marking = Marking.query.filter_by(id=marking_id).first()
-    if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get('file'):
+    if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get(
+            'file'):
         candidate_response = response.get("RESPONSE").get("base")
     else:
         candidate_response = parse_processed_response(processed.get('RESPONSE'))

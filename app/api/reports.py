@@ -2,13 +2,15 @@ import os
 from collections import namedtuple
 
 from PIL import Image, ImageDraw
-from flask import current_app, render_template
+from flask import current_app, render_template, request
 from flask_login import current_user
 
 from app.api import api
 from app.decorators import permission_required
-from app.models import Permission, refresh_mviews, Codebook
+from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking
+from .response import success
 from .. import db
+from ..web.errors import page_not_found
 
 '''Student Naplan Report - graph mapping for drawing picture '''
 graph_mapping = {
@@ -929,3 +931,36 @@ def gen_report():
     refresh_mviews()
     print('Finish refresh mviews')
     return 'True'
+
+
+'''Reset test'''
+
+@api.route('/reset_test/', methods=['POST'])
+@permission_required(Permission.ASSESSMENT_MANAGE)
+def reset_test():
+    guid = request.form.get('guid')
+    testset_id = request.form.get('testset_id')
+    cs_student_id = Student.getStudentUserId(request.form.get('cs_student_id'))
+
+    enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
+                filter_by(testset_id=testset_id). \
+                filter_by(student_user_id=cs_student_id). \
+                order_by(AssessmentEnroll.start_time_client.desc()).first()
+    if not enroll:
+        return page_not_found(e="Invalid request - test not found")
+    rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id==enroll.id).\
+                        filter(Marking.testset_id==enroll.testset_id).order_by(Marking.created_time.asc()). \
+                        all()
+    testlet_ids = [ row.testlet_id for row in rows ]
+
+    Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).delete()
+    db.session.commit()
+    AssessmentEnroll.query.filter_by(assessment_guid=guid).filter_by(testset_id=testset_id).filter_by(
+        student_user_id=cs_student_id).delete()
+    db.session.commit()
+    data = {"assessment_enroll_id":enroll.id,
+            "assessment_id": enroll.assessment_id,
+            "testset_id": enroll.testset_id,
+            "student_user_id": enroll.student_user_id,
+            "testlet_ids": testlet_ids }
+    return success(data)

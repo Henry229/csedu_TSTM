@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
+from sqlalchemy import Date
 
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
@@ -175,7 +176,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                  "test_report_%s_%s_%s_%s.pdf" % (
                                  assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
-    os.chdir(current_app.config['USER_DATA_FOLDER'])
+    os.chdir(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):
         os.makedirs(str(student_user_id))
     os.chdir(str(student_user_id))
@@ -417,8 +418,26 @@ def manage():
         # Test Summary Report list for All Students: 'student_user_id','plan_id','plan_name',
         #                           'year','grade','test_type'
         test_summaries = query_individual_progress_summary_report_list()
+
+    # Reset Test: Assessment Enroll - testset - testid information
+    today_datetime = datetime.today().date()
+    enroll_ids_in_session = db.session.query(AssessmentEnroll.assessment_id).distinct().\
+                            filter_by(finish_time_client=None).\
+                            filter(AssessmentEnroll.start_time_client.cast(Date)>=today_datetime).all()
+    testset_ids_in_session = db.session.query(AssessmentEnroll.testset_id).distinct(). \
+        filter_by(finish_time_client=None). \
+        filter(AssessmentEnroll.start_time_client.cast(Date) >= today_datetime).all()
+    enroll_in_session = [{'assessment_guid': row.GUID, 'assessment_name': row.name}
+                            for row in db.session.query(Assessment.GUID, Assessment.name). \
+                            filter(Assessment.id.in_(enroll_ids_in_session)).order_by(Assessment.name).all()
+                     ]
+    tests_in_session = [{'testset_id': row.id, 'testset_name': row.name}
+                         for row in db.session.query(Testset.id, Testset.name). \
+                             filter(Testset.id.in_(testset_ids_in_session)).order_by(Testset.name).all()
+                         ]
     return render_template('report/manage.html', form=search_form, assessment_r_list=assessment_r_list, reports=reports,
-                           test_summaries=test_summaries, test_center=test_center)
+                           test_summaries=test_summaries, test_center=test_center,
+                           enroll_in_session=enroll_in_session, tests_in_session=tests_in_session)
 
 
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
