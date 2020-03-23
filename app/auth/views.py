@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import pytz
 import requests
 from flask import render_template, redirect, request, url_for, flash
@@ -9,7 +10,7 @@ from common.logger import log
 from config import Config
 from . import auth
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileAdminForm, SearchUserForm, \
-    ResetPasswordRequestForm, ResetPasswordForm, MarkerLinkForm
+    ResetPasswordRequestForm, ResetPasswordForm
 from .. import db
 from ..decorators import permission_required, admin_required
 from ..email import send_email, send_password_reset_email
@@ -54,6 +55,13 @@ def logout():
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('web.index'))
+
+
+@auth.route('/logout_student')
+@login_required
+def logout_student():
+    logout_user()
+    return redirect(url_for('web.loggedout'))
 
 
 @auth.route('/user/<int:id>', methods=['GET'])

@@ -624,6 +624,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     bottom: 60px;
     overflow-x: hidden;
     z-index: 2;
+    font-size: large;
 }
 
 .item-card .summary-container {
@@ -665,7 +666,9 @@ textarea:focus.qti-item.qti-interaction.solid {
 
 .item-card .item-footer .footer-flag-btn,
 .item-card .item-footer .footer-back-btn,
-.item-card .item-footer .footer-next-btn {
+.item-card .item-footer .footer-next-btn,
+.item-card .item-footer .footer-finish-btn
+{
     float: left;
     padding: 6px 30px;
     min-height: 60px;
@@ -715,6 +718,20 @@ textarea:focus.qti-item.qti-interaction.solid {
     font-size: 45px;
     margin-right: 10px;
     vertical-align: middle;
+}
+
+/**
+ * Modal style
+ */
+.item-card .modal-content .modal-title {
+    font-size: large;
+    font-weight: bold;
+}
+.item-card .modal-content .modal-body {
+    font-size: large;
+}
+.item-card .modal-content .modal-footer {
+    font-size: large;
 }
 
 /**

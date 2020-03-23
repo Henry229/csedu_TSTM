@@ -42,6 +42,11 @@ def index():
     return render_template('index.html')
 
 
+@web.route('/loggedout', methods=['GET'])
+def loggedout():
+    return render_template('loggedout.html')
+
+
 @web.route('/testset_simulator', methods=['GET', 'POST'])
 @login_required
 def testset_simulator():
@@ -280,7 +285,7 @@ def assessment_list():
             tset.enrolled = tset.id in testset_enrolled
         assessments.append(assessment)
 
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments )
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments)
 
 
 @web.route('/testing', methods=['GET'])

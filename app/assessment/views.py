@@ -12,7 +12,8 @@ from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestset
 from .. import db
 from ..api.httpstatus import is_success
 from ..decorators import permission_required
-from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail
+from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
+    AssessmentEnroll, Testset
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -380,6 +381,45 @@ def list():
         rows = query.order_by(Assessment.id.desc()).all()
         flash('Found {} assessment(s)'.format(len(rows)))
     return render_template('assessment/list.html', form=search_form, assessments=rows)
+
+
+@assessment.route('/virtual_omr/<string:assessment_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def virtual_omr(assessment_id):
+    '''
+    Sync marking data to csonlineschool through CS_API
+    :return:
+    '''
+    assessment = Assessment.query.filter_by(id=assessment_id).first()
+    if assessment:
+        enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
+        responses = []
+        for enroll in enrolls:
+            testset = Testset.query.filter_by(id=enroll.testset_id).first()
+            answers = {}
+            for m in enroll.marking:
+                # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
+                try:
+                    answers[m.question_no] = {'stud_answer': ord(m.candidate_r_value) - 64,
+                                              'end_flag': m.is_read}
+                except:
+                    pass
+
+            marking = {
+                'GUID': testset.GUID,
+                'student_user_id': enroll.student.student_id,
+                'answers': answers
+            }
+            ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
+            print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
+            responses.append({'testset_name': testset.name,
+                              'testset_guid': testset.GUID,
+                              'student_id': enroll.student.student_id,
+                              'response': ret})
+        return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
+                               responses=responses)
+    return "Invalid Request", 500
 
 
 def register_to_csonlineschool(assessment):

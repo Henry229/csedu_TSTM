@@ -176,7 +176,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                  "test_report_%s_%s_%s_%s.pdf" % (
                                  assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
-    os.chdir(current_app.config['USER_DATA_FOLDER'])
+    os.chdir(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):
         os.makedirs(str(student_user_id))
     os.chdir(str(student_user_id))
