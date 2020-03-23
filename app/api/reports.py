@@ -940,8 +940,7 @@ def gen_report():
 def reset_test():
     guid = request.form.get('guid')
     testset_id = request.form.get('testset_id')
-    # student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
-    student_user_id = 1
+    student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
     enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
                 filter_by(testset_id=testset_id). \
                 filter_by(student_user_id=student_user_id). \
