@@ -315,4 +315,12 @@
     {{ super() }}
     <script src="/static/common/js/csedu_common.js"></script>
     <script src="/static/report/js/manage.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#confirm-reset-test").on("hidden.bs.modal", function () {
+                $('INPUT[name="cs_student_id"]').val("");
+            });
+        });
+
+    </script>
 {% endblock scripts %}
