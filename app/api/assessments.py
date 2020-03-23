@@ -55,10 +55,12 @@ def _search_testsets():
 def _get_testsets():
     id = request.args.get('id', 0, int)
     assessment = Assessment.query.filter_by(id=id).first()
+    rows = []
     if assessment is not None:
         rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
                 row in assessment.testsets]
-        return jsonify(rows)
+    return jsonify(rows)
+
 
 
 # Simulator

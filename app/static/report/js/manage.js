@@ -53,7 +53,6 @@ $(document).ready(function () {
         var href = '/report/results/pdf' + param_str + '/' + $btn.attr("id");
         $btn.attr("href", href);
     });
-
 });
 
 function getTestReport(assessment_id, testset_id, num) {

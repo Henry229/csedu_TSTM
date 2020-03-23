@@ -953,7 +953,6 @@ def reset_test():
                         all()
     testlet_ids = [ row.testlet_id for row in rows ]
 
-    db.session.query()
     Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).delete()
     # db.session.commit()
     data = {"assessment_enroll_id":enroll.id,
