@@ -941,25 +941,42 @@ def reset_test():
     guid = request.form.get('guid')
     testset_id = request.form.get('testset_id')
     student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
+    if not student_user_id:
+        return "Student not found", 404
     enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
                 filter_by(testset_id=testset_id). \
                 filter_by(student_user_id=student_user_id). \
                 order_by(AssessmentEnroll.id.desc()).first()
     if not enroll:
-        return page_not_found(e="Invalid request - test not found")
+        return "Enrollment for %s is not found" % request.form.get('cs_student_id'), 404
     rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id==enroll.id).\
                         filter(Marking.testset_id==enroll.testset_id).order_by(Marking.created_time.asc()). \
                         all()
     testlet_ids = [ row.testlet_id for row in rows ]
 
     marking = Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).first()
-    db.session.delete(marking)
-    db.session.commit()
-    db.session.delete(enroll)
-    db.session.commit()
-    data = {"assessment_enroll_id":enroll.id,
-            "assessment_id": enroll.assessment_id,
-            "testset_id": enroll.testset_id,
-            "student_user_id": enroll.student_user_id,
-            "testlet_ids": testlet_ids }
-    return success(data)
+
+    errors = []
+
+    if marking:
+        db.session.delete(marking)
+        db.session.commit()
+    else:
+        errors.append('No marking')
+
+    if enroll:
+        db.session.delete(enroll)
+        db.session.commit()
+        data = {"assessment_enroll_id":enroll.id,
+                "assessment_id": enroll.assessment_id,
+                "testset_id": enroll.testset_id,
+                "student_user_id": enroll.student_user_id,
+                "testlet_ids": testlet_ids }
+    else:
+        errors.append('No enroll')
+
+    print(errors)
+    if len(errors):
+        return ",".join(errors), 500
+    else:
+        return "Success", 200
