@@ -6,12 +6,13 @@ from datetime import datetime, timedelta
 
 import pytz
 import requests
-from flask import render_template, request, redirect, flash, url_for
+from flask import render_template, request, redirect, flash, url_for, current_app
 from flask_login import login_required, login_user, current_user
 
 from app import db
 from app.testset.forms import TestsetSearchForm
 from app.web.errors import forbidden, page_not_found, internal_server_error
+from common.logger import log
 from . import web
 from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
@@ -137,7 +138,8 @@ def update_campus_info():
 
 @web.route('/inward', methods=['GET'])
 def process_inward():
-    if not current_user.is_authenticated:
+    if current_user.is_authenticated:
+        log.info("Already logged in user. Redirect to index")
         return redirect(url_for('web.index'))
 
     error = request.args.get("error")
