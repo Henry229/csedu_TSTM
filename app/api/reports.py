@@ -940,12 +940,11 @@ def gen_report():
 def reset_test():
     guid = request.form.get('guid')
     testset_id = request.form.get('testset_id')
-    cs_student_id = Student.getStudentUserId(request.form.get('cs_student_id'))
-
+    student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
     enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
                 filter_by(testset_id=testset_id). \
-                filter_by(student_user_id=cs_student_id). \
-                order_by(AssessmentEnroll.start_time_client.desc()).first()
+                filter_by(student_user_id=student_user_id). \
+                order_by(AssessmentEnroll.id.desc()).first()
     if not enroll:
         return page_not_found(e="Invalid request - test not found")
     rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id==enroll.id).\
@@ -953,10 +952,10 @@ def reset_test():
                         all()
     testlet_ids = [ row.testlet_id for row in rows ]
 
-    Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).delete()
+    marking = Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).first()
+    db.session.delete(marking)
     db.session.commit()
-    AssessmentEnroll.query.filter_by(assessment_guid=guid).filter_by(testset_id=testset_id).filter_by(
-        student_user_id=cs_student_id).delete()
+    db.session.delete(enroll)
     db.session.commit()
     data = {"assessment_enroll_id":enroll.id,
             "assessment_id": enroll.assessment_id,
