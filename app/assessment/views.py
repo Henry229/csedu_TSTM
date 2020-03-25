@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytz
 import requests
-from flask import render_template, flash, request, redirect, url_for
+from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
 from config import Config
@@ -389,36 +389,71 @@ def list():
 def virtual_omr(assessment_id):
     '''
     Sync marking data to csonlineschool through CS_API
+    :return: Sync status page
+    '''
+    return virtual_omr_sync(assessment_id)
+
+
+@assessment.route('/virtual_omr_sync', methods=['POST'])
+def virtual_omr_sync(assessment_id=None):
+    '''
+    Sync given or all active assessment markings. Need to manage lock file to prevent surge
+    To call this one use curl with post and the json data of SYNC_SECRET_KEY
     :return:
     '''
-    assessment = Assessment.query.filter_by(id=assessment_id).first()
-    if assessment:
-        enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
-        responses = []
-        for enroll in enrolls:
-            testset = Testset.query.filter_by(id=enroll.testset_id).first()
-            answers = {}
-            for m in enroll.marking:
-                # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
-                try:
-                    answers[m.question_no] = {'stud_answer': ord(m.candidate_r_value) - 64,
-                                              'end_flag': m.is_read}
-                except:
-                    pass
+    process = False
+    result = {}
 
-            marking = {
-                'GUID': testset.GUID,
-                'student_user_id': enroll.student.student_id,
-                'answers': answers
-            }
-            ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
-            print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
-            responses.append({'testset_name': testset.name,
-                              'testset_guid': testset.GUID,
-                              'student_id': enroll.student.student_id,
-                              'response': ret})
-        return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
-                               responses=responses)
+    # Check security key for web request.
+    if request:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
+        try:
+            # TODO - May accept local IP only
+            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY:
+                process = True
+        except:
+            pass
+    else:  # Direct function call
+        process = True
+
+    if process:
+        if assessment_id:  # A specific assessement only. called from virtual_omr()
+            assessments = Assessment.query.filter_by(id=assessment_id).all()
+        else:
+            assessments = Assessment.query.filter_by(active=True).all()
+
+        for assessment in assessments:
+            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
+            responses = []
+            for enroll in enrolls:
+                testset = Testset.query.filter_by(id=enroll.testset_id).first()
+                answers = {}
+                for m in enroll.marking:
+                    # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
+                    try:
+                        answers[m.question_no] = {'stud_answer': ord(m.candidate_r_value) - 64,
+                                                  'end_flag': m.is_read}
+                    except:
+                        pass
+
+                marking = {
+                    'GUID': testset.GUID,
+                    'student_user_id': enroll.student.student_id,
+                    'answers': answers
+                }
+                ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
+                print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
+                responses.append({'testset_name': testset.name,
+                                  'testset_guid': testset.GUID,
+                                  'student_id': enroll.student.student_id,
+                                  'response': ret})
+
+            # There should be only one assessment if an id is given
+            if assessment_id:
+                return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
+                                       responses=responses)
+            else:
+                result[assessment.id] = responses
+        return jsonify(result)
     return "Invalid Request", 500
 
 

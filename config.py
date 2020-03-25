@@ -10,6 +10,7 @@ class Config(metaclass=MetaFlaskEnv):
     # import secrets;secrets.token_urlsafe(24)
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'YYJ19jTgcUqg1JVjwxGy3Eb_CgHMnzkw'
     DELETE_SECRET_KEY = os.environ.get('DELETE_SECRET_KEY') or '@tRt_3xpNn@V5w-au9B3rnES&8w2Ra2D'
+    SYNC_SECRET_KEY = os.environ.get('SYNC_SECRET_KEY') or '!x7!Hn66S0-p2U3zZm8?sKe4V4==XQCz'
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
