@@ -465,6 +465,8 @@ def virtual_omr_sync(assessment_id=None):
 
             # There should be only one assessment if an id is given
             if assessment_id:
+                log.info("Remove the lock file")
+                os.unlink("virtual_omr_sync.lock")
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
