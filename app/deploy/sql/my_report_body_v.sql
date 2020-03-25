@@ -1,6 +1,9 @@
+DROP VIEW public.my_report_body_v;
 CREATE OR REPLACE VIEW public.my_report_body_v
-AS SELECT m.assessment_enroll_id,
+AS SELECT m.id,
+    m.assessment_enroll_id,
     m.testset_id,
+    m.testlet_id,
     e.student_user_id,
     e.grade,
     m.created_time,
@@ -13,7 +16,8 @@ AS SELECT m.assessment_enroll_id,
    FROM marking m,
     assessment_enroll e,
     item i
-  WHERE e.id = m.assessment_enroll_id AND i.id = m.item_id;
+  WHERE e.id = m.assessment_enroll_id AND i.id = m.item_id
+  ORDER BY m.assessment_enroll_id desc, m.testset_id, m.id asc;
 
 -- Permissions
 
