@@ -38,7 +38,6 @@ request_logger.addHandler(r_handler)
 # error_logger = logging.getLogger('__name__' + 'error')
 # error_logger.setLevel(logging.ERROR)
 # error_logger.addHandler(e_handler)
-app.logger = request_logger
 
 
 @app.before_request
