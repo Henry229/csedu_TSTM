@@ -99,7 +99,7 @@ function reset_test() {
         error: function(xhr, status, error) {
             $('#confirm-reset-test').modal("hide");
             $("#status").show();
-            $("#status").html(xhr.responseText).fadeOut(10000, function () {
+            $("#status").html(xhr.responseText).fadeOut(6000, function () {
                 $(this).hide();
             });
         },
@@ -107,7 +107,7 @@ function reset_test() {
             $('#confirm-reset-test').modal("hide");
             console.log(response);
             $("#status").show();
-            $("#status").html("Reset test successfully").fadeOut(10000, function () {
+            $("#status").html("Reset test successfully").fadeOut(6000, function () {
                 $(this).hide()
             });
         }
