@@ -32,12 +32,13 @@ migrate = Migrate(app, db, compare_type=True)
 
 r_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'request.log'), when='W0')
 request_logger = logging.getLogger('__name__')
-request_logger.setLevel(logging.ERROR)
+request_logger.setLevel(logging.DEBUG)
 request_logger.addHandler(r_handler)
 # e_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'error.log'), when='W0')
 # error_logger = logging.getLogger('__name__' + 'error')
 # error_logger.setLevel(logging.ERROR)
 # error_logger.addHandler(e_handler)
+app.logger = request_logger
 
 
 @app.before_request
@@ -107,7 +108,7 @@ def after_request(response):
               % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
                  response.status_code, e)
 
-    request_logger.error(msg)
+    request_logger.debug(msg)
     return response
 
 

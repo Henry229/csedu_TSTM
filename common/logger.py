@@ -10,10 +10,9 @@ def get_logger(log_file, log_level):
         if not os.path.exists(os.path.dirname(log_file)):
             os.mkdir(os.path.dirname(log_file))
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('__name__')
     ch = logging.StreamHandler()
-    fh = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=14)
-
+    fh = TimedRotatingFileHandler(log_file, when='W0')
     logger.addHandler(ch)
     logger.addHandler(fh)
 

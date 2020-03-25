@@ -137,6 +137,9 @@ def update_campus_info():
 
 @web.route('/inward', methods=['GET'])
 def process_inward():
+    if not current_user.is_authenticated:
+        return redirect(url_for('web.index'))
+
     error = request.args.get("error")
     if error:
         flash(error)
@@ -151,7 +154,10 @@ def process_inward():
     test_guid = args["aid"]
     session_timeout = int(args["sto"]) if args["sto"] else 120  # Minutes
 
-    member = get_student_info(student_id)
+    try:
+        member = get_student_info(student_id)
+    except:
+        return forbidden("Invalid Request")
     if is_authorised(member, session_timeout):
         registered_student = Student.query.filter(Student.student_id.ilike(student_id)).first()
         if registered_student:
