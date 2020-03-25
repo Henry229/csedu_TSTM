@@ -405,15 +405,14 @@ def virtual_omr_sync(assessment_id=None):
     result = {}
 
     # Check security key for web request.
-    if request:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
+    if assessment_id:
+        process = True
+    else:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
         try:
-            # TODO - May accept local IP only
-            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY:
+            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY and request.remote_addr == '127.0.0.1':
                 process = True
         except:
             pass
-    else:  # Direct function call
-        process = True
 
     if process:
         if assessment_id:  # A specific assessement only. called from virtual_omr()
@@ -424,6 +423,7 @@ def virtual_omr_sync(assessment_id=None):
         for assessment in assessments:
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
+            responses_text = []
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 answers = {}
@@ -446,13 +446,17 @@ def virtual_omr_sync(assessment_id=None):
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
                                   'response': ret})
+                responses_text.append({'testset_name': testset.name,
+                                       'testset_guid': testset.GUID,
+                                       'student_id': enroll.student.student_id,
+                                       'response': ret.text})
 
             # There should be only one assessment if an id is given
             if assessment_id:
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
-                result[assessment.id] = responses
+                result[assessment.id] = responses_text
         return jsonify(result)
     return "Invalid Request", 500
 
