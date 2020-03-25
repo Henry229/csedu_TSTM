@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime
 
@@ -6,6 +7,7 @@ import requests
 from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
+from common.logger import log
 from config import Config
 from . import assessment
 from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestsetCreateForm, TestsetSearchForm
@@ -40,8 +42,8 @@ def new():
 def insert():
     form = AssessmentCreateForm()
     if form.validate_on_submit():
-        print(form.year.data)
-        print(form.review_period.data)
+        log.debug(form.year.data)
+        log.debug(form.review_period.data)
         assessment = Assessment(GUID=str(uuid.uuid4()),
                                 version=1,
                                 name=form.assessment_name.data,
@@ -415,6 +417,16 @@ def virtual_omr_sync(assessment_id=None):
             pass
 
     if process:
+        if os.path.exists('virtual_omr_sync.lock'):
+            log.info('Lock file exists. Skip')
+            log.info('Lock file exists. Skip')
+            return 'Lock file exists. Skip', 200
+
+        with open('virtual_omr_sync.lock', 'w') as f:
+            lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
+            log.debug('Create lock file - %s' % lock_info)
+            f.write(lock_info)
+
         if assessment_id:  # A specific assessement only. called from virtual_omr()
             assessments = Assessment.query.filter_by(id=assessment_id).all()
         else:
@@ -441,7 +453,7 @@ def virtual_omr_sync(assessment_id=None):
                     'answers': answers
                 }
                 ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
-                print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
+                log.debug("[%s] %s, %s, %s" % (testset.name, testset.GUID, enroll.student.student_id, ret.text))
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
@@ -457,6 +469,8 @@ def virtual_omr_sync(assessment_id=None):
                                        responses=responses)
             else:
                 result[assessment.id] = responses_text
+        log.info("Remove the lock file")
+        os.unlink("virtual_omr_sync.lock")
         return jsonify(result)
     return "Invalid Request", 500
 
