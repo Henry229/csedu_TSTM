@@ -1010,11 +1010,12 @@ textarea:focus.qti-item.qti-interaction.solid {
     text-align: left;
     color: #656769;
     font-size: 16px;
-    margin: 10px auto;
-    padding: 20px;
+    margin: 5px auto;
+    padding-left: 20px;
+    padding-right: 20px;
     float: none;
     min-height: 198px;
-    max-height: 198px;
+    /*max-height: 198px;*/
 }
 
 .notice-container .notice-info .footer {
