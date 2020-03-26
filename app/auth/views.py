@@ -14,7 +14,7 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileA
 from .. import db
 from ..decorators import permission_required, admin_required
 from ..email import send_email, send_password_reset_email
-from ..models import User, Permission, Role, Codebook, MarkerBranch
+from ..models import User, Permission, Role, Codebook, MarkerBranch, Student
 
 
 @auth.before_app_request
@@ -310,6 +310,16 @@ def get_campuses():
     info = requests.get(Config.CS_API_URL + "/campus",
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
     return info
+
+
+def getCSStudentGrade(user_id):
+    student_id = Student.getCSStudentId(user_id)
+    member = get_student_info(student_id)
+    if len(member['sales'])>0:
+        grade = member['sales'][0]['grade']
+        return grade
+    else:
+        return '-'
 
 
 def link_marker(marker_id, branch_ids):
