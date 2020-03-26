@@ -1,4 +1,6 @@
 import os
+import re
+import time
 import uuid
 from datetime import datetime
 
@@ -417,12 +419,22 @@ def virtual_omr_sync(assessment_id=None):
             pass
 
     if process:
-        if os.path.exists('virtual_omr_sync.lock'):
-            log.info('Lock file exists. Skip')
-            log.info('Lock file exists. Skip')
-            return 'Lock file exists. Skip', 200
+        lockfile = 'virtual_omr_sync.lock'
+        locktimeout = 240
+        if os.path.exists(lockfile):
+            log.info('Lock file exists. Checking age')
+            age = int(time.time() - os.path.getmtime(lockfile))
+            log.info('%ss. Timeout : %ss' % (age, locktimeout))
+            if age > locktimeout:
+                log.debug('Delete timed out lockfile')
+                try:
+                    os.unlink(lockfile)
+                except os.error as e:
+                    log.error(e)
+            else:
+                return 'Lock file found. Skip' % (age, locktimeout), 200
 
-        with open('virtual_omr_sync.lock', 'w') as f:
+        with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
             log.debug('Create lock file - %s' % lock_info)
             f.write(lock_info)
@@ -436,6 +448,7 @@ def virtual_omr_sync(assessment_id=None):
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
             responses_text = []
+            log.info("Sync [%s] %s, %s enrolls" % (assessment.name, assessment.GUID, len(enrolls)))
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 answers = {}
@@ -453,7 +466,6 @@ def virtual_omr_sync(assessment_id=None):
                     'answers': answers
                 }
                 ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
-                log.debug("[%s] %s, %s, %s" % (testset.name, testset.GUID, enroll.student.student_id, ret.text))
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
@@ -466,13 +478,25 @@ def virtual_omr_sync(assessment_id=None):
             # There should be only one assessment if an id is given
             if assessment_id:
                 log.info("Remove the lock file")
-                os.unlink("virtual_omr_sync.lock")
+                os.unlink(lockfile)
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
                 result[assessment.id] = responses_text
         log.info("Remove the lock file")
-        os.unlink("virtual_omr_sync.lock")
+        os.unlink(lockfile)
+        synced = 0
+        total = 0
+        added = 0
+        for k, v in result.items():
+            for i in v:
+                r = i['response']
+                m = re.match('^([0-9]+) \/ ([0-9]+).*([0-9]+).*', r)
+                if m:
+                    synced += int(m.group(1))
+                    total += int(m.group(2))
+                    added += int(m.group(3))
+        log.info("Total %s/%s synced. %s added" % (synced, total, added))
         return jsonify(result)
     return "Invalid Request", 500
 
