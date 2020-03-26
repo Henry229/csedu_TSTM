@@ -66,7 +66,7 @@
                     {% for marking in markings %}
                         {% if loop.index<=20 %}
                             <tr>
-                                <td>{{ loop.index }}</td>
+                                <td>{{ marking.question_no }}</td>
                                 <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                 <td>{% if marking.is_correct %}
                                     <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
@@ -92,7 +92,7 @@
                     {% for marking in markings %}
                         {% if loop.index>20 %}
                             <tr>
-                                <td>{{ loop.index }}</td>
+                                <td>{{ marking.question_no }}</td>
                                 <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                 <td>{% if marking.is_correct %}
                                     <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}

@@ -316,8 +316,7 @@ def getCSStudentGrade(user_id):
     student_id = Student.getCSStudentId(user_id)
     member = get_student_info(student_id)
     if len(member['sales'])>0:
-        grade = member['sales'][0]['grade']
-        return grade
+        return member['sales'][0]['grade']
     else:
         return '-'
 
