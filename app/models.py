@@ -1005,6 +1005,7 @@ class Student(db.Model):
         else:
             return 'Unknown User'
 
+
     @staticmethod
     def getCSCampusName(user_id):
         if user_id:

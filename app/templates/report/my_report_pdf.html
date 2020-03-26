@@ -45,7 +45,7 @@
         </tr>
         <tr>
             <th> Grade:</th>
-            <td> {{ marking_rep.grade }}</td>
+            <td> {{ grade }}</td>
             <th> Test Date:</th>
             <td> {{ marking_rep.created_time }}.</td>
         </tr>
@@ -66,12 +66,12 @@
                     {% for marking in markings %}
                         {% if loop.index<=20 %}
                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ marking.candidate_r_value }}</td>
+                                <td>{{ marking.question_no }}</td>
+                                <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                 <td>{% if marking.is_correct %}
                                     <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                     <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                <td>{% if not marking.is_correct %}{{ marking.correct_r_value }}{% endif %}</td>
+                                <td>{% if not marking.is_correct and marking.correct_r_value %}{{ marking.correct_r_value }}{% endif %}</td>
                                 <td>{{ marking.item_percentile }}%</td>
                                 <td>{{ Codebook.get_code_name(marking.category) }}</td>
                             </tr>
@@ -92,12 +92,12 @@
                     {% for marking in markings %}
                         {% if loop.index>20 %}
                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ marking.candidate_r_value }}</td>
+                                <td>{{ marking.question_no }}</td>
+                                <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                 <td>{% if marking.is_correct %}
                                     <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                     <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                <td>{% if not marking.is_correct %}{{ marking.correct_r_value }}{% endif %}</td>
+                                <td>{% if not marking.is_correct and marking.correct_r_value %}{{ marking.correct_r_value }}{% endif %}</td>
                                 <td>{{ marking.item_percentile }}%</td>
                                 <td>{{ Codebook.get_code_name(marking.category) }}</td>
                             </tr>

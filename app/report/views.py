@@ -19,6 +19,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set
+from ..auth.views import get_student_info, getCSStudentGrade
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews
@@ -127,15 +128,17 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    test_subject_string = Codebook.get_code_name(
-        (Testset.query.with_entities(Testset.subject).filter_by(id=row.testset_id).first()).subject)
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade).filter_by(id=row.testset_id).first()
+    test_subject_string = Codebook.get_code_name(testset.subject)
+    grade = Codebook.get_code_name(testset.grade)
+
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
+
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
     if ts_header is None:
         url = request.referrer
         flash('Marking data not available')
         return redirect(url)
-
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
@@ -162,7 +165,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name, rank=rank,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                            pdf_url=pdf_url)
+                                            pdf_url=pdf_url, grade=grade)
     if not pdf:
         return rendered_template_pdf
     # PDF download
