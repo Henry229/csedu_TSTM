@@ -32,7 +32,7 @@ migrate = Migrate(app, db, compare_type=True)
 
 r_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'request.log'), when='W0')
 request_logger = logging.getLogger('__name__')
-request_logger.setLevel(logging.ERROR)
+request_logger.setLevel(logging.DEBUG)
 request_logger.addHandler(r_handler)
 # e_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'error.log'), when='W0')
 # error_logger = logging.getLogger('__name__' + 'error')
@@ -51,10 +51,11 @@ def before_request():
 @app.after_request
 def after_request(response):
     import json
-    if request.path.startswith('/static') or request.path.startswith('/itemstatic'):
+    if request.path.startswith('/static') or request.path.startswith('/itemstatic') \
+            or request.path.startswith('/favicon.ico') or response.status_code == 500:
         return response
 
-    ts = time.strftime('%Y-%m-%d %H:%M')
+    ts = time.strftime('%Y-%m-%d %H:%M:%S')
     public_ip = (request.headers.environ['HTTP_X_FORWARDED_FOR']
                  if 'HTTP_X_FORWARDED_FOR' in request.headers.environ
                  else request.headers.environ['REMOTE_ADDR']
@@ -107,9 +108,45 @@ def after_request(response):
               % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
                  response.status_code, e)
 
-    request_logger.error(msg)
+    request_logger.debug(msg)
     return response
 
+
+@app.errorhandler(Exception)
+def exceptions(e):
+    import json
+    import traceback
+    ts = time.strftime('%Y-%b-%d %H:%M:%S')
+    public_ip = (request.headers.environ['HTTP_X_FORWARDED_FOR']
+                 if 'HTTP_X_FORWARDED_FOR' in request.headers.environ
+                 else request.headers.environ['REMOTE_ADDR']
+                 )
+    if 'tailored_id' in request.cookies:
+        tailored_id = request.cookies.get('tailored_id')
+    else:
+        tailored_id = ''
+    body, files = {}, {}
+    if request.method == 'POST' or request.method == 'PUT':
+        if request.is_json:
+            body = request.json
+        else:
+            body = request.form.to_dict()
+            files = {f.name: f.filename for f in request.files.values()}
+            files = json.dumps(files)
+
+    if body.get('password'):
+        body['password'] = '********'
+    body = json.dumps(body)
+    user_id = current_user.id if not current_user.is_anonymous else 0
+    tb = {"traceback": traceback.format_exc()}
+    tb = json.dumps(tb)
+    msg = '{"time": %s, "ip": %s, "tailored_id": %s, "user_id": %s, "path": %s, ' \
+          '"method": %s, "response_status": %s, "body": %s, "files": %s, ' \
+          '"error": %s}' \
+          % (ts, public_ip, tailored_id, user_id, request.path, request.method,
+             500, body, files, tb)
+    request_logger.error(msg)
+    return "Internal Server Error", 500
 
 # ---------------------------------
 # Cli Commands

@@ -312,7 +312,7 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
 
 
 def query_my_report_body(assessment_enroll_id, ts_id):
-    column_names_1 = ['id',
+    column_names_1 = ['question_no',
                       'assessment_enroll_id',
                       'testset_id',
                       'testlet_id',
@@ -329,7 +329,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     sql_stmt_1 = 'SELECT {columns} ' \
                  'FROM my_report_body_v ' \
                  'WHERE assessment_enroll_id=:assessment_enroll_id and testset_id=:testset_id ' \
-                 'ORDER BY id desc'.format(
+                 'ORDER BY question_no desc'.format(
         columns=','.join(column_names_1))
     cursor_1 = db.session.execute(sql_stmt_1, {'assessment_enroll_id': assessment_enroll_id, 'testset_id': ts_id})
     Record = namedtuple('Record', cursor_1.keys())
