@@ -160,16 +160,29 @@
                 </div>
                 <div class="notice-container">
                     <div class="notice start-notice">
+                        <h1 class="notice-title">{{ testset.name }}</h1>
                         <div class="notice-info">
-                            <h1 class="notice-title">{{ testset.name }}</h1>
                             <div class="notice-content">
-                                Please select Yes to continue:
+                                <h3 style="text-align: center">Agreement of Copyright Policy</h3><br>
+                                <span>CS Education reserves the right to take the following action, should they discover anyone violating their copyright</span>
+                                <ul>
+                                    <li>the immediate cancellation of courses for which the perpetrator has registered without recourse to any refunds.  AND/OR</li>
+                                    <li>a fine of triple the amount the perpetrator has paid for the course for which they have registered. AND/OR</li>
+                                    <li>measures that may result in legal action, should CS Education deem it appropriate.</li>
+                                </ul>
+                                <span>In order to avoid any such issues, CS Education is asking all parents, in good faith, to sign in agreement that they will, not in any way, pass on any of CS Education’s material to any third party, even for example as a favour to a friend.</span><br>
+                                <span>Please could you AND your child sign the form below as indicative of your agreement and acceptance of CS Education’s legal right to the copyright of all their material and return to CS Education.</span><br>
+                                <div style="color: #235d93;margin-top: 25px;font-weight: normal">
+                                    <span>do hereby acknowledge my agreement not to copy or distribute CS Education’s academic material to any other person or group. </span><br>
+                                    <input type="checkbox" id="tnc_agree_checkbox">
+                                    <label for="tnc_agree_checkbox">I agree and proceed to the exam</label>
+                                </div>
                             </div>
-                            <footer>
-                                <button class="start-no-btn">No</button>
-                                <button class="start-yes-btn">Yes</button>
-                            </footer>
                         </div>
+                        <footer>
+                            <button class="start-no-btn">No</button>
+                            <button class="start-yes-btn" disabled>Yes</button>
+                        </footer>
                     </div>
                 </div>
                 <div class="item-footer">
@@ -212,10 +225,13 @@
                 var student_external_id = $('input[name="student_external_id"]').val();
                 var assessment_guid = $('input[name="assessment_guid"]').val();
                 $('.start-yes-btn').on('click', function () {
+                    if ($('#tnc_agree_checkbox').is(':checked') === false) return;
+
                     var options = {
                         assessment_guid: assessment_guid,
                         testset_id: $('input[name="testset_id"]').val(),
                         student_user_id: student_user_id,
+                        tnc_agree_checked: true,
                         session_cb: function (session_id) {
                             window.location.replace("/testing?session=" + session_id);
                         }
@@ -224,6 +240,13 @@
                 });
                 $('.start-no-btn').on('click', function () {
                     window.location.replace("/tests/assessments?guid_list=" + assessment_guid)
+                });
+                $('#tnc_agree_checkbox').on('click', function () {
+                    if ($(this).is(':checked')) {
+                        $('.start-yes-btn').attr('disabled', false);
+                    } else {
+                        $('.start-yes-btn').attr('disabled', true);
+                    }
                 });
 
             {% endif %}

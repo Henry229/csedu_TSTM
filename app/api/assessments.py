@@ -197,6 +197,10 @@ def create_session():
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
     student_ip = request.json.get('student_ip')
+    tnc_agree_checked = request.json.get('tnc_agree_checked', False)
+
+    if tnc_agree_checked is False:
+        return bad_request()
 
     # 1. check if there is an assessment with the guid and get the latest one.
     assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()

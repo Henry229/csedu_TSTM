@@ -20,7 +20,7 @@ var TestRunner = (function () {
         _question_no;
     var _item_info = [], _last_question_no = 0;
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
-        _finishTest, _session_cb;
+        _finishTest, _session_cb, _tnc_agree_checked;
     var _duration_timer, _start_time, _test_duration_minutes;
     var init = function ($container, options) {
         _assessment_guid = options.assessment_guid;
@@ -28,6 +28,7 @@ var TestRunner = (function () {
         _testlet_id = options.testlet_id;
         _session = options.session;
         _session_cb = options.session_cb;
+        _tnc_agree_checked = options.tnc_agree_checked || false;
         _stage_data = [];
         if (!_session) {
             createSession();
@@ -243,6 +244,8 @@ var TestRunner = (function () {
             student_ip: $('input[name="student_ip"]').val(),
             start_time: Math.floor(Date.now() / 1000)
         };
+        if (_tnc_agree_checked)
+            data['tnc_agree_checked'] = true;
         $.ajax({
             url: '/api/session',
             method: 'POST',

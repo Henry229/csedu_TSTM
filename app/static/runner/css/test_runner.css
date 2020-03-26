@@ -986,7 +986,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     width: 100%;
     min-width: 750px;
     max-width: 885px;
-    padding: 110px 0 110px 0;
+    padding: 10px 0 110px 0;
     text-align: center;
 }
 
@@ -998,6 +998,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     max-height: 484px;
     min-width: 750px;
     max-width: 885px;
+    font-weight: bold;
 }
 
 .notice-container .notice-info h1 {
@@ -1006,10 +1007,11 @@ textarea:focus.qti-item.qti-interaction.solid {
 }
 
 .notice-container .notice-info .notice-content {
-    text-align: center;
+    text-align: left;
     color: #656769;
     font-size: 16px;
     margin: 10px auto;
+    padding: 20px;
     float: none;
     min-height: 198px;
     max-height: 198px;
@@ -1035,4 +1037,9 @@ textarea:focus.qti-item.qti-interaction.solid {
     color: #ffffff;
     background-color: #005d93;
     border-color: #004d79;
+}
+.notice-container footer button:disabled {
+    background-color: grey;
+    border-color: grey;
+    cursor: not-allowed;
 }
