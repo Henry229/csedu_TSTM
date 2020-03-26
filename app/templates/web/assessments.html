@@ -81,8 +81,8 @@
                 var assessment_guid = $(this).data('assessment-guid');
                 var testset_id = $(this).data('testset-id');
                 var student_user_id = $(this).data('student-user-id');
-                window.location = '/testing?assessment=' + assessment_guid + '&testset_id='
-                    + testset_id + '&student_user_id=' + student_user_id;
+                window.location.replace('/testing?assessment=' + assessment_guid + '&testset_id='
+                    + testset_id + '&student_user_id=' + student_user_id);
             });
 
             $('#testsets input.report').on('click', function () {

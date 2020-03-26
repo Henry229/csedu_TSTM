@@ -217,13 +217,13 @@
                         testset_id: $('input[name="testset_id"]').val(),
                         student_user_id: student_user_id,
                         session_cb: function (session_id) {
-                            window.location = "/testing?session=" + session_id;
+                            window.location.replace("/testing?session=" + session_id);
                         }
                     };
                     TestRunner.init($('.item-container'), options);
                 });
                 $('.start-no-btn').on('click', function () {
-                    window.location = "/tests/assessments?guid_list=" + assessment_guid;
+                    window.location.replace("/tests/assessments?guid_list=" + assessment_guid)
                 });
 
             {% endif %}
