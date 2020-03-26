@@ -77,6 +77,21 @@ postgres=# grant all privileges on database tailored to tailored;
 GRANT
 postgres=# \c tailored
 postgres=# CREATE EXTENSION IF NOT EXISTS tablefunc;
+
+# Create a readonly user for debugging
+-- Change to the db
+postgres=# \c tailored;
+-- Create a group
+postgres=# CREATE ROLE readaccess;
+-- Grant access to existing tables
+postgres=# GRANT USAGE ON SCHEMA public TO readaccess;
+postgres=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO readaccess;
+-- Grant access to future tables
+postgres=# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO readaccess;
+-- Create a final user with password
+postgres=# CREATE USER tailored_readonly WITH PASSWORD 'P@ssword1';
+postgres=# GRANT readaccess TO tailored_readonly;
+
 postgres=# \q
 ```
 #### Enable password login
