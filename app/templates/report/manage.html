@@ -38,7 +38,8 @@
                             {% if current_user.can(Permission.ADMIN) %}
                                 <hr>
                                 <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-generate">Refresh Collected Report Data</span>
-                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#confirm-reset-test">Reset Test</span>
+                                <span class="btn btn-sm btn-outline-dark" id="#btn-reset-test"
+                                      data-toggle="modal" data-target="#confirm-reset-test">Reset Test</span>
                             {% endif %}
                         </form>
                         <p/>
@@ -276,7 +277,7 @@
         </div>
     </div>
     <div class="modal fade" id="confirm-reset-test" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">
@@ -285,20 +286,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="modal-text">
+                        <font color="red"> Warning: <br> The selected test data will be deleted permanently after reset.</font> <br><br>
                         Please enter your value:  <br><br>
-                        Assessment GUID:
-                            <select name="guid">
-                                {% for enroll in enroll_in_session %}
-                                    <option value="{{ enroll.assessment_guid }}">{{ enroll.assessment_name }}</option>
-                                {% endfor %}
-                            </select><br>
-                        Testset ID:
-                            <select name="testset_id">
-                                {% for testset in tests_in_session %}
-                                    <option value="{{ testset.testset_id }}">{{ testset.testset_name }}</option>
-                                {% endfor %}
+                        Enrolled Test:
+                            <select name="enroll">
+
                             </select><br>
                         CS Student ID: <input type="text" name="cs_student_id"><br>
+                        Security Code: <input type="text" name="week_no"><br>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -315,12 +310,4 @@
     {{ super() }}
     <script src="/static/common/js/csedu_common.js"></script>
     <script src="/static/report/js/manage.js"></script>
-    <script>
-        $(document).ready(function () {
-            $("#confirm-reset-test").on("hidden.bs.modal", function () {
-                $('INPUT[name="cs_student_id"]').val("");
-            });
-        });
-
-    </script>
 {% endblock scripts %}

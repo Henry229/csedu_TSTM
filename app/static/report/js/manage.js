@@ -53,6 +53,15 @@ $(document).ready(function () {
         var href = '/report/results/pdf' + param_str + '/' + $btn.attr("id");
         $btn.attr("href", href);
     });
+
+    $("#confirm-reset-test").on("hidden.bs.modal", function () {
+        $('INPUT[name="cs_student_id"]').val("");
+        $('INPUT[name="week_no"]').val("");
+    });
+
+    $("#confirm-reset-test").on("show.bs.modal", function () {
+        get_testlist_for_reset();
+    });
 });
 
 function getTestReport(assessment_id, testset_id, num) {
@@ -80,11 +89,39 @@ function invokeModalItem(id) {
     return false;
 }
 
+function get_testlist_for_reset() {
+    var enroll_obj = $('SELECT[name="enroll"]');
+    $.ajax({
+        url: '/api/reset_test/',
+        method: 'GET',
+        beforeSend: function () {
+
+        },
+        complete: function () {
+
+        },
+        success: function (response) {
+            // response.data = [{ 'assessment_guid': '...', 'assessment_name': '...', 'testset_id': '...', 'testset_name': '...'},....] }
+            response.data.forEach(function (item) {
+                enroll_obj.append(
+                    $('<option>', {
+                        value: item['assessment_guid'] + ' ' + item['testset_id'],
+                        text: '[' + item['start_time'] + '] ' + item['assessment_name'] + ' : ' + item['testset_name'],
+                    })
+                );
+            });
+        }
+    });
+}
+
 function reset_test() {
+    var enroll_obj = $('SELECT[name="enroll"] option:selected').val();
+    enroll_obj = enroll_obj.split(' ');
     var data = {
-        'guid': $('SELECT[name="guid"] option:selected').val(),
-        'testset_id': $('SELECT[name="testset_id"] option:selected').val(),
-        'cs_student_id': $('INPUT[name="cs_student_id"]').val()
+        'guid': enroll_obj[0],
+        'testset_id': enroll_obj[1],
+        'cs_student_id': $('INPUT[name="cs_student_id"]').val(),
+        'week_no': $('INPUT[name="week_no"]').val(),
     };
     $.ajax({
         url: '/api/reset_test/',
