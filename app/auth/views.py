@@ -70,7 +70,8 @@ def user_profile(id=None):
     if not id:
         id = current_user.id
     user = User.query.filter_by(id=id).first()
-    return render_template('auth/user.html', user=user)
+    week_no = datetime.today().isocalendar()[1]
+    return render_template('auth/user.html', user=user, week_no = week_no)
 
 
 @auth.route('/manage/delete', methods=['POST'])

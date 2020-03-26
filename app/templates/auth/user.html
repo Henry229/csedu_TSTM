@@ -21,7 +21,10 @@
                 </tr>
                 <tr>
                     <th>User Role</th>
-                    <td colspan="5">{{ user.role.name }}</td>
+                    <td colspan="5">{{ user.role.name }}
+                    {% if  current_user.can(Permission.ADMIN) %}
+                        <span class="badge badge-info">{{ week_no }}</span>
+                    {% endif %}
                 </tr>
                 </tbody>
             </table>

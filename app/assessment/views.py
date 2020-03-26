@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime
 
@@ -6,6 +7,7 @@ import requests
 from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
+from common.logger import log
 from config import Config
 from . import assessment
 from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestsetCreateForm, TestsetSearchForm
@@ -40,8 +42,8 @@ def new():
 def insert():
     form = AssessmentCreateForm()
     if form.validate_on_submit():
-        print(form.year.data)
-        print(form.review_period.data)
+        log.debug(form.year.data)
+        log.debug(form.review_period.data)
         assessment = Assessment(GUID=str(uuid.uuid4()),
                                 version=1,
                                 name=form.assessment_name.data,
@@ -405,17 +407,26 @@ def virtual_omr_sync(assessment_id=None):
     result = {}
 
     # Check security key for web request.
-    if request:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
+    if assessment_id:
+        process = True
+    else:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
         try:
-            # TODO - May accept local IP only
-            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY:
+            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY and request.remote_addr == '127.0.0.1':
                 process = True
         except:
             pass
-    else:  # Direct function call
-        process = True
 
     if process:
+        if os.path.exists('virtual_omr_sync.lock'):
+            log.info('Lock file exists. Skip')
+            log.info('Lock file exists. Skip')
+            return 'Lock file exists. Skip', 200
+
+        with open('virtual_omr_sync.lock', 'w') as f:
+            lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
+            log.debug('Create lock file - %s' % lock_info)
+            f.write(lock_info)
+
         if assessment_id:  # A specific assessement only. called from virtual_omr()
             assessments = Assessment.query.filter_by(id=assessment_id).all()
         else:
@@ -424,6 +435,7 @@ def virtual_omr_sync(assessment_id=None):
         for assessment in assessments:
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
+            responses_text = []
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 answers = {}
@@ -441,18 +453,26 @@ def virtual_omr_sync(assessment_id=None):
                     'answers': answers
                 }
                 ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
-                print(testset.name, testset.GUID, enroll.student.student_id, ret.text)
+                log.debug("[%s] %s, %s, %s" % (testset.name, testset.GUID, enroll.student.student_id, ret.text))
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
                                   'response': ret})
+                responses_text.append({'testset_name': testset.name,
+                                       'testset_guid': testset.GUID,
+                                       'student_id': enroll.student.student_id,
+                                       'response': ret.text})
 
             # There should be only one assessment if an id is given
             if assessment_id:
+                log.info("Remove the lock file")
+                os.unlink("virtual_omr_sync.lock")
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
-                result[assessment.id] = responses
+                result[assessment.id] = responses_text
+        log.info("Remove the lock file")
+        os.unlink("virtual_omr_sync.lock")
         return jsonify(result)
     return "Invalid Request", 500
 
