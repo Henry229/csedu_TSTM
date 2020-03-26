@@ -329,7 +329,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     sql_stmt_1 = 'SELECT {columns} ' \
                  'FROM my_report_body_v ' \
                  'WHERE assessment_enroll_id=:assessment_enroll_id and testset_id=:testset_id ' \
-                 'ORDER BY question_no desc'.format(
+                 'ORDER BY question_no asc'.format(
         columns=','.join(column_names_1))
     cursor_1 = db.session.execute(sql_stmt_1, {'assessment_enroll_id': assessment_enroll_id, 'testset_id': ts_id})
     Record = namedtuple('Record', cursor_1.keys())
