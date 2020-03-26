@@ -4,10 +4,11 @@ from collections import namedtuple
 from PIL import Image, ImageDraw
 from flask import current_app, render_template, request
 from flask_login import current_user
+from sqlalchemy import Date
 
 from app.api import api
 from app.decorators import permission_required
-from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking
+from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking, Assessment, Testset
 from .response import success
 from .. import db
 from ..web.errors import page_not_found
@@ -936,14 +937,45 @@ def gen_report():
     return 'True'
 
 
+'''Reset test: return EnrollTest Information'''
+
+@api.route('/reset_test/', methods=['GET'])
+@permission_required(Permission.ASSESSMENT_MANAGE)
+def reset_test_query():
+    # Reset Test: Assessment Enroll - testset - testid information
+    enrolls = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
+                               AssessmentEnroll.start_time_client.cast(Date).label('start_time')).distinct().\
+                            filter(AssessmentEnroll.start_time_client.isnot(None)). \
+                            filter_by(finish_time_client=None).\
+                            order_by(AssessmentEnroll.start_time_client.cast(Date)).all()
+    tests_not_finished = []
+    for enroll in enrolls:
+        data = {}
+        assessment = db.session.query(Assessment.GUID, Assessment.name). \
+                            filter(Assessment.id==enroll.assessment_id).first()
+        testset = db.session.query(Testset). \
+                            filter(Testset.id==enroll.testset_id).first()
+        data['assessment_guid'] = assessment.GUID
+        data['assessment_name'] = assessment.name
+        data['testset_name'] = testset.name
+        data['testset_id'] = testset.id
+        data['start_time'] = str(enroll.start_time)
+        tests_not_finished.append(data)
+    return success(tests_not_finished)
+
 '''Reset test'''
 
 @api.route('/reset_test/', methods=['POST'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def reset_test():
+    from datetime import datetime
     guid = request.form.get('guid')
     testset_id = request.form.get('testset_id')
     student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
+    week_no = request.form.get('week_no')
+
+    if week_no != str(datetime.today().isocalendar()[1]):
+        return "Invalid Security Code for Reset Test", 404
     if not student_user_id:
         return "Student not found", 404
     enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
