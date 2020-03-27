@@ -79,6 +79,8 @@ class Config(metaclass=MetaFlaskEnv):
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
     CS_API_DISABLE = True if os.environ.get('CS_API_DISABLE') else False
 
+    # Student Reports
+    ENABLE_STUDENT_REPORT = False
 
 class DevelopmentConfig(Config):
     DEBUG = True

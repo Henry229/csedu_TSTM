@@ -20,7 +20,8 @@
                                 <table id="testsets" class="display table table-hover" style="width:100%">
                                     <thead>
                                         <tr>
-                                            <th></th><th>Test Set</th><th>Status</th><th>Report</th>
+                                            <th></th><th>Test Set</th><th>Status</th>
+                                            {% if enable_report %}<th>Report</th>{% endif %}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -48,6 +49,7 @@
                                                             data-testset-id="{{ ts.id }}" value="Start">
                                                 {% endif %}
                                             </td>
+                                            {% if enable_report %}
                                             <td>
                                                 {% if ts.enrolled %}
                                                     <input class="btn btn-primary report"
@@ -59,6 +61,7 @@
                                                     <input type="button" class="btn btn-secondary btn-block" value="Not Available" disabled>
                                                 {% endif %}
                                             </td>
+                                            {% endif %}
                                         </tr>
                                     {% endfor %}
                                     </tbody>

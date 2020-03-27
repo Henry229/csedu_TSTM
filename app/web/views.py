@@ -13,6 +13,7 @@ from app import db
 from app.testset.forms import TestsetSearchForm
 from app.web.errors import forbidden, page_not_found, internal_server_error
 from common.logger import log
+from config import Config
 from . import web
 from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
@@ -293,8 +294,10 @@ def assessment_list():
         for tset in assessment.testsets:
             tset.enrolled = tset.id in testset_enrolled
         assessments.append(assessment)
+        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
+                           enable_report=Config.ENABLE_STUDENT_REPORT)
 
 
 @web.route('/testing', methods=['GET'])
