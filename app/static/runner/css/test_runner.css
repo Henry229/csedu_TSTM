@@ -1057,3 +1057,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     border-color: grey;
     cursor: not-allowed;
 }
+
+.disable-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
