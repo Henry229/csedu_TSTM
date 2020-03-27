@@ -3,7 +3,7 @@ import os
 import random
 import string
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from time import time
 
 import pytz
@@ -240,7 +240,7 @@ def create_session():
     if test_center:
         enrolled.test_center = test_center.id
     enrolled.start_time = datetime.utcnow()
-    enrolled.start_time_client = datetime.fromtimestamp(start_time)
+    enrolled.start_time_client = datetime.fromtimestamp(start_time, timezone.utc)
     db.session.add(enrolled)
     db.session.commit()
     assessment_enroll_id = enrolled.id
@@ -369,6 +369,12 @@ def response_process(item_id):
         return bad_request(message='Session status is wrong.')
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
+        return bad_request()
+
+    # check timeout: give 5 seconds gap
+    timeout = (assessment_session.get_value('test_duration') * 60
+               - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
+    if timeout <= 0:
         return bad_request()
 
     # response_json = request.json
@@ -679,12 +685,21 @@ def next_stage():
 @permission_required(Permission.ITEM_EXEC)
 def finish_test():
     session_key = request.json.get('session')
+    finish_time = request.json.get('finish_time')
     assessment_session = AssessmentSession(key=session_key)
     # check session status
     # if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
     #     return bad_request(message='Session status is wrong.')
 
-    assessment_session.set_status(AssessmentSession.STATUS_TEST_SUBMITTED)
+    if assessment_session:
+        assessment_session.set_status(AssessmentSession.STATUS_TEST_SUBMITTED)
+        assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
+        enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
+        if enrolled:
+            enrolled.finish_time = datetime.utcnow()
+            enrolled.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
+            db.session.add(enrolled)
+            db.session.commit()
 
     data = {'redirect_url': '/tests/testsets'}
     return success(data)
