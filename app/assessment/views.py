@@ -8,6 +8,7 @@ import pytz
 import requests
 from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
+from sqlalchemy import or_
 
 from common.logger import log
 from config import Config
@@ -432,7 +433,7 @@ def virtual_omr_sync(assessment_id=None):
                 except os.error as e:
                     log.error(e)
             else:
-                return 'Lock file found. Skip' % (age, locktimeout), 200
+                return 'Lock file found. Skip', 200
 
         with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
@@ -445,27 +446,59 @@ def virtual_omr_sync(assessment_id=None):
             assessments = Assessment.query.filter_by(active=True).all()
 
         for assessment in assessments:
+            log.info("=" * 80)
+            log.info("Assessment : %s" % assessment.GUID)
+            log.info("=" * 80)
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
             responses_text = []
-            log.info("Sync [%s] %s, %s enrolls" % (assessment.name, assessment.GUID, len(enrolls)))
+
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
-                answers = {}
-                for m in enroll.marking:
-                    # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
-                    try:
-                        answers[m.question_no] = {'stud_answer': ord(m.candidate_r_value) - 64,
-                                                  'end_flag': m.is_read}
-                    except:
-                        pass
+                if enroll.synced:
+                    log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
-                marking = {
-                    'GUID': testset.GUID,
-                    'student_user_id': enroll.student.student_id,
-                    'answers': answers
-                }
-                ret = requests.post(Config.CS_API_URL + "/answer_eleven", json=marking, verify=False)
+                    class fake_return(object):
+                        text = "Synced already"
+                        status_code = 200
+
+                    ret = fake_return()
+                else:
+                    # Sync only ended test. Give extra 11min to be safe
+                    end_time = enroll.end_time(margin=11)
+                    if end_time:
+                        log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                            assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
+                            enroll.student.user_id))
+                        log.debug("start time: %s + duration %s = end time %s" % (
+                            enroll.start_time, testset.test_duration, end_time))
+                        if pytz.utc.localize(end_time) >= datetime.now(pytz.utc):
+                            log.info(" > Not timed out yet. Skip")
+                            continue
+                    answers = {}
+                    for m in enroll.marking:
+                        # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
+                        try:
+                            answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                        except:
+                            pass
+
+                    marking = {
+                        'GUID': testset.GUID,
+                        'student_id': enroll.student.student_id,
+                        'answers': answers
+                    }
+                    if len(answers) < 1:
+                        log.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
+
+                        class fake_return(object):
+                            text = "No student answer found"
+                            status_code = 200
+
+                        ret = fake_return()
+                    else:
+                        ret = requests.post(Config.CS_API_URL + "/answer_eleven_synchronised", json=marking,
+                                            verify=False)
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
@@ -474,6 +507,13 @@ def virtual_omr_sync(assessment_id=None):
                                        'testset_guid': testset.GUID,
                                        'student_id': enroll.student.student_id,
                                        'response': ret.text})
+                if ret.status_code == 200:
+                    log.info(" > Success")
+                    enroll.synced = True
+                    enroll.synced_time = datetime.now(pytz.utc)
+                    db.session.commit()
+                else:
+                    log.error(" > Error. %s" % ret.text)
 
             # There should be only one assessment if an id is given
             if assessment_id:
@@ -497,7 +537,7 @@ def virtual_omr_sync(assessment_id=None):
                     total += int(m.group(2))
                     added += int(m.group(3))
         log.info("Total %s/%s synced. %s added" % (synced, total, added))
-        return jsonify(result)
+        return jsonify(result), 200
     return "Invalid Request", 500
 
 
