@@ -565,6 +565,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     vertical-align: top;
 }
 
+.item-header .header-timer .timer-display.finish-soon .number {
+    color: #ff430f;
+}
+
 .item-header .header-timer .timer-display .label {
     display: block;
     line-height: 1;
@@ -999,6 +1003,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     min-width: 750px;
     max-width: 885px;
     font-weight: bold;
+    text-align: left;
 }
 
 .notice-container .notice-info h1 {
@@ -1013,9 +1018,17 @@ textarea:focus.qti-item.qti-interaction.solid {
     margin: 5px auto;
     padding-left: 20px;
     padding-right: 20px;
+    padding-bottom: 3px;
     float: none;
     min-height: 198px;
-    /*max-height: 198px;*/
+    max-height: 355px;
+    overflow-y: auto;
+    border-bottom: 3px solid #d4dfe9;
+}
+
+.notice-container .notice-info .notice-content-agree {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .notice-container .notice-info .footer {

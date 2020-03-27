@@ -42,6 +42,9 @@ var TestRunner = (function () {
             responseProcessedCb: _responseProcessedCb,
             toggleFlaggedCb: _toggleFlaggedCb
         });
+        // Start with seconds hidden.
+        $('.last-min').hide();
+
         var summary_btn = $('.header-summary');
         summary_btn.on('click', function () {
             $('.tools-ruler').hide();
@@ -90,18 +93,28 @@ var TestRunner = (function () {
         $('.footer-finish .footer-finish-btn').on('click', function () {
             _finishTest();
         });
+        $('#timeoverModal .timeover-confirm').on('click', function () {
+            _finishTest();
+        });
         document.addEventListener("contextmenu", function(e){
             e.preventDefault();
         }, false);
     };
     var _setDurationTimer = function () {
         var seconds_past = moment().unix() - _start_time;
-        var minutes_remained = _test_duration_minutes - Math.floor(seconds_past / 60);
+        var seconds_remained = _test_duration_minutes * 60 - seconds_past;
+        var minutes_remained = Math.floor(seconds_remained / 60);
         if (minutes_remained < 0) {
             if (_duration_timer)
                 clearInterval(_duration_timer);
             _duration_timer = null;
+            $('#timeoverModal').modal('show');
             return;
+        } else if (minutes_remained <= 5) {
+            $('.timer-display').addClass('finish-soon');
+            if (minutes_remained === 0) {
+                $('.last-min').show();
+            }
         }
         var hours = Math.floor(minutes_remained / 60);
         if (hours > 9) hours = "" + hours;
@@ -109,8 +122,12 @@ var TestRunner = (function () {
         var minutes = minutes_remained % 60;
         if (minutes > 9) minutes = "" + minutes;
         else minutes = "0" + minutes;
+        var seconds = seconds_remained % 60;
+        if (seconds > 9) seconds = "" + seconds;
+        else seconds = "0" + seconds;
         $('.timer-display .hours .number').html(hours);
         $('.timer-display .minutes .number').html(minutes);
+        $('.timer-display .seconds .number').html(seconds);
     };
     var _startDurationTimer = function (start_time, test_duration_minutes) {
         _start_time = start_time;
@@ -404,7 +421,8 @@ var TestRunner = (function () {
 
     _finishTest = function () {
         var data = {
-            session: _session
+            session: _session,
+            finish_time: Math.floor(Date.now() / 1000)
         };
         $.ajax({
             url: '/api/finish',
@@ -416,7 +434,7 @@ var TestRunner = (function () {
             },
             success: function (response) {
                 var data = response.data;
-                window.location = data.redirect_url + '?session=' + _session;
+                window.location.replace(data.redirect_url + '?session=' + _session);
             }
         });
     };
