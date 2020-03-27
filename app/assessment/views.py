@@ -8,7 +8,6 @@ import pytz
 import requests
 from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from sqlalchemy import or_
 
 from common.logger import log
 from config import Config
@@ -393,9 +392,26 @@ def list():
 @permission_required(Permission.ADMIN)
 def virtual_omr(assessment_id):
     '''
-    Sync marking data to csonlineschool through CS_API
+    Check sync status to csonlineschool through CS_API
     :return: Sync status page
     '''
+    return virtual_omr_sync(assessment_id)
+
+
+@assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def virtual_omr_resync(assessment_id):
+    '''
+    Re-Sync marking data to csonlineschool through CS_API
+    :return: Sync status page
+    '''
+    log.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
+    enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).all()
+    for enroll in enrolls:
+        enroll.synced = False
+        enroll.synced_time = None
+    db.session.commit()
     return virtual_omr_sync(assessment_id)
 
 
@@ -421,7 +437,7 @@ def virtual_omr_sync(assessment_id=None):
 
     if process:
         lockfile = 'virtual_omr_sync.lock'
-        locktimeout = 240
+        locktimeout = 360
         if os.path.exists(lockfile):
             log.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
@@ -433,7 +449,7 @@ def virtual_omr_sync(assessment_id=None):
                 except os.error as e:
                     log.error(e)
             else:
-                return 'Lock file found. Skip', 200
+                return 'Lock file found. Sync may be in progress. Please try again in %ss' % (locktimeout - age), 200
 
         with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
@@ -460,7 +476,7 @@ def virtual_omr_sync(assessment_id=None):
 
                     class fake_return(object):
                         text = "Synced already"
-                        status_code = 200
+                        status_code = 0
 
                     ret = fake_return()
                 else:
@@ -493,7 +509,7 @@ def virtual_omr_sync(assessment_id=None):
 
                         class fake_return(object):
                             text = "No student answer found"
-                            status_code = 200
+                            status_code = 0
 
                         ret = fake_return()
                     else:
@@ -512,7 +528,7 @@ def virtual_omr_sync(assessment_id=None):
                     enroll.synced = True
                     enroll.synced_time = datetime.now(pytz.utc)
                     db.session.commit()
-                else:
+                elif ret.status_code != 0:
                     log.error(" > Error. %s" % ret.text)
 
             # There should be only one assessment if an id is given
