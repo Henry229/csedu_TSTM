@@ -480,17 +480,20 @@ def virtual_omr_sync(assessment_id=None):
 
                     ret = fake_return()
                 else:
-                    # Sync only ended test. Give extra 11min to be safe
-                    end_time = enroll.end_time(margin=11)
-                    if end_time:
-                        log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
-                            assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
-                            enroll.student.user_id))
-                        log.debug("start time: %s + duration %s = end time %s" % (
-                            enroll.start_time, testset.test_duration, end_time))
-                        if pytz.utc.localize(end_time) >= datetime.now(pytz.utc):
-                            log.info(" > Not timed out yet. Skip")
-                            continue
+                    # Sync only ended or timed out test. Give extra 11min to be safe
+                    if enroll.finish_time:
+                        log.info("Test finished at %s. Proceed to sync" % enroll.finish_time)
+                    else:
+                        end_time = enroll.end_time(margin=11)
+                        if end_time:
+                            log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                                assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
+                                enroll.student.user_id))
+                            log.debug("start time: %s + duration %s = end time %s" % (
+                                enroll.start_time, testset.test_duration, end_time))
+                            if pytz.utc.localize(end_time) >= datetime.now(pytz.utc):
+                                log.info(" > Not timed out yet. Skip")
+                                continue
                     answers = {}
                     for m in enroll.marking:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
