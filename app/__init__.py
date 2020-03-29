@@ -20,9 +20,11 @@ cache = Cache()
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-login_manager.session_protection = 'strong'
+# Dynamic IP: https://flask-login.readthedocs.io/en/latest/
+login_manager.session_protection = None
 
 # login_manager.login_message = ''
+
 
 def create_app(config_name):
     app = Flask(__name__)
