@@ -167,7 +167,8 @@
                                                     {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
                                                 {% if current_user.is_administrator() %}
                                                 <td>
-                                                    <a href="{{ url_for('assessment.virtual_omr', assessment_id=assessment.id) }}" target="_blank"><button>Sync2OS</button></a>
+                                                    <a href="{{ url_for('assessment.virtual_omr', assessment_id=assessment.id) }}" target="_blank"><button class="text-primary">Status</button></a>
+                                                    <a href="{{ url_for('assessment.virtual_omr_resync', assessment_id=assessment.id) }}" target="_blank"><button class="text-danger">Sync</button></a>
                                                 </td>
                                                 {% endif %}
 

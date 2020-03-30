@@ -6,13 +6,14 @@ from datetime import datetime, timedelta
 
 import pytz
 import requests
-from flask import render_template, request, redirect, flash, url_for, current_app
+from flask import render_template, request, redirect, flash, url_for
 from flask_login import login_required, login_user, current_user
 
 from app import db
 from app.testset.forms import TestsetSearchForm
 from app.web.errors import forbidden, page_not_found, internal_server_error
 from common.logger import log
+from config import Config
 from . import web
 from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
@@ -173,7 +174,8 @@ def process_inward():
         else:
             role = Role.query.filter_by(name='Test_taker').first()
             student_user = User(
-                username="%s %s" % (member['member']['stud_first_name'], member['member']['stud_last_name']),
+                username="%s %s(%s)" % (
+                    member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
                 active=True)
@@ -293,8 +295,10 @@ def assessment_list():
         for tset in assessment.testsets:
             tset.enrolled = tset.id in testset_enrolled
         assessments.append(assessment)
+        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
+                           enable_report=Config.ENABLE_STUDENT_REPORT)
 
 
 @web.route('/testing', methods=['GET'])

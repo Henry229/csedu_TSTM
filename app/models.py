@@ -1,7 +1,7 @@
 import random
-import string
 import re
-from datetime import datetime
+import string
+from datetime import datetime, timedelta
 from time import time
 
 import jwt
@@ -29,8 +29,8 @@ class Permission:
     TESTSET_MANAGE = 0x0010  # 16
     ASSESSMENT_READ = 0x0020  # 32
     ASSESSMENT_MANAGE = 0x0040  # 64
-    WRITING_READ = 0x0080 # 128
-    WRITING_MANAGE = 0x0100 # 256
+    WRITING_READ = 0x0080  # 128
+    WRITING_MANAGE = 0x0100  # 256
     ADMIN = 0x8000  # 32768
 
 
@@ -63,7 +63,6 @@ class User(UserMixin, db.Model):
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
 
-
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id}).decode('utf-8')
@@ -87,7 +86,7 @@ class User(UserMixin, db.Model):
         return self.can(Permission.ADMIN)
 
     def is_student(self):
-        if self.role.name=='Test_taker':
+        if self.role.name == 'Test_taker':
             return True
         else:
             return False
@@ -218,7 +217,8 @@ class Role(db.Model):
                               Permission.TESTSET_MANAGE, Permission.ASSESSMENT_READ,
                               Permission.WRITING_READ, Permission.WRITING_MANAGE,
                               Permission.ADMIN],
-            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE, Permission.WRITING_READ, Permission.WRITING_MANAGE],
+            'Test_center': [Permission.ASSESSMENT_READ, Permission.ASSESSMENT_MANAGE, Permission.WRITING_READ,
+                            Permission.WRITING_MANAGE],
             'Writing_marker': [Permission.WRITING_READ]
         }
         default_role = 'Test_taker'
@@ -704,10 +704,17 @@ class AssessmentEnroll(db.Model):
     start_time_client = db.Column(db.DateTime)
     finish_time_client = db.Column(db.DateTime)
     start_ip = db.Column(db.String(32))
+    synced = db.Column(db.Boolean, default=False)
+    synced_time = db.Column(db.DateTime)
 
     assessment = db.relationship('Assessment', back_populates="enroll")
     student = db.relationship('Student', back_populates="enroll")
     marking = db.relationship('Marking', back_populates="enroll")
+
+    def end_time(self, margin=11):
+        if self.start_time:
+            testset = Testset.query.filter_by(id=self.testset_id).first()
+            return self.start_time + timedelta(minutes=testset.test_duration + margin)
 
     @hybrid_property
     def markings(self):
@@ -785,8 +792,8 @@ class EducationPlanDetail(db.Model):
     @staticmethod
     def get_grade(assessment_id):
         epd = EducationPlanDetail.query. \
-                filter(EducationPlanDetail.assessment_id == assessment_id). \
-                order_by(EducationPlanDetail.modified_time.desc()).first()
+            filter(EducationPlanDetail.assessment_id == assessment_id). \
+            order_by(EducationPlanDetail.modified_time.desc()).first()
         if epd:
             return Codebook.get_code_name(epd.master_plan.grade)
         else:
@@ -845,7 +852,7 @@ class Marking(db.Model):
         return total_score.score
 
     def __json__(self):
-        return ['question_no', 'testset_id', 'testlet_id', 'item_id', 'weight',\
+        return ['question_no', 'testset_id', 'testlet_id', 'item_id', 'weight', \
                 'is_correct', 'correct_r_value', 'candidate_r_value', 'scaled_outcome_score', 'candidate_mark']
 
     def __repr__(self):
@@ -905,9 +912,11 @@ class MarkingForWriting(db.Model):
     __tablename__ = 'marking_writing'
 
     id = db.Column(db.Integer, primary_key=True)
-    candidate_file_link = db.Column(JSONB)          # {"file1" :"file1_path", ... "filen" : "filen_path" } candidate response writing image file
-    marked_file_link = db.Column(JSONB)             # {"file1" :"file1_path", ... "filen" : "filen_path" } marker's response image file
-    candidate_mark_detail = db.Column(JSONB)        # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
+    candidate_file_link = db.Column(
+        JSONB)  # {"file1" :"file1_path", ... "filen" : "filen_path" } candidate response writing image file
+    marked_file_link = db.Column(
+        JSONB)  # {"file1" :"file1_path", ... "filen" : "filen_path" } marker's response image file
+    candidate_mark_detail = db.Column(JSONB)  # {Codebook.id_for_c1 :1, Codebook.id_for_c2:1, Codebook.id_for_c3:1 ...}
     marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
     markers_comment = db.Column(db.String(2048))
     marker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1005,7 +1014,6 @@ class Student(db.Model):
         else:
             return 'Unknown User'
 
-
     @staticmethod
     def getCSCampusName(user_id):
         if user_id:
@@ -1018,7 +1026,7 @@ class Student(db.Model):
     @hybrid_property
     def branch_name(self):
         return Codebook.query.filter(Codebook.code_type == 'test_center',
-                              Codebook.additional_info.contains({"campus_prefix": self.branch})).first()
+                                     Codebook.additional_info.contains({"campus_prefix": self.branch})).first()
 
     def __json__(self):
         return ['user_id', 'student_id', 'branch_name', 'last_access', 'user']
@@ -1036,9 +1044,11 @@ class Codebook(db.Model):
     code_type = db.Column(db.String(255), index=True)
     code_name = db.Column(db.String(255))
     parent_code = db.Column(db.Integer, db.ForeignKey('codebook.id'))
-    additional_info = db.Column(JSONB) # {"state":"", "suburb":"", "address":"", "country":"", "hq_flag":"", "postcode": "",
-                                        # "centre_type": "", "contact_fax": "", "contact_tel": "", "campus_title": "",
-                                        # "activate_flag": "", "campus_prefix": "", "email_address": ""}
+    additional_info = db.Column(
+        JSONB)  # {"state":"", "suburb":"", "address":"", "country":"", "hq_flag":"", "postcode": "",
+
+    # "centre_type": "", "contact_fax": "", "contact_tel": "", "campus_title": "",
+    # "activate_flag": "", "campus_prefix": "", "email_address": ""}
 
     def get_parent_name(self):
         v_parent = Codebook.query.filter_by(id=self.parent_code).first()
@@ -1202,6 +1212,7 @@ class Weights:
         else:
             return 1
 
+
 def atoi(text):
     return int(text) if text.isdigit() else text
 
@@ -1212,15 +1223,13 @@ def natural_keys(text):
     http://nedbatchelder.com/blog/200712/human_sorting.html
     (See Toothy's implementation in the comments)
     '''
-    return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+    return [atoi(c) for c in re.split(r'(\d+)', text)]
 
 
 def sort_codes(codesets):
     if len(codesets) > 1:
         codesets.sort(key=lambda x: natural_keys(x[1]))
     return codesets
-
-
 
 
 # Refresh materialized views
