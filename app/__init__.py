@@ -3,7 +3,7 @@ import os
 from flask import Flask, g
 from flask.sessions import SecureCookieSessionInterface
 from flask_bootstrap import Bootstrap
-from flask_caching import Cache
+# from flask_caching import Cache
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -16,7 +16,7 @@ from qti.itemservice.itemservice import ItemService
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 mail = Mail()
-cache = Cache()
+# cache = Cache()
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -39,10 +39,10 @@ def create_app(config_name):
     bootstrap.init_app(app)
     login_manager.init_app(app)
 
-    cache.init_app(app, {
-        'CACHE_TYPE': app.config['CACHE_TYPE'],
-        'CACHE_DEFAULT_TIMEOUT': app.config['CACHE_DEFAULT_TIMEOUT']
-    })
+    # cache.init_app(app, {
+    #     'CACHE_TYPE': app.config['CACHE_TYPE'],
+    #     'CACHE_DEFAULT_TIMEOUT': app.config['CACHE_DEFAULT_TIMEOUT']
+    # })
 
     jinja_env = Environment(extensions=['jinja2.ext.loopcontrols'])
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')

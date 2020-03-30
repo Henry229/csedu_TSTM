@@ -52,6 +52,7 @@ class Config(metaclass=MetaFlaskEnv):
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = os.path.join(STORAGE_DIR, 'cache')
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
+    CACHE_THRESHOLD = 1000
 
     @classmethod
     def init_app(cls, app):
@@ -81,6 +82,7 @@ class Config(metaclass=MetaFlaskEnv):
 
     # Student Reports
     ENABLE_STUDENT_REPORT = False
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
