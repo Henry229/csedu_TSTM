@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import pytz
 import requests
-from flask import render_template, request, redirect, flash, url_for, current_app
+from flask import render_template, request, redirect, flash, url_for
 from flask_login import login_required, login_user, current_user
 
 from app import db
@@ -174,7 +174,8 @@ def process_inward():
         else:
             role = Role.query.filter_by(name='Test_taker').first()
             student_user = User(
-                username="%s %s" % (member['member']['stud_first_name'], member['member']['stud_last_name']),
+                username="%s %s(%s)" % (
+                    member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
                 active=True)
