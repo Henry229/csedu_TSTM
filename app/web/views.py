@@ -166,7 +166,7 @@ def process_inward():
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
-            student_user.username = "%s %s(%s)" % (
+            student_user.username = "%s %s (%s)" % (
                 member['member']['stud_first_name'], member['member']['stud_last_name'], student_id)
             student_user.last_seen = datetime.now(pytz.utc)
             registered_student.last_access = datetime.now(pytz.utc)
@@ -174,7 +174,7 @@ def process_inward():
         else:
             role = Role.query.filter_by(name='Test_taker').first()
             student_user = User(
-                username="%s %s(%s)" % (
+                username="%s %s (%s)" % (
                     member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
