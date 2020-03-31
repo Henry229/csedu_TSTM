@@ -691,7 +691,7 @@ def finish_test():
     # if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
     #     return bad_request(message='Session status is wrong.')
 
-    if assessment_session:
+    if assessment_session.assessment:
         assessment_session.set_status(AssessmentSession.STATUS_TEST_SUBMITTED)
         assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
         enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()

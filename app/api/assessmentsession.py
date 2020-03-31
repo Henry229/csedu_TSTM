@@ -1,8 +1,10 @@
 import copy
 import hashlib
 from datetime import datetime
+from flask import current_app
 
-from app import cache
+# from app import cache
+from cachelib.filesystemcache import FileSystemCache
 
 
 class AssessmentSession:
@@ -32,10 +34,13 @@ class AssessmentSession:
         :param attempt_count:
         :param key:
         """
+        self.cache = FileSystemCache(current_app.config['CACHE_DIR'],
+                                     threshold=current_app.config['CACHE_THRESHOLD'],
+                                     default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
         if key is None:
             key_string = '{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count)
             self.key = hashlib.sha256(key_string.encode()).hexdigest()
-            cache.delete(self.key)
+            self.cache.delete(self.key)
             self.assessment = copy.deepcopy(self.assessment_default)
             self.assessment.update({
                 'assessment_enroll_id': enroll_id,
@@ -48,14 +53,14 @@ class AssessmentSession:
             self.save_assessment()
         else:
             self.key = key
-            self.assessment = cache.get(self.key)
+            self.assessment = self.cache.get(self.key)
 
     def save_assessment(self):
         timeout = ((self.get_value('test_duration') + 10) * 60
                    - (int(datetime.now().timestamp()) - self.get_value('start_time')))
         if timeout <= 0:
             return
-        cache.set(self.key, self.assessment, timeout=timeout)
+        self.cache.set(self.key, self.assessment, timeout=timeout)
 
     def get_assessment(self):
         return self.assessment
