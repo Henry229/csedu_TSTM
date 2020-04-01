@@ -1203,6 +1203,15 @@ class Choices:
             my_codesets.append((str(current_year), str(current_year)))
         return my_codesets
 
+    @staticmethod
+    def get_branch_group_choices():
+        b_group = current_app.config['CS_BRANCH_GROUPS']
+        my_codesets = [('', '')]
+        for group in b_group.keys():
+            my_codesets.append((group, group))
+        return my_codesets
+
+
 
 class Weights:
     def get_weight(testlet_id, level):
