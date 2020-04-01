@@ -4,7 +4,6 @@ $('.code_type').on('change', function () {
     var $updateCodeObj = $(this).closest('tr').find("input.update_code");
     var $additionalInfoObj = $(this).closest('tr').find("textarea.additional_info");
     var code_id = $(this).children("option:selected").val();
-    // var code_value = $codeTextObj.val();
     if (code_id == 0) {
         alert('Please select code from the list first.');
     } else {
@@ -15,12 +14,13 @@ $('.code_type').on('change', function () {
 $('.branch-group-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
     var $codeTextObj = $(this).closest('tr').find("select.branch_group");
-    // var $updateCodeObj = $(this).closest('tr').find("input.update_code");
-    // var $additionalInfoObj = $(this).closest('tr').find("textarea.additional_info");
     var code_id = $codeObj.children("option:selected").val();
-    var code_value = $codeTextObj.children("option:selected").val();
+    var code_value = [];
+    $codeTextObj.children("option:selected").each(function() {
+       code_value.push($(this).val());
+    });
 
-    if (code_value == 0) {
+    if (code_value.length == 0) {
         alert('Please select branch group from the list first.');
         return;
     }
@@ -33,7 +33,6 @@ $('.branch-group-icon').on('click', function () {
 
 $('.additional-info-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
-    // var $updateCodeObj = $(this).closest('tr').find("input.update_code");
     var $codeTextObj = $(this).closest('tr').find("textarea.additional_info");
     var code_id = $codeObj.children("option:selected").val();
     var code_value = $codeTextObj.val();
@@ -52,7 +51,6 @@ $('.additional-info-icon').on('click', function () {
 $('.update-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
     var $codeTextObj = $(this).closest('tr').find("input.update_code");
-    // var $additionalInfoObj = $(this).closest('tr').find("textarea.additional_info");
     var code_id = $codeObj.children("option:selected").val();
     var code_value = $codeTextObj.val();
 

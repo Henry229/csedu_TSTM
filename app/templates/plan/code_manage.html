@@ -89,7 +89,7 @@
                     <td><textarea rows="3" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i><br>
                         <small>Add {{ form.branch_group.label }}: </small><br>
-                        {{ form.branch_group(class='branch_group') }}
+                        {{ form.branch_group(class='branch_group', multiple=true, size="3") }}
                         <i class="icon-check icons branch-group-icon" style="color: #0b4d75"></i>
                     </td>
                 </tr>

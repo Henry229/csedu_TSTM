@@ -62,19 +62,23 @@ def get_codebook_info():
 def update_codebook():
     import json
     code_id = request.form.get('code_id', 0, type=int)
-    code_value = request.form.get('code_value', '', type=str)
     code_value_field = request.form.get('code_value_field', '', type=str)
     codebook = Codebook.query.filter_by(id=code_id).first()
     if code_value_field == 'code_name':
+        code_value = request.form.get('code_value', '', type=str)
         codebook.code_name = code_value
     elif code_value_field == 'branch_group':
+        code_values = []
+        for code_value in request.form.getlist('code_value[]'):
+            code_values.append(code_value)
         additional_info = {
-            'branch_group': code_value
+            'branch_group': code_values
         }
         for x, y in codebook.additional_info.items():
             additional_info[x] = y
         codebook.additional_info = additional_info
     elif code_value_field == 'additional_info':
+        code_value = request.form.get('code_value', '', type=str)
         try:
             additional_info = json.loads(code_value.replace('\'','"'))
         except Exception as e:
