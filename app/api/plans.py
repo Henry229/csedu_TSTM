@@ -72,7 +72,7 @@ def update_codebook():
         for code_value in request.form.getlist('code_value[]'):
             code_values.append(code_value)
         additional_info = {
-            'branch_group': code_values
+            'branch_groups': code_values
         }
         for x, y in codebook.additional_info.items():
             additional_info[x] = y
