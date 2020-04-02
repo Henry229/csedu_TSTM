@@ -506,7 +506,7 @@ def virtual_omr_sync(assessment_id=None):
                         'GUID': testset.GUID,
                         'student_id': enroll.student.student_id,
                         'answers': answers,
-                        'branch_group': assessment.branch_group
+                        'branch_state': assessment.branch_state
                     }
                     if len(answers) < 1:
                         log.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
@@ -602,7 +602,7 @@ def register_to_csonlineschool(assessment):
                 "myear": plan.year,
                 "title_a": plan.GUID,
                 "details": test_detail,
-                "branch_group": assessment.branch_group
+                "branch_state": assessment.branch_state
             }]
 
             info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)
@@ -624,7 +624,7 @@ def register_to_csonlineschool(assessment):
             "myear": assessment.year,
             "title_a": assessment.GUID,
             "details": test_detail,
-            "branch_group": assessment.branch_group
+            "branch_state": assessment.branch_state
         }]
 
         info = requests.post(Config.CS_API_URL + "/tailored", json=test_type, verify=False)

@@ -80,8 +80,8 @@ class Config(metaclass=MetaFlaskEnv):
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
     CS_API_DISABLE = True if os.environ.get('CS_API_DISABLE') else False
 
-    # Branch groups. The first one is the default for assessment
-    CS_BRANCH_GROUPS = {'NSW': 'Branches in NSW',
+    # Branch state. The first one is the default for assessment
+    CS_BRANCH_STATES = {'NSW': 'Branches in NSW',
                         'VIC': 'Branches in VIC'}
 
     # Student Reports

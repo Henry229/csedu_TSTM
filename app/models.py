@@ -635,12 +635,12 @@ class Assessment(db.Model):
     enroll = db.relationship('AssessmentEnroll', back_populates="assessment")
 
     @property
-    def branch_group(self):
+    def branch_state(self):
         branch_info = Codebook.get_additional_info(self.branch_id)
         if branch_info:
-            if 'branch_group' in branch_info.keys():
-                return branch_info['branch_group']
-        return list(Config.CS_BRANCH_GROUPS.keys())[0]  # Use the first one as default
+            if 'branch_state' in branch_info.keys():
+                return branch_info['branch_state']
+        return list(Config.CS_BRANCH_STATES.keys())[0]  # Use the first one as default
 
     def versioning(self):
         new_assessment = Assessment()
@@ -1218,12 +1218,9 @@ class Choices:
         return my_codesets
 
     @staticmethod
-    def get_branch_group_choices():
-        b_group = current_app.config['CS_BRANCH_GROUPS']
-        my_codesets = [('', '')]
-        for group in b_group.keys():
-            my_codesets.append((group, group))
-        return my_codesets
+    def get_branch_state_choices():
+        b_state = current_app.config['CS_BRANCH_STATES']
+        return [(state, state) for state in b_state.keys()]
 
 
 class Weights:

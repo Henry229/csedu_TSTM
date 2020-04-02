@@ -13,18 +13,18 @@ $('.code_type').on('change', function () {
 
 $('.branch-group-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
-    var $codeTextObj = $(this).closest('tr').find("select.branch_group");
+    var $codeTextObj = $(this).closest('tr').find("select.branch_state");
     var code_id = $codeObj.children("option:selected").val();
     var code_value = $codeTextObj.children("option:selected").val();
 
     if (code_value == null) {
-        alert('Please select branch group from the list first.');
+        alert('Please select branch state from the list first.');
         return;
     }
     if (code_id == 0) {
         alert('Please select code from the list first.');
     } else {
-        updateCodebook($codeObj, $codeTextObj, code_id, code_value, 'branch_group');
+        updateCodebook($codeObj, $codeTextObj, code_id, code_value, 'branch_state');
     }
 });
 
@@ -214,6 +214,6 @@ function addCodebook(selectObj, inputObj, code_id, code_type, code_value) {
 function reset_val() {
         $(".update_code").val('');
         $(".additional_info").val('');
-        $(".branch_group").val('');
+        $(".branch_state").val('');
         $(".code_type").val('');
 }
