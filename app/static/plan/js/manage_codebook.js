@@ -146,6 +146,7 @@ function updateCodebook(selectObj, inputObj, code_id, code_value, code_value_fie
             $(".update_code").val('');
             $(".additional_info").val('');
             $(".branch_group").val('');
+            $(".code_type").val('');
         },
         error: function(xhr, status, error) {
             if (code_value_field=='additional_info') {

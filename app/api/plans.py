@@ -74,8 +74,9 @@ def update_codebook():
         additional_info = {
             'branch_groups': code_values
         }
-        for x, y in codebook.additional_info.items():
-            additional_info[x] = y
+        if codebook.additional_info:
+            for x, y in codebook.additional_info.items():
+                additional_info[x] = y
         codebook.additional_info = additional_info
     elif code_value_field == 'additional_info':
         code_value = request.form.get('code_value', '', type=str)
