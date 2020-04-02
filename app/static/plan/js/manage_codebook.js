@@ -5,7 +5,7 @@ $('.code_type').on('change', function () {
     var $additionalInfoObj = $(this).closest('tr').find("textarea.additional_info");
     var code_id = $(this).children("option:selected").val();
     if (code_id == 0) {
-        alert('Please select code from the list first.');
+        reset_val();
     } else {
         getCodebookInfo(code_id, $updateCodeObj, $additionalInfoObj);
     }
@@ -143,10 +143,7 @@ function updateCodebook(selectObj, inputObj, code_id, code_value, code_value_fie
         complete: function () {
             selectObj.removeAttr('disabled');
             inputObj.removeAttr('disabled');
-            $(".update_code").val('');
-            $(".additional_info").val('');
-            $(".branch_group").val('');
-            $(".code_type").val('');
+            reset_val();
         },
         error: function(xhr, status, error) {
             if (code_value_field=='additional_info') {
@@ -215,4 +212,11 @@ function addCodebook(selectObj, inputObj, code_id, code_type, code_value) {
             });
         }
     });
+}
+
+function reset_val() {
+        $(".update_code").val('');
+        $(".additional_info").val('');
+        $(".branch_group").val('');
+        $(".code_type").val('');
 }
