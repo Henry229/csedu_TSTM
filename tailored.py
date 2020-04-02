@@ -146,6 +146,7 @@ def exceptions(e):
           % (ts, public_ip, tailored_id, user_id, request.path, request.method,
              500, body, files, tb)
     request_logger.error(msg)
+    request_logger.error(traceback.format_exc())
     return "Internal Server Error", 500
 
 # ---------------------------------

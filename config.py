@@ -80,22 +80,9 @@ class Config(metaclass=MetaFlaskEnv):
     CS_API_PASSWORD = os.environ.get('CS_API_PASSWORD')
     CS_API_DISABLE = True if os.environ.get('CS_API_DISABLE') else False
 
+    # Branch groups. The first one is the default for assessment
     CS_BRANCH_GROUPS = {'NSW': 'Branches in NSW',
                         'VIC': 'Branches in VIC'}
-
-    cs_api = {'NSW': {
-        'URL': os.environ.get('CS_NSW_API_URL') or 'http://127.0.0.1:8000/csonlineschool',
-        'USER': os.environ.get('CS_NSW_API_USER'),
-        'PASSWORD': os.environ.get('CS_NSW_API_PASSWORD'),
-        'DISABLE': True if os.environ.get('CS_NSW_API_DISABLE') else False
-    },
-        'VIC': {
-            'URL': os.environ.get('CS_VIC_API_URL') or 'http://127.0.0.1:8000/csonlineschool',
-            'USER': os.environ.get('CS_VIC_API_USER'),
-            'PASSWORD': os.environ.get('CS_VIC_API_PASSWORD'),
-            'DISABLE': True if os.environ.get('CS_VIC_API_DISABLE') else False
-        }
-    }
 
     # Student Reports
     ENABLE_STUDENT_REPORT = False

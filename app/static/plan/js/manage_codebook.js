@@ -15,12 +15,9 @@ $('.branch-group-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
     var $codeTextObj = $(this).closest('tr').find("select.branch_group");
     var code_id = $codeObj.children("option:selected").val();
-    var code_value = [];
-    $codeTextObj.children("option:selected").each(function() {
-       code_value.push($(this).val());
-    });
+    var code_value = $codeTextObj.children("option:selected").val();
 
-    if (code_value.length == 0) {
+    if (code_value == null) {
         alert('Please select branch group from the list first.');
         return;
     }

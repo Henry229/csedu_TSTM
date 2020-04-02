@@ -634,6 +634,14 @@ class Assessment(db.Model):
     testsets = db.relationship('Testset', secondary='assessment_testsets')
     enroll = db.relationship('AssessmentEnroll', back_populates="assessment")
 
+    @property
+    def branch_group(self):
+        branch_info = Codebook.get_additional_info(self.branch_id)
+        if branch_info:
+            if 'branch_group' in branch_info.keys():
+                return branch_info['branch_group']
+        return list(Config.CS_BRANCH_GROUPS.keys())[0]  # Use the first one as default
+
     def versioning(self):
         new_assessment = Assessment()
         version = db.session.query(func.max(Assessment.version)).filter_by(GUID=self.GUID).scalar()
@@ -1089,6 +1097,12 @@ class Codebook(db.Model):
                                          Codebook.additional_info.contains({"campus_prefix": student.branch})).first()
 
     @staticmethod
+    def get_additional_info(code_id):
+        code = Codebook.query.filter_by(id=code_id).first()
+        if code:
+            return code.additional_info
+
+    @staticmethod
     def get_childlist(parent_id):
         childlist = [(row.id, row.code_name) for row in Codebook.query.filter_by(parent_code=parent_id).all()]
         return childlist
@@ -1210,7 +1224,6 @@ class Choices:
         for group in b_group.keys():
             my_codesets.append((group, group))
         return my_codesets
-
 
 
 class Weights:
