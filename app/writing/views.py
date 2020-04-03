@@ -383,9 +383,9 @@ def marking(marking_writing_id, student_user_id):
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
-                populate_criteria_form(form, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
+                populate_criteria_form(form, marking_writing_id, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
             else:
-                populate_criteria_form(form)
+                populate_criteria_form(form, marking_writing_id)
             form.markers_comment.data = marking_writing.markers_comment
             return render_template('writing/marking_onscreen_gradient.html', form=form, web_img_links=web_img_links,
                                    timestamp=str(round(time.time() * 1000)))
@@ -393,14 +393,20 @@ def marking(marking_writing_id, student_user_id):
             return render_template('writing/marking_empty.html')
 
 
-def populate_criteria_form(form, criteria_detail=None):
+def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
     """
     Call from writing.marking(marking_writing_id, student_user_id) to populate form - fieldList Criteria information
     :param form:
+    :param marking_writing_id: marking_writing.id
     :param criteria_detail:
     :return:
     """
-    criteria = Codebook.query.filter_by(code_type='criteria').order_by(Codebook.id).all()
+    test_type_code_id = ( db.session.query(Testset.test_type). \
+                          join(Marking, Marking.testset_id==Testset.id).\
+                          join(MarkingForWriting, MarkingForWriting.marking_id==Marking.id). \
+                          filter(MarkingForWriting.id==marking_writing_id).first()
+                          ).test_type
+    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type_code_id).order_by(Codebook.id).all()
     if criteria_detail is None:
         while len(form.markings) > 0:
             form.markings.pop_entry()
@@ -409,6 +415,10 @@ def populate_criteria_form(form, criteria_detail=None):
             wm_form = WritingMMForm()  # weight mapping
             wm_form.criteria = c.code_name
             wm_form.marking = 0
+            if c.additional_info:
+                wm_form.max_score = c.additional_info['max_score']
+            else:
+                wm_form.max_score = 0.0
             form.markings.append_entry(wm_form)
     else:
         while len(form.markings) > 0:
@@ -417,6 +427,10 @@ def populate_criteria_form(form, criteria_detail=None):
             wm_form = WritingMMForm()  # weight mapping
             wm_form.criteria = c.code_name
             wm_form.marking = float(criteria_detail[c.code_name])
+            if c.additional_info:
+                wm_form.max_score = float(c.additional_info['max_score'])
+            else:
+                wm_form.max_score = 0.0
             form.markings.append_entry(wm_form)
     return form
 
