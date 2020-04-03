@@ -79,6 +79,16 @@
                                                                             style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
+                    <th>&nbsp; - {{ form.criteria.label }}</th>
+                    <td> {{ form.criteria(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                <tr>
                     <th>{{ form.test_center.label }}</th>
                     <td> {{ form.test_center(class='code_type') }} </td>
                     <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
@@ -89,19 +99,9 @@
                     <td><textarea rows="3" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i><br>
                         <small>Select {{ form.branch_state.label }}: </small><br>
-                        {{ form.branch_state(class='branch_state', size="3") }}
+                        {{ form.branch_state(class='branch_state') }}
                         <i class="icon-check icons branch-group-icon" style="color: #0b4d75"></i>
                     </td>
-                </tr>
-                <tr>
-                    <th>{{ form.criteria.label }}</th>
-                    <td> {{ form.criteria(class='code_type') }} </td>
-                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
-                                                                         style="color: #ec6701"></i></td>
-                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
-                                                                            style="color: #0b4d75"></i></td>
-                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
-                                                                            style="color: #0b4d75"></i></td>
                 </tr>
                 </tbody>
             </table>
