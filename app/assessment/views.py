@@ -472,7 +472,7 @@ def virtual_omr_sync(assessment_id=None):
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 if enroll.synced:
-                    log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
+                    # log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
                     class fake_return(object):
                         text = "Synced already"
