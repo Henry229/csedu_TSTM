@@ -112,6 +112,7 @@
                                     <span>
                                         {{ criteria_form.marking(size=2, readonly=True) }}
                                     </span>
+                                    {{ criteria_form.max_score(class='max_score') }}
                                     </td>
                                     <td>
                                         <div id="slider{{ loop.index }}" class="slider">
@@ -538,13 +539,14 @@
             $("#weight_mapping span input").each(function (i, v) {
                 index = i + 1;
                 var marking = $(this)[0];
+                var max_score = $('#markings-'+i+'-max_score').val();
                 var value = parseFloat(marking.value);
                 var handle = $('div[name="custom-handle' + index + '"]');
                 $("#slider" + index).slider({
                     value: value,
                     orientation: "horizontal",
                     min: 0.0,
-                    max: 10.0,
+                    max: max_score,
                     range: "max",
                     animate: true,
                     create: function () {

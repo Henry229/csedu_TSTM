@@ -1064,3 +1064,7 @@ textarea:focus.qti-item.qti-interaction.solid {
   -ms-user-select: none;
   user-select: none;
 }
+
+.print-notice-hidden {
+    display: none;
+}

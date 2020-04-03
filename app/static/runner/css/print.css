@@ -1,0 +1,6 @@
+.item-card {
+    display: none;
+}
+.print-notice-hidden {
+    display: block!important;
+}

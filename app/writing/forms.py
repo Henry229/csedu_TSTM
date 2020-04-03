@@ -73,6 +73,7 @@ class WritingMMForm(FlaskForm):
 
     criteria = StringField('Criteria', default='')
     marking = DecimalField('Mark', default=0.0, places=0)
+    max_score = HiddenField('Max Score', default=0.0)
 
 
 class WritingMarkingForm(FlaskForm):
