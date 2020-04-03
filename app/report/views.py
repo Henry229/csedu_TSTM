@@ -4,13 +4,12 @@ from datetime import datetime
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
-from sqlalchemy import Date
 
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
 from .. import db
 from ..api.reports import query_my_report_list_v, query_my_report_header, query_my_report_body, \
-    query_my_report_footer, make_naplan_student_report, query_all_report_data, \
+    make_naplan_student_report, query_all_report_data, \
     query_individual_progress_summary_report_list, \
     query_test_ranking_subject_list, query_test_ranking_data, build_test_ranking_excel_response, \
     query_item_score_summary_data, query_individual_progress_summary_report_header, \
@@ -19,12 +18,10 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set
-from ..auth.views import get_student_info, getCSStudentGrade
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews
 from ..web.errors import page_not_found
-from ..web.views import assessment_list
 
 ''' 
  @report.route('/full_report/<int:student_id>', methods=['GET'])
@@ -90,9 +87,11 @@ def list_my_report():
     #     rows = query_my_report_list_v(student_user_id)
     #     return render_template("report/my_report_list.html", assessment_enrolls=rows)
     #
-    rows = db.session.query(AssessmentEnroll.assessment_guid).distinct().filter_by(student_user_id=student_user_id).all()
+    rows = db.session.query(AssessmentEnroll.assessment_guid).distinct().filter_by(
+        student_user_id=student_user_id).all()
     if not rows:
-        return page_not_found(e="Invalid request - not found assessment enrolled by [{}]".format(Student.getCSStudentName(student_user_id)))
+        return page_not_found(e="Invalid request - not found assessment enrolled by [{}]".format(
+            Student.getCSStudentName(student_user_id)))
     guid_list = [row.assessment_guid for row in rows]
     guid_list = ','.join(guid_list)
     return redirect(url_for('web.assessment_list', guid_list=guid_list))
@@ -177,7 +176,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                  str(student_user_id),
                                  "report",
                                  "test_report_%s_%s_%s_%s.pdf" % (
-                                 assessment_enroll_id, assessment_id, ts_id, student_user_id))
+                                     assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
     os.chdir(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):

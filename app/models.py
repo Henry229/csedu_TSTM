@@ -1002,6 +1002,7 @@ class Student(db.Model):
     user = db.relationship('User', lazy='joined')
     student_id = db.Column(db.String(64), index=True)
     branch = db.Column(db.String(5), index=True)
+    state = db.Column(db.String(5), index=True)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
