@@ -5,7 +5,8 @@ from flask_login import current_user, login_required
 from sqlalchemy.orm import load_only
 
 from app.api import api
-from ..models import Permission, MarkingForWriting, Marking, MarkerAssigned
+from .. import db
+from ..models import Permission, MarkingForWriting, Marking, MarkerAssigned, AssessmentEnroll, MarkerBranch
 from ..web.errors import forbidden
 
 
@@ -21,13 +22,18 @@ def get_data(user_id, file):
 @api.route('/userdata/writing/<int:marking_writing_id>/<int:student_user_id>/<string:file>', methods=['GET'])
 @login_required
 def get_writing(marking_writing_id, student_user_id, file):
-    marking_id = (
-        MarkingForWriting.query.options(load_only("marking_id")).filter_by(id=marking_writing_id).first()).marking_id
-    marking = Marking.query.filter_by(id=marking_id).first()
-    assessment_id = marking.enroll.assessment_id
-    marker_ids = [sub.marker_id for sub in MarkerAssigned.query.options(load_only("marker_id")).filter_by(
-        assessment_id=assessment_id).filter(MarkerAssigned.delete.isnot(True)).all()]
+    # marking_id = (
+    #     MarkingForWriting.query.options(load_only("marking_id")).filter_by(id=marking_writing_id).first()).marking_id
+    # marking = Marking.query.filter_by(id=marking_id).first()
+    # assessment_id = marking.enroll.assessment_id
+    branch_id = (db.session.query(AssessmentEnroll.test_center). \
+                    join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
+                    join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
+                    filter(MarkingForWriting.id==marking_writing_id).first()
+                 ).test_center
 
+    marker_ids = [sub.marker_id for sub in MarkerBranch.query.options(load_only("marker_id")).filter_by(
+        branch_id=branch_id).filter(MarkerBranch.delete.isnot(True)).all()]
     if current_user.can(Permission.ADMIN) or current_user.id in marker_ids or current_user.id == student_user_id:
         p = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id), "writing")

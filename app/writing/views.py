@@ -28,7 +28,7 @@ def list_writing_marking():
     marker_id = current_user.id
     branch_ids = [row.branch_id for row in
                   db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
-    # / marking / < int: marking_writing_id > / < int: student_user_id >
+
     writing_code_id = Codebook.get_code_id('Writing')
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
@@ -36,7 +36,8 @@ def list_writing_marking():
     marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
-        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)).all()
+        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
+        order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
     marking_writing_list = []
     for m in marking_writings:
         if m.MarkingForWriting.candidate_file_link:
