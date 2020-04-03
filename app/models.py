@@ -91,6 +91,12 @@ class User(UserMixin, db.Model):
         else:
             return False
 
+    def is_writing_marker(self):
+        if self.role.name == 'Writing_marker':
+            return True
+        else:
+            return False
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -634,6 +640,14 @@ class Assessment(db.Model):
     testsets = db.relationship('Testset', secondary='assessment_testsets')
     enroll = db.relationship('AssessmentEnroll', back_populates="assessment")
 
+    @property
+    def branch_state(self):
+        branch_info = Codebook.get_additional_info(self.branch_id)
+        if branch_info:
+            if 'branch_state' in branch_info.keys():
+                return branch_info['branch_state']
+        return list(Config.CS_BRANCH_STATES.keys())[0]  # Use the first one as default
+
     def versioning(self):
         new_assessment = Assessment()
         version = db.session.query(func.max(Assessment.version)).filter_by(GUID=self.GUID).scalar()
@@ -708,6 +722,7 @@ class AssessmentEnroll(db.Model):
     synced_time = db.Column(db.DateTime)
 
     assessment = db.relationship('Assessment', back_populates="enroll")
+    testset = db.relationship('Testset')
     student = db.relationship('Student', back_populates="enroll")
     marking = db.relationship('Marking', back_populates="enroll")
 
@@ -987,6 +1002,7 @@ class Student(db.Model):
     user = db.relationship('User', lazy='joined')
     student_id = db.Column(db.String(64), index=True)
     branch = db.Column(db.String(5), index=True)
+    state = db.Column(db.String(5), index=True)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
@@ -1087,6 +1103,12 @@ class Codebook(db.Model):
         if student:
             return Codebook.query.filter(Codebook.code_type == 'test_center',
                                          Codebook.additional_info.contains({"campus_prefix": student.branch})).first()
+
+    @staticmethod
+    def get_additional_info(code_id):
+        code = Codebook.query.filter_by(id=code_id).first()
+        if code:
+            return code.additional_info
 
     @staticmethod
     def get_childlist(parent_id):
@@ -1202,6 +1224,11 @@ class Choices:
             current_year = i + current_year
             my_codesets.append((str(current_year), str(current_year)))
         return my_codesets
+
+    @staticmethod
+    def get_branch_state_choices():
+        b_state = current_app.config['CS_BRANCH_STATES']
+        return [(state, state) for state in b_state.keys()]
 
 
 class Weights:

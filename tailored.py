@@ -146,6 +146,7 @@ def exceptions(e):
           % (ts, public_ip, tailored_id, user_id, request.path, request.method,
              500, body, files, tb)
     request_logger.error(msg)
+    request_logger.error(traceback.format_exc())
     return "Internal Server Error", 500
 
 # ---------------------------------
@@ -524,3 +525,16 @@ def fillout_default_score():
                                                                                                  marking.candidate_mark,
                                                                                                  marking.outcome_score))
     refresh_mviews()
+
+
+@app.cli.command()
+def change_criteria():
+    '''Command: $ flask change-criteria'''
+    print('Updating writing criteria to be under "Naplan" test type in Codebook table')
+    parent_code_id = Codebook.get_code_id('Naplan')
+    criteria_list = Codebook.query.filter_by(code_type='criteria', parent_code=None).all()
+    for c in criteria_list:
+        c.parent_code = parent_code_id
+        db.session.add(c)
+        print(c)
+    db.session.commit()

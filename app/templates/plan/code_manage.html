@@ -3,7 +3,6 @@
 {% block title %}CSEdu Assessment System - {{ user.username }}{% endblock %}
 
 {% block app_content %}
-
     <div class="card">
         <div class="card-header">
             <i class="fas fa-user-cog"></i> Codebook Manage - New, Update
@@ -17,6 +16,7 @@
                     <th>Code List</th>
                     <th>Add New Code</th>
                     <th>Update Code Name</th>
+                    <th>Additional Info</th>
                 </tr>
                 <tr>
                     <th>{{ form.subject.label }}</th>
@@ -24,6 +24,8 @@
                     <td><input type="text" class="add_code" value=""><i class="icon-check icons add-icon"
                                                                         style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
@@ -33,6 +35,8 @@
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
                     <th>&nbsp; &nbsp; - {{ form.subcategory.label }}</th>
@@ -41,6 +45,8 @@
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
                     <th>{{ form.grade.label }}</th>
@@ -48,6 +54,8 @@
                     <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
@@ -57,6 +65,8 @@
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i></td>
                 </tr>
                 <tr>
                     <th>&nbsp; - {{ form.level.label }}</th>
@@ -65,6 +75,22 @@
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                </tr>
+                <tr>
+                    <th>&nbsp; - {{ form.criteria.label }}</th>
+                    <td> {{ form.criteria(class='code_type') }} </td>
+                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
+                                                                         style="color: #ec6701"></i></td>
+                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
+                                                                            style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i><br>
+                        <small>Enter {{ form.max_score.label }} value: </small><br>
+                        {{ form.max_score(class='max_score') }}
+                        <i class="icon-check icons max-score-icon" style="color: #0b4d75"></i>
+                    </td>
                 </tr>
                 <tr>
                     <th>{{ form.test_center.label }}</th>
@@ -72,15 +98,14 @@
                     <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
-                                                                            style="color: #0b4d75"></i></td>
-                </tr>
-                <tr>
-                    <th>{{ form.criteria.label }}</th>
-                    <td> {{ form.criteria(class='code_type') }} </td>
-                    <td><input type="text" class="add_code" value=""> <i class="icon-check icons add-icon"
-                                                                         style="color: #ec6701"></i></td>
-                    <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
-                                                                            style="color: #0b4d75"></i></td>
+                                                                            style="color: #0b4d75"></i>
+                    </td>
+                    <td><textarea rows="3" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i><br>
+                        <small>Select {{ form.branch_state.label }}: </small><br>
+                        {{ form.branch_state(class='branch_state') }}
+                        <i class="icon-check icons branch-state-icon" style="color: #0b4d75"></i>
+                    </td>
                 </tr>
                 </tbody>
             </table>

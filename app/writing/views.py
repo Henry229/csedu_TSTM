@@ -18,7 +18,50 @@ from ..api.reports import query_my_report_header
 from ..api.response import success, bad_request
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
-    AssessmentHasTestset, Testset, MarkerAssigned, Item
+    AssessmentHasTestset, Testset, MarkerAssigned, Item, MarkerBranch, User
+
+
+@writing.route('/writing_marking_list', methods=['GET'])
+@login_required
+@permission_required(Permission.WRITING_READ)
+def list_writing_marking():
+    marker_id = current_user.id
+    branch_ids = [row.branch_id for row in
+                  db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
+
+    writing_code_id = Codebook.get_code_id('Writing')
+    assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
+        filter(AssessmentEnroll.testset_id == Testset.id). \
+        filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id).all()]
+    marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
+        join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
+        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
+        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
+        order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
+    marking_writing_list = []
+    for m in marking_writings:
+        if m.MarkingForWriting.candidate_file_link:
+            is_candidate_file = 'Y'
+        else:
+            is_candidate_file = 'N'
+        if m.MarkingForWriting.candidate_mark_detail:
+            is_marked = 'Y'
+        else:
+            is_marked = 'N'
+
+        json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
+                    "assessment_name": m.AssessmentEnroll.assessment.name,
+                    "student_user_id": m.AssessmentEnroll.student_user_id,
+                    "student_user_name": User.getUserName(m.AssessmentEnroll.student_user_id),
+                    "testset_name": m.AssessmentEnroll.testset.name,
+                    "start_time": m.AssessmentEnroll.start_time,
+                    "marking_id": m.Marking.id,
+                    "item_id": m.Marking.item_id,
+                    "marking_writing_id": m.MarkingForWriting.id,
+                    "is_candidate_file": is_candidate_file,
+                    "is_marked": is_marked}
+        marking_writing_list.append(json_str)
+    return render_template('writing/list.html', marking_writing_list=marking_writing_list)
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
@@ -91,6 +134,9 @@ def manage():
     Menu Writing > Marking main page
     :return: search form and search result - assessment related information
     """
+    if  current_user.is_writing_marker():
+        return redirect(url_for('writing.list_writing_marking'))
+
     assessment_name = request.args.get("assessment_name")
     year = request.args.get("year")
     test_type = request.args.get("test_type")
@@ -236,7 +282,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                         os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
                                      str(student_user_id), "writing", v))
                 except FileNotFoundError:
-                    return redirect(url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
+                    return redirect(
+                        url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
 
                 # Merge only when marking is available
                 if marking_writing.marked_file_link:

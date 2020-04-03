@@ -10,8 +10,9 @@ from app.models import sort_codes
 
 @api.route('/_get_child_codes/')
 def _get_child_codes():
-    parent = request.args.get('parent', '01', type=str)
-    child = [(row.id, row.code_name) for row in Codebook.query.filter_by(parent_code=parent).all()]
+    parent = request.args.get('parent', 0, type=int)
+    child_code_type = request.args.get('child_code_type', '', type=str)
+    child = [(row.id, row.code_name) for row in Codebook.query.filter_by(parent_code=parent, code_type=child_code_type).all()]
     child.insert(0, (0, ''))
     child = sort_codes(child)
     return jsonify(child)

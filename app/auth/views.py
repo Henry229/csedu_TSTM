@@ -14,7 +14,7 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileA
 from .. import db
 from ..decorators import permission_required, admin_required
 from ..email import send_email, send_password_reset_email
-from ..models import User, Permission, Role, Codebook, MarkerBranch, Student
+from ..models import User, Permission, Role, Codebook, MarkerBranch
 
 
 @auth.before_app_request
@@ -71,7 +71,7 @@ def user_profile(id=None):
         id = current_user.id
     user = User.query.filter_by(id=id).first()
     week_no = datetime.today().isocalendar()[1]
-    return render_template('auth/user.html', user=user, week_no = week_no)
+    return render_template('auth/user.html', user=user, week_no=week_no)
 
 
 @auth.route('/manage/delete', methods=['POST'])
@@ -290,35 +290,28 @@ def reset_password(token):
     return render_template('auth/reset_password.html', form=form)
 
 
-def get_student_info(stud_id):
+def get_student_info(state, stud_id):
     """
     Get member info from CS_API
+    :param state: csonlineschool state. NSW or VIC for now
     :param stud_id: csonlineschool student id
     :return: a member info
     """
-    print(Config.CS_API_URL + "/member/%s" % stud_id)
-    info = requests.get(Config.CS_API_URL + "/member/%s" % stud_id,
+    print(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id))
+    info = requests.get(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id),
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
     return info
 
 
-def get_campuses():
+def get_campuses(state):
     """
     Get compus info from CS_API. CSOnlineSchool has the info
+    :param state: csonlineschool state
     :return: List of campuses
     """
-    info = requests.get(Config.CS_API_URL + "/campus",
+    info = requests.get(Config.CS_API_URL + "/campus/%s" % state,
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
     return info
-
-
-def getCSStudentGrade(user_id):
-    student_id = Student.getCSStudentId(user_id)
-    member = get_student_info(student_id)
-    if len(member['sales'])>0:
-        return member['sales'][0]['grade']
-    else:
-        return '-'
 
 
 def link_marker(marker_id, branch_ids):

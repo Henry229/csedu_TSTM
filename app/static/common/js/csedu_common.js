@@ -51,35 +51,38 @@ var dropdown = {
     item_subcategory: $('.item_subcategories'),
     test_type: $('#select_test_type'),
     level: $('#select_level'),
+    criteria: $('#select_criteria'),
 };
 
 dropdown.subject.on('change', function () {
-    updateChildCode(dropdown.subject.val(), dropdown.category);
+    updateChildCode(dropdown.subject.val(), dropdown.category, 'category');
 });
 dropdown.category.on('change', function () {
-    updateChildCode(dropdown.category.val(), dropdown.subcategory);
+    updateChildCode(dropdown.category.val(), dropdown.subcategory, 'subcategory');
 });
 dropdown.subject2.on('change', function () {
-    updateChildCode(dropdown.subject2.val(), dropdown.category2);
+    updateChildCode(dropdown.subject2.val(), dropdown.category2, 'category');
 });
 dropdown.category2.on('change', function () {
-    updateChildCode(dropdown.category2.val(), dropdown.subcategory2);
+    updateChildCode(dropdown.category2.val(), dropdown.subcategory2, 'subcategory');
 });
 dropdown.item_subject.on('change', function () {
     var $childObj = $(this).closest('tr').find("select.item_categories");
-    updateChildCode(this.value, $childObj);
+    updateChildCode(this.value, $childObj, 'category');
 });
 dropdown.item_category.on('change', function () {
     var $childObj = $(this).closest('tr').find("select.item_subcategories");
-    updateChildCode(this.value, $childObj);
+    updateChildCode(this.value, $childObj, 'subcategory');
 });
 dropdown.test_type.on('change', function () {
-    updateChildCode(dropdown.test_type.val(), dropdown.level);
+    updateChildCode(dropdown.test_type.val(), dropdown.level, 'level');
+    updateChildCode(dropdown.test_type.val(), dropdown.criteria, 'criteria');
 });
 
-function updateChildCode(parentObjId, childObj) {
+function updateChildCode(parentObjId, childObj, child_code_type) {
     var send = {
-        parent: parentObjId
+        parent: parentObjId,
+        child_code_type: child_code_type
     };
     childObj.attr('disabled', 'disabled');
     childObj.empty();

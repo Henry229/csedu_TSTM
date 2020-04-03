@@ -3,6 +3,7 @@ from flask import jsonify, request
 from app.api import api
 from app.decorators import permission_required
 from app.models import Permission, Codebook, Assessment, EducationPlanDetail
+from .response import success, fail, bad_request
 from .. import db
 from app.models import sort_codes
 
@@ -44,14 +45,57 @@ def get_assessment_list():
     return jsonify(rows)
 
 
+# Administration > Codebook Manage > Select Code
+@api.route('/get_codebook_info/', methods=['GET'])
+@permission_required(Permission.ADMIN)
+def get_codebook_info():
+    code_id = request.args.get('code_id', 0, type=int)
+    codebook = Codebook.query.filter_by(id=code_id).first()
+    additional_info = codebook.additional_info if codebook.additional_info else ''
+    data = {'code_name': codebook.code_name, 'additional_info': additional_info}
+    return jsonify(data)
+
+
 # Administration > Codebook Manage > Update
 @api.route('/update_codebook/', methods=['PUT'])
 @permission_required(Permission.ADMIN)
 def update_codebook():
+    import json
     code_id = request.form.get('code_id', 0, type=int)
-    code_value = request.form.get('code_value', '', type=str)
+    code_value_field = request.form.get('code_value_field', '', type=str)
     codebook = Codebook.query.filter_by(id=code_id).first()
-    codebook.code_name = code_value
+    if code_value_field == 'code_name':
+        code_value = request.form.get('code_value', '', type=str)
+        codebook.code_name = code_value
+    elif code_value_field == 'branch_state':
+        additional_info = {
+            'branch_state': request.form.get('code_value')
+        }
+        if codebook.additional_info:
+            for x, y in codebook.additional_info.items():
+                if x == 'branch_state':
+                    continue
+                additional_info[x] = y
+        codebook.additional_info = additional_info
+    elif code_value_field == 'additional_info':
+        code_value = request.form.get('code_value', '', type=str)
+        try:
+            additional_info = json.loads(code_value.replace('\'','"'))
+        except Exception as e:
+            print(e)
+            return bad_request(message=e.msg)
+        codebook.additional_info = additional_info
+    elif code_value_field == 'max_score':
+        additional_info = {
+            'max_score': int(request.form.get('code_value'))
+        }
+        if codebook.additional_info:
+            for x, y in codebook.additional_info.items():
+                if x == 'max_score':
+                    continue
+                additional_info[x] = y
+        codebook.additional_info = additional_info
+
     db.session.commit()
 
     query = Codebook.query.filter_by(code_type=codebook.code_type)
@@ -60,7 +104,9 @@ def update_codebook():
     child = [(row.id, row.code_name) for row in query.all()]
     child.insert(0, (0, ''))
     child = sort_codes(child)
-    return jsonify(child)
+    # return jsonify(child)
+    data = {'child':child, 'message':'Codebook updated successfully'}
+    return success(data)
 
 
 # Administration > Codebook Manage > Add

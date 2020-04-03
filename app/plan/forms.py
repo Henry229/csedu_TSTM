@@ -74,7 +74,9 @@ class CodebookForm(FlaskForm):
     subcategory = SelectField('Sub Category',
                               id='select_subcategory',
                               coerce=int)
-    criteria = SelectField('Criteria For Writing', id="select_criteria", coerce=int)
+    criteria = SelectField('Criteria', id="select_criteria", coerce=int)
+    max_score = StringField('Max Score')
+    branch_state = SelectField('Branch State', id="select_branch_state")
     submit = SubmitField('Search')
 
     def __init__(self, *args, **kwargs):
@@ -86,4 +88,5 @@ class CodebookForm(FlaskForm):
         self.subject.choices = Choices.get_codes('subject')
         self.category.choices = [(0, '')]
         self.subcategory.choices = [(0, '')]
-        self.criteria.choices = Choices.get_codes('criteria')
+        self.criteria.choices = [(0, '')]
+        self.branch_state.choices = Choices.get_branch_state_choices()

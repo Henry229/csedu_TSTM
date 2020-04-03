@@ -41,6 +41,8 @@ from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll
 def index():
     if current_user.is_student():
         return redirect(url_for('report.list_my_report'))
+    elif current_user.is_writing_marker():
+        return redirect(url_for('writing.manage'))
     return render_template('index.html')
 
 
@@ -118,8 +120,8 @@ def is_authorised(student, timeout=120):
     return False
 
 
-def update_campus_info():
-    campuses = get_campuses()
+def update_campus_info(state):
+    campuses = get_campuses(state)
     for c in campuses:
         # Skip existing campus with correct prefix
         if Codebook.query.filter(Codebook.code_type == 'test_center', Codebook.code_name == c['campus_title'],
@@ -131,6 +133,7 @@ def update_campus_info():
             campus.additional_info = c
         else:
             # Register new campus
+            c['branch_state'] = state
             campus = Codebook(code_type='test_center',
                               code_name=c['campus_title'],
                               additional_info=c)
@@ -153,20 +156,24 @@ def process_inward():
         return internal_server_error('Wrong token')
 
     args = json.loads(token.decode('UTF-8'))
+    log.debug("Inward: %s" % args)
+    state = list(Config.CS_BRANCH_STATES.keys())[0]  # Set default state
+    if "state" in args.keys():
+        state = args["state"]
     student_id = args["sid"]
     test_guid = args["aid"]
     session_timeout = int(args["sto"]) if args["sto"] else 120  # Minutes
 
     try:
-        member = get_student_info(student_id)
+        member = get_student_info(state, student_id)
     except:
         return forbidden("Invalid Request")
     if is_authorised(member, session_timeout):
-        registered_student = Student.query.filter(Student.student_id.ilike(student_id)).first()
+        registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
-            student_user.username = "%s %s(%s)" % (
+            student_user.username = "%s %s (%s)" % (
                 member['member']['stud_first_name'], member['member']['stud_last_name'], student_id)
             student_user.last_seen = datetime.now(pytz.utc)
             registered_student.last_access = datetime.now(pytz.utc)
@@ -174,7 +181,7 @@ def process_inward():
         else:
             role = Role.query.filter_by(name='Test_taker').first()
             student_user = User(
-                username="%s %s(%s)" % (
+                username="%s %s (%s)" % (
                     member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
@@ -186,11 +193,12 @@ def process_inward():
 
             student = Student(student_id=student_id,
                               user_id=student_user.id,
-                              branch=member['member']['branch'])
+                              branch=member['member']['branch'],
+                              state=state)
             db.session.add(student)
 
         # Update campus info in the code book
-        update_campus_info()
+        update_campus_info(state)
         db.session.commit()
         login_user(student_user)
         # student_data = get_member_info(student_user_id)
