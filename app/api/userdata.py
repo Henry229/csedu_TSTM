@@ -22,10 +22,6 @@ def get_data(user_id, file):
 @api.route('/userdata/writing/<int:marking_writing_id>/<int:student_user_id>/<string:file>', methods=['GET'])
 @login_required
 def get_writing(marking_writing_id, student_user_id, file):
-    # marking_id = (
-    #     MarkingForWriting.query.options(load_only("marking_id")).filter_by(id=marking_writing_id).first()).marking_id
-    # marking = Marking.query.filter_by(id=marking_id).first()
-    # assessment_id = marking.enroll.assessment_id
     branch_id = (db.session.query(AssessmentEnroll.test_center). \
                     join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
                     join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
