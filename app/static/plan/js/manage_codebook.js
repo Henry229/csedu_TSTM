@@ -79,6 +79,8 @@ $('.add-icon').on('click', function () {
         $parentcodeObj = $('#select_category');
     else if (code_type == 'select_level')
         $parentcodeObj = $('#select_test_type');
+    else if (code_type == 'select_criteria')
+        $parentcodeObj = $('#select_test_type');
 
     if ($parentcodeObj == null)
         var code_id = null;
@@ -192,7 +194,7 @@ function addCodebook(selectObj, inputObj, code_id, code_type, code_value) {
         complete: function () {
             selectObj.removeAttr('disabled');
             inputObj.removeAttr('disabled');
-            inputObj.val('');
+            reset_val();
         },
         success: function (response) {
             response.forEach(function (item) {
