@@ -85,6 +85,17 @@ def update_codebook():
             print(e)
             return bad_request(message=e.msg)
         codebook.additional_info = additional_info
+    elif code_value_field == 'max_score':
+        additional_info = {
+            'max_score': int(request.form.get('code_value'))
+        }
+        if codebook.additional_info:
+            for x, y in codebook.additional_info.items():
+                if x == 'max_score':
+                    continue
+                additional_info[x] = y
+        codebook.additional_info = additional_info
+
     db.session.commit()
 
     query = Codebook.query.filter_by(code_type=codebook.code_type)

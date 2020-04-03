@@ -11,7 +11,25 @@ $('.code_type').on('change', function () {
     }
 });
 
-$('.branch-group-icon').on('click', function () {
+$('.max-score-icon').on('click', function () {
+    var $codeObj = $(this).closest('tr').find("select.code_type");
+    var $codeTextObj = $(this).closest('tr').find("input.max_score");
+    var code_id = $codeObj.children("option:selected").val();
+    var code_value = $codeTextObj.val();
+
+    if (code_value == null) {
+        alert('Please enter max score value first.');
+        return;
+    }
+    if (code_id == 0) {
+        alert('Please select code from the list first.');
+    } else {
+        updateCodebook($codeObj, $codeTextObj, code_id, code_value, 'max_score');
+    }
+});
+
+
+$('.branch-state-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
     var $codeTextObj = $(this).closest('tr').find("select.branch_state");
     var code_id = $codeObj.children("option:selected").val();
@@ -218,4 +236,5 @@ function reset_val() {
         $(".additional_info").val('');
         $(".branch_state").val('');
         $(".code_type").val('');
+        $(".max_score").val('');
 }
