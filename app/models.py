@@ -91,6 +91,12 @@ class User(UserMixin, db.Model):
         else:
             return False
 
+    def is_writing_marker(self):
+        if self.role.name == 'Writing_marker':
+            return True
+        else:
+            return False
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -716,6 +722,7 @@ class AssessmentEnroll(db.Model):
     synced_time = db.Column(db.DateTime)
 
     assessment = db.relationship('Assessment', back_populates="enroll")
+    testset = db.relationship('Testset')
     student = db.relationship('Student', back_populates="enroll")
     marking = db.relationship('Marking', back_populates="enroll")
 

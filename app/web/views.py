@@ -41,6 +41,8 @@ from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll
 def index():
     if current_user.is_student():
         return redirect(url_for('report.list_my_report'))
+    elif current_user.is_writing_marker():
+        return redirect(url_for('writing.manage'))
     return render_template('index.html')
 
 
