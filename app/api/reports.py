@@ -997,19 +997,19 @@ def reset_test():
         all()
     testlet_ids = [row.testlet_id for row in rows]
 
-    marking = Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).first()
+    markings = Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).all()
 
     errors = []
+    if not markings:
+        errors.append('No marking')
 
-    if marking:
+    for marking in markings:
         marking_writing = MarkingForWriting.query.filter_by(marking_id=marking.id).first()
         if marking_writing:
             db.session.delete(marking_writing)
             db.session.commit()
         db.session.delete(marking)
         db.session.commit()
-    else:
-        errors.append('No marking')
 
     if enroll:
         db.session.delete(enroll)
