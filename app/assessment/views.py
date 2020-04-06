@@ -472,7 +472,7 @@ def virtual_omr_sync(assessment_id=None):
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 if enroll.synced:
-                    log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
+                    # log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
                     class fake_return(object):
                         text = "Synced already"
@@ -615,6 +615,20 @@ def register_to_csonlineschool(assessment):
         # Don't need to register testsets as they are not used by csonlineschool
         # Use the grade of the first item
         grade = grade_table[Codebook.get_code_name(items[0].testset.grade)]
+        for item in items:
+            grade = grade_table[Codebook.get_code_name(item.testset.grade)]
+            test_detail.append(
+                {
+                    "test_kind": "objective",
+                    "test_no": Codebook.get_code_name(plan_detail.order) if plan_detail else None,
+                    "title": item.testset.name,
+                    "subject": Codebook.get_code_name(item.testset.subject),
+                    "myear": assessment.year,
+                    "grade": grade,
+                    "qn_total": 0,
+                    "test_time": item.testset.test_duration,
+                    "title_a": item.testset.GUID
+                })
 
         test_type = [{
             "kind": "tstm",

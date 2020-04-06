@@ -1,0 +1,48 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3>Assessment Enroll Info [{{ date_interval }} ~ Today]</h3>
+    <div>
+        <table class="table table-bordered table-hover" bgcolor="white">
+            <tr bgcolor="#f5f5dc">
+                <th>ID</th>
+                <th>Assessment GUID</th>
+                <th>Assessment</th>
+                <th>Testset</th>
+                <th>Student</th>
+                <th>Attempt Count</th>
+{#                <th>Grade</th>#}
+                <th>Test Center</th>
+{#                <th>Start Time</th>#}
+                <th>Start Time Client</th>
+                <th>Finish Time Count</th>
+                <th>Start IP</th>
+                <th>Synced</th>
+                <th>Synced_time</th>
+            </tr>
+            {% for enroll in enrolls %}
+                <tr>
+                    <td><a href="{{ url_for('report.marking_info', id=enroll.id) }}">
+                        {{ enroll.id }}</a></td>
+                    <td>{{ enroll.assessment_guid }}</td>
+                    <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
+                    <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }})</td>
+                    <td>{{ enroll.student_user_id}}<br>({{ Student.getCSStudentId(enroll.student_user_id) }})</td>
+                    <td>{{ enroll.attempt_count }}</td>
+{#                    <td>{{ enroll.grade }}</td>#}
+                    <td>{{ enroll.test_center }}<br>({{ Codebook.get_code_name(enroll.test_center) }})</td>
+{#                    <td>{{ enroll.start_time }}</td>#}
+                    <td>{{ enroll.start_time_client }}t</td>
+                    <td>{{ enroll.finish_time_client }}</td>
+                    <td>{{ enroll.start_ip }}</td>
+                    <td>{{ enroll.synced }}</td>
+                    <td>{{ enroll.synced_time }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock app_content %}

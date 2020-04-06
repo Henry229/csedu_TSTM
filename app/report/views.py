@@ -1,9 +1,10 @@
 import os
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
+from sqlalchemy import Date
 
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
@@ -862,3 +863,23 @@ def report_test(type):
         as_attachment=True,
         attachment_filename=pdf_file_path)
     return rsp
+
+
+@report.route('/enroll_info/', methods=['GET'])
+@permission_required(Permission.ASSESSMENT_MANAGE)
+def enroll_info():
+    date_interval = (date.today() - timedelta(1 * 365 / 12)).isoformat() # one month before
+    enrolls = db.session.query(AssessmentEnroll).\
+                            filter(AssessmentEnroll.start_time_client.cast(Date).label('start_time')>=date_interval). \
+                            order_by(AssessmentEnroll.start_time_client.cast(Date).desc()).all()
+    return render_template('report/assessment_enroll_info.html', enrolls = enrolls, date_interval=date_interval)
+
+
+@report.route('/marking_info/<int:id>', methods=['GET'])
+@permission_required(Permission.ASSESSMENT_MANAGE)
+def marking_info(id):
+    enroll = AssessmentEnroll.query.filter_by(id=id).first()
+    markings = Marking.query.filter_by(assessment_enroll_id=id).\
+                order_by(Marking.question_no).all()
+
+    return render_template('report/marking_info.html', markings = markings, enroll=enroll)

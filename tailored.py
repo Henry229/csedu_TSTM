@@ -34,6 +34,8 @@ r_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'reque
 request_logger = logging.getLogger('__name__')
 request_logger.setLevel(logging.DEBUG)
 request_logger.addHandler(r_handler)
+
+
 # e_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'error.log'), when='W0')
 # error_logger = logging.getLogger('__name__' + 'error')
 # error_logger.setLevel(logging.ERROR)
@@ -74,6 +76,7 @@ def after_request(response):
             'ip': public_ip,
             'tailored_id': tailored_id,
             'user_id': user_id,
+            'user_name': User.getUserName(user_id),
             'start_time': g.start_time,
             'lapsed_time': lapsed_time,
             'method': request.method,
@@ -96,13 +99,13 @@ def after_request(response):
             log_msg['body']['password'] = '********'
         msg = json.dumps(log_msg)
     except TypeError as e:
-        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, '\
+        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, ' \
               '"method": %s, "response_status": %s, ' \
               '"log_error": "%s"}' \
               % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
                  response.status_code, e)
     except Exception as e:
-        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, '\
+        msg = '{"time": %s, "ip": %s, "tailored_id": %s, "start_time": %s, "lapsed_time": %s, "path": %s, ' \
               '"method": %s, "response_status": %s, ' \
               '"log_error": "%s"}' \
               % (ts, public_ip, tailored_id, g.start_time, lapsed_time, request.path, request.method,
@@ -148,6 +151,7 @@ def exceptions(e):
     request_logger.error(msg)
     request_logger.error(traceback.format_exc())
     return "Internal Server Error", 500
+
 
 # ---------------------------------
 # Cli Commands
@@ -442,7 +446,6 @@ def verify_views():
         except Exception as e:
             print("Error: ", e)
             pass
-
 
     print("Verify View object existence from DB: ")
     for object_name in view_names:

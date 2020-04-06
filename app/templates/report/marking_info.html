@@ -1,0 +1,45 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3>Marking Info [{{ enroll.assessment_guid }} by {{ Student.getCSStudentId(enroll.student_user_id) }} ]</h3>
+    <div>
+        <table class="table table-bordered table-hover" bgcolor="white">
+            <tr bgcolor="#f5f5dc">
+                <th>ID</th>
+                <th>Question No</th>
+                <th>Testset ID</th>
+                <th>Testlet ID</th>
+                <th>Item ID</th>
+{#                <th>Candidate Value</th>#}
+                <th>Is Correct?</th>
+                <th>Weight</th>
+                <th>Outcome Score</th>
+                <th>Candidate Mark</th>
+                <th>Duration</th>
+                <th>Is Read?</th>
+                <th>Enroll ID</th>
+            </tr>
+            {% for marking in markings %}
+                <tr>
+                    <td>{{ marking.id }}</td>
+                    <td>{{ marking.question_no }}</td>
+                    <td>{{ marking.testset_id }}</td>
+                    <td>{{ marking.testlet_id }}</td>
+                    <td>{{ marking.item_id}}</td>
+{#                    <td>{{ marking.candidate_r_value }}</td>                    #}
+                    <td>{{ marking.is_correct }}</td>
+                    <td>{{ marking.weight }}</td>
+                    <td>{{ marking.outcome_score }}</td>
+                    <td>{{ marking.candidate_mark }}</td>
+                    <td>{{ marking.duration }}</td>
+                    <td>{{ marking.is_read }}</td>
+                    <td>{{ marking.assessment_enroll_id }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock app_content %}
