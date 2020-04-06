@@ -8,7 +8,8 @@ from sqlalchemy import Date
 
 from app.api import api
 from app.decorators import permission_required
-from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking, Assessment, Testset
+from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking, Assessment, Testset, \
+    MarkingForWriting
 from .response import success
 from .. import db
 
@@ -1001,6 +1002,10 @@ def reset_test():
     errors = []
 
     if marking:
+        marking_writing = MarkingForWriting.query.filter_by(marking_id=marking.id).first()
+        if marking_writing:
+            db.session.delete(marking_writing)
+            db.session.commit()
         db.session.delete(marking)
         db.session.commit()
     else:
