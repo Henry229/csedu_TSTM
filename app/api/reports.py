@@ -944,11 +944,15 @@ def gen_report():
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def reset_test_query():
     # Reset Test: Assessment Enroll - testset - testid information
-    enrolls = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
-                               AssessmentEnroll.start_time_client.cast(Date).label('start_time')).distinct(). \
-        filter(AssessmentEnroll.start_time_client.isnot(None)). \
-        filter_by(finish_time_client=None). \
-        order_by(AssessmentEnroll.start_time_client.cast(Date)).all()
+    #       condition : start_time_client
+    # query = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id, \
+    #                            AssessmentEnroll.start_time_client.cast(Date).label('start_time')).distinct(). \
+    #                     filter(AssessmentEnroll.start_time_client.isnot(None)). \
+    #                     filter_by(finish_time_client=None).order_by(AssessmentEnroll.start_time_client.cast(Date).desc())
+    query = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id).distinct(). \
+                                order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id)
+
+    enrolls = query.all()
     tests_not_finished = []
     for enroll in enrolls:
         data = {}
@@ -960,7 +964,7 @@ def reset_test_query():
         data['assessment_name'] = assessment.name
         data['testset_name'] = testset.name
         data['testset_id'] = testset.id
-        data['start_time'] = str(enroll.start_time)
+        # data['start_time'] = str(enroll.start_time)
         tests_not_finished.append(data)
     return success(tests_not_finished)
 
