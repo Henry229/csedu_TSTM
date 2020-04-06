@@ -3,6 +3,17 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="/static/csedu_style.css">
+    <style>
+        .main .container-fluid {
+            padding: 0 5px;
+        }
+        .container {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-left: 0px;
+        }
+    </style>
 {% endblock %}
 {% block app_content %}
     <h3>Marking Info [{{ enroll.assessment_guid }} by {{ Student.getCSStudentId(enroll.student_user_id) }} ]</h3>
