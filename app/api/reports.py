@@ -11,7 +11,6 @@ from app.decorators import permission_required
 from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking, Assessment, Testset
 from .response import success
 from .. import db
-from ..web.errors import page_not_found
 
 '''Student Naplan Report - graph mapping for drawing picture '''
 graph_mapping = {
@@ -190,7 +189,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
                                                'student_user_id': student_user_id})
         Record = namedtuple('Record', cursor.keys())
         rows = [Record(*r) for r in cursor.fetchall()]
-        if len(rows)==0:
+        if len(rows) == 0:
             return None
         for row in rows:
             student_score = row.percentile_score
@@ -302,10 +301,10 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                'and assessment_id=:assessment_id and testset_id=:testset_id ' \
                'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
     cursor = db.session.execute(sql_stmt,
-                                {'assessment_enroll_id':assessment_enroll_id, 'assessment_id': assessment_id, 'testset_id': ts_id, 'student_user_id': student_user_id})
+                                {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
+                                 'testset_id': ts_id, 'student_user_id': student_user_id})
     ts_header = cursor.fetchone()
     return ts_header
-
 
 
 '''Student UI: Query My Report (subject) Body for each Student'''
@@ -335,7 +334,6 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
     return rows
-
 
 
 '''Student UI: Query My Report (subject) Footer for each Student'''
@@ -799,7 +797,8 @@ def draw_individual_progress_by_subject(score_summaries, plan_GUID, student_user
         index += 1
 
     file_name = "individual_progress_by_subject_%s_%s.png" % (plan_GUID, student_user_id)
-    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "individual_progress_report")
+    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id),
+                                 "individual_progress_report")
     f.savefig(os.path.join(report_folder, file_name))
     return file_name
 
@@ -823,7 +822,8 @@ def draw_individual_progress_by_set(my_set_score, avg_set_score, plan_GUID, stud
     sns.lineplot(data=df, palette="tab10", linewidth=2.5)
     # plt.show()
     file_name = "individual_progress_by_set_%s_%s.png" % (plan_GUID, student_user_id)
-    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "individual_progress_report")
+    report_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id),
+                                 "individual_progress_report")
     fig.savefig(os.path.join(report_folder, file_name))
     return file_name
 
@@ -874,9 +874,9 @@ def build_individual_progress_zipper(plan_GUID):
     from flask import send_file
 
     pdf_dir_path = os.path.join(str(current_user.id),
-                                 "individual_progress_report",
+                                "individual_progress_report",
                                 plan_GUID)
-    os.chdir('%s/%s/%s' % (current_app.config['USER_DATA_FOLDER'],str(current_user.id),"individual_progress_report"))
+    os.chdir('%s/%s/%s' % (current_app.config['USER_DATA_FOLDER'], str(current_user.id), "individual_progress_report"))
     file_paths = get_all_files(plan_GUID)
 
     with ZipFile('%s.zip' % plan_GUID, 'w') as zip:
@@ -884,9 +884,9 @@ def build_individual_progress_zipper(plan_GUID):
             zip.write(file)
 
     zfile = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                 str(current_user.id),
-                                 "individual_progress_report",
-                                 "%s.zip" % (plan_GUID))
+                         str(current_user.id),
+                         "individual_progress_report",
+                         "%s.zip" % (plan_GUID))
     rsp = send_file(
         zfile,
         mimetype='application/zip',
@@ -939,22 +939,23 @@ def gen_report():
 
 '''Reset test: return EnrollTest Information'''
 
+
 @api.route('/reset_test/', methods=['GET'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def reset_test_query():
     # Reset Test: Assessment Enroll - testset - testid information
     enrolls = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
-                               AssessmentEnroll.start_time_client.cast(Date).label('start_time')).distinct().\
-                            filter(AssessmentEnroll.start_time_client.isnot(None)). \
-                            filter_by(finish_time_client=None).\
-                            order_by(AssessmentEnroll.start_time_client.cast(Date)).all()
+                               AssessmentEnroll.start_time_client.cast(Date).label('start_time')).distinct(). \
+        filter(AssessmentEnroll.start_time_client.isnot(None)). \
+        filter_by(finish_time_client=None). \
+        order_by(AssessmentEnroll.start_time_client.cast(Date)).all()
     tests_not_finished = []
     for enroll in enrolls:
         data = {}
         assessment = db.session.query(Assessment.GUID, Assessment.name). \
-                            filter(Assessment.id==enroll.assessment_id).first()
+            filter(Assessment.id == enroll.assessment_id).first()
         testset = db.session.query(Testset). \
-                            filter(Testset.id==enroll.testset_id).first()
+            filter(Testset.id == enroll.testset_id).first()
         data['assessment_guid'] = assessment.GUID
         data['assessment_name'] = assessment.name
         data['testset_name'] = testset.name
@@ -963,7 +964,9 @@ def reset_test_query():
         tests_not_finished.append(data)
     return success(tests_not_finished)
 
+
 '''Reset test'''
+
 
 @api.route('/reset_test/', methods=['POST'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
@@ -978,16 +981,16 @@ def reset_test():
         return "Invalid Security Code for Reset Test", 404
     if not student_user_id:
         return "Student not found", 404
-    enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid).\
-                filter_by(testset_id=testset_id). \
-                filter_by(student_user_id=student_user_id). \
-                order_by(AssessmentEnroll.id.desc()).first()
+    enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid). \
+        filter_by(testset_id=testset_id). \
+        filter_by(student_user_id=student_user_id). \
+        order_by(AssessmentEnroll.id.desc()).first()
     if not enroll:
         return "Enrollment for %s is not found" % request.form.get('cs_student_id'), 404
-    rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id==enroll.id).\
-                        filter(Marking.testset_id==enroll.testset_id).order_by(Marking.created_time.asc()). \
-                        all()
-    testlet_ids = [ row.testlet_id for row in rows ]
+    rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id == enroll.id). \
+        filter(Marking.testset_id == enroll.testset_id).order_by(Marking.created_time.asc()). \
+        all()
+    testlet_ids = [row.testlet_id for row in rows]
 
     marking = Marking.query.filter_by(assessment_enroll_id=enroll.id).filter_by(testset_id=enroll.testset_id).first()
 
@@ -1002,11 +1005,11 @@ def reset_test():
     if enroll:
         db.session.delete(enroll)
         db.session.commit()
-        data = {"assessment_enroll_id":enroll.id,
+        data = {"assessment_enroll_id": enroll.id,
                 "assessment_id": enroll.assessment_id,
                 "testset_id": enroll.testset_id,
                 "student_user_id": enroll.student_user_id,
-                "testlet_ids": testlet_ids }
+                "testlet_ids": testlet_ids}
     else:
         errors.append('No enroll')
 
