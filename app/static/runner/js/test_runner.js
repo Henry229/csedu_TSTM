@@ -21,7 +21,7 @@ var TestRunner = (function () {
     var _item_info = [], _last_question_no = 0;
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
         _finishTest, _session_cb, _tnc_agree_checked;
-    var _duration_timer, _start_time, _test_duration_minutes;
+    var _duration_timer, _start_time, _remained_time, _test_duration_minutes;
     var init = function ($container, options) {
         _assessment_guid = options.assessment_guid;
         _testset_id = options.testset_id;
@@ -88,20 +88,20 @@ var TestRunner = (function () {
             _nextStage();
         });
         $('#finishModal .finish-test').on('click', function () {
-            _finishTest();
+            _finishTest('finish-popup');
         });
         $('.footer-finish .footer-finish-btn').on('click', function () {
-            _finishTest();
+            _finishTest('finish-button');
         });
         $('#timeoverModal .timeover-confirm').on('click', function () {
-            _finishTest();
+            _finishTest('time-over');
         });
         document.addEventListener("contextmenu", function(e){
             e.preventDefault();
         }, false);
     };
     var _setDurationTimer = function () {
-        var seconds_past = moment().unix() - _start_time;
+        var seconds_past = Math.floor(Date.now() / 1000) - _start_time;
         var seconds_remained = _test_duration_minutes * 60 - seconds_past;
         var minutes_remained = Math.floor(seconds_remained / 60);
         if (minutes_remained < 0) {
@@ -129,8 +129,17 @@ var TestRunner = (function () {
         $('.timer-display .minutes .number').html(minutes);
         $('.timer-display .seconds .number').html(seconds);
     };
-    var _startDurationTimer = function (start_time, test_duration_minutes) {
-        _start_time = start_time;
+    /**
+     * 시험 시간을 계산한다.
+     * 서버시간과 PC 에 설정된 시간이 다를 수 있기때문에 _start_time 을 현재 PC 시간을 기준으로 해서 계산한다.
+     * @param start_time Timer from the server
+     * @param current_time Time from the server
+     * @param test_duration_minutes
+     * @private
+     */
+    var _startDurationTimer = function (start_time, current_time, test_duration_minutes) {
+        var time_lapsed = current_time - start_time;
+        _start_time = Math.floor(Date.now() / 1000) - time_lapsed;
         _test_duration_minutes = test_duration_minutes;
         _setDurationTimer();
         if (_duration_timer)
@@ -312,7 +321,7 @@ var TestRunner = (function () {
                 }
 
                 _goToQuestionNo(question_no);
-                _startDurationTimer(rsp_data.start_time, rsp_data.test_duration);
+                _startDurationTimer(rsp_data.start_time, rsp_data.current_time, rsp_data.test_duration);
             }
         });
     };
@@ -419,13 +428,14 @@ var TestRunner = (function () {
         });
     };
 
-    _finishTest = function () {
+    _finishTest = function (reason) {
+        reason = reason || 'unknown';
         var data = {
             session: _session,
             finish_time: Math.floor(Date.now() / 1000)
         };
         $.ajax({
-            url: '/api/finish',
+            url: '/api/finish?reason=' + reason,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

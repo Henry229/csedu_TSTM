@@ -334,6 +334,7 @@ def test_start():
         'next_question_no': next_question_no,
         'test_duration': assessment_session.get_value('test_duration'),
         'start_time': assessment_session.get_value('start_time'),
+        'current_time': int(time()),
         'new_questions': new_questions,
     })
     return success(data)
