@@ -58,7 +58,8 @@ def new():
         testset_form.no_stages.data = testset.no_of_stages
         testset_form.test_duration.data = testset.test_duration
         testset_form.total_score.data = testset.total_score
-        testset_form.link1.data = testset.extended_property['explanation_link']
+        if testset.extended_property:
+            testset_form.link1.data = testset.extended_property['explanation_link']
         stageData = {"stage_depth": testset.no_of_stages}
     if error:
         flash(error)
@@ -200,7 +201,8 @@ def edit(id):
     testset_form.no_stages.data = testset.no_of_stages
     testset_form.test_duration.data = testset.test_duration
     testset_form.total_score.data = testset.total_score
-    testset_form.link1.data = testset.extended_property['explanation_link']
+    if testset.extended_property:
+        testset_form.link1.data = testset.extended_property['explanation_link']
 
     query = Testlet.query
     query = query.filter_by(test_type=testset.test_type).filter_by(grade=testset.grade).filter_by(

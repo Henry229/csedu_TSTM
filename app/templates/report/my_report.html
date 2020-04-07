@@ -141,18 +141,23 @@
                             {% for marking in markings %}
                                 {% if loop.index<=20 %}
                                     <tr>
-                                        {% if not marking.is_correct %}
-                                            <td>
+                                        <td>
+                                            {% if not marking.is_correct %}
                                                 <button class="btn btn-sm btn-outline-info" type="button"
                                                         name="previewButton"
                                                         data-toggle="modal" data-target="#dataModal"
                                                         data-item-id="{{ marking.item_id }}">
                                                     {{ marking.question_no }}
                                                 </button>
-                                            </td>
-                                        {% else %}
-                                            <td>{{ marking.question_no }}</td>
-                                        {% endif %}
+                                            {% else %}
+                                                {{ marking.question_no }}
+                                            {% endif %}
+                                            <span name="explanationButton"
+                                                    data-toggle="modal" data-target="#dataModal"
+                                                    data-item-id="{{ marking.item_id }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                            </span>
+                                        </td>
                                         <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                         <td>{% if marking.is_correct %}
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
@@ -178,18 +183,23 @@
                             {% for marking in markings %}
                                 {% if loop.index>20 %}
                                     <tr>
-                                        {% if not marking.is_correct %}
-                                            <td>
+                                        <td>
+                                            {% if not marking.is_correct %}
                                                 <button class="btn btn-sm btn-outline-info" type="button"
                                                         name="previewButton"
                                                         data-toggle="modal" data-target="#dataModal"
                                                         data-item-id="{{ marking.item_id }}">
                                                     {{ marking.question_no }}
                                                 </button>
-                                            </td>
-                                        {% else %}
-                                            <td>{{ marking.question_no }}</td>
-                                        {% endif %}
+                                            {% else %}
+                                                {{ marking.question_no }}
+                                            {% endif %}
+                                            <span name="explanationButton"
+                                                    data-toggle="modal" data-target="#dataModal"
+                                                    data-item-id="{{ marking.item_id }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                            </span>
+                                        </td>
                                         <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
                                         <td>{% if marking.is_correct %}
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}

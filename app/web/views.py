@@ -271,10 +271,12 @@ def testset_list():
     testsets = assessment.testsets
     for tsets in testsets:
         tsets.enrolled = tsets.id in testset_enrolled
+        enable_report = True if Codebook.get_code_name(
+            tsets.test_type) == 'Naplan' else Config.ENABLE_STUDENT_REPORT
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
-                           testsets=sorted_testsets, assessment_id=assessment.id)
+                           testsets=sorted_testsets, assessment_id=assessment.id, enable_report=enable_report)
 
 
 @web.route('/tests/assessments', methods=['GET'])
@@ -302,11 +304,12 @@ def assessment_list():
         # Get all testset the assessment has
         for tset in assessment.testsets:
             tset.enrolled = tset.id in testset_enrolled
+            tset.enable_report = True if Codebook.get_code_name(
+                tset.test_type) == 'Naplan' else Config.ENABLE_STUDENT_REPORT
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
-                           enable_report=Config.ENABLE_STUDENT_REPORT)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments)
 
 
 @web.route('/testing', methods=['GET'])
