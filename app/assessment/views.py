@@ -471,6 +471,7 @@ def virtual_omr_sync(assessment_id=None):
 
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
+                subject = Codebook.get_subject_name(testset.id)
                 if enroll.synced:
                     # log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
@@ -496,11 +497,24 @@ def virtual_omr_sync(assessment_id=None):
                                 continue
                     answers = {}
                     for m in enroll.marking:
-                        # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
-                        try:
-                            answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
-                        except:
-                            pass
+                        if subject == 'Writing':
+                            try:
+                                # need file transfer for candidate_file_link and marker_file_link
+                                answers['question_no'] = str(m.question_no)
+                                answers['candidate_file_link'] = m.candidate_file_link
+                                answers['marker_file_link'] = m.marker_file_link
+                                answers['candidate_mark_detail'] = m.candidate_mark_detail
+                                answers['markers_comment'] = m.markers_comment
+                                answers['start_time'] = m.start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                                answers['end_time'] = m.end_time.strftime("%m/%d/%Y, %H:%M:%S")
+                            except:
+                                pass
+                        else:
+                            # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
+                            try:
+                                answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                            except:
+                                pass
 
                     marking = {
                         'GUID': testset.GUID,
