@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, BooleanField, HiddenField, StringField
+from wtforms.fields.html5 import URLField
 from wtforms.validators import DataRequired
 
 from ..models import Choices
@@ -34,7 +35,7 @@ class TestsetCreateForm(FlaskForm):
     no_stages = StringField('Number of stages', default='3', validators=[DataRequired()])
     test_duration = StringField('Test Duration', default='50', validators=[DataRequired()])
     total_score = StringField('Total Score', default='100')
-
+    link1 = URLField('Explanation')
     submit = SubmitField('Save')
 
     def __init__(self, *args, **kwargs):
@@ -42,3 +43,4 @@ class TestsetCreateForm(FlaskForm):
         self.grade.choices = Choices.get_codes('grade')
         self.subject.choices = Choices.get_codes('subject')
         self.test_type.choices = Choices.get_codes('test_type')
+

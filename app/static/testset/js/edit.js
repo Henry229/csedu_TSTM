@@ -8,7 +8,8 @@ function update_testset() {
         'subject': $('#update_form #subject').val(),
         'no_stages': $('#update_form #no_stages').val(),
         'test_duration': $('#update_form #test_duration').val(),
-        'total_score': $('#update_form #total_score').val()
+        'total_score': $('#update_form #total_score').val(),
+        'link1': $('#update_form #link1').val()
     };
 
     var url = $('#update_form').attr("action");

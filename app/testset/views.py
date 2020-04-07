@@ -58,6 +58,7 @@ def new():
         testset_form.no_stages.data = testset.no_of_stages
         testset_form.test_duration.data = testset.test_duration
         testset_form.total_score.data = testset.total_score
+        testset_form.link1.data = testset.extended_property['explanation_link']
         stageData = {"stage_depth": testset.no_of_stages}
     if error:
         flash(error)
@@ -97,6 +98,8 @@ def testset_insert():
                 testset.total_score = float(form.total_score.data)
             else:
                 testset.total_score = 100
+            link_json = {"explanation_link": form.link1.data}
+            testset.extended_property = link_json
             db.session.add(testset)
             db.session.commit()
 
@@ -197,6 +200,7 @@ def edit(id):
     testset_form.no_stages.data = testset.no_of_stages
     testset_form.test_duration.data = testset.test_duration
     testset_form.total_score.data = testset.total_score
+    testset_form.link1.data = testset.extended_property['explanation_link']
 
     query = Testlet.query
     query = query.filter_by(test_type=testset.test_type).filter_by(grade=testset.grade).filter_by(
@@ -227,6 +231,7 @@ def update():
         no_stages = json_data.get('no_stages')
         test_duration = json_data.get('test_duration')
         total_score = json_data.get('total_score')
+        link_json = {"explanation_link": json_data.get('link1')}
 
         # Get data from old testset
         testset = Testset.query.filter_by(id=testset_id).first()
@@ -249,6 +254,7 @@ def update():
                     new_testset.total_score = total_score
                 else:
                     new_testset.total_score = 100
+                new_testset.extended_property = link_json
                 new_testset.branching = testset_data
                 new_testset.modified_by = current_user.id
                 new_testset.modified_time = datetime.now(pytz.utc)
@@ -270,6 +276,7 @@ def update():
                     testset.total_score = total_score
                 else:
                     testset.total_score = 100
+                testset.extended_property = link_json
                 testset.branching = testset_data
                 testset.modified_by = current_user.id
                 testset.modified_time = datetime.now(pytz.utc)
@@ -306,6 +313,7 @@ def clone(id):
     form.no_stages.data = testset.no_of_stages
     form.test_duration.data = testset.test_duration
     form.total_score.data = testset.total_score
+    form.link1.data = testset.extended_property['explanation_link']
 
     query = Testlet.query
     query = query.filter_by(test_type=testset.test_type).filter_by(grade=testset.grade).filter_by(
@@ -336,6 +344,7 @@ def clone_insert():
         no_stages = json_data.get('no_stages')
         test_duration = json_data.get('test_duration')
         total_score = json_data.get('total_score')
+        link_json = {"explanation_link": json_data.get('link1')}
 
         len_testlets = db.session.query(Testlet.id).filter_by(test_type=test_type).filter_by(grade=grade).filter_by(
             subject=subject).filter_by(active=True).count()
@@ -353,6 +362,7 @@ def clone_insert():
                               subject=subject,
                               no_of_stages=no_stages,
                               test_duration=test_duration,
+                              extended_property=link_json,
                               branching=testset_data,
                               modified_by=current_user.id)
             if total_score != '':

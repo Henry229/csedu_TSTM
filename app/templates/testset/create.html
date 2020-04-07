@@ -43,7 +43,9 @@
                             {{ testset_form.test_duration.label }}(min)
                             {{ testset_form.test_duration(disabled=True) }}
                             {{ testset_form.total_score.label }}
-                            {{ testset_form.total_score(disabled=True) }} &nbsp;&nbsp;
+                            {{ testset_form.total_score(disabled=True) }}<br>
+                            {{ testset_form.link1.label }}
+                            {{ testset_form.link1(placeholder='http://...') }}&nbsp;&nbsp;
                             {{ testset_form.submit(class="btn btn-success btn-sm", id="Save",disabled=True) }}
                         {% else %}
                             {{ testset_form.hidden_tag() }}
@@ -70,7 +72,9 @@
                             {{ testset_form.test_duration.label }}(min)
                             {{ testset_form.test_duration(type="number",min="5",max="300",step="5") }}
                             {{ testset_form.total_score.label }}
-                            {{ testset_form.total_score(size="4", pattern="[0-9.]{1,}") }} &nbsp;&nbsp;
+                            {{ testset_form.total_score(size="4", pattern="[0-9.]{1,}") }}<br>
+                            {{ testset_form.link1.label }}
+                            {{ testset_form.link1(placeholder='http://...') }}&nbsp;&nbsp;
                             {{ testset_form.submit(class="btn btn-success btn-sm", id="Save") }}
                         {% endif %}
                     </form>
