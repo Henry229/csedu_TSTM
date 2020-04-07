@@ -3,22 +3,13 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="/static/csedu_style.css">
-    <style>
-        .main .container-fluid {
-            padding: 0 5px;
-        }
-        .container {
-            width: 100%;
-            padding-right: 15px;
-            padding-left: 15px;
-            margin-left: 0px;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/ui/vendors/DataTables/DataTables-1.10.18/css/jquery.dataTables.min.css">
 {% endblock %}
-{% block app_content %}
-    <h3>Marking Info [{{ enroll.assessment_guid }} by {{ Student.getCSStudentId(enroll.student_user_id) }} ]</h3>
-    <div>
-        <table class="table table-bordered table-hover" bgcolor="white">
+{% block content %}
+    <div class="ml-5 mr-5">
+        <h3>Marking Info [{{ enroll.assessment_guid }} by {{ Student.getCSStudentId(enroll.student_user_id) }} ]</h3>
+        <table id="table_info" class="table table-bordered table-hover" bgcolor="white">
+        <thead>
             <tr bgcolor="#f5f5dc">
                 <th>ID</th>
                 <th>Question No</th>
@@ -34,6 +25,8 @@
                 <th>Is Read?</th>
                 <th>Enroll ID</th>
             </tr>
+        </thead>
+        <tbody>
             {% for marking in markings %}
                 <tr>
                     <td>{{ marking.id }}</td>
@@ -51,6 +44,38 @@
                     <td>{{ marking.assessment_enroll_id }}</td>
                 </tr>
             {% endfor %}
+        </tbody>
+       <tfoot>
+            <tr bgcolor="#f5f5dc">
+                <th>ID</th>
+                <th>Question No</th>
+                <th>Testset ID</th>
+                <th>Testlet ID</th>
+                <th>Item ID</th>
+{#                <th>Candidate Value</th>#}
+                <th>Is Correct?</th>
+                <th>Weight</th>
+                <th>Outcome Score</th>
+                <th>Candidate Mark</th>
+                <th>Duration</th>
+                <th>Is Read?</th>
+                <th>Enroll ID</th>
+            </tr>
+        </tfoot>
         </table>
     </div>
-{% endblock app_content %}
+
+{% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery/js/jquery.js"></script>
+    <script src="/static/ui/vendors/DataTables/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+    <script>
+            $(document).ready(function() {
+                $('#table_info').DataTable( {
+                    "pageLength": 50,
+                    "order": [[ 0, 'asc' ], [ 1, 'asc' ]]
+                } );
+            } );
+    </script>
+{% endblock scripts %}

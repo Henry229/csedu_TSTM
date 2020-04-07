@@ -3,23 +3,14 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="/static/csedu_style.css">
-    <style>
-        .main .container-fluid {
-            padding: 0 5px;
-        }
-        .container {
-            width: 100%;
-            padding-right: 15px;
-            padding-left: 15px;
-            margin-left: 0px;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/ui/vendors/DataTables/DataTables-1.10.18/css/jquery.dataTables.min.css">
 {% endblock %}
 {% block content %}
     <div class="ml-5 mr-5">
         <h3>Assessment Enroll Info [{{ date_interval }} ~ Today]</h3>
         <div>
-            <table class="table table-bordered table-hover" bgcolor="white">
+            <table id="table_info" class="table table-bordered table-hover" bgcolor="white">
+            <thead>
                 <tr bgcolor="#f5f5dc">
                     <th>ID</th>
                     <th>Assessment GUID</th>
@@ -36,6 +27,8 @@
                     <th>Synced</th>
                     <th>Synced_time</th>
                 </tr>
+            </thead>
+            <tbody>
                 {% for enroll in enrolls %}
                     <tr>
                         <td><a href="{{ url_for('report.marking_info', id=enroll.id) }}">
@@ -55,7 +48,41 @@
                         <td>{{ enroll.synced_time }}</td>
                     </tr>
                 {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr bgcolor="#f5f5dc">
+                    <th>ID</th>
+                    <th>Assessment GUID</th>
+                    <th>Assessment</th>
+                    <th>Testset</th>
+                    <th>Student</th>
+                    <th>Attempt Count</th>
+                    {#                <th>Grade</th>#}
+                    <th>Test Center</th>
+                    {#                <th>Start Time</th>#}
+                    <th>Start Time Client</th>
+                    <th>Finish Time Count</th>
+                    <th>Start IP</th>
+                    <th>Synced</th>
+                    <th>Synced_time</th>
+                </tr>
+            </tfoot>
             </table>
         </div>
     </div>
 {% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/ui/vendors/jquery/js/jquery.js"></script>
+    <script src="/static/ui/vendors/DataTables/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+    <script>
+            $(document).ready(function() {
+                $('#table_info').DataTable( {
+                    "pageLength": 50,
+                    "order": [[ 0, 'asc' ], [ 1, 'asc' ]]
+                } );
+            } );
+    </script>
+{% endblock scripts %}
+
+
