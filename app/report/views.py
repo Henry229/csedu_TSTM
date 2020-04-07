@@ -871,7 +871,7 @@ def enroll_info():
     date_interval = (date.today() - timedelta(1 * 365 / 12)).isoformat() # one month before
     enrolls = db.session.query(AssessmentEnroll).\
                             filter(AssessmentEnroll.start_time_client.cast(Date).label('start_time')>=date_interval). \
-                            order_by(AssessmentEnroll.start_time_client.cast(Date).desc()).all()
+                            order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id, AssessmentEnroll.student_user_id).all()
     return render_template('report/assessment_enroll_info.html', enrolls = enrolls, date_interval=date_interval)
 
 

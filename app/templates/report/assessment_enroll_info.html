@@ -12,7 +12,7 @@
             <table id="table_info" class="table table-bordered table-hover" bgcolor="white">
             <thead>
                 <tr bgcolor="#f5f5dc">
-                    <th>ID</th>
+                    <th></th>
                     <th>Assessment GUID</th>
                     <th>Assessment</th>
                     <th>Testset</th>
@@ -32,7 +32,7 @@
                 {% for enroll in enrolls %}
                     <tr>
                         <td><a href="{{ url_for('report.marking_info', id=enroll.id) }}">
-                            {{ enroll.id }}</a></td>
+                            {{ loop.index }}</a></td>
                         <td>{{ enroll.assessment_guid }}</td>
                         <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
                         <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }})</td>
@@ -79,7 +79,7 @@
             $(document).ready(function() {
                 $('#table_info').DataTable( {
                     "pageLength": 50,
-                    "order": [[ 0, 'asc' ], [ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
+                    "order": [[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
                 } );
             } );
     </script>
