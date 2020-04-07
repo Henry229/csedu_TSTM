@@ -153,16 +153,18 @@
                                                 {{ marking.question_no }}
                                             {% endif %}
                                             <span name="explanationButton"
-                                                    data-toggle="modal" data-target="#dataModal"
-                                                    data-item-id="{{ marking.item_id }}">
+                                                  data-toggle="modal" data-target="#dataModal"
+                                                  data-item-id="{{ marking.item_id }}">
                                                 <i class="fa fa-play-circle" style="color: #c0a16b"></i>
                                             </span>
                                         </td>
-                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
+                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                                            answer_unsubmission{% endif %}</td>
                                         <td>{% if marking.is_correct %}
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                             <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                        <td>{% if not marking.is_correct and marking.correct_r_value %}{{ marking.correct_r_value }}{% endif %}</td>
+                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
+                                            {{ marking.correct_r_value }}{% endif %}</td>
                                         <td>{{ marking.item_percentile }}%</td>
                                         <td>{{ Codebook.get_code_name(marking.category) }}</td>
                                     </tr>
@@ -195,16 +197,18 @@
                                                 {{ marking.question_no }}
                                             {% endif %}
                                             <span name="explanationButton"
-                                                    data-toggle="modal" data-target="#dataModal"
-                                                    data-item-id="{{ marking.item_id }}">
+                                                  data-toggle="modal" data-target="#dataModal"
+                                                  data-item-id="{{ marking.item_id }}">
                                                 <i class="fa fa-play-circle" style="color: #c0a16b"></i>
                                             </span>
                                         </td>
-                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}answer_unsubmission{% endif %}</td>
+                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                                            answer_unsubmission{% endif %}</td>
                                         <td>{% if marking.is_correct %}
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                             <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                        <td>{% if not marking.is_correct and marking.correct_r_value %}{{ marking.correct_r_value }}{% endif %}</td>
+                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
+                                            {{ marking.correct_r_value }}{% endif %}</td>
                                         <td>{{ marking.item_percentile }}%</td>
                                         <td>{{ Codebook.get_code_name(marking.category) }}</td>
                                     </tr>
