@@ -241,6 +241,7 @@ def save_rewrite(student_user_id):
     return bad_request()
 
 
+# https://github.com/nkmk/python-snippets/blob/4e232ef06628025ef6d3c4ed7775f5f4e25ebe19/notebook/pillow_concat.py
 def get_concat_h_multi_resize(im_list, resample=Image.BICUBIC):
     min_height = min(im.height for im in im_list)
     im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
