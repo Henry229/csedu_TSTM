@@ -274,8 +274,8 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     :param student_user_id: Student user ID
     :param marking_writing: MarkingWriting object
     :param local_file: Get path to local files
-    :param vertical:
-    :return:
+    :param vertical: Merge image to vertical otherwise horizontal
+    :return: URLs/Paths for combined image, URL/Path for the single image
     """
     # Create merged writing markings
     marked_images = []
