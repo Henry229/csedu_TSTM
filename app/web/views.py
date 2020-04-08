@@ -368,3 +368,14 @@ def start_test_manager():
         for tsets in testsets:
             tsets.enrolled = tsets.id in testset_enrolled
     return render_template('web/start_online_test.html', guid_list=guid_list, form=form, testsets=testsets)
+
+
+@web.route('/view_explanation/<int:testset_id>', methods=['GET'])
+@web.route('/view_explanation/<int:testset_id>/<int:item_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def view_explanation(testset_id, item_id=None):
+    url = 'http://csonlineschool.com.au/myStudy/lec.asp?lect=/offline-review-oc/10/part1/10.part1.full'
+    note = 'Please make sure .... '
+    return render_template('web/view_explanation.html', url=url, note=note)
+

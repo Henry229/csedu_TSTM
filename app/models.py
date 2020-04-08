@@ -554,7 +554,7 @@ class Testset(db.Model):
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     branching = db.Column(JSONB)
 
-    assessments = db.relationship('Assessment', secondary='assessment_testsets')
+    assessments = db.relationship('Assessment', secondary='assessment_testsets', order_by='AssessmentHasTestset.assessment_id.asc()')
 
     def versioning(self):
         new_ts = Testset()
@@ -637,7 +637,7 @@ class Assessment(db.Model):
     active = db.Column(db.Boolean, default=True)
     delete = db.Column(db.Boolean)
 
-    testsets = db.relationship('Testset', secondary='assessment_testsets')
+    testsets = db.relationship('Testset', secondary='assessment_testsets', order_by='AssessmentHasTestset.testset_id.asc()')
     enroll = db.relationship('AssessmentEnroll', back_populates="assessment")
 
     @property

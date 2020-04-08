@@ -112,7 +112,7 @@ function invokeModalTestset(id) {
  * Function renderUrlDocument(): Rendering URL HTML Document on modal window
  * @param obj : get HTML Document from url=$(obj).val
  * @param modalId : modal window object id  ex) dataModalMedium
- * @param id : for url combination , 0 means new, null means other
+ * @param id : id for url combination , 0 means new, null means other
  * @param parentModalId : use when this is called from Modal Window
  */
 function renderUrlDocument(obj, modalId, id, parentModalId) {
