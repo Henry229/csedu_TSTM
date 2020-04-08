@@ -10,6 +10,7 @@ from flask import render_template, flash, request, redirect, url_for, current_ap
 from flask_login import login_required, current_user
 from sqlalchemy.orm.attributes import flag_modified
 
+from common.logger import log
 from . import writing
 from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
     MarkerAssignForm
@@ -134,7 +135,7 @@ def manage():
     Menu Writing > Marking main page
     :return: search form and search result - assessment related information
     """
-    if  current_user.is_writing_marker():
+    if current_user.is_writing_marker():
         return redirect(url_for('writing.list_writing_marking'))
 
     assessment_name = request.args.get("assessment_name")
@@ -240,6 +241,41 @@ def save_rewrite(student_user_id):
     return bad_request()
 
 
+def get_merged_images(student_user_id, marking_writing, pdf):
+    # Create merged writing markings
+    marked_images = []
+    for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
+        try:
+            c_image = Image.open(
+                os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                             str(student_user_id), "writing", v))
+        except FileNotFoundError:
+            log.error('File not found. Check the student writing file existing')
+
+        # Merge only when marking is available
+        if marking_writing.marked_file_link:
+            if k in marking_writing.marked_file_link.keys():
+                m_image = Image.open(
+                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "writing", marking_writing.marked_file_link[k]))
+                c_image.paste(m_image, (0, 0), m_image)
+        saved_file_name = v.replace('.jpg', '_merged.png')
+        c_image.save(
+            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                         str(student_user_id),
+                         "writing", saved_file_name), "PNG")
+        marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing.id,
+                                      student_user_id=student_user_id, file=saved_file_name)
+        if pdf:
+            marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
+                os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                str(student_user_id), saved_file_name)
+
+        marked_images.append(marked_writing_path)
+    return marked_images
+
+
 @login_required
 @permission_required(Permission.WRITING_READ)
 @writing.route('/report/<int:assessment_enroll_id>/<int:student_user_id>/<int:marking_writing_id>', methods=['GET'])
@@ -275,36 +311,36 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
 
             # Create merged writing markings
-            marking_writing.marked_images = []
-            for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                try:
-                    c_image = Image.open(
-                        os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                     str(student_user_id), "writing", v))
-                except FileNotFoundError:
-                    return redirect(
-                        url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
-
-                # Merge only when marking is available
-                if marking_writing.marked_file_link:
-                    if k in marking_writing.marked_file_link.keys():
-                        m_image = Image.open(
-                            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                         str(student_user_id),
-                                         "writing", marking_writing.marked_file_link[k]))
-                        c_image.paste(m_image, (0, 0), m_image)
-                saved_file_name = v.replace('.jpg', '_merged.png')
-                c_image.save(
-                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                 str(student_user_id),
-                                 "writing", saved_file_name), "PNG")
-                marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing_id,
-                                              student_user_id=student_user_id, file=saved_file_name)
-                if pdf:
-                    marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
-                        os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                        str(student_user_id), saved_file_name)
-                marking_writing.marked_images.append(marked_writing_path)
+            marking_writing.marked_images = get_merged_images(student_user_id, marking_writing, pdf)
+            # for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
+            #     try:
+            #         c_image = Image.open(
+            #             os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            #                          str(student_user_id), "writing", v))
+            #     except FileNotFoundError:
+            #         return redirect(
+            #             url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
+            #
+            #     # Merge only when marking is available
+            #     if marking_writing.marked_file_link:
+            #         if k in marking_writing.marked_file_link.keys():
+            #             m_image = Image.open(
+            #                 os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            #                              str(student_user_id),
+            #                              "writing", marking_writing.marked_file_link[k]))
+            #             c_image.paste(m_image, (0, 0), m_image)
+            #     saved_file_name = v.replace('.jpg', '_merged.png')
+            #     c_image.save(
+            #         os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            #                      str(student_user_id),
+            #                      "writing", saved_file_name), "PNG")
+            #     marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing_id,
+            #                                   student_user_id=student_user_id, file=saved_file_name)
+            #     if pdf:
+            #         marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
+            #             os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            #             str(student_user_id), saved_file_name)
+            #     marking_writing.marked_images.append(marked_writing_path)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
@@ -383,7 +419,8 @@ def marking(marking_writing_id, student_user_id):
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
-                populate_criteria_form(form, marking_writing_id, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
+                populate_criteria_form(form, marking_writing_id,
+                                       marking_writing.candidate_mark_detail)  # SubForm data populate from the db
             else:
                 populate_criteria_form(form, marking_writing_id)
             form.markers_comment.data = marking_writing.markers_comment
@@ -401,12 +438,13 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
     :param criteria_detail:
     :return:
     """
-    test_type_code_id = ( db.session.query(Testset.test_type). \
-                          join(Marking, Marking.testset_id==Testset.id).\
-                          join(MarkingForWriting, MarkingForWriting.marking_id==Marking.id). \
-                          filter(MarkingForWriting.id==marking_writing_id).first()
-                          ).test_type
-    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type_code_id).order_by(Codebook.id).all()
+    test_type_code_id = (db.session.query(Testset.test_type). \
+                         join(Marking, Marking.testset_id == Testset.id). \
+                         join(MarkingForWriting, MarkingForWriting.marking_id == Marking.id). \
+                         filter(MarkingForWriting.id == marking_writing_id).first()
+                         ).test_type
+    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type_code_id).order_by(
+        Codebook.id).all()
     if criteria_detail is None:
         while len(form.markings) > 0:
             form.markings.pop_entry()
