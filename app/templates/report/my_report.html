@@ -152,11 +152,10 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            <span name="explanationButton"
-                                                  data-toggle="modal" data-target="#dataModal"
-                                                  data-item-id="{{ marking.item_id }}">
-                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                            </span>
+                                            <a id="view_explanation"
+                                                        href="{{ url_for('web.view_explanation',testset_id=0,item_id=marking.item_id) }}"
+                                                        target="_video"><i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                            </a>
                                         </td>
                                         <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
                                             answer_unsubmission{% endif %}</td>

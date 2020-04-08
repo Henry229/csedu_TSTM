@@ -19,7 +19,7 @@ from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
-    User, Role, EducationPlan, EducationPlanDetail
+    User, Role, EducationPlan, EducationPlanDetail, ItemExplanation
 
 """sample usage for decorator
     @web.route('/admin')
@@ -375,7 +375,19 @@ def start_test_manager():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def view_explanation(testset_id, item_id=None):
-    url = 'http://csonlineschool.com.au/myStudy/lec.asp?lect=/offline-review-oc/10/part1/10.part1.full'
+    url = None
     note = 'Please make sure .... '
+    if item_id:
+        item = ItemExplanation.query.filter_by(item_id=item_id).first()
+        if item and item.links:
+            url = item.links['link1']
+            url2 = item.links['link2']
+            url3 = item.links['link3']
+            url4 = item.links['link4']
+            url5 = item.links['link5']
+    else:
+        testset = Testset.query.filter_by(id=testset_id).first()
+        if testset.extended_property:
+            url = testset.extended_property['explanation_link']
     return render_template('web/view_explanation.html', url=url, note=note)
 
