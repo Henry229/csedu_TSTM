@@ -1,11 +1,9 @@
 from flask import jsonify
-from flask import jsonify
 from flask import request
-from sqlalchemy.orm import load_only
 
 from app.api import api
 from app.decorators import permission_required_or_multiple
-from app.models import Item, Permission, AssessmentEnroll, MarkingForWriting
+from app.models import Item, Permission, AssessmentEnroll, MarkingForWriting, Codebook
 
 
 # Writing > Assessment List > search writings > Items return for listing
@@ -23,9 +21,8 @@ def get_writing_item_list():
         for m in markings:
             marking_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
             if marking_writing:
-                interaction_type = (
-                    Item.query.options(load_only("interaction_type")).filter_by(id=m.item_id).first()).interaction_type
-                if interaction_type == 'extendedTextInteraction' or interaction_type == 'uploadInteraction':
+                item_subject_code = Item.query.filter_by(id=m.item_id).first().subject
+                if Codebook.get_code_name(item_subject_code) == Codebook.get_code_id("Writing"):
                     if marking_writing.candidate_file_link:
                         is_candidate_file = True
                     else:
