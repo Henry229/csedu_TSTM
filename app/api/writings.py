@@ -19,26 +19,27 @@ def get_writing_item_list():
     for a in assessment_enroll:
         markings = a.marking
         for m in markings:
+            item_subject_code = Item.query.filter_by(id=m.item_id).first().subject
+            if item_subject_code != Codebook.get_code_id("Writing"):
+                continue
             marking_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
             if marking_writing:
-                item_subject_code = Item.query.filter_by(id=m.item_id).first().subject
-                if Codebook.get_code_name(item_subject_code) == Codebook.get_code_id("Writing"):
-                    if marking_writing.candidate_file_link:
-                        is_candidate_file = True
-                    else:
-                        is_candidate_file = False
-                    if marking_writing.candidate_mark_detail:
-                        is_marked = True
-                    else:
-                        is_marked = False
+                if marking_writing.candidate_file_link:
+                    is_candidate_file = True
+                else:
+                    is_candidate_file = False
+                if marking_writing.candidate_mark_detail:
+                    is_marked = True
+                else:
+                    is_marked = False
 
-                    json_str = {"assessment_enroll_id": a.id,
-                                "assessment_name": a.assessment.name,
-                                "start_time": a.start_time,
-                                "marking_id": m.id,
-                                "item_id": m.item_id,
-                                "marking_writing_id": marking_writing.id,
-                                "is_candidate_file": is_candidate_file,
-                                "is_marked": is_marked}
-                    marking_writing_list.append(json_str)
+                json_str = {"assessment_enroll_id": a.id,
+                            "assessment_name": a.assessment.name,
+                            "start_time": a.start_time,
+                            "marking_id": m.id,
+                            "item_id": m.item_id,
+                            "marking_writing_id": marking_writing.id,
+                            "is_candidate_file": is_candidate_file,
+                            "is_marked": is_marked}
+                marking_writing_list.append(json_str)
     return jsonify(marking_writing_list)
