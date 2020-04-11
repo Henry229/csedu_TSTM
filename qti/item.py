@@ -304,13 +304,22 @@ class Item(FlowContainerMixin, IdentifiedElementContainerMixin, IdentifiedElemen
         return interactions
 
     def get_interaction_type(self):
-        # ToDo: 여러개의 interaction type 을 보여야함.
+        """
+        ToDo: 여러개의 interaction type 을 보여야함. 현재는 하나만 지원함.
+        Writing item 을 처리하기 위해서 extendedTextInteraction 이나 uploadInteraction 이 있는 경우 우선 적용한다.
+        """
         from .utils import ClassUtils
         interaction_type = ''
+        writing_types = ['extendedTextInteraction', 'uploadInteraction']
         for element in self.body.get_elements().values():
             if ClassUtils.is_subclass_by_name(element, 'Interaction'):
-                interaction_type = element.get_qti_tag()
-                # break
+                new_type = element.get_qti_tag()
+                # 이전 코드와 규칙을 맞추기 위해서 new_type 을 한번 더 확인해 넣어준다.
+                if interaction_type in writing_types:
+                    if new_type in writing_types:
+                        interaction_type = new_type
+                else:
+                    interaction_type = new_type
         return interaction_type
 
     def get_cardinality(self):
