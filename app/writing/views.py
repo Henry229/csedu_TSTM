@@ -161,7 +161,11 @@ def manage():
     search_form.test_center.data = test_center
     rows = None
     assessments = []
-    query = Assessment.query.filter_by(active=True)
+    query = db.session.query(Assessment.id, Assessment.GUID,
+                             Assessment.year, Assessment.test_type,
+                             Assessment.name, Assessment.branch_id,
+                             Testset.id.label('testset_id'),
+                             Testset.name.label('testset_name')).filter_by(active=True)
     if current_user.role.name == 'Writing_marker':
         ids = [sub.assessment_id for sub in
                db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
@@ -194,11 +198,14 @@ def manage():
                 MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
             student_user_ids = [sub.student_user_id for sub in
                                 db.session.query(AssessmentEnroll.student_user_id).filter(
-                                    AssessmentEnroll.assessment_id == r.id).distinct()]
+                                    AssessmentEnroll.assessment_id == r.id,
+                                    AssessmentEnroll.testset_id == r.testset_id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
                                    "name": r.name,
+                                   "testset_name": r.testset_name,
+                                   "testset_id": r.testset_id,
                                    "test_center": r.branch_id,
                                    "markers": marker_ids,
                                    "students": student_user_ids

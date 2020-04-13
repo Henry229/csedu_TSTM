@@ -11,11 +11,12 @@ from app.models import Item, Permission, AssessmentEnroll, MarkingForWriting, Co
 @permission_required_or_multiple(Permission.WRITING_READ, Permission.WRITING_MANAGE)
 def get_writing_item_list():
     assessment_guid = request.args.get('assessment_guid', '01', type=str)
+    testset_id = request.args.get('testset_id', 0, type=int)
     student_user_id = request.args.get('student_user_id', 0, type=int)
 
     marking_writing_list = []
     assessment_enroll = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid).filter_by(
-        student_user_id=student_user_id).all()
+        student_user_id=student_user_id).filter_by(testset_id=testset_id).all()
     for a in assessment_enroll:
         markings = a.marking
         for m in markings:

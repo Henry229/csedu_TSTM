@@ -23,10 +23,11 @@ $(document).ready(function () {
  * Function searchWritings(): search item list of writings
  * @returns {boolean}
  */
-function searchWritings(assessment_guid,id) {
+function searchWritings(assessment_guid,id,testset_id) {
     var $btn = $('#search_item');
     var data = {
         assessment_guid: assessment_guid,
+        testset_id: testset_id,
         student_user_id: $("#select_student"+"_"+id+" option:selected").val()
     };
     if (data.assessment_guid == null) return false;
