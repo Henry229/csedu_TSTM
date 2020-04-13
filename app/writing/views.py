@@ -29,7 +29,13 @@ def list_writing_marking():
     marker_id = current_user.id
     branch_ids = [row.branch_id for row in
                   db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
-
+    all_branches = []
+    for branch_id in branch_ids:
+        if Codebook.get_code_name(branch_id)=='All':
+            all_branches = [row.branch_id for row in
+                            db.session.query(Codebook.id).filter_by(Codebook.code_name=='test_center').all()]
+            break
+    branch_ids += all_branches
     writing_code_id = Codebook.get_code_id('Writing')
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
