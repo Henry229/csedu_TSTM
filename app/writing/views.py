@@ -457,7 +457,8 @@ def marking(marking_writing_id, student_user_id):
     form.marking_writing_id.data = marking_writing_id
     form.student_user_id.data = student_user_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
-    if marking_writing:
+
+    if marking_writing and canMarking(current_user, marking_writing.marking_id):
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
@@ -675,3 +676,12 @@ def marking_onscreen_save():
             return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
             # except:
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
+
+def canMarking(marker, marking_id):
+    if marker.is_administrator():
+        return True
+    marking = Marking.query.filter_by(id=marking_id).first()
+    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).filter_by(assessment_id=marking.enroll.assessment_id).first()
+    if marker_assigned:
+        return True
+    return False
