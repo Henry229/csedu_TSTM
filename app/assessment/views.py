@@ -17,7 +17,7 @@ from .. import db
 from ..api.httpstatus import is_success
 from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
-    AssessmentEnroll, Testset
+    AssessmentEnroll, Testset, MarkingForWriting
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -499,14 +499,16 @@ def virtual_omr_sync(assessment_id=None):
                     for m in enroll.marking:
                         if subject == 'Writing':
                             try:
+                                m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
+                                writing = {}
+                                writing['candidate_file_link'] = m_writing.candidate_file_link
+                                writing['marker_file_link'] = m_writing.marked_file_link
+                                writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
+                                writing['markers_comment'] = m_writing.markers_comment
+                                writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                                writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
                                 # need file transfer for candidate_file_link and marker_file_link
-                                answers['question_no'] = str(m.question_no)
-                                answers['candidate_file_link'] = m.candidate_file_link
-                                answers['marker_file_link'] = m.marker_file_link
-                                answers['candidate_mark_detail'] = m.candidate_mark_detail
-                                answers['markers_comment'] = m.markers_comment
-                                answers['start_time'] = m.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-                                answers['end_time'] = m.end_time.strftime("%m/%d/%Y, %H:%M:%S")
+                                answers[str(m.question_no)] = writing
                             except:
                                 pass
                         else:
@@ -520,7 +522,8 @@ def virtual_omr_sync(assessment_id=None):
                         'GUID': testset.GUID,
                         'student_id': enroll.student.student_id,
                         'answers': answers,
-                        'branch_state': assessment.branch_state
+                        'branch_state': assessment.branch_state,
+                        'test_type': Codebook.get_code_name(assessment.test_type)
                     }
                     if len(answers) < 1:
                         log.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
@@ -531,7 +534,11 @@ def virtual_omr_sync(assessment_id=None):
 
                         ret = fake_return()
                     else:
-                        ret = requests.post(Config.CS_API_URL + "/answer_eleven_synchronised", json=marking,
+                        if subject == 'Writing':
+                            url = '/essay_writing_synchronised'
+                        else:
+                            url = '/answer_eleven_synchronised'
+                        ret = requests.post(Config.CS_API_URL + url, json=marking,
                                             verify=False)
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
