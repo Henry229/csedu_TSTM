@@ -32,8 +32,8 @@ def list_writing_marking():
     all_branches = []
     for branch_id in branch_ids:
         if Codebook.get_code_name(branch_id)=='All':
-            all_branches = [row.branch_id for row in
-                            db.session.query(Codebook.id).filter_by(Codebook.code_name=='test_center').all()]
+            all_branches = [row.id for row in
+                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
             break
     branch_ids += all_branches
     writing_code_id = Codebook.get_code_id('Writing')
