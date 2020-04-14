@@ -29,7 +29,13 @@ def list_writing_marking():
     marker_id = current_user.id
     branch_ids = [row.branch_id for row in
                   db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
-
+    all_branches = []
+    for branch_id in branch_ids:
+        if Codebook.get_code_name(branch_id)=='All':
+            all_branches = [row.id for row in
+                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
+            break
+    branch_ids += all_branches
     writing_code_id = Codebook.get_code_id('Writing')
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
@@ -161,7 +167,11 @@ def manage():
     search_form.test_center.data = test_center
     rows = None
     assessments = []
-    query = Assessment.query.filter_by(active=True)
+    query = db.session.query(Assessment.id, Assessment.GUID,
+                             Assessment.year, Assessment.test_type,
+                             Assessment.name, Assessment.branch_id,
+                             Testset.id.label('testset_id'),
+                             Testset.name.label('testset_name')).filter_by(active=True)
     if current_user.role.name == 'Writing_marker':
         ids = [sub.assessment_id for sub in
                db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
@@ -194,11 +204,14 @@ def manage():
                 MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
             student_user_ids = [sub.student_user_id for sub in
                                 db.session.query(AssessmentEnroll.student_user_id).filter(
-                                    AssessmentEnroll.assessment_id == r.id).distinct()]
+                                    AssessmentEnroll.assessment_id == r.id,
+                                    AssessmentEnroll.testset_id == r.testset_id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
                                    "name": r.name,
+                                   "testset_name": r.testset_name,
+                                   "testset_id": r.testset_id,
                                    "test_center": r.branch_id,
                                    "markers": marker_ids,
                                    "students": student_user_ids
@@ -444,7 +457,8 @@ def marking(marking_writing_id, student_user_id):
     form.marking_writing_id.data = marking_writing_id
     form.student_user_id.data = student_user_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
-    if marking_writing:
+
+    if marking_writing and canMarking(current_user, marking_writing.marking_id):
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
@@ -483,7 +497,11 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
             wm_form.criteria = c.code_name
             wm_form.marking = 0
             if c.additional_info:
-                wm_form.max_score = c.additional_info['max_score']
+                try:
+                    wm_form.max_score = c.additional_info['max_score']
+                except TypeError:
+                    flash('Check if max_score of "%s" correctly entered. '% c.code_name)
+                    wm_form.max_score = 0.0
             else:
                 wm_form.max_score = 0.0
             form.markings.append_entry(wm_form)
@@ -662,3 +680,12 @@ def marking_onscreen_save():
             return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
             # except:
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
+
+def canMarking(marker, marking_id):
+    if marker.is_administrator():
+        return True
+    marking = Marking.query.filter_by(id=marking_id).first()
+    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).filter_by(assessment_id=marking.enroll.assessment_id).first()
+    if marker_assigned:
+        return True
+    return False

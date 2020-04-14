@@ -67,7 +67,7 @@
                                 <td class="a_year" id="{{ w.year }}"> {{ w.year }}</td>
                                 <td class="a_type"
                                     id="{{ w.test_type }}"> {{ Codebook.get_code_name(w.test_type) }}</td>
-                                <td class="a_name" id="{{ w.name }}"> {{ w.name }}</td>
+                                <td class="a_name" id="{{ w.name }}"> {{ w.name }} : {{ w.testset_name }}</td>
                                 <td class="a_test_center" id="{{ w.test_center }}"> {{ Codebook.get_code_name(w.test_center) }}</td>
                                 {% if current_user.can(Permission.WRITING_MANAGE) %}
                                     <td>
@@ -88,7 +88,7 @@
                                         {% endfor %}
                                         </select>
                                         <span class="badge badge-warning" href="" name="search_item" id="search_item"
-                                                                           onclick="searchWritings('{{ w.assessment_guid }}',{{ loop.index }})"> Search Writings </span>
+                                                                           onclick="searchWritings('{{ w.assessment_guid }}',{{ loop.index }},{{ w.testset_id }})"> Search Writings </span>
                                     </td>
                                 {% endif %}
                             </tr>
