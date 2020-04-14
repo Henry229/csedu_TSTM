@@ -831,7 +831,7 @@ class Marking(db.Model):
     correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
     candidate_r_value = db.Column(JSONB)  # Candidate Response Value
     is_correct = db.Column(db.Boolean)
-    outcome_score = db.Column(db.Float, default=0)  # SetOutcome Score
+    outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
     candidate_mark = db.Column(db.Float, default=0)  # Student's score
     duration = db.Column(db.Interval)  # time - time:duration, DB column type:Interval,Python Type: datetime.timedelta?
     # flag = db.Column(db.Boolean)
