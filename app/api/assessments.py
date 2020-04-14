@@ -789,7 +789,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
 
 
 def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
-    testset = Testset.query.filter_by(id=testset_id).first()
+    testset = Testset.query.filter_by(id=testset_id, active=True).first()
     first_branch = testset.branching.get('data')[0]
 
     if len(stage_data) == 0:
