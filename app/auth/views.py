@@ -45,7 +45,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             return redirect(url_for('web.index'))
-        flash('Invalid username or password.')
+        flash('Login Failed. Please check if email address or password is correct.')
     return render_template('auth/login.html', form=form)
 
 
@@ -61,6 +61,7 @@ def logout():
 @login_required
 def logout_student():
     logout_user()
+    flash('You have been logged out.')
     return redirect(url_for('web.loggedout'))
 
 
