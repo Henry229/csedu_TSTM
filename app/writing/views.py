@@ -497,7 +497,11 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
             wm_form.criteria = c.code_name
             wm_form.marking = 0
             if c.additional_info:
-                wm_form.max_score = c.additional_info['max_score']
+                try:
+                    wm_form.max_score = c.additional_info['max_score']
+                except TypeError:
+                    flash('Check if max_score of "%s" correctly entered. '% c.code_name)
+                    wm_form.max_score = 0.0
             else:
                 wm_form.max_score = 0.0
             form.markings.append_entry(wm_form)
