@@ -44,7 +44,7 @@ def new():
     testlet_id_list = request.args.get('testlet_list')
     if testlet_id_list:
         testlet_list = testlet_id_list.split(',')
-        testlet_db = [(row.id, row.name) for row in Testlet.query.filter(Testlet.id.in_(testlet_list)).all()]
+        testlet_db = [(row.id, row.name) for row in Testlet.query.filter_by(active=True).filter(Testlet.id.in_(testlet_list)).all()]
     testset_form = TestsetCreateForm()
     if testset_id is None:
         testset_form.test_type.data = Codebook.get_code_id('Naplan')
@@ -205,8 +205,7 @@ def edit(id):
         testset_form.link1.data = testset.extended_property['explanation_link']
 
     query = Testlet.query
-    query = query.filter_by(test_type=testset.test_type).filter_by(grade=testset.grade).filter_by(
-        subject=testset.subject)
+    query = query.filter_by(test_type=testset.test_type, grade=testset.grade, subject=testset.subject, active=True)
     testlet_db = [(row.id, row.name) for row in query.order_by(Testlet.modified_time.desc()).all()]
     if len(testlet_db) == 0:
         flash("Please check testlets if exists. No testlets found.")
