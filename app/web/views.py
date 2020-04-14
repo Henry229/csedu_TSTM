@@ -271,8 +271,8 @@ def testset_list():
     testsets = assessment.testsets
     for tsets in testsets:
         tsets.enrolled = tsets.id in testset_enrolled
-        enable_report = True if Codebook.get_code_name(
-            tsets.test_type) == 'Naplan' else Config.ENABLE_STUDENT_REPORT
+        test_type = Codebook.get_code_name(tsets.test_type)
+        enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
     sorted_testsets = sorted(testsets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
@@ -304,8 +304,8 @@ def assessment_list():
         # Get all testset the assessment has
         for tset in assessment.testsets:
             tset.enrolled = tset.id in testset_enrolled
-            tset.enable_report = True if Codebook.get_code_name(
-                tset.test_type) == 'Naplan' else Config.ENABLE_STUDENT_REPORT
+            test_type = Codebook.get_code_name(tset.test_type)
+            tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 

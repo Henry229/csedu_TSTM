@@ -10,6 +10,7 @@ from flask import render_template, flash, request, redirect, url_for, current_ap
 from flask_login import login_required, current_user
 from sqlalchemy.orm.attributes import flag_modified
 
+from common.logger import log
 from . import writing
 from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
     MarkerAssignForm
@@ -28,7 +29,13 @@ def list_writing_marking():
     marker_id = current_user.id
     branch_ids = [row.branch_id for row in
                   db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
-
+    all_branches = []
+    for branch_id in branch_ids:
+        if Codebook.get_code_name(branch_id)=='All':
+            all_branches = [row.id for row in
+                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
+            break
+    branch_ids += all_branches
     writing_code_id = Codebook.get_code_id('Writing')
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
@@ -134,7 +141,7 @@ def manage():
     Menu Writing > Marking main page
     :return: search form and search result - assessment related information
     """
-    if  current_user.is_writing_marker():
+    if current_user.is_writing_marker():
         return redirect(url_for('writing.list_writing_marking'))
 
     assessment_name = request.args.get("assessment_name")
@@ -160,7 +167,11 @@ def manage():
     search_form.test_center.data = test_center
     rows = None
     assessments = []
-    query = Assessment.query.filter_by(active=True)
+    query = db.session.query(Assessment.id, Assessment.GUID,
+                             Assessment.year, Assessment.test_type,
+                             Assessment.name, Assessment.branch_id,
+                             Testset.id.label('testset_id'),
+                             Testset.name.label('testset_name')).filter_by(active=True)
     if current_user.role.name == 'Writing_marker':
         ids = [sub.assessment_id for sub in
                db.session.query(MarkerAssigned.assessment_id).filter_by(marker_id=current_user.id).all()]
@@ -193,11 +204,14 @@ def manage():
                 MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
             student_user_ids = [sub.student_user_id for sub in
                                 db.session.query(AssessmentEnroll.student_user_id).filter(
-                                    AssessmentEnroll.assessment_id == r.id).distinct()]
+                                    AssessmentEnroll.assessment_id == r.id,
+                                    AssessmentEnroll.testset_id == r.testset_id).distinct()]
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
                                    "name": r.name,
+                                   "testset_name": r.testset_name,
+                                   "testset_id": r.testset_id,
                                    "test_center": r.branch_id,
                                    "markers": marker_ids,
                                    "students": student_user_ids
@@ -240,6 +254,98 @@ def save_rewrite(student_user_id):
     return bad_request()
 
 
+# https://github.com/nkmk/python-snippets/blob/4e232ef06628025ef6d3c4ed7775f5f4e25ebe19/notebook/pillow_concat.py
+def get_concat_h_multi_resize(im_list, resample=Image.BICUBIC):
+    min_height = min(im.height for im in im_list)
+    im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
+                      for im in im_list]
+    total_width = sum(im.width for im in im_list_resize)
+    dst = Image.new('RGB', (total_width, min_height))
+    pos_x = 0
+    for im in im_list_resize:
+        dst.paste(im, (pos_x, 0))
+        pos_x += im.width
+    return dst
+
+
+def get_concat_v_multi_resize(im_list, resample=Image.BICUBIC):
+    min_width = min(im.width for im in im_list)
+    im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=resample)
+                      for im in im_list]
+    total_height = sum(im.height for im in im_list_resize)
+    dst = Image.new('RGB', (min_width, total_height))
+    pos_y = 0
+    for im in im_list_resize:
+        dst.paste(im, (0, pos_y))
+        pos_y += im.height
+    return dst
+
+
+def get_merged_images(student_user_id, marking_writing, local_file=False, vertical=True):
+    """
+    Create writing + marking combined files with it's resource URLs AND all-in-one single file
+    :param student_user_id: Student user ID
+    :param marking_writing: MarkingWriting object
+    :param local_file: Get path to local files
+    :param vertical: Merge image to vertical otherwise horizontal
+    :return: URLs/Paths for combined image, URL/Path for the single image
+    """
+    # Create merged writing markings
+    marked_images = []
+    combined_images = []
+    for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
+        try:
+            c_image = Image.open(
+                os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                             str(student_user_id), "writing", v))
+        except FileNotFoundError:
+            log.error('File not found. Check the student writing file existing')
+
+        # Merge only when marking is available
+        if marking_writing.marked_file_link:
+            if k in marking_writing.marked_file_link.keys():
+                m_image = Image.open(
+                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "writing", marking_writing.marked_file_link[k]))
+                c_image.paste(m_image, (0, 0), m_image)
+        saved_file_name = v.replace('.jpg', '_merged.png')
+        c_image.save(
+            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                         str(student_user_id),
+                         "writing", saved_file_name), "PNG")
+        combined_images.append(c_image)
+        marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing.id,
+                                      student_user_id=student_user_id, file=saved_file_name)
+        if local_file:
+            # PDF generation needs to access the file from local file system
+            marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
+                os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                str(student_user_id), saved_file_name)
+
+        marked_images.append(marked_writing_path)
+
+    # Generate single image of all combined images
+    single_image_name = "%s_single.png" % marking_writing.id
+    single_image_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     str(student_user_id), "writing", single_image_name)
+
+    if vertical:
+        get_concat_v_multi_resize(combined_images).save(single_image_path, "PNG")
+    else:
+        get_concat_h_multi_resize(combined_images).save(single_image_path, "PNG")
+
+    single_image_url = url_for('api.get_writing', marking_writing_id=marking_writing.id,
+                               student_user_id=student_user_id, file=single_image_name)
+    if local_file:
+        # PDF generation needs to access the file from local file system
+        single_image_url = 'file:///%s/%s/%s/writing/%s' % (
+            os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            str(student_user_id), single_image_name)
+
+    return marked_images, single_image_url
+
+
 @login_required
 @permission_required(Permission.WRITING_READ)
 @writing.route('/report/<int:assessment_enroll_id>/<int:student_user_id>/<int:marking_writing_id>', methods=['GET'])
@@ -275,36 +381,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
 
             # Create merged writing markings
-            marking_writing.marked_images = []
-            for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
-                try:
-                    c_image = Image.open(
-                        os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                     str(student_user_id), "writing", v))
-                except FileNotFoundError:
-                    return redirect(
-                        url_for(redirect_url_for_name, error='File not found. Check the student writing file existing'))
-
-                # Merge only when marking is available
-                if marking_writing.marked_file_link:
-                    if k in marking_writing.marked_file_link.keys():
-                        m_image = Image.open(
-                            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                         str(student_user_id),
-                                         "writing", marking_writing.marked_file_link[k]))
-                        c_image.paste(m_image, (0, 0), m_image)
-                saved_file_name = v.replace('.jpg', '_merged.png')
-                c_image.save(
-                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                 str(student_user_id),
-                                 "writing", saved_file_name), "PNG")
-                marked_writing_path = url_for('api.get_writing', marking_writing_id=marking_writing_id,
-                                              student_user_id=student_user_id, file=saved_file_name)
-                if pdf:
-                    marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
-                        os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                        str(student_user_id), saved_file_name)
-                marking_writing.marked_images.append(marked_writing_path)
+            marking_writing.marked_images, single_image = get_merged_images(student_user_id, marking_writing,
+                                                                            local_file=pdf)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
@@ -379,11 +457,13 @@ def marking(marking_writing_id, student_user_id):
     form.marking_writing_id.data = marking_writing_id
     form.student_user_id.data = student_user_id
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
-    if marking_writing:
+
+    if marking_writing and canMarking(current_user, marking_writing.marking_id):
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
-                populate_criteria_form(form, marking_writing_id, marking_writing.candidate_mark_detail)  # SubForm data populate from the db
+                populate_criteria_form(form, marking_writing_id,
+                                       marking_writing.candidate_mark_detail)  # SubForm data populate from the db
             else:
                 populate_criteria_form(form, marking_writing_id)
             form.markers_comment.data = marking_writing.markers_comment
@@ -401,12 +481,13 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
     :param criteria_detail:
     :return:
     """
-    test_type_code_id = ( db.session.query(Testset.test_type). \
-                          join(Marking, Marking.testset_id==Testset.id).\
-                          join(MarkingForWriting, MarkingForWriting.marking_id==Marking.id). \
-                          filter(MarkingForWriting.id==marking_writing_id).first()
-                          ).test_type
-    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type_code_id).order_by(Codebook.id).all()
+    test_type_code_id = (db.session.query(Testset.test_type). \
+                         join(Marking, Marking.testset_id == Testset.id). \
+                         join(MarkingForWriting, MarkingForWriting.marking_id == Marking.id). \
+                         filter(MarkingForWriting.id == marking_writing_id).first()
+                         ).test_type
+    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type_code_id).order_by(
+        Codebook.id).all()
     if criteria_detail is None:
         while len(form.markings) > 0:
             form.markings.pop_entry()
@@ -416,7 +497,11 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
             wm_form.criteria = c.code_name
             wm_form.marking = 0
             if c.additional_info:
-                wm_form.max_score = c.additional_info['max_score']
+                try:
+                    wm_form.max_score = c.additional_info['max_score']
+                except TypeError:
+                    flash('Check if max_score of "%s" correctly entered. '% c.code_name)
+                    wm_form.max_score = 0.0
             else:
                 wm_form.max_score = 0.0
             form.markings.append_entry(wm_form)
@@ -595,3 +680,12 @@ def marking_onscreen_save():
             return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
             # except:
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
+
+def canMarking(marker, marking_id):
+    if marker.is_administrator():
+        return True
+    marking = Marking.query.filter_by(id=marking_id).first()
+    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).filter_by(assessment_id=marking.enroll.assessment_id).first()
+    if marker_assigned:
+        return True
+    return False

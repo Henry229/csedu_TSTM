@@ -549,7 +549,7 @@ def save_writing_data(student_user_id, marking_id, writing_files=None, writing_t
         candidate_file_link_json["file%s" % index] = file_name
         index += 1
     if marking_writing is None:
-        marking_writing = MarkingForWriting(marking_id=marking_id)
+        marking_writing = MarkingForWriting(marking_id=marking_id, marker_id=current_user.id)
     marking_writing.candidate_file_link = candidate_file_link_json
     marking_writing.modified_time = datetime.utcnow()
     db.session.add(marking_writing)
