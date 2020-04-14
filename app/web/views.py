@@ -269,11 +269,16 @@ def testset_list():
 
     # Get all testset the assessment has
     testsets = assessment.testsets
-    for tsets in testsets:
-        tsets.enrolled = tsets.id in testset_enrolled
-        test_type = Codebook.get_code_name(tsets.test_type)
+    new_test_sets = []
+    for tset in testsets:
+        if not tset.active:
+            tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+            tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
+        new_test_sets.append(tset)
+        tset.enrolled = tset.id in testset_enrolled
+        test_type = Codebook.get_code_name(tset.test_type)
         enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
-    sorted_testsets = sorted(testsets, key=lambda x: x.name)
+    sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
                            testsets=sorted_testsets, assessment_id=assessment.id, enable_report=enable_report)
@@ -302,10 +307,17 @@ def assessment_list():
         testset_enrolled = {en.testset_id: en.id for en in enrolled}
 
         # Get all testset the assessment has
+        new_test_sets = []
         for tset in assessment.testsets:
+            if not tset.active:
+                tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+                tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
+            new_test_sets.append(tset)
+
             tset.enrolled = tset.id in testset_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
             tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+        assessment.testsets = new_test_sets
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
