@@ -44,7 +44,9 @@ def new():
     testlet_id_list = request.args.get('testlet_list')
     if testlet_id_list:
         testlet_list = testlet_id_list.split(',')
-        testlet_db = [(row.id, row.name) for row in Testlet.query.filter_by(active=True).filter(Testlet.id.in_(testlet_list)).all()]
+        testlet_db = [(row.id, row.name) for row in
+                      Testlet.query.filter_by(active=True).filter(Testlet.id.in_(testlet_list)).order_by(
+                          Testlet.name.desc()).all()]
     testset_form = TestsetCreateForm()
     if testset_id is None:
         testset_form.test_type.data = Codebook.get_code_id('Naplan')
@@ -78,7 +80,7 @@ def testset_insert():
     form = TestsetCreateForm()
     if form.validate_on_submit():
         testlets = Testlet.query.filter_by(test_type=form.test_type.data).filter_by(grade=form.grade.data).filter_by(
-            subject=form.subject.data).filter_by(active=True).order_by(Testlet.name.asc()).all()
+            subject=form.subject.data).filter_by(active=True).order_by(Testlet.name.desc()).all()
         if (len(testlets) == 0):
             flash("No testlets found having the same condition - Test Type{}, Grade:{}, Subject{}".format(
                 form.test_type.data, form.grade.data, form.subject.data
@@ -206,7 +208,7 @@ def edit(id):
 
     query = Testlet.query
     query = query.filter_by(test_type=testset.test_type, grade=testset.grade, subject=testset.subject, active=True)
-    testlet_db = [(row.id, row.name) for row in query.order_by(Testlet.modified_time.desc()).all()]
+    testlet_db = [(row.id, row.name) for row in query.order_by(Testlet.name.desc()).all()]
     if len(testlet_db) == 0:
         flash("Please check testlets if exists. No testlets found.")
     return render_template('testset/edit.html', testset_form=testset_form, stageData=testset.branching,
@@ -317,9 +319,8 @@ def clone(id):
     form.link1.data = testset.extended_property['explanation_link']
 
     query = Testlet.query
-    query = query.filter_by(test_type=testset.test_type).filter_by(grade=testset.grade).filter_by(
-        subject=testset.subject)
-    testlet_db = [(row.id, row.name) for row in query.order_by(Testlet.modified_time.desc()).all()]
+    query = query.filter_by(test_type=testset.test_type, grade=testset.grade, subject=testset.subject, active=True)
+    testlet_db = [(row.id, row.name) for row in query.order_by(Testlet.name.desc()).all()]
     if len(testlet_db) == 0:
         flash("Please check testlets if exists. No testlets found.")
     return render_template('testset/clone.html', testset_form=form, stageData=testset.branching,
