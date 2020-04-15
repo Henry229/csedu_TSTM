@@ -252,6 +252,7 @@ def update():
                 new_testset.grade = grade
                 new_testset.subject = subject
                 new_testset.test_type = test_type
+                new_testset.test_duration = test_duration
                 new_testset.no_of_stages = no_stages
                 if total_score != '':
                     new_testset.total_score = total_score
@@ -274,6 +275,7 @@ def update():
                 testset.grade = grade
                 testset.subject = subject
                 testset.test_type = test_type
+                testset.test_duration = test_duration
                 testset.no_of_stages = no_stages
                 if total_score != '':
                     testset.total_score = total_score
