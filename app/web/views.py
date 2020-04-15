@@ -264,19 +264,31 @@ def testset_list():
         return page_not_found(e="Invalid request - assessment information")
 
     # Get all assessment enroll to get testsets the student enrolled in already.
-    enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student.user_id).all()
-    testset_enrolled = {en.testset_id: en.id for en in enrolled}
+    enrolled = AssessmentEnroll.query.join(Testset, Testset.id==AssessmentEnroll.testset_id)\
+        .filter(AssessmentEnroll.assessment_guid==assessment_guid,
+                AssessmentEnroll.student_user_id==student.user_id).all()
+    enrolled_guids = [en.testset.GUID for en in enrolled]
 
-    # Get all testset the assessment has
-    testsets = assessment.testsets
+    # Get testsets in enrolled
+    enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
+    student_testsets = []
+    for tset in assessment.testsets:
+        if tset.GUID not in enrolled_guids:
+            student_testsets.append(tset)
+    for ts_id in enrolled_testsets:
+        student_testsets.append(enrolled_testsets[ts_id])
     new_test_sets = []
-    for tset in testsets:
-        if not tset.active:
+    enable_report = False
+    for tset in student_testsets:
+        # Compare GUID to check enrollment status
+        enrolled = tset.GUID in enrolled_guids
+        if not enrolled and not tset.active:
             tset_with_guid = Testset.query.filter_by(id=tset.id).first()
             tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
         new_test_sets.append(tset)
-        tset.enrolled = tset.id in testset_enrolled
+        tset.enrolled = enrolled
         test_type = Codebook.get_code_name(tset.test_type)
+        tset.explanation_link = view_explanation(tset.id)
         enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
     sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
 
@@ -302,22 +314,33 @@ def assessment_list():
             return page_not_found(e="Invalid request - assessment enroll information")
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
-                                                    student_user_id=current_user.id).all()
-        testset_enrolled = {en.testset_id: en.id for en in enrolled}
+        enrolled = AssessmentEnroll.query.join(Testset, Testset.id==AssessmentEnroll.testset_id)\
+            .filter(AssessmentEnroll.assessment_guid==assessment_guid,
+                    AssessmentEnroll.student_user_id==current_user.id).all()
+        enrolled_guids = [en.testset.GUID for en in enrolled]
 
-        # Get all testset the assessment has
-        new_test_sets = []
+        # Get testsets in enrolled
+        enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
+        student_testsets = []
         for tset in assessment.testsets:
-            if not tset.active:
+            if tset.GUID not in enrolled_guids:
+                student_testsets.append(tset)
+        for ts_id in enrolled_testsets:
+            student_testsets.append(enrolled_testsets[ts_id])
+        new_test_sets = []
+        for tset in student_testsets:
+            # Compare GUID to check enrollment status
+            enrolled = tset.GUID in enrolled_guids
+            if not enrolled and not tset.active:
                 tset_with_guid = Testset.query.filter_by(id=tset.id).first()
                 tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
             new_test_sets.append(tset)
-
-            tset.enrolled = tset.id in testset_enrolled
+            tset.enrolled = enrolled
             test_type = Codebook.get_code_name(tset.test_type)
-            tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
-        assessment.testsets = new_test_sets
+            tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.explanation_link = view_explanation(tset.id)
+        sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        assessment.testsets = sorted_testsets
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
@@ -382,13 +405,8 @@ def start_test_manager():
     return render_template('web/start_online_test.html', guid_list=guid_list, form=form, testsets=testsets)
 
 
-@web.route('/view_explanation/<int:testset_id>', methods=['GET'])
-@web.route('/view_explanation/<int:testset_id>/<int:item_id>', methods=['GET'])
-@login_required
-@permission_required(Permission.ITEM_EXEC)
 def view_explanation(testset_id, item_id=None):
     url = None
-    note = 'Please make sure .... '
     if item_id:
         item = ItemExplanation.query.filter_by(item_id=item_id).first()
         if item and item.links:
@@ -401,5 +419,52 @@ def view_explanation(testset_id, item_id=None):
         testset = Testset.query.filter_by(id=testset_id).first()
         if testset.extended_property:
             url = testset.extended_property['explanation_link']
-    return render_template('web/view_explanation.html', url=url, note=note)
+    return url
 
+
+@web.route('/tests/modal', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def modal_test():
+    # Parameter check
+    guid_list = request.args.get("guid_list").split(",")
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return page_not_found(e="Login user not registered as student")
+
+    assessments = []
+    for assessment_guid in guid_list:
+        # Check if there is an assessment with the guid
+        assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+        if assessment is None:
+            return page_not_found(e="Invalid request - assessment enroll information")
+
+        # Get all assessment enroll to get testsets the student enrolled in already.
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
+                                                    student_user_id=current_user.id).all()
+        testset_enrolled = {en.testset_id: en.id for en in enrolled}
+
+        # Get all testset the assessment has
+        new_test_sets = []
+        for tset in assessment.testsets:
+            if not tset.active:
+                tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+                tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
+            new_test_sets.append(tset)
+
+            tset.enrolled = tset.id in testset_enrolled
+            test_type = Codebook.get_code_name(tset.test_type)
+            tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.explanation_link = view_explanation(tset.id)
+        assessment.testsets = new_test_sets
+        assessments.append(assessment)
+        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
+
+    return render_template('web/test_modal_video_assessments.html', student_user_id=current_user.id, assessments=assessments)
+
+
+@web.route('/tests/mp4_testing', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def mp4_testing():
+    return render_template('web/testing.html')

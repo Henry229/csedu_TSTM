@@ -4,65 +4,61 @@
 {% block app_content %}
 
     <h3><i class="icons cui-laptop" style="color: #339af0;"></i> Naplan Online Test </h3>
-    <div class="row">
     <div class="col">
         <div class="card card-accent-info">
             <div class="card-header">
-                <div class="col">
-                    Please enter your Student ID and Enroll ID.
-                </div>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col">
 
-                        <form action="" method="post">
-                            {{ form.hidden_tag() }}
-                            <p>
-                                {{ form.student_user_id.label }}<br>
-                                {{ form.student_user_id(placeholder='100') }}
-                            </p>
-                            <p>
-                                {{ form.assessment_enroll_id.label }}<br>
-                                {{ form.assessment_enroll_id(placeholder='10023') }}
-                            </p>
-                            <p>{{ form.submit() }} &nbsp
-                                <input class="btn btn-warning" type="submit" name="btn_mock_test" value="Mock Test"></p>
-                        </form>
-                    </div>
-                    <div class="col">
-                        {% if testsets %}
-                            <table id="testsets" class="display table table-hover" style="width:100%">
-                                <tbody>
-                                <form method="POST" action="online-test">
-                                    {{ ot_form.hidden_tag() }}
-                                    {% for ts in testsets %}
-                                        <tr>
-                                            <td><input type="submit" class="btn btn-success btn-block"
-                                                       name="btn_testset" id="{{ ts.id }}" value="{{ ts.name }}"></td>
-                                        </tr>
-                                    {% endfor %}
-                                </form>
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
-                </div>
+{#                <video width="1050" height="600"  controls>#}
+{#                    <source id="video_mp4" src="http://csonlineschool.com.au/movie//naplan-y3/set3/language/3.language.full.mp4" type="video/mp4">#}
+{#                    Your browser does not support the video tag.#}
+{#                </video>#}
+                <span id="view_explanation_mp4"
+                   class="btn btn-outline-danger" type="button"
+                   data-url="http://csonlineschool.com.au/movie//naplan-y3/set3/language/3.language.full.mp4"
+                    data-toggle="modal" data-target="#videoMp4Modal">
+                    <i class="fa fa-play" style="color: #FF7F6E"> <small>Video</small></i>
+                </span>
             </div>
         </div>
     </div>
+
+<div class="modal fade" id="videoMp4Modal" tabindex="-1" role="dialog" aria-labelledby="videoMp4ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <!-- 16:9 aspect ratio -->
+        <div class="embed-responsive embed-responsive-16by9">
+            <video id="video_mp4" width="1050" height="600"  controls>
+            </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock app_content %}
 {% block scripts %}
     {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
     <script>
         $(document).ready(function () {
-            $('input[name="btn_mock_test"]').click(function () {
-                $('input[name="student_user_id"]').val('100');
-                $('input[name="assessment_enroll_id"]').val('1');
+            var $videoSrc;
+            $('#view_explanation_mp4').on('click', function () {
+                $videoSrc = $(this).data( "url" );
+              });
+
+            // when the modal is opened autoplay it
+            $('#videoMp4Modal').on('show.bs.modal', function (e) {
+                $("#video_mp4").html('<source id="video_mp4" src="'+$videoSrc+'" type="video/mp4">');
             });
 
-            $('input[name="btn_testset"]').click(function () {
-                $('input[name="testset_id"]').val($(this).attr("id"));
+            // stop playing the video when close the modal
+            $('#videoMp4Modal').on('hide.bs.modal', function (e) {
+                $("#video_mp4").attr('src',$videoSrc+'?autoplay=0');
             });
         });
     </script>
