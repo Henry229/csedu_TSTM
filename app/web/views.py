@@ -384,10 +384,6 @@ def start_test_manager():
     return render_template('web/start_online_test.html', guid_list=guid_list, form=form, testsets=testsets)
 
 
-# @web.route('/view_explanation/<int:testset_id>', methods=['GET'])
-# @web.route('/view_explanation/<int:testset_id>/<int:item_id>', methods=['GET'])
-# @login_required
-# @permission_required(Permission.ITEM_EXEC)
 def view_explanation(testset_id, item_id=None):
     url = None
     if item_id:
@@ -402,6 +398,45 @@ def view_explanation(testset_id, item_id=None):
         testset = Testset.query.filter_by(id=testset_id).first()
         if testset.extended_property:
             url = testset.extended_property['explanation_link']
-    # return render_template('web/view_explanation.html', url=url)
     return url
 
+
+@web.route('/tests/modal', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def modal_test():
+    # Parameter check
+    guid_list = request.args.get("guid_list").split(",")
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return page_not_found(e="Login user not registered as student")
+
+    assessments = []
+    for assessment_guid in guid_list:
+        # Check if there is an assessment with the guid
+        assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+        if assessment is None:
+            return page_not_found(e="Invalid request - assessment enroll information")
+
+        # Get all assessment enroll to get testsets the student enrolled in already.
+        enrolled = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
+                                                    student_user_id=current_user.id).all()
+        testset_enrolled = {en.testset_id: en.id for en in enrolled}
+
+        # Get all testset the assessment has
+        new_test_sets = []
+        for tset in assessment.testsets:
+            if not tset.active:
+                tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+                tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
+            new_test_sets.append(tset)
+
+            tset.enrolled = tset.id in testset_enrolled
+            test_type = Codebook.get_code_name(tset.test_type)
+            tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.explanation_link = view_explanation(tset.id)
+        assessment.testsets = new_test_sets
+        assessments.append(assessment)
+        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
+
+    return render_template('web/test_modal_video_assessments.html', student_user_id=current_user.id, assessments=assessments)

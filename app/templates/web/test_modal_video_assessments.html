@@ -70,9 +70,10 @@
                                                 </td>
                                                 <td>
                                                     {% if ts.enrolled %}
-                                                        <a id="view_explanation_window"
+                                                        <a id="view_explanation"
                                                            class="btn btn-outline-danger" type="button"
-                                                           onclick="window.open('{{ ts.explanation_link }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                                                           data-url="{{ ts.explanation_link }}"
+                                                            data-toggle="modal" data-target="#videoModal">
                                                             <i class="fa fa-play" style="color: #FF7F6E"></i>
                                                         </a>
                                                     {% else %}
@@ -118,6 +119,25 @@
                 window.location = '/report/ts/' + assessment_id + '/'
                     + testset_id + '/' + student_user_id;
             });
+
+            var $videoSrc;
+            $('#view_explanation').on('click', function () {
+                $videoSrc = $(this).data( "url" );
+              });
+
+            // when the modal is opened autoplay it
+            $('#videoModal').on('shown.bs.modal', function (e) {
+                $("#video").attr('src',$videoSrc);
+            })
+
+            // stop playing the video when I close the modal
+            $('#videoModal').on('hide.bs.modal', function (e) {
+                $("#video").attr('src',$videoSrc+'?autoplay=0');
+            })
+
+            $('#videoModal').on('hidden.bs.modal', function (e) {
+                $('#videoModal').modal('dispose');
+            })
         });
     </script>
 {% endblock %}
