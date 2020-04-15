@@ -66,8 +66,9 @@
                                                     {% if ts.enrolled %}
                                                         <a id="view_explanation"
                                                                 class="btn btn-outline-danger" type="button"
-                                                                href="{{ url_for('web.view_explanation',testset_id=ts.id) }}"
-                                                                target="_video"><i class="fa fa-play"></i>
+                                                                data-url="{{ url_for('web.view_explanation',testset_id=ts.id) }}"
+                                                                data-toggle="modal" data-target="#dataModalXL" data-backdrop="static"
+                                                                ><i class="fa fa-play" style="color: #FF7F6E"></i>
                                                         </a>
                                                     {% else %}
                                                         <button class="btn btn-outline-secondarybtn-block" disabled><i class="fa fa-stop"></i></button>
@@ -113,11 +114,15 @@
             });
 
             $('#view_explanation').on('click', function () {
-                var url = $(this).val();
+                var url = $(this).data('url');
                 $.get(url, function (data) {
-                    $('#dataModal .modal-content').html(data);
+                    $('#dataModalXL .modal-content').html(data);
                 });
-                $('#dataModal .modal-content').html("Loading... Try again if data not shown");
+                $('#dataModalXL .modal-content').html("Loading... Try again if data not shown");
+            });
+
+            $('#dataModalXL').on('hidden.bs.modal', function (e) {
+                $('#dataModalXL').modal('dispose');
             });
         });
     </script>
