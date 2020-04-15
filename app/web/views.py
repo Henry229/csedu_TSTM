@@ -277,6 +277,7 @@ def testset_list():
         new_test_sets.append(tset)
         tset.enrolled = tset.id in testset_enrolled
         test_type = Codebook.get_code_name(tset.test_type)
+        tset.explanation_link = view_explanation(tset.id)
         enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
     sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
 
@@ -317,6 +318,7 @@ def assessment_list():
             tset.enrolled = tset.id in testset_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
             tset.enable_report = True if  (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.explanation_link = view_explanation(tset.id)
         assessment.testsets = new_test_sets
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
@@ -382,13 +384,12 @@ def start_test_manager():
     return render_template('web/start_online_test.html', guid_list=guid_list, form=form, testsets=testsets)
 
 
-@web.route('/view_explanation/<int:testset_id>', methods=['GET'])
-@web.route('/view_explanation/<int:testset_id>/<int:item_id>', methods=['GET'])
-@login_required
-@permission_required(Permission.ITEM_EXEC)
+# @web.route('/view_explanation/<int:testset_id>', methods=['GET'])
+# @web.route('/view_explanation/<int:testset_id>/<int:item_id>', methods=['GET'])
+# @login_required
+# @permission_required(Permission.ITEM_EXEC)
 def view_explanation(testset_id, item_id=None):
     url = None
-    note = 'Please make sure .... '
     if item_id:
         item = ItemExplanation.query.filter_by(item_id=item_id).first()
         if item and item.links:
@@ -401,5 +402,6 @@ def view_explanation(testset_id, item_id=None):
         testset = Testset.query.filter_by(id=testset_id).first()
         if testset.extended_property:
             url = testset.extended_property['explanation_link']
-    return render_template('web/view_explanation.html', url=url, note=note)
+    # return render_template('web/view_explanation.html', url=url)
+    return url
 

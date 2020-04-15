@@ -70,12 +70,16 @@
                                                 </td>
                                                 <td>
                                                     {% if ts.enrolled %}
-                                                        <a id="view_explanation"
+{#                                                        <a id="view_explanation"#}
+{#                                                           class="btn btn-outline-danger" type="button"#}
+{#                                                           data-url="{{ ts.explanation_link }}"#}
+{#                                                           data-toggle="modal" data-target="#dataModalXL"#}
+{#                                                           > <i class="fa fa-play" style="color: #FF7F6E"> Modal </i>#}
+{#                                                        </a>#}
+                                                        <a id="view_explanation_window"
                                                            class="btn btn-outline-danger" type="button"
-                                                           data-url="{{ url_for('web.view_explanation',testset_id=ts.id) }}"
-                                                           data-toggle="modal" data-target="#dataModalXL"
-                                                           data-backdrop="static"
-                                                        ><i class="fa fa-play" style="color: #FF7F6E"></i>
+                                                           onclick="window.open('{{ ts.explanation_link }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                                                            <i class="fa fa-play" style="color: #FF7F6E"></i>
                                                         </a>
                                                     {% else %}
                                                         <button class="btn btn-outline-secondarybtn-block" disabled><i
@@ -125,13 +129,14 @@
                 var url = $(this).data('url');
                 $.get(url, function (data) {
                     $('#dataModalXL .modal-content').html(data);
-                });
+                 });
+                {#$('#dataModalXL .modal-content').html#}
                 $('#dataModalXL .modal-content').html("Loading... Try again if data not shown");
-            });
+              });
 
             $('#dataModalXL').on('hidden.bs.modal', function (e) {
                 $('#dataModalXL').modal('dispose');
-            });
+             });
         });
     </script>
 {% endblock %}

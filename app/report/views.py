@@ -23,6 +23,7 @@ from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews
 from ..web.errors import page_not_found
+from ..web.views import view_explanation
 
 ''' 
  @report.route('/full_report/<int:student_id>', methods=['GET'])
@@ -145,6 +146,10 @@ def my_report(assessment_id, ts_id, student_user_id):
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
     markings = query_my_report_body(assessment_enroll_id, ts_id)
+    explanation_link = {}
+    for marking in markings:
+        explanation_link[marking.question_no] = view_explanation(testset_id=ts_id,item_id=marking.item_id)
+
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
@@ -165,7 +170,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name, rank=rank,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                            pdf_url=pdf_url, grade=grade)
+                                            pdf_url=pdf_url, grade=grade,
+                                            explanation_link=explanation_link)
     if not pdf:
         return rendered_template_pdf
     # PDF download
