@@ -22,15 +22,8 @@
         </div>
         <div class="card-body">
             {% if url %}
-            <div class="row">
-                <div class="col">
-                    <strong>Note: </strong><br> {{ note }} <br><br>
-                    <button class="btn btn-outline-danger btn-sm" onclick="window.close()">Close</button>
-                </div>
-                <div class="col">
-                    <iframe width="1200" height="700" src="{{ url }}" frameborder="0"></iframe><br>
-                </div>
-            </div>
+                <button class="btn btn-outline-danger btn-sm" data-dismiss="modal">Close</button><br><br>
+                <iframe width="1050" height="600" src="{{ url }}" frameborder="0"></iframe><br>
             {% else %}
                 <div> <h3> Explanation video clip - Not found. Please ask CS Education Branch officer.</h3> </div>
             {% endif %}
