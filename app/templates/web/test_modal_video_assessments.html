@@ -6,6 +6,7 @@
         <div class="col">
             <div class="card card-accent-info">
                 <div class="card-header">
+                    <a href="{{ url_for('web.mp4_testing') }}">Video Tag Test</a>
                 </div>
                 {% for assessment in assessments %}
                     <div class="card-body">
@@ -74,7 +75,13 @@
                                                            class="btn btn-outline-danger" type="button"
                                                            data-url="{{ ts.explanation_link }}"
                                                             data-toggle="modal" data-target="#videoModal">
-                                                            <i class="fa fa-play" style="color: #FF7F6E"></i>
+                                                            <i class="fa fa-play" style="color: #FF7F6E"> <small>iFrame</small></i>
+                                                        </a>
+                                                        <a id="view_explanation_mp4"
+                                                           class="btn btn-outline-danger" type="button"
+                                                           data-url="http://csonlineschool.com.au/movie//naplan-y3/set3/language/3.language.full.mp4"
+                                                            data-toggle="modal" data-target="#videoMp4Modal">
+                                                            <i class="fa fa-play" style="color: #FF7F6E"> <small>Video</small></i>
                                                         </a>
                                                     {% else %}
                                                         <button class="btn btn-outline-secondarybtn-block" disabled><i
@@ -125,15 +132,24 @@
                 $videoSrc = $(this).data( "url" );
               });
 
+            $('#view_explanation_mp4').on('click', function () {
+                $videoSrc = $(this).data( "url" );
+              });
+
             // when the modal is opened autoplay it
             $('#videoModal').on('shown.bs.modal', function (e) {
                 $("#video").attr('src',$videoSrc);
-            })
+            });
 
-            // stop playing the video when I close the modal
+            // stop playing the video when close the modal
             $('#videoModal').on('hide.bs.modal', function (e) {
                 $("#video").attr('src',$videoSrc+'?autoplay=0');
-            })
+            });
+
+            // when the modal is opened autoplay it
+            $('#videoMp4Modal').on('shown.bs.modal', function (e) {
+                $("#video_mp4").attr('src',$videoSrc);
+            });
         });
     </script>
 {% endblock %}
