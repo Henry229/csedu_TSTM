@@ -1068,3 +1068,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 .print-notice-hidden {
     display: none;
 }
+
+#testsets .report {
+    cursor: pointer;
+}
