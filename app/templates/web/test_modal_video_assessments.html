@@ -134,10 +134,6 @@
             $('#videoModal').on('hide.bs.modal', function (e) {
                 $("#video").attr('src',$videoSrc+'?autoplay=0');
             })
-
-            $('#videoModal').on('hidden.bs.modal', function (e) {
-                $('#videoModal').modal('dispose');
-            })
         });
     </script>
 {% endblock %}
