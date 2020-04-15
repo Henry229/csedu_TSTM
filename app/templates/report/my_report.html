@@ -152,10 +152,14 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            <a id="view_explanation"
-                                                        href="{{ url_for('web.view_explanation',testset_id=0,item_id=marking.item_id) }}"
-                                                        target="_video"><i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                            </a>
+                                            {% if explanation_link.get(marking.question_no) %}
+                                                <a id="view_explanation_window"
+                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </a>
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
                                         </td>
                                         <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
                                             answer_unsubmission{% endif %}</td>
@@ -195,11 +199,14 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            <span name="explanationButton"
-                                                  data-toggle="modal" data-target="#dataModal"
-                                                  data-item-id="{{ marking.item_id }}">
-                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                            </span>
+                                            {% if explanation_link.get(marking.question_no) %}
+                                                <a id="view_explanation_window"
+                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </a>
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
                                         </td>
                                         <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
                                             answer_unsubmission{% endif %}</td>
