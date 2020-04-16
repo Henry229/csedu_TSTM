@@ -60,7 +60,7 @@
         #t_assessment_info th, td {
             vertical-align: middle;
             text-align: center;
-            border: 1px solid #c8ced3;
+            border: 0px solid #c8ced3;
         }
 
         #t_assessment_info th {
@@ -93,13 +93,15 @@
         <div class="card-header">
             <table style="width:100%" id="t_header">
                 <tr>
-                    <th colspan="3">
-                        <h3 style="color:#397e38"> {{ assessment_name }} </h3>
-                    </th>
                     <td>
                         <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                    </td>
+                    <th colspan="2">
+                        <h3 style="color:#397e38"> {{ assessment_name }} ({{ subject }}) </h3>
+                    </th>
+                    <td>
                         {% if pdf_url %}
-                            <a class="badge badge-primary" href="{{ pdf_url }}">PDF</a>
+                            <a class="badge badge-primary" href="{{ pdf_url }}">Download Result (PDF)</a>
                         {% endif %}
                     </td>
                 </tr>

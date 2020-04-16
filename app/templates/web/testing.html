@@ -14,12 +14,12 @@
 {#                    <source id="video_mp4" src="http://csonlineschool.com.au/movie//naplan-y3/set3/language/3.language.full.mp4" type="video/mp4">#}
 {#                    Your browser does not support the video tag.#}
 {#                </video>#}
-                <a id="view_explanation_mp4"
+                <span id="view_explanation_mp4"
                    class="btn btn-outline-danger" type="button"
                    data-url="http://csonlineschool.com.au/movie//naplan-y3/set3/language/3.language.full.mp4"
                     data-toggle="modal" data-target="#videoMp4Modal">
                     <i class="fa fa-play" style="color: #FF7F6E"> <small>Video</small></i>
-                </a>
+                </span>
             </div>
         </div>
     </div>
@@ -33,9 +33,7 @@
         </button>
         <!-- 16:9 aspect ratio -->
         <div class="embed-responsive embed-responsive-16by9">
-            <video width="1050" height="600"  controls>
-                <source id="video_mp4" src="" type="video/mp4">
-                Your browser does not support the video tag.
+            <video id="video_mp4" width="1050" height="600"  controls>
             </video>
         </div>
       </div>
@@ -43,3 +41,25 @@
   </div>
 </div>
 {% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script>
+        $(document).ready(function () {
+            var $videoSrc;
+            $('#view_explanation_mp4').on('click', function () {
+                $videoSrc = $(this).data( "url" );
+              });
+
+            // when the modal is opened autoplay it
+            $('#videoMp4Modal').on('show.bs.modal', function (e) {
+                $("#video_mp4").html('<source id="video_mp4" src="'+$videoSrc+'" type="video/mp4">');
+            });
+
+            // stop playing the video when close the modal
+            $('#videoMp4Modal').on('hide.bs.modal', function (e) {
+                $("#video_mp4").attr('src',$videoSrc+'?autoplay=0');
+            });
+        });
+    </script>
+{% endblock %}

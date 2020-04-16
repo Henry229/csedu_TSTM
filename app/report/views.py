@@ -167,7 +167,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     if pdf:
         template_file = 'report/my_report_pdf.html',
 
-    rendered_template_pdf = render_template(template_file, assessment_name=assessment_name, rank=rank,
+    rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
+                                            subject=test_subject_string, rank=rank,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
