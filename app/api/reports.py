@@ -965,6 +965,7 @@ def reset_test_query():
         data['assessment_name'] = assessment.name
         data['testset_name'] = testset.name
         data['testset_id'] = testset.id
+        data['testset_version'] = testset.version
         # data['start_time'] = str(enroll.start_time)
         tests_not_finished.append(data)
     return success(tests_not_finished)
