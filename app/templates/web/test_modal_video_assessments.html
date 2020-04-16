@@ -1,5 +1,10 @@
 {% extends "ui/testsets_base.html" %}
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block head %}
+    {{ super() }}
+{#    https://developers.google.com/web/fundamentals/security/prevent-mixed-content/fixing-mixed-content#}
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+{% endblock %}
 {% block app_content %}
     <h3><i class="icons cui-laptop" style="color: #339af0;"></i> CS Education - Online Test </h3>
     <div class="row">

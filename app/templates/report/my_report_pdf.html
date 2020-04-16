@@ -21,7 +21,7 @@
     <table>
         <tr>
             <td>
-                <h1 style="color:#397e38"> {{ assessment_name }} </h1>
+                <h1 style="color:#397e38"> {{ assessment_name }}  ({{ subject }}) </h1>
             </td>
             <td align="right">
                 <img src="file:///{{ static_folder }}/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
@@ -33,24 +33,25 @@
     <table id="t_student_info">
         <tr>
             <th> Student Name:</th>
-            <td> {{ Student.getCSStudentName(student_user_id) }} </td>
+            <td>&nbsp;{{ Student.getCSStudentName(student_user_id) }} </td>
             <th> Rank:</th>
-            <td> {{ rank }} </td>
+            <td>&nbsp;{{ rank }} </td>
         </tr>
         <tr>
             <th> Student ID:</th>
-            <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+            <td>&nbsp;{{ Student.getCSStudentId(student_user_id) }}</td>
             <th> Score:</th>
-            <td> {{ score }} </td>
+            <td>&nbsp;{{ score }} </td>
         </tr>
         <tr>
             <th> Grade:</th>
-            <td> {{ grade }}</td>
+            <td>&nbsp;{{ grade }}</td>
             <th> Test Date:</th>
-            <td> {{ marking_rep.created_time }}.</td>
+            <td>&nbsp;{{ marking_rep.created_time }}.</td>
         </tr>
     </table>
 </div>
+<br>
 <div class="report_content">
     {% if markings %}
         <div class="row">
