@@ -73,7 +73,7 @@ class Math(Element):
                 related_item.add_namespace(ns, 'http://www.w3.org/1998/Math/MathML')
 
         if ns != '':
-            body = re.sub(r'<(?!/)', "<" + ns + ":", body, flags=re.IGNORECASE)
+            body = re.sub(r'<(?!/)(?!!)', "<" + ns + ":", body, flags=re.IGNORECASE)
             body = re.sub(r'</', "</" + ns + ":", body, flags=re.IGNORECASE)
             tag = ns + ":" + tag
 
