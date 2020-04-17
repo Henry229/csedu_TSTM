@@ -489,18 +489,18 @@ def virtual_omr_sync(assessment_id=None, duration=365):
                 else:
                     # Sync only ended or timed out test. Give extra 11min to be safe
                     end_time = pytz.utc.localize(enroll.end_time(margin=11))
+                    log_sync.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                        assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
+                        enroll.student.user_id))
                     if enroll.finish_time:
-                        log_sync.info("Test finished at %s" % enroll.finish_time)
+                        log_sync.info(" > Test finished at %s" % enroll.finish_time)
                         sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
                         if end_time < sync_after_utc:
                             log_sync.info(" > Result older than %s days. Skip" % duration)
                             continue
                     else:
                         if end_time:
-                            log_sync.info("Sync [%s] %s, %s(%s), %s(%s)" % (
-                                assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
-                                enroll.student.user_id))
-                            log_sync.debug("start time: %s + duration %s = end time %s" % (
+                            log_sync.debug(" > start time: %s + duration %s = end time %s" % (
                                 enroll.start_time, testset.test_duration, end_time))
                             if end_time >= datetime.now(pytz.utc):
                                 log_sync.info(" > Not timed out yet. Skip")
