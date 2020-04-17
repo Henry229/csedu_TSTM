@@ -51,7 +51,9 @@ var ItemRunner = (function () {
 
     var postProcessRendered = function (data) {
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data});
-        _handler.processUI(_item_info.saved_answer);
+        if (_mode !== 'preview') {
+            _handler.processUI(_item_info.saved_answer);
+        }
         if (MathJax)
             MathJax.typeset()
     };
