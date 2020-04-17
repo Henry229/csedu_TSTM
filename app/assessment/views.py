@@ -2,14 +2,14 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 import requests
 from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
-from common.logger import log
+from common.logger import log, get_file_logger
 from config import Config
 from . import assessment
 from .forms import AssessmentCreateForm, AssessmentSearchForm, AssessmentTestsetCreateForm, TestsetSearchForm
@@ -18,6 +18,8 @@ from ..api.httpstatus import is_success
 from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
     AssessmentEnroll, Testset, MarkingForWriting
+
+log_sync = get_file_logger('virtual_omr.log')
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -395,7 +397,7 @@ def virtual_omr(assessment_id):
     Check sync status to csonlineschool through CS_API
     :return: Sync status page
     '''
-    return virtual_omr_sync(assessment_id)
+    return virtual_omr_sync(assessment_id, duration=7)
 
 
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
@@ -416,14 +418,18 @@ def virtual_omr_resync(assessment_id):
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None):
+def virtual_omr_sync(assessment_id=None, duration=365):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
+    :param: assessment_id - A specific assessment to sync
+    :param: duration - days from today to sync
     :return:
     '''
     process = False
     result = {}
+
+    log.info("Syncing tested completed for last %d days" % duration)
 
     # Check security key for web request.
     if assessment_id:
@@ -439,21 +445,21 @@ def virtual_omr_sync(assessment_id=None):
         lockfile = 'virtual_omr_sync.lock'
         locktimeout = 360
         if os.path.exists(lockfile):
-            log.info('Lock file exists. Checking age')
+            log_sync.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
-            log.info('%ss. Timeout : %ss' % (age, locktimeout))
+            log_sync.info('%ss. Timeout : %ss' % (age, locktimeout))
             if age > locktimeout:
-                log.debug('Delete timed out lockfile')
+                log_sync.debug('Delete timed out lockfile')
                 try:
                     os.unlink(lockfile)
                 except os.error as e:
-                    log.error(e)
+                    log_sync.error(e)
             else:
                 return 'Lock file found. Sync may be in progress. Please try again in %ss' % (locktimeout - age), 200
 
         with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
-            log.debug('Create lock file - %s' % lock_info)
+            log_sync.debug('Create lock file - %s' % lock_info)
             f.write(lock_info)
 
         if assessment_id:  # A specific assessement only. called from virtual_omr()
@@ -462,9 +468,9 @@ def virtual_omr_sync(assessment_id=None):
             assessments = Assessment.query.filter_by(active=True).all()
 
         for assessment in assessments:
-            log.info("=" * 80)
-            log.info("Assessment : %s" % assessment.GUID)
-            log.info("=" * 80)
+            log_sync.info("=" * 80)
+            log_sync.info("Assessment : %s" % assessment.GUID)
+            log_sync.info("=" * 80)
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
             responses_text = []
@@ -473,7 +479,7 @@ def virtual_omr_sync(assessment_id=None):
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 subject = Codebook.get_subject_name(testset.id)
                 if enroll.synced:
-                    # log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
+                    # log_sync.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
                     class fake_return(object):
                         text = "Synced already"
@@ -482,18 +488,22 @@ def virtual_omr_sync(assessment_id=None):
                     ret = fake_return()
                 else:
                     # Sync only ended or timed out test. Give extra 11min to be safe
+                    end_time = pytz.utc.localize(enroll.end_time(margin=11))
                     if enroll.finish_time:
-                        log.info("Test finished at %s. Proceed to sync" % enroll.finish_time)
+                        log_sync.info("Test finished at %s" % enroll.finish_time)
+                        sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
+                        if end_time < sync_after_utc:
+                            log_sync.info(" > Result older than %s days. Skip" % duration)
+                            continue
                     else:
-                        end_time = enroll.end_time(margin=11)
                         if end_time:
-                            log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                            log_sync.info("Sync [%s] %s, %s(%s), %s(%s)" % (
                                 assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
                                 enroll.student.user_id))
-                            log.debug("start time: %s + duration %s = end time %s" % (
+                            log_sync.debug("start time: %s + duration %s = end time %s" % (
                                 enroll.start_time, testset.test_duration, end_time))
-                            if pytz.utc.localize(end_time) >= datetime.now(pytz.utc):
-                                log.info(" > Not timed out yet. Skip")
+                            if end_time >= datetime.now(pytz.utc):
+                                log_sync.info(" > Not timed out yet. Skip")
                                 continue
                     answers = {}
                     for m in enroll.marking:
@@ -526,7 +536,7 @@ def virtual_omr_sync(assessment_id=None):
                         'test_type': Codebook.get_code_name(assessment.test_type)
                     }
                     if len(answers) < 1:
-                        log.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
+                        log_sync.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
 
                         class fake_return(object):
                             text = "No student answer found"
@@ -549,22 +559,22 @@ def virtual_omr_sync(assessment_id=None):
                                        'student_id': enroll.student.student_id,
                                        'response': ret.text})
                 if ret.status_code == 200:
-                    log.info(" > Success")
+                    log_sync.info(" > Success")
                     enroll.synced = True
                     enroll.synced_time = datetime.now(pytz.utc)
                     db.session.commit()
                 elif ret.status_code != 0:
-                    log.error(" > Error. %s" % ret.text)
+                    log_sync.error(" > Error. %s" % ret.text)
 
             # There should be only one assessment if an id is given
             if assessment_id:
-                log.info("Remove the lock file")
+                log_sync.info("Remove the lock file")
                 os.unlink(lockfile)
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
                 result[assessment.id] = responses_text
-        log.info("Remove the lock file")
+        log_sync.info("Remove the lock file")
         os.unlink(lockfile)
         synced = 0
         total = 0
