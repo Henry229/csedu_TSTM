@@ -27,15 +27,7 @@ from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll
 @permission_required(Permission.WRITING_READ)
 def list_writing_marking():
     marker_id = current_user.id
-    branch_ids = [row.branch_id for row in
-                  db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
-    all_branches = []
-    for branch_id in branch_ids:
-        if Codebook.get_code_name(branch_id)=='All':
-            all_branches = [row.id for row in
-                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
-            break
-    branch_ids += all_branches
+    branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
@@ -511,7 +503,12 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
         for c in criteria:
             wm_form = WritingMMForm()  # weight mapping
             wm_form.criteria = c.code_name
-            wm_form.marking = float(criteria_detail[c.code_name])
+
+            try:
+                wm_form.marking = float(criteria_detail[c.code_name])
+            except TypeError:
+                flash("Invalid Criteria: %s " % c.code_name)
+                pass
             if c.additional_info:
                 wm_form.max_score = float(c.additional_info['max_score'])
             else:
@@ -682,10 +679,34 @@ def marking_onscreen_save():
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
 
 def canMarking(marker, marking_id):
+    # Admin user : pass
     if marker.is_administrator():
         return True
+
+    # Marker user assigned to Assessment : pass
     marking = Marking.query.filter_by(id=marking_id).first()
-    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).filter_by(assessment_id=marking.enroll.assessment_id).first()
+    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).\
+                        filter_by(assessment_id=marking.enroll.assessment_id).\
+                        filter_by(delete=False).first()
     if marker_assigned:
         return True
+
+    # Marker user branch Check - enrollment testing branch in marker-branch-ids: Pass
+    branch_ids = getBranchIds(marker.id)
+    is_markable = True if marking.enroll.test_center in branch_ids else False
+    if is_markable:
+        return True
     return False
+
+
+def getBranchIds(marker_id):
+    branch_ids = [row.branch_id for row in
+                  db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
+    all_branches = []
+    for branch_id in branch_ids:
+        if Codebook.get_code_name(branch_id)=='All':
+            all_branches = [row.id for row in
+                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
+            break
+    branch_ids += all_branches
+    return branch_ids
