@@ -19,7 +19,7 @@ from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
     AssessmentEnroll, Testset, MarkingForWriting
 
-log_sync = get_file_logger('virtual_omr.log')
+log_sync = get_file_logger('log/virtual_omr.log')
 
 
 @assessment.route('/manage/new', methods=['GET'])

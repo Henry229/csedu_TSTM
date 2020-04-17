@@ -35,11 +35,11 @@ def get_file_logger(log_file, log_level=logging.DEBUG):
         if not os.path.exists(os.path.dirname(log_file)):
             os.mkdir(os.path.dirname(log_file))
 
-    logger = logging.getLogger('__name__')
-    fh = TimedRotatingFileHandler(log_file, when='W0')
-    logger.addHandler(fh)
+    file_logger = logging.getLogger('__name__')
+    file_handle = TimedRotatingFileHandler(log_file, when='W0')
+    file_logger.addHandler(file_handle)
 
-    logger.setLevel(log_level)
+    file_logger.setLevel(log_level)
 
     if log_level == logging.DEBUG:
         format = logging.Formatter(
@@ -47,9 +47,9 @@ def get_file_logger(log_file, log_level=logging.DEBUG):
     else:
         format = logging.Formatter("%(asctime)s (%(levelname)s)\t: %(message)s")
 
-    fh.setFormatter(format)
+    file_handle.setFormatter(format)
 
-    return logger
+    return file_logger
 
 
 log = get_logger(Config.LOG_FILE, Config.LOG_LEVEL)
