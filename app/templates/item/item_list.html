@@ -81,8 +81,9 @@
                             {% for item in items %}
                                 <tr>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-info" type="button" name="modalButton"
+                                        <button class="btn btn-sm btn-outline-info" type="button" name="previewButton"
                                                 value="{{ url_for('item.preview', item_id=item.id) }}"
+                                                data-item-id="{{ item.id }}"
                                                 data-toggle="modal" data-target="#dataModal">
                                             <i class="fas fa-eye"></i>
                                         </button>
@@ -131,8 +132,13 @@
 {% block scripts %}
     {{ super() }}
     <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/runner/js/item_runner.js"></script>
+    <script src="/static/runner/js/item_handlers.js"></script>
+    <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
+
     <script>
         $(document).ready(function () {
+            ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
             $('#export').on('click', function () {
                 var url = '/item/export?export=1';
                 if ($('#grade').val() !== '0')
