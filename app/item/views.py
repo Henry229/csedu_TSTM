@@ -16,7 +16,6 @@ from sqlalchemy.orm import load_only
 from werkzeug.utils import secure_filename
 from xlrd import open_workbook
 
-from common.config import Config as common_config
 from common.logger import log
 from config import Config
 from qti.itemservice.itemservice import ItemService
