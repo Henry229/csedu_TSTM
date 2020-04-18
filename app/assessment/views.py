@@ -3,7 +3,7 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 import requests
@@ -397,7 +397,7 @@ def virtual_omr(assessment_id):
     Check sync status to csonlineschool through CS_API
     :return: Sync status page
     '''
-    return virtual_omr_sync(assessment_id)
+    return virtual_omr_sync(assessment_id, duration=365)
 
 
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
@@ -414,18 +414,22 @@ def virtual_omr_resync(assessment_id):
         enroll.synced = False
         enroll.synced_time = None
     db.session.commit()
-    return virtual_omr_sync(assessment_id)
+    return virtual_omr_sync(assessment_id, duration=365)
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None):
+def virtual_omr_sync(assessment_id=None, duration=7):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
+    :param: assessment_id - A specific assessment to sync
+    :param: duration - days from today to sync
     :return:
     '''
     process = False
     result = {}
+
+    log.info("Syncing tested completed for last %d days" % duration)
 
     # Check security key for web request.
     if assessment_id:
@@ -485,17 +489,21 @@ def virtual_omr_sync(assessment_id=None):
                     ret = fake_return()
                 else:
                     # Sync only ended or timed out test. Give extra 11min to be safe
+                    end_time = pytz.utc.localize(enroll.end_time(margin=11))
+                    log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                        assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
+                        enroll.student.user_id))
                     if enroll.finish_time:
-                        log.info("Test finished at %s. Proceed to sync" % enroll.finish_time)
+                        log.info(" > Test finished at %s" % enroll.finish_time)
+                        sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
+                        if end_time < sync_after_utc:
+                            log.info(" > Result older than %s days. Skip" % duration)
+                            continue
                     else:
-                        end_time = enroll.end_time(margin=11)
                         if end_time:
-                            log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
-                                assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
-                                enroll.student.user_id))
-                            log.debug("start time: %s + duration %s = end time %s" % (
+                            log.debug(" > start time: %s + duration %s = end time %s" % (
                                 enroll.start_time, testset.test_duration, end_time))
-                            if pytz.utc.localize(end_time) >= datetime.now(pytz.utc):
+                            if end_time >= datetime.now(pytz.utc):
                                 log.info(" > Not timed out yet. Skip")
                                 continue
                     answers = {}
