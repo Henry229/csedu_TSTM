@@ -338,27 +338,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     return marked_images, single_image_url
 
 
-@login_required
-@permission_required(Permission.WRITING_READ)
-@writing.route('/report/<int:assessment_enroll_id>/<int:student_user_id>/<int:marking_writing_id>', methods=['GET'])
-@login_required
-def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
-    """
-    Menu Writing > Marking > Click 'search writing' > Click 'link to Marking' page
-    :param marking_writing_id:
-    :param student_user_id:
-    :return: the specific student's writing information for marking by marker
-    """
-
-    if current_user.id == student_user_id:
-        redirect_url_for_name = 'report.list_my_report'
-    else:
-        redirect_url_for_name = 'writing.manage'
-    pdf = False
-    pdf_url = "%s?type=pdf" % request.url
-    if 'type' in request.args.keys():
-        pdf = request.args['type'] == 'pdf'
-
+def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url=None):
     if marking_writing_id == 0:
         marking_writings = MarkingForWriting.query \
             .join(Marking, Marking.id == MarkingForWriting.marking_id) \
@@ -413,25 +393,57 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
                                                     marking_writings=marking_writings,
                                                     static_folder=current_app.static_folder,
                                                     pdf_url=pdf_url)
-            if not pdf:
-                return rendered_template_pdf
-            # PDF download
-            from weasyprint import HTML
-            html = HTML(string=rendered_template_pdf)
+            return rendered_template_pdf
+        else:
+            return 'fail-enrollment'
+    else:
+        return 'fail-marking'
 
-            pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
-                                         str(student_user_id),
-                                         "writing",
-                                         "%s_%s_%s.pdf" % (assessment_enroll_id, student_user_id, marking_writing_id))
-            html.write_pdf(target=pdf_file_path, presentational_hints=True)
-            rsp = send_file(
-                pdf_file_path,
-                mimetype='application/pdf',
-                as_attachment=True,
-                attachment_filename=pdf_file_path)
-            return rsp
+
+@login_required
+@permission_required(Permission.WRITING_READ)
+@writing.route('/report/<int:assessment_enroll_id>/<int:student_user_id>/<int:marking_writing_id>', methods=['GET'])
+@login_required
+def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
+    """
+    Menu Writing > Marking > Click 'search writing' > Click 'link to Marking' page
+    :param marking_writing_id:
+    :param student_user_id:
+    :return: the specific student's writing information for marking by marker
+    """
+
+    if current_user.id == student_user_id:
+        redirect_url_for_name = 'report.list_my_report'
+    else:
+        redirect_url_for_name = 'writing.manage'
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
+    rendered_template_pdf = get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url)
+    if rendered_template_pdf == 'fail-enrollment':
         return redirect(url_for(redirect_url_for_name, error='Not found assessment enroll - writing data'))
-    return redirect(url_for(redirect_url_for_name, error='Not found Marking for writing data'))
+    elif rendered_template_pdf == 'fail-enrollment':
+        return redirect(url_for(redirect_url_for_name, error='Not found Marking for writing data'))
+    else:
+        if not pdf:
+            return rendered_template_pdf
+        # PDF download
+        from weasyprint import HTML
+        html = HTML(string=rendered_template_pdf)
+
+        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                                     str(student_user_id),
+                                     "writing",
+                                     "%s_%s_%s.pdf" % (assessment_enroll_id, student_user_id, marking_writing_id))
+        html.write_pdf(target=pdf_file_path, presentational_hints=True)
+        rsp = send_file(
+            pdf_file_path,
+            mimetype='application/pdf',
+            as_attachment=True,
+            attachment_filename=pdf_file_path)
+        return rsp
 
 
 @login_required
@@ -492,7 +504,7 @@ def populate_criteria_form(form, marking_writing_id, criteria_detail=None):
                 try:
                     wm_form.max_score = c.additional_info['max_score']
                 except TypeError:
-                    flash('Check if max_score of "%s" correctly entered. '% c.code_name)
+                    flash('Check if max_score of "%s" correctly entered. ' % c.code_name)
                     wm_form.max_score = 0.0
             else:
                 wm_form.max_score = 0.0
@@ -579,6 +591,9 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
                     web_img_links[key] = {
                         'writing': url_for('api.get_writing', marking_writing_id=marking_writing_id,
                                            student_user_id=student_user_id, file=file_name)}
+                else:
+                    log.debug("writing file not found: marking_writing_id(%s) student_user_id(%s) - filename(%s)"
+                              % (marking_writing_id, student_user_id, file_path))
                 if marking_writing.marked_file_link:
                     if key in marking_writing.marked_file_link.keys():
                         if os.path.exists(
@@ -678,6 +693,7 @@ def marking_onscreen_save():
             # except:
             #     return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
 
+
 def canMarking(marker, marking_id):
     # Admin user : pass
     if marker.is_administrator():
@@ -685,9 +701,9 @@ def canMarking(marker, marking_id):
 
     # Marker user assigned to Assessment : pass
     marking = Marking.query.filter_by(id=marking_id).first()
-    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id).\
-                        filter_by(assessment_id=marking.enroll.assessment_id).\
-                        filter_by(delete=False).first()
+    marker_assigned = MarkerAssigned.query.filter_by(marker_id=marker.id). \
+        filter_by(assessment_id=marking.enroll.assessment_id). \
+        filter_by(delete=False).first()
     if marker_assigned:
         return True
 
@@ -704,9 +720,9 @@ def getBranchIds(marker_id):
                   db.session.query(MarkerBranch.branch_id).filter_by(marker_id=marker_id).all()]
     all_branches = []
     for branch_id in branch_ids:
-        if Codebook.get_code_name(branch_id)=='All':
+        if Codebook.get_code_name(branch_id) == 'All':
             all_branches = [row.id for row in
-                            db.session.query(Codebook.id).filter(Codebook.code_type=='test_center').all()]
+                            db.session.query(Codebook.id).filter(Codebook.code_type == 'test_center').all()]
             break
     branch_ids += all_branches
     return branch_ids

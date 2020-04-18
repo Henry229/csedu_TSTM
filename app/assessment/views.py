@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import time
@@ -6,7 +7,7 @@ from datetime import datetime
 
 import pytz
 import requests
-from flask import render_template, flash, request, redirect, url_for, jsonify
+from flask import render_template, flash, request, redirect, url_for, jsonify, current_app
 from flask_login import login_required, current_user
 
 from common.logger import log
@@ -18,6 +19,7 @@ from ..api.httpstatus import is_success
 from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
     AssessmentEnroll, Testset, MarkingForWriting
+from ..writing.views import get_w_report_template
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -437,7 +439,8 @@ def virtual_omr_sync(assessment_id=None):
 
     if process:
         lockfile = 'virtual_omr_sync.lock'
-        locktimeout = 360
+        # locktimeout = 360
+        locktimeout = 1
         if os.path.exists(lockfile):
             log.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
@@ -496,18 +499,45 @@ def virtual_omr_sync(assessment_id=None):
                                 log.info(" > Not timed out yet. Skip")
                                 continue
                     answers = {}
+                    pdf_file_path = None
                     for m in enroll.marking:
                         if subject == 'Writing':
                             try:
                                 m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
+                                # Check marker's makring detail is empty
+                                if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
+                                    log.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
+                                        m_writing.id))
+                                    continue
+                                # Get merged writing markings file
+                                m_assessment_enroll_id = enroll.id
+                                m_student_user_id = enroll.student_user_id
+                                m_marking_writing_id = m_writing.id
+
+                                rendered_template_pdf = get_w_report_template(
+                                    assessment_enroll_id=m_assessment_enroll_id,
+                                    student_user_id=m_student_user_id,
+                                    marking_writing_id=m_marking_writing_id,
+                                    pdf=True)
+                                # PDF generation
+                                from weasyprint import HTML
+                                html = HTML(string=rendered_template_pdf)
+
+                                pdf_file_path = os.path.join(os.path.dirname(current_app.root_path),
+                                                             current_app.config['USER_DATA_FOLDER'],
+                                                             str(m_student_user_id),
+                                                             "writing",
+                                                             "%s_%s_%s.pdf" % (
+                                                                 m_assessment_enroll_id, m_student_user_id,
+                                                                 m_marking_writing_id))
+                                html.write_pdf(target=pdf_file_path, presentational_hints=True)
+
                                 writing = {}
-                                writing['candidate_file_link'] = m_writing.candidate_file_link
-                                writing['marker_file_link'] = m_writing.marked_file_link
+                                writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
                                 writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
                                 writing['markers_comment'] = m_writing.markers_comment
                                 writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
                                 writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
-                                # need file transfer for candidate_file_link and marker_file_link
                                 answers[str(m.question_no)] = writing
                             except:
                                 pass
@@ -538,8 +568,18 @@ def virtual_omr_sync(assessment_id=None):
                             url = '/essay_writing_synchronised'
                         else:
                             url = '/answer_eleven_synchronised'
-                        ret = requests.post(Config.CS_API_URL + url, json=marking,
-                                            verify=False)
+
+                        try:
+                            files = {
+                                'file': (os.path.basename(pdf_file_path), open(pdf_file_path, 'rb'), "application/pdf")
+                            }
+                        except FileNotFoundError:
+                            log.error('File not found. Check the student writing file existing')
+
+                        data = {
+                            'json': (None, json.dumps(marking), 'application/json')
+                        }
+                        ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
