@@ -7,67 +7,97 @@
 {% endblock %}
 {% block content %}
     <div class="ml-5 mr-5">
-        <h3>Assessment Enroll Info [{{ date_interval }} ~ Today]</h3>
+        <h3>Assessment Enroll Information</h3>
         <div>
+            <form class="form inline" role="form">
+                Test Date: <input type="date" name="search_date" value="{{ search_date }}">
+                <input type="submit" class="btn btn-sm btn-danger" value="Search">
+            </form>
+            <hr>
+            <div id="status" class="alert alert-success" role="alert"></div>
             <table id="table_info" class="table table-bordered table-hover" bgcolor="white">
             <thead>
                 <tr bgcolor="#f5f5dc">
-                    <th></th>
-                    <th>Assessment GUID</th>
+                    <th>ID</th>
                     <th>Assessment</th>
                     <th>Testset</th>
                     <th>Student</th>
                     <th>Attempt Count</th>
-                    {#                <th>Grade</th>#}
                     <th>Test Center</th>
-                    {#                <th>Start Time</th>#}
-                    <th>Start Time Client</th>
-                    <th>Finish Time Count</th>
-                    <th>Start IP</th>
+                    <th>Start Time</th>
+                    <th>Finish Time</th>
                     <th>Synced</th>
-                    <th>Synced_time</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for enroll in enrolls %}
                     <tr>
                         <td><a href="{{ url_for('report.marking_info', id=enroll.id) }}">
-                            {{ loop.index }}</a></td>
-                        <td>{{ enroll.assessment_guid }}</td>
+                            {{ enroll.id }}</a></td>
                         <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
-                        <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }})</td>
+                        <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }} v.{{ enroll.testset.version }})</td>
                         <td>{{ enroll.student_user_id }}<br>({{ Student.getCSStudentId(enroll.student_user_id) }})</td>
                         <td>{{ enroll.attempt_count }}</td>
-                        {#                    <td>{{ enroll.grade }}</td>#}
                         <td>{{ enroll.test_center }}<br>({{ Codebook.get_code_name(enroll.test_center) }})</td>
-                        {#                    <td>{{ enroll.start_time }}</td>#}
-                        <td>{{ enroll.start_time_client }}t</td>
-                        <td>{{ enroll.finish_time_client }}</td>
-                        <td>{{ enroll.start_ip }}</td>
+                        <td>{{ enroll.start_time }}t</td>
+                        <td>{{ enroll.finish_time }}</td>
                         <td>{{ enroll.synced }}</td>
-                        <td>{{ enroll.synced_time }}</td>
+                        <td>
+                            <span class="btn btn-sm btn-outline-dark" id="btn-reset-test"
+                                   data-enroll-id="{{ enroll.id }}" data-assessment="{{ enroll.assessment.name }}"
+                                   data-testset-id = "{{ enroll.testset_id }}"
+                                   data-testset="{{ enroll.testset.name }} v.{{ enroll.testset.version }}"
+                                   data-student="{{ Student.getCSStudentId(enroll.student_user_id) }}"
+                                   data-toggle="modal" data-target="#confirm-reset">Reset</span>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr bgcolor="#f5f5dc">
                     <th>ID</th>
-                    <th>Assessment GUID</th>
                     <th>Assessment</th>
                     <th>Testset</th>
                     <th>Student</th>
                     <th>Attempt Count</th>
-                    {#                <th>Grade</th>#}
                     <th>Test Center</th>
-                    {#                <th>Start Time</th>#}
-                    <th>Start Time Client</th>
-                    <th>Finish Time Count</th>
-                    <th>Start IP</th>
+                    <th>Start Time</th>
+                    <th>Finish Time</th>
                     <th>Synced</th>
-                    <th>Synced_time</th>
+                    <td></td>
                 </tr>
             </tfoot>
             </table>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-reset" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">
+                        Are you sure to reset test ?
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-text">
+                        <font color="red"> Warning: <br> The selected test data will be deleted permanently after reset.</font> <br><br>
+                        Please enter your value:  <br><br>
+                        Enrolled Test:
+                            <select name="enroll">
+
+                            </select><br>
+                        CS Student ID: <input type="text" name="cs_student_id"><br>
+                        Security Code: <input type="text" name="week_no"><br>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger danger" data-toggle="modal"
+                            onclick="reset_test('confirm-reset');" data-dismiss="modal">Reset Test
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}
@@ -76,12 +106,70 @@
     <script src="/static/ui/vendors/jquery/js/jquery.js"></script>
     <script src="/static/ui/vendors/DataTables/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
     <script>
-            $(document).ready(function() {
-                $('#table_info').DataTable( {
-                    "pageLength": 50,
-                    "order": [[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
-                } );
+        $(document).ready(function() {
+            $("#status").hide();
+            $('#table_info').DataTable( {
+                "pageLength": 50,
+                "order": [[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
             } );
+
+            $('#btn-reset-test').on('click', function () {
+                var _enroll_id, _testset_id, _assessment, _testset, _student;
+                _enroll_id = $(this).data('enroll-id');
+                _testset_id = $(this).data('testset-id');
+                _assessment = $(this).data('assessment');
+                _testset = $(this).data('testset');
+                _student = $(this).data('student');
+
+                var enroll_obj = $('SELECT[name="enroll"]');
+                enroll_obj.empty();
+                enroll_obj.append(
+                    $('<option>', {
+                        value: _enroll_id + ' ' + _testset,
+                        text: _assessment + ' : ' + _testset,
+                    })
+                );
+                $('INPUT[name="cs_student_id"]').val(_student);
+                $('INPUT[name="week_no"]').val('');
+             });
+        } );
+
+        function reset_test(modal_name) {
+            var enroll_obj = $('SELECT[name="enroll"] option:selected').val();
+            enroll_obj = enroll_obj.split(' ');
+            var data = {
+                'enroll_id': enroll_obj[0],
+                'testset_id': enroll_obj[1],
+                'cs_student_id': $('INPUT[name="cs_student_id"]').val(),
+                'week_no': $('INPUT[name="week_no"]').val(),
+            };
+            $.ajax({
+                url: '/api/reset_test/',
+                method: 'POST',
+                data: data,
+                beforeSend: function () {
+
+                },
+                complete: function () {
+
+                },
+                error: function(xhr, status, error) {
+                    {#$('#'+modal_name).modal("hide");#}
+                    $("#status").show();
+                    $("#status").html(xhr.responseText).fadeOut(6000, function () {
+                        $(this).hide();
+                    });
+                },
+                success: function (response) {
+                    {#$('#'+modal_name).modal("hide");#}
+                    console.log(response);
+                    $("#status").show();
+                    $("#status").html("Reset test successfully").fadeOut(6000, function () {
+                        $(this).hide()
+                    });
+                }
+            });
+        }
     </script>
 {% endblock scripts %}
 

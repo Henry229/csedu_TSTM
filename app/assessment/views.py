@@ -139,7 +139,6 @@ def edit(id):
     return render_template("assessment/new.html", assessment_form=form)
 
 
-# Todo: Update source codes to new add and detail clone
 '''Edit Assessment Page - insert (versioned) row into DB'''
 
 
@@ -273,7 +272,6 @@ def search_detail(id):
     return render_template('assessment/testsets.html', form=form)
 
 
-# ToDo: decide if insert(=update) new master data when detail update
 '''Add Testsets(detail) for Assessment(master) Page - insert or update or delete row into DB'''
 
 
@@ -450,8 +448,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
 
     if process:
         lockfile = 'virtual_omr_sync.lock'
-        # locktimeout = 360
-        locktimeout = 1
+        locktimeout = 360
         if os.path.exists(lockfile):
             vomr_logger.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
@@ -521,10 +518,14 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                                 # Check marker's makring detail is empty
                                 if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
-                                    vomr_logger.debug(
-                                        "Marker's marking detail or comment is empty: marking_writing(%s)" % (
-                                            m_writing.id))
-                                    continue
+                                    vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
+                                        m_writing.id))
+
+                                    class fake_return(object):
+                                        text = "Marking For Writing data not found."
+                                        status_code = 0
+
+                                    ret = fake_return()
                                 # Get merged writing markings file
                                 m_assessment_enroll_id = enroll.id
                                 m_student_user_id = enroll.student_user_id
@@ -582,17 +583,22 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                     else:
                         if subject == 'Writing':
                             url = '/essay_writing_synchronised'
-                            try:
+                            if os.path.exists(pdf_file_path):
                                 files = {
                                     'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
                                 }
-                            except FileNotFoundError:
-                                vomr_logger.error('File not found. Check the student writing file existing')
+                                data = {
+                                    'json': (None, json.dumps(marking), 'application/json')
+                                }
+                                ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
+                            else:
+                                vomr_logger.error('Student Writing File not found: %s' % pdf_file_path)
 
-                            data = {
-                                'json': (None, json.dumps(marking), 'application/json')
-                            }
-                            ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
+                                class fake_return(object):
+                                    text = "Student Writing File not found."
+                                    status_code = 0
+
+                                ret = fake_return()
                         else:
                             url = '/answer_eleven_synchronised'
                             ret = requests.post(Config.CS_API_URL + url, json=marking, verify=False)

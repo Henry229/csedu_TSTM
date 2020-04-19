@@ -978,6 +978,7 @@ def reset_test_query():
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def reset_test():
     from datetime import datetime
+    enroll_id = request.form.get('enroll_id')
     guid = request.form.get('guid')
     testset_id = request.form.get('testset_id')
     student_user_id = Student.getStudentUserId(request.form.get('cs_student_id'))
@@ -987,10 +988,16 @@ def reset_test():
         return "Invalid Security Code for Reset Test", 404
     if not student_user_id:
         return "Student not found", 404
-    enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid). \
-        filter_by(testset_id=testset_id). \
-        filter_by(student_user_id=student_user_id). \
-        order_by(AssessmentEnroll.id.desc()).first()
+
+    if enroll_id:
+        enroll = AssessmentEnroll.query.filter_by(id=enroll_id).\
+                    filter_by(student_user_id=student_user_id).first()
+    else:
+        enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid). \
+            filter_by(testset_id=testset_id). \
+            filter_by(student_user_id=student_user_id). \
+            order_by(AssessmentEnroll.id.desc()).first()
+
     if not enroll:
         return "Enrollment for %s is not found" % request.form.get('cs_student_id'), 404
     rows = db.session.query(Marking.testlet_id).distinct().filter(Marking.assessment_enroll_id == enroll.id). \
@@ -1023,7 +1030,6 @@ def reset_test():
     else:
         errors.append('No enroll')
 
-    print(errors)
     if len(errors):
         return ",".join(errors), 500
     else:
