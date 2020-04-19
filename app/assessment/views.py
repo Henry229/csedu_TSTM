@@ -579,7 +579,7 @@ def virtual_omr_sync(assessment_id=None, duration=7):
 
                         try:
                             files = {
-                                'file': (os.path.basename(pdf_file_path), open(pdf_file_path, 'rb'), "application/pdf")
+                                'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
                             }
                         except FileNotFoundError:
                             log.error('File not found. Check the student writing file existing')
