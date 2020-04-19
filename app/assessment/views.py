@@ -574,20 +574,20 @@ def virtual_omr_sync(assessment_id=None, duration=7):
                     else:
                         if subject == 'Writing':
                             url = '/essay_writing_synchronised'
+                            try:
+                                files = {
+                                    'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
+                                }
+                            except FileNotFoundError:
+                                log.error('File not found. Check the student writing file existing')
+
+                            data = {
+                                'json': (None, json.dumps(marking), 'application/json')
+                            }
+                            ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
                         else:
                             url = '/answer_eleven_synchronised'
-
-                        try:
-                            files = {
-                                'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
-                            }
-                        except FileNotFoundError:
-                            log.error('File not found. Check the student writing file existing')
-
-                        data = {
-                            'json': (None, json.dumps(marking), 'application/json')
-                        }
-                        ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
+                            ret = requests.post(Config.CS_API_URL + url, json=marking, verify=False)
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
