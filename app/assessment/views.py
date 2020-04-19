@@ -132,7 +132,6 @@ def edit(id):
     return render_template("assessment/new.html", assessment_form=form)
 
 
-# Todo: Update source codes to new add and detail clone
 '''Edit Assessment Page - insert (versioned) row into DB'''
 
 
@@ -266,7 +265,6 @@ def search_detail(id):
     return render_template('assessment/testsets.html', form=form)
 
 
-# ToDo: decide if insert(=update) new master data when detail update
 '''Add Testsets(detail) for Assessment(master) Page - insert or update or delete row into DB'''
 
 
