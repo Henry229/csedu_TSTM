@@ -106,7 +106,6 @@ function get_testlist_for_reset() {
                 enroll_obj.append(
                     $('<option>', {
                         value: item['assessment_guid'] + ' ' + item['testset_id'],
-                        // text: '[' + item['start_time'] + '] ' + item['assessment_name'] + ' : ' + item['testset_name'],
                         text: item['assessment_name'] + ' : ' + item['testset_name'] + ' v.' + item['testset_version'],
                     })
                 );
