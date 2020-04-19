@@ -29,7 +29,7 @@
                     <small class="text-muted">Item Search</small>
                     <br>
 
-                    <form action="{{url_for('item.manage')}}" method="get" class="form inline" role="form">
+                    <form action="{{ url_for('item.manage') }}" method="get" class="form inline" role="form">
                         {{ search_form.hidden_tag() }}
                         {{ search_form.grade.label }}
                         {{ search_form.grade }}

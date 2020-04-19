@@ -421,7 +421,8 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    rendered_template_pdf = get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url)
+    rendered_template_pdf = get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf,
+                                                  pdf_url)
     if rendered_template_pdf == 'fail-enrollment':
         return redirect(url_for(redirect_url_for_name, error='Not found assessment enroll - writing data'))
     elif rendered_template_pdf == 'fail-enrollment':
@@ -479,14 +480,18 @@ def marking(marking_writing_id, student_user_id):
                                    web_img_links=web_img_links,
                                    timestamp=str(round(time.time() * 1000)))
         else:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - marking_onscreen_load return null' %(marking_writing_id, student_user_id))
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - marking_onscreen_load return null' % (
+            marking_writing_id, student_user_id))
     else:
         if marking_writing:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - item not found'%(marking_writing_id, student_user_id))
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - item not found' % (
+            marking_writing_id, student_user_id))
         elif not item:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - data not found'%(marking_writing_id, student_user_id))
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - data not found' % (
+            marking_writing_id, student_user_id))
         else:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - canMarking return false'%(marking_writing_id, student_user_id))
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - canMarking return false' % (
+            marking_writing_id, student_user_id))
     return render_template('writing/marking_empty.html')
 
 
