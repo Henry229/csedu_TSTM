@@ -515,7 +515,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                         m_writing.id))
 
                                     class fake_return(object):
-                                        text = "Marking data not found."
+                                        text = "Marking For Writing data not found."
                                         status_code = 0
 
                                     ret = fake_return()
