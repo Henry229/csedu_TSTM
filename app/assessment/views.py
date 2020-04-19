@@ -397,7 +397,7 @@ def virtual_omr(assessment_id):
     Check sync status to csonlineschool through CS_API
     :return: Sync status page
     '''
-    return virtual_omr_sync(assessment_id, duration=365)
+    return virtual_omr_sync(assessment_id, duration=30)
 
 
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
@@ -414,11 +414,11 @@ def virtual_omr_resync(assessment_id):
         enroll.synced = False
         enroll.synced_time = None
     db.session.commit()
-    return virtual_omr_sync(assessment_id, duration=365)
+    return virtual_omr_sync(assessment_id, duration=30)
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=7):
+def virtual_omr_sync(assessment_id=None, duration=1):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
