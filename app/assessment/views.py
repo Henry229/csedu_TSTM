@@ -1,9 +1,11 @@
 import json
+import logging
 import os
 import re
 import time
 import uuid
 from datetime import datetime, timedelta
+from logging.handlers import TimedRotatingFileHandler
 
 import pytz
 import requests
@@ -20,6 +22,11 @@ from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
     AssessmentEnroll, Testset, MarkingForWriting
 from ..writing.views import get_w_report_template
+
+v_handler = TimedRotatingFileHandler(os.path.join(Config.LOGS_DIR, 'virtual_omr.log'), when='W0')
+vomr_logger = logging.getLogger('__name__')
+vomr_logger.setLevel(logging.DEBUG)
+vomr_logger.addHandler(v_handler)
 
 
 @assessment.route('/manage/new', methods=['GET'])
@@ -406,7 +413,7 @@ def virtual_omr_resync(assessment_id):
     Re-Sync marking data to csonlineschool through CS_API
     :return: Sync status page
     '''
-    log.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
+    vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
     enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).all()
     for enroll in enrolls:
         enroll.synced = False
@@ -427,7 +434,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
     process = False
     result = {}
 
-    log.info("Syncing tested completed for last %d days" % duration)
+    vomr_logger.info("Syncing tested completed for last %d days" % duration)
 
     # Check security key for web request.
     if assessment_id:
@@ -443,21 +450,21 @@ def virtual_omr_sync(assessment_id=None, duration=1):
         lockfile = 'virtual_omr_sync.lock'
         locktimeout = 360
         if os.path.exists(lockfile):
-            log.info('Lock file exists. Checking age')
+            vomr_logger.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
-            log.info('%ss. Timeout : %ss' % (age, locktimeout))
+            vomr_logger.info('%ss. Timeout : %ss' % (age, locktimeout))
             if age > locktimeout:
-                log.debug('Delete timed out lockfile')
+                vomr_logger.debug('Delete timed out lockfile')
                 try:
                     os.unlink(lockfile)
                 except os.error as e:
-                    log.error(e)
+                    vomr_logger.error(e)
             else:
                 return 'Lock file found. Sync may be in progress. Please try again in %ss' % (locktimeout - age), 200
 
         with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
-            log.debug('Create lock file - %s' % lock_info)
+            vomr_logger.debug('Create lock file - %s' % lock_info)
             f.write(lock_info)
 
         if assessment_id:  # A specific assessement only. called from virtual_omr()
@@ -466,9 +473,9 @@ def virtual_omr_sync(assessment_id=None, duration=1):
             assessments = Assessment.query.filter_by(active=True).all()
 
         for assessment in assessments:
-            log.info("=" * 80)
-            log.info("Assessment : %s" % assessment.GUID)
-            log.info("=" * 80)
+            vomr_logger.info("=" * 80)
+            vomr_logger.info("Assessment : %s" % assessment.GUID)
+            vomr_logger.info("=" * 80)
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
             responses = []
             responses_text = []
@@ -477,7 +484,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 subject = Codebook.get_subject_name(testset.id)
                 if enroll.synced:
-                    # log.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
+                    # vomr_logger.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
 
                     class fake_return(object):
                         text = "Synced already"
@@ -487,21 +494,21 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                 else:
                     # Sync only ended or timed out test. Give extra 11min to be safe
                     end_time = pytz.utc.localize(enroll.end_time(margin=11))
-                    log.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                    vomr_logger.info("Sync [%s] %s, %s(%s), %s(%s)" % (
                         assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
                         enroll.student.user_id))
                     if enroll.finish_time:
-                        log.info(" > Test finished at %s" % enroll.finish_time)
+                        vomr_logger.info(" > Test finished at %s" % enroll.finish_time)
                         sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
                         if end_time < sync_after_utc:
-                            log.info(" > Result older than %s days. Skip" % duration)
+                            vomr_logger.info(" > Result older than %s days. Skip" % duration)
                             continue
                     else:
                         if end_time:
-                            log.debug(" > start time: %s + duration %s = end time %s" % (
+                            vomr_logger.debug(" > start time: %s + duration %s = end time %s" % (
                                 enroll.start_time, testset.test_duration, end_time))
                             if end_time >= datetime.now(pytz.utc):
-                                log.info(" > Not timed out yet. Skip")
+                                vomr_logger.info(" > Not timed out yet. Skip")
                                 continue
                     answers = {}
                     pdf_file_path = None
@@ -511,7 +518,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                                 # Check marker's makring detail is empty
                                 if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
-                                    log.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
+                                    vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
                                         m_writing.id))
 
                                     class fake_return(object):
@@ -566,7 +573,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                         'test_type': Codebook.get_code_name(assessment.test_type)
                     }
                     if len(answers) < 1:
-                        log.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
+                        vomr_logger.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
 
                         class fake_return(object):
                             text = "No student answer found"
@@ -585,7 +592,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 }
                                 ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
                             else:
-                                log.error('Student Writing File not found: %s' % pdf_file_path)
+                                vomr_logger.error('Student Writing File not found: %s' % pdf_file_path)
 
                                 class fake_return(object):
                                     text = "Student Writing File not found."
@@ -604,22 +611,22 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                        'student_id': enroll.student.student_id,
                                        'response': ret.text})
                 if ret.status_code == 200:
-                    log.info(" > Success")
+                    vomr_logger.info(" > Success")
                     enroll.synced = True
                     enroll.synced_time = datetime.now(pytz.utc)
                     db.session.commit()
                 elif ret.status_code != 0:
-                    log.error(" > Error. %s" % ret.text)
+                    vomr_logger.error(" > Error. %s" % ret.text)
 
             # There should be only one assessment if an id is given
             if assessment_id:
-                log.info("Remove the lock file")
+                vomr_logger.info("Remove the lock file")
                 os.unlink(lockfile)
                 return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
                                        responses=responses)
             else:
                 result[assessment.id] = responses_text
-        log.info("Remove the lock file")
+        vomr_logger.info("Remove the lock file")
         os.unlink(lockfile)
         synced = 0
         total = 0
@@ -632,7 +639,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                     synced += int(m.group(1))
                     total += int(m.group(2))
                     added += int(m.group(3))
-        log.info("Total %s/%s synced. %s added" % (synced, total, added))
+        vomr_logger.info("Total %s/%s synced. %s added" % (synced, total, added))
         return jsonify(result), 200
     return "Invalid Request", 500
 
