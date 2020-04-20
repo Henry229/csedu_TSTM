@@ -21,6 +21,7 @@
                     <th>ID</th>
                     <th>Assessment</th>
                     <th>Testset</th>
+                    <th>Testset GUID</th>
                     <th>Student</th>
                     <th>Attempt Count</th>
                     <th>Test Center</th>
@@ -37,6 +38,7 @@
                             {{ enroll.id }}</a></td>
                         <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
                         <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }} v.{{ enroll.testset.version }})</td>
+                        <td>{{ enroll.testset.GUID }}</td>
                         <td>{{ enroll.student_user_id }}<br>({{ Student.getCSStudentId(enroll.student_user_id) }})</td>
                         <td>{{ enroll.attempt_count }}</td>
                         <td>{{ enroll.test_center }}<br>({{ Codebook.get_code_name(enroll.test_center) }})</td>
@@ -59,6 +61,7 @@
                     <th>ID</th>
                     <th>Assessment</th>
                     <th>Testset</th>
+                    <th>Testset GUID</th>
                     <th>Student</th>
                     <th>Attempt Count</th>
                     <th>Test Center</th>
