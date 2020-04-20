@@ -156,6 +156,7 @@ function updateCodebook(selectObj, inputObj, code_id, code_value, code_value_fie
         beforeSend: function () {
             selectObj.attr('disabled', 'disabled');
             inputObj.attr('disabled', 'disabled');
+            selectObj.empty();
         },
         complete: function () {
             selectObj.removeAttr('disabled');
@@ -235,6 +236,5 @@ function reset_val() {
         $(".update_code").val('');
         $(".additional_info").val('');
         $(".branch_state").val('');
-        $(".code_type").val('');
         $(".max_score").val('');
 }
