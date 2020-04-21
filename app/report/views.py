@@ -308,6 +308,8 @@ def manage():
         query = Assessment.query.join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
             filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
             filter(Assessment.test_type == test_type)
+        # Query enroll data filter by test center
+        # If test_center 'All', query all
         if Codebook.get_code_name(test_center) != 'All':
             query = query.filter(AssessmentEnroll.test_center == test_center)
         assessments = query.order_by(Assessment.id.asc()).all()
@@ -872,7 +874,7 @@ def report_test(type):
     return rsp
 
 @report.route('/enroll_info/', methods=['GET'])
-@permission_required(Permission.ASSESSMENT_MANAGE)
+@permission_required(Permission.ADMIN)
 def enroll_info():
     search_date = request.args.get('search_date')
     if not search_date:
@@ -884,7 +886,7 @@ def enroll_info():
 
 
 @report.route('/marking_info/<int:id>', methods=['GET'])
-@permission_required(Permission.ASSESSMENT_MANAGE)
+@permission_required(Permission.ADMIN)
 def marking_info(id):
     enroll = AssessmentEnroll.query.filter_by(id=id).first()
     markings = Marking.query.filter_by(assessment_enroll_id=id).\

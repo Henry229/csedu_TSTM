@@ -85,11 +85,11 @@
                                                                          style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
-                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
+                    <td><textarea rows="1" class="additional_info" value="" placeholder='{"max_score":3}'></textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i><br>
-                        <small>Enter {{ form.max_score.label }} value: </small><br>
+                        <small>Enter the {{ form.max_score.label }} below: (ex, 3) </small><br>
                         {{ form.max_score(class='max_score') }}
-                        <i class="icon-check icons max-score-icon" style="color: #0b4d75"></i>
+                        <i class="icon-check icons max-score-icon" style="color: #0b4d75"></i> <br>
                     </td>
                 </tr>
                 <tr>
@@ -102,7 +102,7 @@
                     </td>
                     <td><textarea rows="3" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
                                                                             style="color: #0b4d75"></i><br>
-                        <small>Select {{ form.branch_state.label }}: </small><br>
+                        <small>Select the {{ form.branch_state.label }} below: </small><br>
                         {{ form.branch_state(class='branch_state') }}
                         <i class="icon-check icons branch-state-icon" style="color: #0b4d75"></i>
                     </td>
