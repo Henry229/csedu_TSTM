@@ -518,8 +518,9 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                                 # Check marker's makring detail is empty
                                 if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
-                                    vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
-                                        m_writing.id))
+                                    vomr_logger.debug(
+                                        "Marker's marking detail or comment is empty: marking_writing(%s)" % (
+                                            m_writing.id))
 
                                     class fake_return(object):
                                         text = "Marking For Writing data not found."
@@ -555,7 +556,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 # Extract the assigned number(char)
                                 _names = assessment.name.rsplit(" ")
                                 writing['year'] = assessment.year
-                                writing['year_number'] = _names[len(_names)-1]
+                                writing['year_number'] = _names[len(_names) - 1]
                                 writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
                                 writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
                                 writing['markers_comment'] = m_writing.markers_comment
