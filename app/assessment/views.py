@@ -24,7 +24,7 @@ from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, Edu
 from ..writing.views import get_w_report_template
 
 v_handler = TimedRotatingFileHandler(os.path.join(Config.LOGS_DIR, 'virtual_omr.log'), when='W0')
-vomr_logger = logging.getLogger('__name__')
+vomr_logger = logging.getLogger('virtual_omr')
 vomr_logger.setLevel(logging.DEBUG)
 vomr_logger.addHandler(v_handler)
 

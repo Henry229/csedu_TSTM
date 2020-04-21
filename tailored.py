@@ -31,7 +31,7 @@ app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db, compare_type=True)
 
 r_handler = TimedRotatingFileHandler(os.path.join(app.config['LOGS_DIR'], 'request.log'), when='W0')
-request_logger = logging.getLogger('__name__')
+request_logger = logging.getLogger(__name__)
 request_logger.setLevel(logging.DEBUG)
 request_logger.addHandler(r_handler)
 

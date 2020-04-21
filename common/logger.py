@@ -9,7 +9,7 @@ def get_logger():
         if not os.path.exists(os.path.dirname(log_file)):
             os.mkdir(os.path.dirname(log_file))
 
-    logger = logging.getLogger('__name__')
+    logger = logging.getLogger('tailored')
     ch = logging.StreamHandler()
     fh = TimedRotatingFileHandler(log_file, when='W0')
     logger.addHandler(ch)
