@@ -550,6 +550,12 @@ def virtual_omr_sync(assessment_id=None, duration=1):
                                 html.write_pdf(target=pdf_file_path, presentational_hints=True)
 
                                 writing = {}
+
+                                # CSEdu assign serial number(char) for each assessment in the name
+                                # Extract the assigned number(char)
+                                _names = assessment.name.rsplit(" ")
+                                writing['year'] = assessment.year
+                                writing['year_number'] = _names[len(_names)-1]
                                 writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
                                 writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
                                 writing['markers_comment'] = m_writing.markers_comment
