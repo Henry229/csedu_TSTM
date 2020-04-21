@@ -483,125 +483,116 @@ def virtual_omr_sync(assessment_id=None, duration=7):
             for enroll in enrolls:
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 subject = Codebook.get_subject_name(testset.id)
-                if enroll.synced:
-                    # vomr_logger.info(" > %s(%s) synced already" % (enroll.testset_id, enroll.student_user_id))
+                # Sync only ended or timed out test. Give extra 11min to be safe
+                end_time = pytz.utc.localize(enroll.end_time(margin=11))
+                vomr_logger.info("Sync [%s] %s, %s(%s), %s(%s)" % (
+                    assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
+                    enroll.student.user_id))
+                if enroll.finish_time:
+                    vomr_logger.info(" > Test finished at %s" % enroll.finish_time)
+                    sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
+                    if end_time < sync_after_utc:
+                        vomr_logger.info(" > Result older than %s days. Skip" % duration)
+                        continue
+                else:
+                    if end_time:
+                        vomr_logger.debug(" > start time: %s + duration %s = end time %s" % (
+                            enroll.start_time, testset.test_duration, end_time))
+                        if end_time >= datetime.now(pytz.utc):
+                            vomr_logger.info(" > Not timed out yet. Skip")
+                            continue
+                answers = {}
+                pdf_file_path = None
+                for m in enroll.marking:
+                    if subject == 'Writing':
+                        try:
+                            m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
+                            # Check marker's makring detail is empty
+                            if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
+                                vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
+                                    m_writing.id))
+
+                                class fake_return(object):
+                                    text = "Marking For Writing data not found."
+                                    status_code = 0
+
+                                ret = fake_return()
+                            # Get merged writing markings file
+                            m_assessment_enroll_id = enroll.id
+                            m_student_user_id = enroll.student_user_id
+                            m_marking_writing_id = m_writing.id
+
+                            rendered_template_pdf = get_w_report_template(
+                                assessment_enroll_id=m_assessment_enroll_id,
+                                student_user_id=m_student_user_id,
+                                marking_writing_id=m_marking_writing_id,
+                                pdf=True)
+                            # PDF generation
+                            from weasyprint import HTML
+                            html = HTML(string=rendered_template_pdf)
+
+                            pdf_file_path = os.path.join(os.path.dirname(current_app.root_path),
+                                                         current_app.config['USER_DATA_FOLDER'],
+                                                         str(m_student_user_id),
+                                                         "writing",
+                                                         "%s_%s_%s.pdf" % (
+                                                             m_assessment_enroll_id, m_student_user_id,
+                                                             m_marking_writing_id))
+                            html.write_pdf(target=pdf_file_path, presentational_hints=True)
+
+                            writing = {}
+                            writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
+                            writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
+                            writing['markers_comment'] = m_writing.markers_comment
+                            writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                            writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
+                            answers[str(m.question_no)] = writing
+                        except:
+                            pass
+                    else:
+                        # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
+                        try:
+                            answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                        except:
+                            pass
+
+                marking = {
+                    'GUID': testset.GUID,
+                    'student_id': enroll.student.student_id,
+                    'answers': answers,
+                    'branch_state': assessment.branch_state,
+                    'test_type': Codebook.get_code_name(assessment.test_type)
+                }
+                if len(answers) < 1:
+                    vomr_logger.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
 
                     class fake_return(object):
-                        text = "Synced already"
+                        text = "No student answer found"
                         status_code = 0
 
                     ret = fake_return()
                 else:
-                    # Sync only ended or timed out test. Give extra 11min to be safe
-                    end_time = pytz.utc.localize(enroll.end_time(margin=11))
-                    vomr_logger.info("Sync [%s] %s, %s(%s), %s(%s)" % (
-                        assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
-                        enroll.student.user_id))
-                    if enroll.finish_time:
-                        vomr_logger.info(" > Test finished at %s" % enroll.finish_time)
-                        sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
-                        if end_time < sync_after_utc:
-                            vomr_logger.info(" > Result older than %s days. Skip" % duration)
-                            continue
-                    else:
-                        if end_time:
-                            vomr_logger.debug(" > start time: %s + duration %s = end time %s" % (
-                                enroll.start_time, testset.test_duration, end_time))
-                            if end_time >= datetime.now(pytz.utc):
-                                vomr_logger.info(" > Not timed out yet. Skip")
-                                continue
-                    answers = {}
-                    pdf_file_path = None
-                    for m in enroll.marking:
-                        if subject == 'Writing':
-                            try:
-                                m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
-                                # Check marker's makring detail is empty
-                                if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
-                                    vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
-                                        m_writing.id))
-
-                                    class fake_return(object):
-                                        text = "Marking For Writing data not found."
-                                        status_code = 0
-
-                                    ret = fake_return()
-                                # Get merged writing markings file
-                                m_assessment_enroll_id = enroll.id
-                                m_student_user_id = enroll.student_user_id
-                                m_marking_writing_id = m_writing.id
-
-                                rendered_template_pdf = get_w_report_template(
-                                    assessment_enroll_id=m_assessment_enroll_id,
-                                    student_user_id=m_student_user_id,
-                                    marking_writing_id=m_marking_writing_id,
-                                    pdf=True)
-                                # PDF generation
-                                from weasyprint import HTML
-                                html = HTML(string=rendered_template_pdf)
-
-                                pdf_file_path = os.path.join(os.path.dirname(current_app.root_path),
-                                                             current_app.config['USER_DATA_FOLDER'],
-                                                             str(m_student_user_id),
-                                                             "writing",
-                                                             "%s_%s_%s.pdf" % (
-                                                                 m_assessment_enroll_id, m_student_user_id,
-                                                                 m_marking_writing_id))
-                                html.write_pdf(target=pdf_file_path, presentational_hints=True)
-
-                                writing = {}
-                                writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
-                                writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
-                                writing['markers_comment'] = m_writing.markers_comment
-                                writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-                                writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
-                                answers[str(m.question_no)] = writing
-                            except:
-                                pass
+                    if subject == 'Writing':
+                        url = '/essay_writing_synchronised'
+                        if os.path.exists(pdf_file_path):
+                            files = {
+                                'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
+                            }
+                            data = {
+                                'json': (None, json.dumps(marking), 'application/json')
+                            }
+                            ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
                         else:
-                            # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
-                            try:
-                                answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
-                            except:
-                                pass
+                            vomr_logger.error('Student Writing File not found: %s' % pdf_file_path)
 
-                    marking = {
-                        'GUID': testset.GUID,
-                        'student_id': enroll.student.student_id,
-                        'answers': answers,
-                        'branch_state': assessment.branch_state,
-                        'test_type': Codebook.get_code_name(assessment.test_type)
-                    }
-                    if len(answers) < 1:
-                        vomr_logger.debug("No answer found: testset_id(%s) enroll_id(%s)" % (testset.id, enroll.id))
+                            class fake_return(object):
+                                text = "Student Writing File not found."
+                                status_code = 0
 
-                        class fake_return(object):
-                            text = "No student answer found"
-                            status_code = 0
-
-                        ret = fake_return()
+                            ret = fake_return()
                     else:
-                        if subject == 'Writing':
-                            url = '/essay_writing_synchronised'
-                            if os.path.exists(pdf_file_path):
-                                files = {
-                                    'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
-                                }
-                                data = {
-                                    'json': (None, json.dumps(marking), 'application/json')
-                                }
-                                ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
-                            else:
-                                vomr_logger.error('Student Writing File not found: %s' % pdf_file_path)
-
-                                class fake_return(object):
-                                    text = "Student Writing File not found."
-                                    status_code = 0
-
-                                ret = fake_return()
-                        else:
-                            url = '/answer_eleven_synchronised'
-                            ret = requests.post(Config.CS_API_URL + url, json=marking, verify=False)
+                        url = '/answer_eleven_synchronised'
+                        ret = requests.post(Config.CS_API_URL + url, json=marking, verify=False)
                 responses.append({'testset_name': testset.name,
                                   'testset_guid': testset.GUID,
                                   'student_id': enroll.student.student_id,
