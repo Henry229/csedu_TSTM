@@ -423,7 +423,7 @@ def virtual_omr_resync(assessment_id):
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=1):
+def virtual_omr_sync(assessment_id=None, duration=7):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
@@ -476,7 +476,7 @@ def virtual_omr_sync(assessment_id=None, duration=1):
             vomr_logger.info("=" * 80)
             vomr_logger.info("Assessment : %s" % assessment.GUID)
             vomr_logger.info("=" * 80)
-            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID).all()
+            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).all()
             responses = []
             responses_text = []
 
