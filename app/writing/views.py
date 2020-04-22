@@ -288,7 +288,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
             c_image = Image.open(
-                os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id), "writing", v))
         except FileNotFoundError:
             log.error('File not found. Check the student writing file existing')
@@ -297,13 +297,13 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
         if marking_writing.marked_file_link:
             if k in marking_writing.marked_file_link.keys():
                 m_image = Image.open(
-                    os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                    os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "writing", marking_writing.marked_file_link[k]))
                 c_image.paste(m_image, (0, 0), m_image)
         saved_file_name = v.replace('.jpg', '_merged.png')
         c_image.save(
-            os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id),
                          "writing", saved_file_name), "PNG")
         combined_images.append(c_image)
@@ -312,14 +312,14 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
         if local_file:
             # PDF generation needs to access the file from local file system
             marked_writing_path = 'file:///%s/%s/%s/writing/%s' % (
-                os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+                os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                 str(student_user_id), saved_file_name)
 
         marked_images.append(marked_writing_path)
 
     # Generate single image of all combined images
     single_image_name = "%s_single.png" % marking_writing.id
-    single_image_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+    single_image_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                      str(student_user_id), "writing", single_image_name)
 
     if vertical:
@@ -332,7 +332,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     if local_file:
         # PDF generation needs to access the file from local file system
         single_image_url = 'file:///%s/%s/%s/writing/%s' % (
-            os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+            os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
             str(student_user_id), single_image_name)
 
     return marked_images, single_image_url
@@ -434,7 +434,7 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
         from weasyprint import HTML
         html = HTML(string=rendered_template_pdf)
 
-        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                      str(student_user_id),
                                      "writing",
                                      "%s_%s_%s.pdf" % (assessment_enroll_id, student_user_id, marking_writing_id))

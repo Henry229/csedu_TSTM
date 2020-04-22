@@ -97,6 +97,14 @@ class User(UserMixin, db.Model):
         else:
             return False
 
+    def get_branch_id(self):
+        if self.role.name == 'Test_center':
+            branch_name = self.username.rsplit(' ', 1)[0]
+            row = Codebook.query.filter_by(code_type='test_center').filter_by(code_name=branch_name).first()
+            return row.id
+        else:
+            return None
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')

@@ -180,13 +180,13 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     html = HTML(string=rendered_template_pdf)
 
-    pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+    pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "report",
                                  "test_report_%s_%s_%s_%s.pdf" % (
                                      assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
-    os.chdir(os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER']))
+    os.chdir(os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):
         os.makedirs(str(student_user_id))
     os.chdir(str(student_user_id))
@@ -479,7 +479,7 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
     if request.args.get('pdf-download') == "1":
         from weasyprint import HTML
         html = HTML(string=rendered_template_pdf)
-        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                      str(current_user.id),
                                      "test_ranking",
                                      "%s_%s.pdf" % (assessment_id, sequence))
@@ -851,7 +851,7 @@ def report_test(type):
 
         html = HTML(string=rendered_template_pdf)
 
-        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                      "report_test",
                                      "individual_progress_Naplan_pdf_test.pdf")
     elif type == 'test_ranking':
@@ -860,7 +860,7 @@ def report_test(type):
 
         html = HTML(string=rendered_template_pdf)
 
-        pdf_file_path = os.path.join(os.path.dirname(current_app.root_path), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
                                      "report_test",
                                      "test_ranking_pdf_test.pdf")
     else:
@@ -877,11 +877,18 @@ def report_test(type):
 @permission_required(Permission.ADMIN)
 def enroll_info():
     search_date = request.args.get('search_date')
-    if not search_date:
-        search_date = date.today().strftime('%Y-%m-%d')
-    query = db.session.query(AssessmentEnroll).\
-                        filter(func.date(AssessmentEnroll.start_time)==search_date)
+    search_student_id = request.args.get('search_student_id')
+    query = db.session.query(AssessmentEnroll)
+    if search_student_id:
+        query = query.filter_by(student_user_id=Student.getStudentUserId(search_student_id))
+    if not search_student_id and not search_date:
+        query = query.filter(1 == 2)
+    elif search_date:
+        query = query.filter(func.date(AssessmentEnroll.start_time) == search_date)
     enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id, AssessmentEnroll.student_user_id).all()
+    # Default set date as today
+    if not search_student_id and not search_date:
+        search_date = date.today().strftime('%Y-%m-%d')
     return render_template('report/assessment_enroll_info.html', enrolls = enrolls, search_date=search_date)
 
 
