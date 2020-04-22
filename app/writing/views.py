@@ -603,7 +603,7 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             if file_name:
-                file_path = os.path.join(os.path.normpath(current_app.root_path),
+                file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)),
                                          current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
                                          file_name)
                 if os.path.exists(file_path):
