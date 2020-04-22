@@ -481,17 +481,17 @@ def marking(marking_writing_id, student_user_id):
                                    timestamp=str(round(time.time() * 1000)))
         else:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - marking_onscreen_load return null' % (
-            marking_writing_id, student_user_id))
+                marking_writing_id, student_user_id))
     else:
         if marking_writing:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - item not found' % (
-            marking_writing_id, student_user_id))
+                marking_writing_id, student_user_id))
         elif not item:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - data not found' % (
-            marking_writing_id, student_user_id))
+                marking_writing_id, student_user_id))
         else:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - canMarking return false' % (
-            marking_writing_id, student_user_id))
+                marking_writing_id, student_user_id))
     return render_template('writing/marking_empty.html')
 
 
@@ -603,7 +603,8 @@ def marking_onscreen_load(marking_writing_id, student_user_id):
     if marking_writing.candidate_file_link:
         for key, file_name in marking_writing.candidate_file_link.items():
             if file_name:
-                file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
+                file_path = os.path.join(os.path.normpath(current_app.root_path),
+                                         current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
                                          file_name)
                 if os.path.exists(file_path):
                     web_img_links[key] = {
