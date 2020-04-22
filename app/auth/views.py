@@ -145,27 +145,18 @@ def user_edit_profile(id):
 def user_manage():
     email = request.args.get("email")
     username = request.args.get("username")
-    role = request.args.get("role")
     error = request.args.get("error")
     if error:
         flash(error)
 
-    if not role:
-        roles = Role.query.filter_by(name='Test_center').first()
-        role = roles.id
-
     searchUserform = SearchUserForm()
     searchUserform.email.data = email
     searchUserform.username.data = username
-    searchUserform.role.data = role
-
     query = User.query
     if searchUserform.email.data:
         query = query.filter(User.email.ilike('%{}%'.format(searchUserform.email.data)))
     if searchUserform.username.data:
         query = query.filter(User.username.ilike('%{}%'.format(searchUserform.username.data)))
-    if searchUserform.role.data:
-        query = query.filter(User.role_id==searchUserform.role.data)
     rows = query.order_by(User.id.desc()).all()
     return render_template('auth/manage.html', form=searchUserform, users=rows)
 

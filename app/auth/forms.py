@@ -62,13 +62,7 @@ class ChangePasswordForm(FlaskForm):
 class SearchUserForm(FlaskForm):
     email = StringField('Email')
     username = StringField('Username')
-    role = SelectField('Role', id='role', coerce=int)
     submit = SubmitField('Search')
-
-    def __init__(self, *args, **kwargs):
-        super(SearchUserForm, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name)
-                             for role in Role.query.order_by(Role.name).all()]
 
 
 class EditProfileForm(FlaskForm):
