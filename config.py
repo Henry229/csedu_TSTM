@@ -23,11 +23,11 @@ class Config(metaclass=MetaFlaskEnv):
     CSEDU_ITEM_PER_PAGE = 25
     CSEDU_IMG_DIR = os.environ.get('CSEDU_IMG_DIR') or 'app/static/ui/img'
 
-    # ToDo: Need to update Upload_folder, allowed_extentions
-    UPLOAD_FOLDER = os.environ.get('TEMP') or 'tmp/upload'
+    # ToDo: Need to update Upload_folder, allowed_extensions
+    UPLOAD_FOLDER = os.environ.get('TEMP') or os.path.join(basedir, 'tmp/upload')
     ALLOWED_EXTENSIONS = {'xml', 'xls', 'xlsx', 'zip'}
 
-    USER_DATA_FOLDER = os.environ.get('USER_DATA_FOLDER') or 'userdata'
+    USER_DATA_FOLDER = os.environ.get('USER_DATA_FOLDER') or os.path.join(basedir, 'userdata')
     WRITING_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'gif', 'txt'}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -40,7 +40,7 @@ class Config(metaclass=MetaFlaskEnv):
     IMPORT_TEMP_DIR = os.path.join(basedir, 'import_temp')
 
     # TEST DATA folder
-    DEPLOY_DATA_DIR = os.environ.get('DEPLOY_DATA_DIR') or 'app/deploy'
+    DEPLOY_DATA_DIR = os.environ.get('DEPLOY_DATA_DIR') or os.path.join(basedir, 'app/deploy')
 
     # QTI XML 을 저장하는 폴더
     STORAGE_DIR = os.path.join(basedir, 'storage')

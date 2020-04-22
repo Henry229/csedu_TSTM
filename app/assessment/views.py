@@ -531,8 +531,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             from weasyprint import HTML
                             html = HTML(string=rendered_template_pdf)
 
-                            pdf_file_path = os.path.join(os.path.dirname(current_app.root_path),
-                                                         current_app.config['USER_DATA_FOLDER'],
+                            pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                                          str(m_student_user_id),
                                                          "writing",
                                                          "%s_%s_%s.pdf" % (

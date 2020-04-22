@@ -850,7 +850,7 @@ def build_individual_progress_pdf_response(template_file_name, static_folder,
     html = HTML(string=rendered_template_pdf)
     curr_dir = os.getcwd()
 
-    pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+    pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(current_user.id),
                                  "individual_progress_report",
                                  plan_GUID,
@@ -884,7 +884,7 @@ def build_individual_progress_zipper(plan_GUID):
         for file in file_paths:
             zip.write(file)
 
-    zfile = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+    zfile = os.path.join(current_app.config['USER_DATA_FOLDER'],
                          str(current_user.id),
                          "individual_progress_report",
                          "%s.zip" % (plan_GUID))

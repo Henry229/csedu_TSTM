@@ -15,7 +15,7 @@ from ..web.errors import forbidden
 def get_data(user_id, file):
     if current_user.can(Permission.ADMIN) or current_user.id == user_id:
         return send_from_directory(
-            os.path.join(current_app.instance_path, current_app.config['USER_DATA_FOLDER'], str(user_id)), file)
+            os.path.join(current_app.config['USER_DATA_FOLDER'], str(user_id)), file)
     return forbidden("Not authorised to get the resource requested")
 
 
@@ -31,7 +31,7 @@ def get_writing(marking_writing_id, student_user_id, file):
     marker_ids = [sub.marker_id for sub in MarkerBranch.query.options(load_only("marker_id")).filter_by(
         branch_id=branch_id).filter(MarkerBranch.delete.isnot(True)).all()]
     if current_user.can(Permission.ADMIN) or current_user.id in marker_ids or current_user.id == student_user_id:
-        p = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+        p = os.path.join(current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id), "writing")
         return send_from_directory(p, file)
     return forbidden("Not authorised to get the resource requested")
@@ -41,7 +41,7 @@ def get_writing(marking_writing_id, student_user_id, file):
 @login_required
 def get_naplan(student_user_id, file):
     if current_user.can(Permission.ADMIN) or current_user.id == student_user_id:
-        p = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+        p = os.path.join(current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id), "naplan")
         mimetype = None
         if file.find('.png') > 0:

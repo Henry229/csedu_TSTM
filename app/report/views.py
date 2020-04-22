@@ -180,13 +180,13 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     html = HTML(string=rendered_template_pdf)
 
-    pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+    pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "report",
                                  "test_report_%s_%s_%s_%s.pdf" % (
                                      assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
-    os.chdir(os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER']))
+    os.chdir(os.path.join(current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):
         os.makedirs(str(student_user_id))
     os.chdir(str(student_user_id))
@@ -479,7 +479,7 @@ def test_ranking_report(year, test_type, sequence, assessment_id, test_center):
     if request.args.get('pdf-download') == "1":
         from weasyprint import HTML
         html = HTML(string=rendered_template_pdf)
-        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                      str(current_user.id),
                                      "test_ranking",
                                      "%s_%s.pdf" % (assessment_id, sequence))
@@ -851,7 +851,7 @@ def report_test(type):
 
         html = HTML(string=rendered_template_pdf)
 
-        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                      "report_test",
                                      "individual_progress_Naplan_pdf_test.pdf")
     elif type == 'test_ranking':
@@ -860,7 +860,7 @@ def report_test(type):
 
         html = HTML(string=rendered_template_pdf)
 
-        pdf_file_path = os.path.join(os.path.normpath(os.path.dirname(current_app.root_path)), current_app.config['USER_DATA_FOLDER'],
+        pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                      "report_test",
                                      "test_ranking_pdf_test.pdf")
     else:
