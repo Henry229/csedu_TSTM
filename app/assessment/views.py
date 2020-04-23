@@ -508,53 +508,49 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                 pdf_file_path = None
                 for m in enroll.marking:
                     if subject == 'Writing':
-                        try:
-                            m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
-                            vomr_logger.info(" mw > marking_id(%s), marking_for_writing_id(%s)" % (m.id, m_writing.id))
-                            # Check marker's makring detail is empty
-                            if not m_writing.is_mark_done():
-                                vomr_logger.debug(" mw > Marker not finished marking: marking_for_writing_id(%s)" % (
-                                    m_writing.id))
+                        m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
+                        vomr_logger.info(" mw > marking_id(%s), marking_for_writing_id(%s)" % (m.id, m_writing.id))
+                        # Check marker's marking detail is empty
+                        if not m_writing.is_mark_done():
+                            vomr_logger.debug(" mw > Marker not finished marking: marking_for_writing_id(%s)" % (
+                                m_writing.id))
 
-                                class fake_return(object):
-                                    text = "Marking For Writing data not found."
-                                    status_code = 0
+                            class fake_return(object):
+                                text = "Marking For Writing data not found."
+                                status_code = 0
 
-                                ret = fake_return()
-                            # Get merged writing markings file
-                            m_assessment_enroll_id = enroll.id
-                            m_student_user_id = enroll.student_user_id
-                            m_marking_writing_id = m_writing.id
+                            ret = fake_return()
+                        # Get merged writing markings file
+                        m_assessment_enroll_id = enroll.id
+                        m_student_user_id = enroll.student_user_id
+                        m_marking_writing_id = m_writing.id
 
-                            rendered_template_pdf = get_w_report_template(
-                                assessment_enroll_id=m_assessment_enroll_id,
-                                student_user_id=m_student_user_id,
-                                marking_writing_id=m_marking_writing_id,
-                                pdf=True)
-                            vomr_logger.info(" mw > pdf report file start generation")
-                            # PDF generation
-                            from weasyprint import HTML
-                            html = HTML(string=rendered_template_pdf)
+                        rendered_template_pdf = get_w_report_template(
+                            assessment_enroll_id=m_assessment_enroll_id,
+                            student_user_id=m_student_user_id,
+                            marking_writing_id=m_marking_writing_id,
+                            pdf=True)
+                        vomr_logger.info(" mw > pdf report file start generation")
+                        # PDF generation
+                        from weasyprint import HTML
+                        html = HTML(string=rendered_template_pdf)
 
-                            pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
-                                                         str(m_student_user_id),
-                                                         "writing",
-                                                         "%s_%s_%s.pdf" % (
-                                                             m_assessment_enroll_id, m_student_user_id,
-                                                             m_marking_writing_id))
-                            html.write_pdf(target=pdf_file_path, presentational_hints=True)
-                            vomr_logger.info(" mw > pdf report file generated for FTP (%s)" % (pdf_file_path))
+                        pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                                     str(m_student_user_id),
+                                                     "writing",
+                                                     "%s_%s_%s.pdf" % (
+                                                         m_assessment_enroll_id, m_student_user_id,
+                                                         m_marking_writing_id))
+                        html.write_pdf(target=pdf_file_path, presentational_hints=True)
+                        vomr_logger.info(" mw > pdf report file generated for FTP (%s)" % (pdf_file_path))
 
-                            writing = {}
-                            writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
-                            writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
-                            writing['markers_comment'] = m_writing.markers_comment
-                            writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-                            writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
-                            answers[str(m.question_no)] = writing
-                        except Exception as e:
-                            vomr_logger.debug(e)
-                            pass
+                        writing = {}
+                        writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
+                        writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
+                        writing['markers_comment'] = m_writing.markers_comment
+                        writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                        writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
+                        answers[str(m.question_no)] = writing
                     else:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
                         try:
