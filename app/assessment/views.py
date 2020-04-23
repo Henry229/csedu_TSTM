@@ -27,6 +27,9 @@ v_handler = TimedRotatingFileHandler(os.path.join(Config.LOGS_DIR, 'virtual_omr.
 vomr_logger = logging.getLogger('virtual_omr')
 vomr_logger.setLevel(logging.DEBUG)
 vomr_logger.addHandler(v_handler)
+format = logging.Formatter(
+    "%(asctime)s [%(filename)-10s:%(lineno)-5s:%(funcName)-30s] (%(levelname)s) : %(message)s")
+v_handler.setFormatter(format)
 
 
 @assessment.route('/manage/new', methods=['GET'])
