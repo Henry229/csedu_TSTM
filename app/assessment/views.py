@@ -451,7 +451,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
     if process:
         lockfile = 'virtual_omr_sync.lock'
-        locktimeout = 360
+        locktimeout = 1 #360
         if os.path.exists(lockfile):
             vomr_logger.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
@@ -511,7 +511,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         try:
                             m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                             # Check marker's makring detail is empty
-                            if m_writing.is_mark_done():
+                            if not m_writing.is_mark_done():
                                 vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
                                     m_writing.id))
 
