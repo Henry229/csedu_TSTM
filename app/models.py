@@ -947,6 +947,22 @@ class MarkingForWriting(db.Model):
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
+    def is_mark_done(self):
+        # Check markers_comment existing
+        if self.markers_comment:
+            if len(self.markers_comment) < 1:
+                return False
+        else:
+            return False
+        # Check candidate marking score existing
+        if self.candidate_mark_detail:
+            if len(self.candidate_mark_detail) < 1:
+                return False
+        else:
+            return False
+
+        return True
+
     def __repr__(self):
         return '<Marking Detail For Writing {}>'.format(self.id)
 

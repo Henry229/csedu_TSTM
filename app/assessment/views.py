@@ -508,7 +508,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         try:
                             m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                             # Check marker's makring detail is empty
-                            if not m_writing.candidate_mark_detail or not m_writing.markers_comment:
+                            if m_writing.is_mark_done():
                                 vomr_logger.debug("Marker's marking detail or comment is empty: marking_writing(%s)" % (
                                     m_writing.id))
 

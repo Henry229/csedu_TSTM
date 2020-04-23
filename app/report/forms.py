@@ -2,6 +2,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from sqlalchemy.sql import func
 from wtforms import SelectField, BooleanField, SubmitField
+from wtforms.validators import DataRequired
 
 from .. import db
 from ..models import Choices, Codebook, Assessment
@@ -31,7 +32,7 @@ class ReportSearchForm(FlaskForm):
         csrf = False
 
     year = SelectField('Year')
-    test_type = SelectField('Test Type', coerce=int)
+    test_type = SelectField('Test Type', coerce=int, validators=[DataRequired()])
     test_center = SelectField('CSEdu Branch', coerce=int)
 
     def __init__(self, *args, **kwargs):

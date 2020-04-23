@@ -21,7 +21,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews
+    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User
 from ..web.errors import page_not_found
 from ..web.views import view_explanation
 
@@ -880,7 +880,8 @@ def enroll_info():
     search_student_id = request.args.get('search_student_id')
     query = db.session.query(AssessmentEnroll)
     if search_student_id:
-        query = query.filter_by(student_user_id=Student.getStudentUserId(search_student_id))
+        student_user_ids = [row.id for row in User.query.filter(User.username.ilike('%{}%'.format(search_student_id))).all()]
+        query = query.filter(AssessmentEnroll.student_user_id.in_(student_user_ids))
     if not search_student_id and not search_date:
         query = query.filter(1 == 2)
     elif search_date:
