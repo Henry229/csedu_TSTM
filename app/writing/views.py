@@ -383,7 +383,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
             template_file = 'writing/my_report_writing.html'
             if pdf:
                 template_file = 'writing/my_report_writing_pdf.html',
-            student = Student.query.filter_by(student_user_id=student_user_id).first()
+            student = User.query.filter_by(id=student_user_id).first()
             rendered_template_pdf = render_template(template_file,
                                                     assessment_name=assessment_name, item_name=item_name,
                                                     grade=grade, test_date=test_date,
