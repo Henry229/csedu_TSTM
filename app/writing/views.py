@@ -318,13 +318,18 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
 
     # Generate single image of all combined images
     single_image_name = "%s_single.png" % marking_writing.id
+    single_pdf_name = "%s_single.pdf" % marking_writing.id
     single_image_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                      str(student_user_id), "writing", single_image_name)
+    single_pdf_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                   str(student_user_id), "writing", single_pdf_name)
 
     if vertical:
         get_concat_v_multi_resize(combined_images).save(single_image_path, "PNG")
+        get_concat_v_multi_resize(combined_images).save(single_pdf_path, "PDF")
     else:
         get_concat_h_multi_resize(combined_images).save(single_image_path, "PNG")
+        get_concat_h_multi_resize(combined_images).save(single_pdf_path, "PDF")
 
     single_image_url = url_for('api.get_writing', marking_writing_id=marking_writing.id,
                                student_user_id=student_user_id, file=single_image_name)
