@@ -529,6 +529,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             marked_images, single_image, pdf_file_path = get_merged_images(m_student_user_id,
                                                                                            m_writing,
                                                                                            local_file=True)
+                            pdf_file_path = pdf_file_path.replace('file:///', '')
                             vomr_logger.info(" mw > pdf report file for FTP (%s)" % (pdf_file_path))
                         except Exception as e:
                             vomr_logger.error(e)
