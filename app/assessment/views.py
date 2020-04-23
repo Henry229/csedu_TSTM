@@ -543,11 +543,6 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             html.write_pdf(target=pdf_file_path, presentational_hints=True)
 
                             writing = {}
-                            # CSEdu assign serial number(char) for each assessment in the name
-                            # Extract the assigned number(char)
-                            _names = assessment.name.rsplit(" ")
-                            writing['year'] = assessment.year
-                            writing['year_number'] = _names[len(_names) - 1]
                             writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
                             writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
                             writing['markers_comment'] = m_writing.markers_comment
@@ -580,6 +575,12 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     ret = fake_return()
                 else:
                     if subject == 'Writing':
+                        # CSEdu assign serial number(char) for each assessment in the name
+                        # Extract the assigned number(char)
+                        _names = assessment.name.rsplit(" ")
+                        marking['year'] = assessment.year
+                        marking['year_number'] = _names[len(_names) - 1]
+
                         url = '/essay_writing_synchronised'
                         if os.path.exists(pdf_file_path):
                             files = {
@@ -588,6 +589,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             data = {
                                 'json': (None, json.dumps(marking), 'application/json')
                             }
+
                             ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
                         else:
                             vomr_logger.error('Student Writing File not found: %s' % pdf_file_path)
