@@ -528,29 +528,24 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         m_student_user_id = enroll.student_user_id
                         m_marking_writing_id = m_writing.id
 
-                        try:
-                            rendered_template_pdf = get_w_report_template(
-                                assessment_enroll_id=m_assessment_enroll_id,
-                                student_user_id=m_student_user_id,
-                                marking_writing_id=m_marking_writing_id,
-                                pdf=True)
-                            vomr_logger.info(" mw > pdf report file start generation")
-                            vomr_logger.debug(rendered_template_pdf)
-                            # PDF generation
-                            from weasyprint import HTML
-                            html = HTML(string=rendered_template_pdf)
+                        rendered_template_pdf = get_w_report_template(
+                            assessment_enroll_id=m_assessment_enroll_id,
+                            student_user_id=m_student_user_id,
+                            marking_writing_id=m_marking_writing_id,
+                            pdf=True)
+                        vomr_logger.info(" mw > pdf report file start generation")
+                        # PDF generation
+                        from weasyprint import HTML
+                        html = HTML(string=rendered_template_pdf)
 
-                            pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
-                                                         str(m_student_user_id),
-                                                         "writing",
-                                                         "%s_%s_%s.pdf" % (
-                                                             m_assessment_enroll_id, m_student_user_id,
-                                                             m_marking_writing_id))
-                            html.write_pdf(target=pdf_file_path, presentational_hints=True)
-                            vomr_logger.info(" mw > pdf report file generated for FTP (%s)" % (pdf_file_path))
-                        except Exception as e:
-                            vomr_logger.error(e)
-                            continue
+                        pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                                     str(m_student_user_id),
+                                                     "writing",
+                                                     "%s_%s_%s.pdf" % (
+                                                         m_assessment_enroll_id, m_student_user_id,
+                                                         m_marking_writing_id))
+                        html.write_pdf(target=pdf_file_path, presentational_hints=True)
+                        vomr_logger.info(" mw > pdf report file generated for FTP (%s)" % (pdf_file_path))
 
                         writing = {}
                         writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
