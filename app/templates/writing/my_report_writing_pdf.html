@@ -25,13 +25,13 @@
     <table id="t_student_info">
         <tr>
             <th> Student Name:</th>
-            <td> {{ current_user.username }} </td>
+            <td> {{ student.username }} </td>
             <th> Rank:</th>
             <td> {{ rank }} </td>
         </tr>
         <tr>
             <th> Student ID:</th>
-            <td> {{ Student.getCSStudentId(current_user.id) }}</td>
+            <td> {{ student.student_id }}</td>
             <th> Assessment Score:</th>
             <td> {{ score }} </td>
         </tr>
