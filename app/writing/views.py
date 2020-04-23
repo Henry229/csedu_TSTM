@@ -333,12 +333,17 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
 
     single_image_url = url_for('api.get_writing', marking_writing_id=marking_writing.id,
                                student_user_id=student_user_id, file=single_image_name)
+    single_pdf_url = url_for('api.get_writing', marking_writing_id=marking_writing.id,
+                             student_user_id=student_user_id, file=single_pdf_name)
+
     if local_file:
         # PDF generation needs to access the file from local file system
         single_image_url = 'file:///%s/%s/writing/%s' % (current_app.config['USER_DATA_FOLDER'],
                                                          str(student_user_id), single_image_name)
+        single_pdf_url = 'file:///%s/%s/writing/%s' % (current_app.config['USER_DATA_FOLDER'],
+                                                       str(student_user_id), single_pdf_url)
 
-    return marked_images, single_image_url
+    return marked_images, single_image_url, single_pdf_url
 
 
 def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url=None):
@@ -356,7 +361,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
 
             # Create merged writing markings
-            marking_writing.marked_images, single_image = get_merged_images(student_user_id, marking_writing,
+            marking_writing.marked_images, single_image, single_pdf = get_merged_images(student_user_id, marking_writing,
                                                                             local_file=pdf)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
