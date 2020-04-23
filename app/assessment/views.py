@@ -509,6 +509,9 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                 for m in enroll.marking:
                     if subject == 'Writing':
                         m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
+                        if m_writing is None:
+                            vomr_logger.info(" mw > No marking found for marking_id(%s)" % m.id)
+                            continue
                         vomr_logger.info(" mw > marking_id(%s), marking_for_writing_id(%s)" % (m.id, m_writing.id))
                         # Check marker's marking detail is empty
                         if not m_writing.is_mark_done():
