@@ -341,7 +341,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
         single_image_url = 'file:///%s/%s/writing/%s' % (current_app.config['USER_DATA_FOLDER'],
                                                          str(student_user_id), single_image_name)
         single_pdf_url = 'file:///%s/%s/writing/%s' % (current_app.config['USER_DATA_FOLDER'],
-                                                       str(student_user_id), single_pdf_url)
+                                                       str(student_user_id), single_pdf_name)
 
     return marked_images, single_image_url, single_pdf_url
 
