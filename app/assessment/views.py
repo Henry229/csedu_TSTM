@@ -535,6 +535,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                                 marking_writing_id=m_marking_writing_id,
                                 pdf=True)
                             vomr_logger.info(" mw > pdf report file start generation")
+                            vomr_logger.debug(rendered_template_pdf)
                             # PDF generation
                             from weasyprint import HTML
                             html = HTML(string=rendered_template_pdf)
