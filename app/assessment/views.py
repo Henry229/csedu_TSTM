@@ -451,7 +451,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
     if process:
         lockfile = 'virtual_omr_sync.lock'
-        locktimeout = 1 #360
+        locktimeout = 360
         if os.path.exists(lockfile):
             vomr_logger.info('Lock file exists. Checking age')
             age = int(time.time() - os.path.getmtime(lockfile))
