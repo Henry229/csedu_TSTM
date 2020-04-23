@@ -552,7 +552,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
                             writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
                             answers[str(m.question_no)] = writing
-                        except:
+                        except Exception as e:
+                            vomr_logger.debug(e)
                             pass
                     else:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
