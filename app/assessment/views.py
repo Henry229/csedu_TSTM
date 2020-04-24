@@ -547,7 +547,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             if enroll.finish_time:
                                 writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
                             else:
-                                writing['end_time'] = ""   # finish_time=None when timeout before test finish
+                                writing['end_time'] = ""  # finish_time=None when timeout before test finish
                         except Exception as e:
                             vomr_logger.error("Getting end time: %s" % e)
                         answers[str(m.question_no)] = writing

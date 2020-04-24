@@ -526,7 +526,6 @@ def center():
     #                        "all_subject_student_list": all_subject_student_list,
     #                        "testsets": testset_list}
     # assessment_r_list.append(assessment_json_str)
-
     #
     # return render_template('report/manage.html', form=search_form, assessment_r_list=assessment_r_list, reports=reports,
     #                        test_summaries=test_summaries, test_center=test_center)
