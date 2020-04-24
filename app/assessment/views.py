@@ -539,8 +539,14 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
                         writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
                         writing['markers_comment'] = m_writing.markers_comment
-                        writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-                        writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
+                        try:
+                            writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                        except Exception as e:
+                            vomr_logger.error("Getting start time: %s" % e)
+                        try:
+                            writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
+                        except Exception as e:
+                            vomr_logger.error("Getting end time: %s" % e)
                         answers[str(m.question_no)] = writing
                     else:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
