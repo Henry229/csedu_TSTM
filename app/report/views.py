@@ -442,6 +442,7 @@ def center():
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
     year = request.args.get("year")
+    assessment = request.args.get("assessment")
     if test_type or test_center or year:
         flag = True
     else:
@@ -468,6 +469,67 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
+    # if Codebook.get_code_name(test_center) == 'All':
+    #     assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id). \
+    #         order_by(AssessmentEnroll.testset_id.asc()).all()
+    # else:
+    #     assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment.id). \
+    #         filter_by(test_center=test_center). \
+    #         order_by(AssessmentEnroll.testset_id.asc()).all()
+    # #
+    # # all_subjects data
+    # #
+    # all_subject_student_list = []
+    # for assessment_enroll in assessment_enrolls:
+    #     all_subject_student_list.append(assessment_enroll.student_user_id)
+    #     # if x!=0:)
+    # all_subject_student_list.sort()
+    # all_subject_student_list = list(set(all_subject_student_list))
+    #
+    # #
+    # # individual_subjects data
+    # #
+    # old_testset_id, testset_id = 0, 0
+    # testset_json_str = {}
+    # student_list = []
+    # testset_list = []
+    # for assessment_enroll in assessment_enrolls:
+    #     testset_id = assessment_enroll.testset_id
+    #
+    #     if old_testset_id != testset_id:
+    #         if old_testset_id > 0:
+    #             testset_json_str["students"] = student_list
+    #             testset_list.append(testset_json_str)
+    #             student_list = []
+    #             testset_json_str = []
+    #
+    #         old_testset_id = testset_id
+    #         testset_json_str = {"testset_id": testset_id}
+    #         student_list.append({"student_user_id": assessment_enroll.student_user_id,
+    #                              "assessment_enroll_id": assessment_enroll.id,
+    #                              "test_time": assessment_enroll.start_time_client})
+    #     else:
+    #         # student_json_str = {"student_user_id": assessment_enroll.student_user_id,
+    #         #                     "assessment_enroll_id": assessment_enroll.id,
+    #         #                     "test_time": assessment_enroll.start_time_client}
+    #         student_list.append({"student_user_id": assessment_enroll.student_user_id,
+    #                              "assessment_enroll_id": assessment_enroll.id,
+    #                              "test_time": assessment_enroll.start_time_client})
+    #
+    # testset_json_str["students"] = student_list
+    # testset_list.append(testset_json_str)
+    # assessment_json_str = {"year": assessment.year,
+    #                        "assessment_id": assessment.id,
+    #                        "assessment_name": assessment.name,
+    #                        "test_type": assessment.test_type,
+    #                        "test_center": assessment.branch_id,
+    #                        "all_subject_student_list": all_subject_student_list,
+    #                        "testsets": testset_list}
+    # assessment_r_list.append(assessment_json_str)
+
+    #
+    # return render_template('report/manage.html', form=search_form, assessment_r_list=assessment_r_list, reports=reports,
+    #                        test_summaries=test_summaries, test_center=test_center)
     return render_template('report/report_center.html', form=search_form)
 
 
