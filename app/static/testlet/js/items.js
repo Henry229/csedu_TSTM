@@ -166,9 +166,9 @@ function drawItemListModal() {
 
 // invoke from items.html - Modal box
 function invokeModalItemInfo(id) {
-    var url = '/item/' + id + '/preview';
-    $.get(url, function (data) {
-        $('#dataModalInfo .modal-content').html(data);
-    });
+    ItemRunner.init($('#dataModalInfo .modal-content'), {mode: 'preview'});
+
     $('#dataModalInfo .modal-content').html("Loading... Try again if data not shown");
+
+    ItemRunner.getRendered(id);
 }

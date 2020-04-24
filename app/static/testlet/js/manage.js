@@ -263,11 +263,11 @@ function drawItemList(id, name, category, level) {
 }
 
 function invokeModalItem(id) {
-    var url = '/item/' + id + '/preview';
-    $.get(url, function (data) {
-        $('#dataModal .modal-content').html(data);
-    });
+    ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
+
+    ItemRunner.getRendered(id);
 }
 
 function invokeModalTestlet(id) {
