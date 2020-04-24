@@ -1,3 +1,4 @@
+import html
 import re
 
 from lxml import etree
@@ -196,7 +197,7 @@ class ItemLoader:
         if data.text is None:
             body_data = ''
         else:
-            body_data = data.text
+            body_data = html.escape(data.text)
         body_data += ''.join(children_data)
         if remove_namespace:
             body_data = re.sub(r'<\s*\w*:', "<", body_data, flags=re.IGNORECASE)
@@ -624,7 +625,7 @@ class ItemLoader:
 
         return data
 
-    def parse_container_interactive(self, data, container:ContainerInteractive):
+    def parse_container_interactive(self, data, container: ContainerInteractive):
         body_elements = {}
         interaction_nodes = self.query_xpath(".//*[not(ancestor::feedbackBlock) and not(ancestor::feedbackInline) and contains(name(.), 'Interaction')]", data)
         for node in interaction_nodes:
