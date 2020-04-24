@@ -575,7 +575,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         url = '/essay_writing_synchronised'
                         if os.path.exists(pdf_file_path):
                             files = {
-                                'file': (pdf_file_path, open(pdf_file_path, 'rb'), "application/pdf")
+                                'file': (os.path.basename(pdf_file_path), open(pdf_file_path, 'rb'), "application/pdf")
                             }
                             data = {
                                 'json': (None, json.dumps(marking), 'application/json')
