@@ -160,6 +160,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     margin: 0;
 }
 
+.qti-item .pseudo-label-box .label-content p {
+    margin-bottom: 0;
+}
+
 .qti-item .qti-choiceInteraction .real-label input {
     position: absolute;
 }
