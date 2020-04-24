@@ -31,9 +31,11 @@ class ReportSearchForm(FlaskForm):
     class Meta:
         csrf = False
 
-    year = SelectField('Year')
+    year = SelectField('Year', validators=[DataRequired()])
     test_type = SelectField('Test Type', coerce=int, validators=[DataRequired()])
-    test_center = SelectField('CSEdu Branch', coerce=int)
+    test_center = SelectField('CSEdu Branch', coerce=int, validators=[DataRequired()])
+    assessment = SelectField('Assessment', coerce=int, validators=[DataRequired()])
+
 
     def __init__(self, *args, **kwargs):
         super(ReportSearchForm, self).__init__(*args, **kwargs)
@@ -42,6 +44,7 @@ class ReportSearchForm(FlaskForm):
                              db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
         self.test_type.choices = Choices.get_codes('test_type')
         self.test_center.choices = get_test_center()
+        self.assessment.choices = [(0, '')]
 
 
 class ItemSearchForm(FlaskForm):

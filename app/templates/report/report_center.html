@@ -1,0 +1,82 @@
+{% extends "ui/ui_base.html" %}
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/static/csedu_style.css">
+{% endblock %}
+{% block app_content %}
+    <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report Centre </h3>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search Condition
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    This page provides [Test Result by Year/TestType]. <br>
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                        <h5>Enter you search condition. Click on the Search button. Choose report.</h5>
+                        <small class="text-muted">Report Search</small>
+                        <br>
+                        <form method="GET" class="form inline" role="form" id="report_form">
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                            {% if current_user.is_administrator() %}{{ form.test_center }}{% else %}{{ form.test_center(read_only=True) }}{% endif %}
+                            <button type="submit" class="btn btn-secondary btn-sm" id="btn_search_assessment">Search
+                                Assessment List
+                            </button>
+                            <hr>
+                            {{ form.assessment.label }}
+                            {{ form.assessment }}
+                            <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search Report</button>
+                            {% if current_user.can(Permission.ADMIN) %}
+                                <div class="float-right">
+                                    <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
+                                          data-target="#confirm-generate">Refresh Collected Report Data</span>
+                                </div>
+                            {% endif %}
+                        </form>
+                        <p/>
+                        <div id="status" class="alert alert-success" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    {#    <script src="/static/report/js/manage.js"></script>#}
+    <script src="/static/report/js/report_center.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#status").hide();
+
+            $('#btn_search_assessment').click(function (event) {
+                event.preventDefault();
+                var year = $('SELECT[name="year"] option:selected').val();
+                var test_type = $('SELECT[name="test_type"] option:selected').val();
+                var test_center = $('SELECT[name="test_center"] option:selected').val();
+                search_assessment(year, test_type, test_center);
+            });
+
+            $('#btn_search').click(function () {
+
+            });
+        });
+
+    </script>
+{% endblock scripts %}

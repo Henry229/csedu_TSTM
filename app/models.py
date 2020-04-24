@@ -99,6 +99,7 @@ class User(UserMixin, db.Model):
 
     def get_branch_id(self):
         if self.role.name == 'Test_center':
+            # Naming convention: 'Castlehill' or 'Castlehill Branch'
             branch_name = self.username.rsplit(' ', 1)[0]
             row = Codebook.query.filter_by(code_type='test_center').filter_by(code_name=branch_name).first()
             return row.id

@@ -435,6 +435,42 @@ def manage():
                            test_summaries=test_summaries, test_center=test_center)
 
 
+@report.route('/center', methods=['GET'])
+@login_required
+@permission_required(Permission.ASSESSMENT_READ)
+def center():
+    test_type = request.args.get("test_type")
+    test_center = request.args.get("test_center")
+    year = request.args.get("year")
+    if test_type or test_center or year:
+        flag = True
+    else:
+        flag = False
+
+    error = request.args.get("error")
+    if error:
+        flash(error)
+    if test_type:
+        test_type = int(test_type)
+    if test_center:
+        test_center = int(test_center)
+
+    search_form = ReportSearchForm()
+    if test_type is None:
+        search_form.test_type.data = Codebook.get_code_id('Naplan')
+    else:
+        search_form.test_type.data = test_type
+    # default setting value into test_center list
+    branch_id = current_user.get_branch_id()
+    if branch_id:
+        search_form.test_center.data = branch_id
+    else:
+        search_form.test_center.data = test_center
+    search_form.year.data = year
+
+    return render_template('report/report_center.html', form=search_form)
+
+
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',
               methods=['GET'])
 @login_required

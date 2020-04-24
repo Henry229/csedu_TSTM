@@ -1,10 +1,10 @@
 import os
 from collections import namedtuple
+from datetime import datetime
 
 from PIL import Image, ImageDraw
-from flask import current_app, render_template, request
+from flask import current_app, render_template, request, jsonify
 from flask_login import current_user
-from sqlalchemy import Date
 
 from app.api import api
 from app.decorators import permission_required
@@ -951,7 +951,7 @@ def reset_test_query():
     #                     filter(AssessmentEnroll.start_time_client.isnot(None)). \
     #                     filter_by(finish_time_client=None).order_by(AssessmentEnroll.start_time_client.cast(Date).desc())
     query = db.session.query(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id).distinct(). \
-                                order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id)
+        order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id)
 
     enrolls = query.all()
     tests_not_finished = []
@@ -990,8 +990,8 @@ def reset_test():
         return "Student not found", 404
 
     if enroll_id:
-        enroll = AssessmentEnroll.query.filter_by(id=enroll_id).\
-                    filter_by(student_user_id=student_user_id).first()
+        enroll = AssessmentEnroll.query.filter_by(id=enroll_id). \
+            filter_by(student_user_id=student_user_id).first()
     else:
         enroll = AssessmentEnroll.query.filter_by(assessment_guid=guid). \
             filter_by(testset_id=testset_id). \
@@ -1034,3 +1034,42 @@ def reset_test():
         return ",".join(errors), 500
     else:
         return "Success", 200
+
+
+# Report Centre > search assessment
+@api.route('/search_assessment/')
+@permission_required(Permission.ASSESSMENT_READ)
+def search_assessment():
+    year = request.args.get('year', '2020', type=str)
+    test_type = request.args.get('test_type', 0, type=int)
+    test_center = request.args.get('test_center', 0, type=int)
+
+    query = db.session.query(Assessment.id, Assessment.name, Testset.id.label('testset_id'),
+                             Testset.version, Testset.name.label('testset_name')).\
+        join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
+        join(Testset, Testset.id==AssessmentEnroll.testset_id). \
+        filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
+        filter(Assessment.test_type == test_type)
+
+    # Query current_user's test center
+    # If test_center 'All', query all
+    # If test_center 'Administrator', query all
+    if not current_user.is_administrator() and \
+            current_user.get_branch_id() != test_center:
+        return "Forbidden branch data!", 403
+    else:
+        if Codebook.get_code_name(test_center) != 'All':
+            query = query.filter(AssessmentEnroll.test_center == test_center)
+
+    assessment_list = []
+    assessments = query.distinct().order_by(Assessment.id.asc()).all()
+    for assessment in assessments:
+        data = {}
+        data['assessment_id'] = assessment.id
+        data['assessment_name'] = assessment.name
+        data['testset_name'] = assessment.name
+        data['testset_id'] = assessment.testset_id
+        data['testset_name'] = assessment.testset_name
+        data['testset_version'] = assessment.version
+        assessment_list.append(data)
+    return success(assessment_list)
