@@ -47,7 +47,7 @@
                         <td>{{ enroll.finish_time }}</td>
                         <td>{{ enroll.synced }}</td>
                         <td>
-                            <span class="btn btn-sm btn-outline-dark" id="btn-reset-test"
+                            <span class="btn btn-sm btn-outline-dark btn-reset-test" id="btn-reset-{{ enroll.id }}"
                                    data-enroll-id="{{ enroll.id }}" data-assessment="{{ enroll.assessment.name }}"
                                    data-testset-id = "{{ enroll.testset_id }}"
                                    data-testset="{{ enroll.testset.name }} v.{{ enroll.testset.version }}"
@@ -117,7 +117,7 @@
                 "order": [[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
             } );
 
-            $('#btn-reset-test').on('click', function () {
+            $('.btn-reset-test').on('click', function () {
                 var _enroll_id, _testset_id, _assessment, _testset, _student;
                 _enroll_id = $(this).data('enroll-id');
                 _testset_id = $(this).data('testset-id');
@@ -129,7 +129,7 @@
                 enroll_obj.empty();
                 enroll_obj.append(
                     $('<option>', {
-                        value: _enroll_id + ' ' + _testset,
+                        value: _enroll_id + ' ' + _testset_id,
                         text: _assessment + ' : ' + _testset,
                     })
                 );
