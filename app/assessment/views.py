@@ -510,9 +510,9 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     if subject == 'Writing':
                         m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                         if m_writing is None:
-                            if not enroll.finish_time:
-                                vomr_logger.info(" mw > timeout for marking_id(%s)" % m.id)
-                            vomr_logger.info(" mw > No marking found for marking_id(%s)" % m.id)
+                            if not m.candidate_r_value:
+                                vomr_logger.info(" mw > candidate_r_value is null for marking_id(%s)" % m.id)
+                            vomr_logger.info(" mw > No marking_for_writing found for marking_id(%s)" % m.id)
                             continue
                         vomr_logger.info(" mw > marking_id(%s), marking_for_writing_id(%s)" % (m.id, m_writing.id))
                         # Check marker's marking detail is empty
