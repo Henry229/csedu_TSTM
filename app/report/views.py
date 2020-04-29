@@ -482,7 +482,7 @@ def center():
     # If test_center 'Administrator', query all
     if not current_user.is_administrator() and \
             current_user.get_branch_id() != test_center:
-        query = query.filter_by(test_center=0)
+        query = query.filter(1==0)
         flash("Forbidden branch data!")
     else:
         if Codebook.get_code_name(test_center) != 'All':

@@ -176,7 +176,6 @@ def manage():
         if test_type != 0:
             query = query.filter_by(test_type=test_type)
         if test_center:
-            # Todo: Need to check if current_user have access right on queried data
             if test_center == Codebook.get_code_id(current_user.username):
                 query = query.filter_by(branch_id=test_center)
             elif Codebook.get_code_name(test_center) == 'All':
@@ -186,18 +185,38 @@ def manage():
 
         # Filtering for only writing testset
         subject_id = Codebook.get_code_id('Writing')
-        query = query.join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id).join(Testset,
-                                                                                                           AssessmentHasTestset.testset_id == Testset.id).filter(
-            Testset.subject == subject_id)
+        query = query.join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id).\
+                        join(Testset, AssessmentHasTestset.testset_id == Testset.id).\
+                        filter(Testset.subject == subject_id)
 
         rows = query.order_by(Assessment.id.desc()).all()
         for r in rows:
             marker_ids = [sub.marker_id for sub in db.session.query(MarkerAssigned.marker_id).filter(
                 MarkerAssigned.assessment_id == r.id).filter(MarkerAssigned.delete.isnot(True)).all()]
-            student_user_ids = [sub.student_user_id for sub in
-                                db.session.query(AssessmentEnroll.student_user_id).filter(
+
+            query = AssessmentEnroll.query.filter(
                                     AssessmentEnroll.assessment_id == r.id,
-                                    AssessmentEnroll.testset_id == r.testset_id).distinct()]
+                                    AssessmentEnroll.testset_id == r.testset_id)
+            # Query current_user's test center
+            # If test_center 'All', query all
+            # If test_center 'Administrator', query all
+            if not current_user.is_administrator() and \
+                    current_user.get_branch_id() != test_center:
+                query = query.filter(1 == 0)
+                flash("Forbidden branch data!")
+            else:
+                if Codebook.get_code_name(test_center) != 'All':
+                    query = query.filter(AssessmentEnroll.test_center == test_center)
+            enrolls = query.distinct().order_by(AssessmentEnroll.student_user_id.asc()).all()
+            student_user_ids = []
+            # Check if marking_writing record existing
+            for enroll in enrolls:
+                for marking in enroll.marking:
+                    mw = db.session.query(MarkingForWriting.id).filter_by(marking_id=marking.id).first()
+                    if mw:
+                        student_user_ids.append(enroll.student_user_id)
+                        break
+
             assessment_json_str = {"assessment_guid": r.GUID,
                                    "year": r.year,
                                    "test_type": r.test_type,
