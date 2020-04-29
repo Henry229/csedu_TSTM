@@ -26,7 +26,7 @@ function search_assessment(year, test_type, test_center) {
             response.data.forEach(function (item) {
                 assessment_obj.append(
                     $('<option>', {
-                        value: item['assessment_id'] + ' ' + item['testset_id'],
+                        value: item['assessment_id'] + '_' + item['testset_id'],
                         text: item['assessment_name'] + ' : ' + item['testset_name'] + ' v.' + item['testset_version'],
                     })
                 );

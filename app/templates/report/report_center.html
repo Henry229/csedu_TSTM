@@ -54,6 +54,65 @@
                 </div>
             </div>
         </div>
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+                <i class="icons cui-list"></i> Search Result: Assessment Enroll Information
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseTwo">
+                        <i class="icons cui-list"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    {% if enrolls %}
+                        <table id="table_info" class="table table-bordered table-hover">
+                        <thead>
+                            <tr bgcolor="#f5f5dc">
+                                <th>Student</th>
+                                <th>Assessment</th>
+                                <th>Testset</th>
+                                <th>Test Center</th>
+                                <th>Start Time</th>
+                                <th>Finish Time</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enroll in enrolls %}
+                                <tr>
+                                    <td>{{ User.getUserName(enroll.student_user_id) }}</td>
+                                    <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
+                                    <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }} v.{{ enroll.testset.version }})</td>
+                                    <td>{{ enroll.test_center }}<br>({{ Codebook.get_code_name(enroll.test_center) }})</td>
+                                    <td>{{ enroll.start_time }}t</td>
+                                    <td>{{ enroll.finish_time }}</td>
+                                    <td>
+                                        <a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=enroll.assessment_id, student_user_id=enroll.student_user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>
+                                        <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=enroll.assessment_id, ts_id=enroll.testset_id, student_user_id=enroll.student_user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr bgcolor="#f5f5dc">
+                                <th>Student</th>
+                                <th>Assessment</th>
+                                <th>Testset</th>
+                                <th>Test Center</th>
+                                <th>Start Time</th>
+                                <th>Finish Time</th>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                        </table>
+                {% else %}
+                    There is no enrollment information.
+                {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock app_content %}
 {% block scripts %}
@@ -62,8 +121,13 @@
     {#    <script src="/static/report/js/manage.js"></script>#}
     <script src="/static/report/js/report_center.js"></script>
     <script>
+
         $(document).ready(function () {
             $("#status").hide();
+            $('#table_info').DataTable( {
+                "pageLength": 100,
+                "order": [[ 1, 'asc' ],[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
+            } );
 
             $('#btn_search_assessment').click(function (event) {
                 event.preventDefault();
@@ -71,10 +135,6 @@
                 var test_type = $('SELECT[name="test_type"] option:selected').val();
                 var test_center = $('SELECT[name="test_center"] option:selected').val();
                 search_assessment(year, test_type, test_center);
-            });
-
-            $('#btn_search').click(function () {
-
             });
         });
 
