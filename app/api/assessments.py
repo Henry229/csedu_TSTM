@@ -191,9 +191,28 @@ def get_next_stage():
 @permission_required(Permission.ITEM_EXEC)
 def create_session():
     """ Create a new assessment session.
+    o 2가지 경우가 있다.
+        + 시험을 처음 시작하는 경우 : session_id 가 없다.
+        + 시험을 다시 시작하는 경우 : session_id 가 있다.
+    1. session_id 가 있는 경우 session 을 찾는다.
+        a. session 이 존재하고 active 인 경우
+            + 중단한 시험을 바로 이어 시작하는 경우이다.
+            + session 을 복사해서 새로 생성하고 이전 것은 inactive 로 변경한다.
+        b.  session 이 존재하고 inactive 인 경우
+            + 시험이 다른 기기나 브라우저에서 다시 시작된 경우이다.
+            + 서버에서는 에러를 주고, client 에서는 경고를 주고 시험을 진행할 수 없도록 한다.
+        c. session 이 존재하재 하지 않는 경우
+            + session 이 존재하지 않는 다는 것은 시간이 지나서 삭제되었다는 것을 의미함.
+    2. session_id 가 없는 경우
+        a. DB 에 assessment_enroll 이 존재하지 않는 경우
+            + 새로운 session 을 시작한다.
+        b. DB 에 assessment_enroll 이 존재하는 경우
+            + 시험 시간이 남은 경우는 시험 시간이 남았으니 다시 해 보라고 한다.
+            + 시험 시간이 남지 않은 경우는 시험이 끝났다고 알려준다.
     :return:
     """
     assessment_guid = request.json.get('assessment_guid')
+    session_id = request.json.get('session_id')
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
     student_ip = request.json.get('student_ip')
@@ -212,6 +231,11 @@ def create_session():
         return bad_request()
     student_user_id = student.user_id
 
+    testset = Testset.query.filter_by(id=testset_id).first()
+    if testset is None:
+        return bad_request('testset_id', message="Cannot find testset_id {}".format(testset_id))
+    test_duration = testset.test_duration or 70
+
     # 2. check if the student went through the testset.
     # ToDo: What should we do if he already did?
     # If we only handle single test, it's time to check count and proceed or stop processing.
@@ -229,7 +253,8 @@ def create_session():
 
     # 4. Create a new enroll
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
-                                student_user_id=student_user_id, attempt_count=attempt_count)
+                                student_user_id=student_user_id, attempt_count=attempt_count,
+                                test_duration=test_duration)
     if student_ip:
         enrolled.start_ip = student_ip
     elif 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
@@ -245,16 +270,16 @@ def create_session():
     db.session.commit()
     assessment_enroll_id = enrolled.id
 
-    testset = Testset.query.filter_by(id=testset_id).first()
-    if testset is None:
-        return bad_request('testset_id', message="Cannot find testset_id {}".format(testset_id))
-    test_duration = testset.test_duration or 70
     assessment_session = AssessmentSession(current_user.id, assessment_enroll_id,
                                            testset_id, test_duration, attempt_count)
     assessment_session.set_value('start_time', int(time()))
 
     # Start a new assessment session.
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
+    # session key 를 enroll db 에 저장한다.
+    enrolled.session_key = assessment_session.key
+    db.session.add(enrolled)
+    db.session.commit()
     data = {
         'session': assessment_session.key,
     }
@@ -426,8 +451,9 @@ def response_process(item_id):
     marking.outcome_score = processed.get('maxScore')
     marking.is_correct = marking.candidate_mark >= marking.outcome_score
     marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
-
     db.session.commit()
+
+    assessment_session.set_saved_answer(marking_id, marking.candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = get_next_item(assessment_session, question_no)
@@ -767,7 +793,12 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         testlet_id = next_branch_json.get("id")
         stage = len(stage_data) + 1
         stage_data.append({'stage': stage, 'testlet_id': int(testlet_id)})
+        # stage 정보를 session 과 DB 에 저장한다.
         assessment_session.set_value('stage_data', stage_data)
+        assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
+        assessment_enroll.stage_data = stage_data
+        db.session.add(assessment_enroll)
+        db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         for item in items:
             last_question_no += 1

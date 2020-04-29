@@ -77,3 +77,10 @@ class AssessmentSession:
 
     def get_status(self):
         return self.get_value('status')
+
+    def set_saved_answer(self, marking_id, answer):
+        for item in self.assessment['test_items']:
+            if item['marking_id'] == marking_id:
+                item['saved_answer'] = answer
+                self.save_assessment()
+                break

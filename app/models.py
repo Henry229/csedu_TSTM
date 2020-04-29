@@ -723,6 +723,12 @@ class AssessmentEnroll(db.Model):
     attempt_count = db.Column(db.Integer)
     grade = db.Column(db.String(10))
     test_center = db.Column(db.Integer)
+    # Test runner session key
+    session_key = db.Column(db.String(120))
+    # Testlet stage change data
+    stage_data = db.Column(JSONB)
+    # Number of minutes the testset runs. 0 means no limit
+    test_duration = db.Column(db.Integer, default=50)
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     start_time = db.Column(db.DateTime)
     finish_time = db.Column(db.DateTime)
