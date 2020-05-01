@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>CS Education</title>
-    <link href="file:///{{ static_folder }}/report/css/test_result.css" rel="stylesheet">
+    <link href="file:///{{ static_folder }}/report/css/my_report.css" rel="stylesheet">
 </head>
 <body>
 <div class="header">
@@ -35,7 +35,7 @@
 </div>
 <div class="report_content">
     {% if subjects %}
-        <table id="t_mark"><tr><th>Summary Report(Subject)</th></tr></table>
+        <br><br><table id="t_mark"><tr><th>Summary Report(Subject)</th></tr></table>
         <table class="table" id="t_mark_info">
             <tr>
                 <th> Category</th>
@@ -47,7 +47,7 @@
                 {% set outer_loop = loop.index0 %}
                 <tr>
                     {% if subject_names[outer_loop].endswith('Average') %}
-                        <th class="small">{{ subject_names[outer_loop] }}
+                        <td class="small">{{ subject_names[outer_loop] }}
                     {% else %}<th>{{ subject_names[outer_loop] }}{% endif %}</th>
                     {% for i in range(0,num_of_assessments) %}
                         <td>{{ line[i] }}</td>
@@ -82,7 +82,7 @@
     {% endif %}
 
     {% if subjects %}
-        <table id="t_mark"><tr><th>Strength/Weakness Report(Subject)</th></tr></table>
+        <br><br><table id="t_mark"><tr><th>Strength/Weakness Report(Subject)</th></tr></table>
         <table class="table" id="t_mark_info">
             <tr>
                 <th>Subject</th>
@@ -105,7 +105,7 @@
                 </tr>
             {% endfor %}
         </table>
-        <table id="t_mark"><tr><th>Summary Progress Report</th></tr></table>
+        <br><br><table id="t_mark"><tr><th>Summary Progress Report</th></tr></table>
         <table class="table" border=1 id="t_mark_info">
             <tr>
                 <td><img src=" {{ by_set_file_name }}" alt="by set chart" width="400" height="300" ></td>
