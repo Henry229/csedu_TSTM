@@ -21,7 +21,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     draw_individual_progress_by_subject, draw_individual_progress_by_set
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User
+    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting
 from ..web.errors import page_not_found
 from ..web.views import view_explanation
 
@@ -118,9 +118,8 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
         filter_by(assessment_id=assessment_id). \
-        filter_by(testset_id=ts_id)
-    if not current_user.is_administrator():
-        query = query.filter_by(student_user_id=student_user_id)
+        filter_by(testset_id=ts_id). \
+        filter_by(student_user_id=student_user_id)
     row = query.order_by(AssessmentEnroll.id.desc()).first()
     if row is None:
         url = request.referrer
@@ -228,6 +227,7 @@ def my_student_set_report(assessment_id, student_user_id):
         filter_by(student_user_id=student_user_id). \
         order_by(AssessmentEnroll.testset_id.asc(), AssessmentEnroll.attempt_count.desc()).all()
 
+    web_file_path = None
     if assessment_enrolls:
         # ToDo: Decide which grade should be taken
         # grade = EducationPlanDetail.get_grade(assessment_id)
@@ -250,12 +250,14 @@ def my_student_set_report(assessment_id, student_user_id):
                     url = request.referrer
                     flash('Marking data not available')
                     return redirect(url)
+            web_file_path = url_for("api.get_naplan", student_user_id=student_user_id, file=file_name)
         else:
             # For selective test or other test type
             test_type_string = 'other'
         template_html_name = 'report/my_report_' + test_type_string + '.html'
-        web_file_path = url_for("api.get_naplan", student_user_id=student_user_id, file=file_name)
-        return render_template(template_html_name, image_file_path=web_file_path, grade=grade,
+
+        return render_template(template_html_name, image_file_path=web_file_path,
+                               grade=grade, test_type=test_type_string,
                                student_user_id=student_user_id)
     else:
         return redirect(url_for('report.list_my_report', error='Report data not available'))
@@ -488,6 +490,24 @@ def center():
         if Codebook.get_code_name(test_center) != 'All':
             query = query.filter(AssessmentEnroll.test_center == test_center)
     enrolls = query.order_by(AssessmentEnroll.student_user_id.asc()).all()
+
+    for enroll in enrolls:
+        # If subject is 'Writing', report enabled:
+        #   - True when Marker's comment existing for 'ALL' items in Testset
+        #   - False when Marker's comment not existing
+        enroll.enable_writing_report = False
+        enroll.is_writing = False
+        subject = Codebook.get_code_name(enroll.testset.subject)
+        if subject == 'Writing':
+            enroll.is_writing = True
+            mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                filter(Marking.id == MarkingForWriting.marking_id). \
+                filter(Marking.assessment_enroll_id == enroll.id).all()
+            for mw in mws:
+                enroll.enable_writing_report = True if mw.markers_comment else False
+                if not enroll.enable_writing_report:
+                    break
+
     return render_template('report/report_center.html', form=search_form, enrolls=enrolls)
 
 

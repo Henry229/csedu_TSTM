@@ -89,8 +89,13 @@
                                     <td>{{ enroll.start_time }}t</td>
                                     <td>{{ enroll.finish_time }}</td>
                                     <td>
+
                                         <a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=enroll.assessment_id, student_user_id=enroll.student_user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>
-                                        <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=enroll.assessment_id, ts_id=enroll.testset_id, student_user_id=enroll.student_user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                        {% if enroll.is_writing and not enroll.enable_writing_report %}
+                                            <span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>
+                                        {% else %}
+                                            <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=enroll.assessment_id, ts_id=enroll.testset_id, student_user_id=enroll.student_user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

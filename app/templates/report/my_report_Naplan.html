@@ -22,12 +22,9 @@
         <div class="card-header">
             <table style="width:100%" id="t_student_info">
                 <tr>
-                    <th> Student Name:</th>
-                    <td> {{ Student.getCSStudentName(student_user_id) }} </td>
-                    <th> Grade:</th>
-                    <td> {{ grade }} </td>
-                    <th> Student ID:</th>
-                    <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+                    <td width="25%"> <strong>Student Name:</strong> {{ Student.getCSStudentName(student_user_id) }} </td>
+                    <td width="25%"> <strong>Grade:</strong> {{ grade }} </td>
+                    <td width="25%"> <strong>Student ID:</strong> {{ Student.getCSStudentId(student_user_id) }}</td>
                 </tr>
             </table>
         </div>

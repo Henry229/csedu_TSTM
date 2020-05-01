@@ -93,13 +93,12 @@ graph_mapping = {
 '''Student Naplan Report - draw picture '''
 
 
-def draw_report(result):
+def draw_report(result, student_user_id):
     # Read base image
-    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "naplan")
     if not os.path.exists(naplan_folder):
         os.makedirs(naplan_folder)
-    base = Image.open('%s/static/report/img/naplan-%s.png' % (current_app.root_path, result["grade"]))
-
+    base = Image.open('%s/naplan-%s.png' % (current_app.config['NAPLAN_BASE_IMG_DIR'], result["grade"]))
     base.load()
     img = Image.new("RGB", base.size, (255, 255, 255))
     img.paste(base, mask=base.split()[3])
@@ -160,7 +159,7 @@ def draw_report(result):
     img.format = "PNG"
     # img.show()
     file_name = 'naplan-grade-%s_%s_%s.png' % (result["grade"], result["student_user_id"], result["assessment_GUID"])
-    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(current_user.id), "naplan")
+    naplan_folder = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "naplan")
     img.save(os.path.join(naplan_folder, file_name))
     return file_name
 
@@ -255,7 +254,7 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
         "student_user_id": student_user_id,
         "assessments": assessment_json
     }
-    file_name = draw_report(scores)
+    file_name = draw_report(scores, student_user_id)
     return file_name
 
 
