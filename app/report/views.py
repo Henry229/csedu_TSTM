@@ -92,7 +92,7 @@ def list_my_report():
     rows = db.session.query(AssessmentEnroll.assessment_guid).distinct().filter_by(
         student_user_id=student_user_id).all()
     if not rows:
-        return page_not_found(e="Invalid request - not found assessment enrolled by [{}]".format(
+        return page_not_found(e="Your account[{}] is not open for assessments yet. Please contact your branch office.".format(
             Student.getCSStudentName(student_user_id)))
     guid_list = [row.assessment_guid for row in rows]
     guid_list = ','.join(guid_list)

@@ -19,7 +19,7 @@ from .forms import StartOnlineTestForm
 from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
-    User, Role, EducationPlan, EducationPlanDetail, ItemExplanation
+    User, Role, EducationPlan, EducationPlanDetail, ItemExplanation, MarkingForWriting, Marking
 
 """sample usage for decorator
     @web.route('/admin')
@@ -290,6 +290,22 @@ def testset_list():
         test_type = Codebook.get_code_name(tset.test_type)
         tset.explanation_link = view_explanation(tset.id)
         enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+        # If subject is 'Writing', report enabled:
+        #   - True when Marker's comment existing for 'ALL' items in Testset
+        #   - False when Marker's comment not existing
+        tset.enable_writing_report = False
+        subject = Codebook.get_code_name(tset.subject)
+        if subject == 'Writing' and tset.enable_report:
+            mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                join(AssessmentEnroll). \
+                filter(Marking.id == MarkingForWriting.marking_id). \
+                filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
+                filter(AssessmentEnroll.student_user_id == current_user.id). \
+                filter(Marking.testset_id == tset.id).all()
+            for mw in mws:
+                tset.enable_writing_report = True if mw.markers_comment else False
+                if not tset.enable_writing_report:
+                    break
     sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
@@ -338,6 +354,22 @@ def assessment_list():
             tset.enrolled = enrolled
             test_type = Codebook.get_code_name(tset.test_type)
             tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            # If subject is 'Writing', report enabled:
+            #   - True when Marker's comment existing for 'ALL' items in Testset
+            #   - False when Marker's comment not existing
+            tset.enable_writing_report = False
+            subject = Codebook.get_code_name(tset.subject)
+            if subject=='Writing' and tset.enable_report:
+                mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                    join(AssessmentEnroll). \
+                    filter(Marking.id == MarkingForWriting.marking_id). \
+                    filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
+                    filter(AssessmentEnroll.student_user_id == current_user.id). \
+                    filter(Marking.testset_id == tset.id).all()
+                for mw in mws:
+                    tset.enable_writing_report = True if mw.markers_comment else False
+                    if not tset.enable_writing_report:
+                        break
             tset.explanation_link = view_explanation(tset.id)
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
         assessment.testsets = sorted_testsets

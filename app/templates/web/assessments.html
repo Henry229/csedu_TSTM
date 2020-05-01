@@ -56,13 +56,18 @@
                                             </td>
                                             {% if ts.enable_report %}
                                                 <td>
-                                                    {% if ts.enrolled %}
-                                                        <input class="btn btn-primary report"
-                                                               data-student-user-id="{{ student_user_id }}"
-                                                               data-assessment-id="{{ assessment.id }}"
-                                                               data-assessment-guid="{{ assessment.GUID }}"
-                                                               data-testset-id="{{ ts.id }}"
-                                                               value="Test# {{ assessment.id }}- {{ ts.id }} ">
+                                                    {% if ts.enrolled  %}
+                                                        {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
+                                                            <input type="button" class="btn btn-secondary btn-block"
+                                                                   value="Not Available" disabled>
+                                                        {% else %}
+                                                            <input class="btn btn-primary report"
+                                                                   data-student-user-id="{{ student_user_id }}"
+                                                                   data-assessment-id="{{ assessment.id }}"
+                                                                   data-assessment-guid="{{ assessment.GUID }}"
+                                                                   data-testset-id="{{ ts.id }}"
+                                                                   value="Test# {{ assessment.id }}- {{ ts.id }} ">
+                                                        {% endif %}
                                                     {% else %}
                                                         <input type="button" class="btn btn-secondary btn-block"
                                                                value="Not Available" disabled>

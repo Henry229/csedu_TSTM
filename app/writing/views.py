@@ -512,14 +512,17 @@ def marking(marking_writing_id, student_user_id):
                 marking_writing_id, student_user_id))
     else:
         if marking_writing:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - item not found' % (
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - student writing data not found' % (
                 marking_writing_id, student_user_id))
+            flash('student writing data not found')
         elif not item:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - data not found' % (
+            log.debug('Marking For Writing: id(%s),student_user_id(%s) - student answer data not found' % (
                 marking_writing_id, student_user_id))
+            flash('student answer data not found')
         else:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - canMarking return false' % (
                 marking_writing_id, student_user_id))
+            flash('Not authorised to get the resource requested')
     return render_template('writing/marking_empty.html')
 
 
