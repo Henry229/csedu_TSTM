@@ -1,10 +1,10 @@
 import os
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
-from sqlalchemy import Date, func
+from sqlalchemy import func
 
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
@@ -22,7 +22,6 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting
-from ..web.errors import page_not_found
 from ..web.views import view_explanation
 
 ''' 
@@ -92,8 +91,9 @@ def list_my_report():
     rows = db.session.query(AssessmentEnroll.assessment_guid).distinct().filter_by(
         student_user_id=student_user_id).all()
     if not rows:
-        return page_not_found(e="Your account[{}] is not open for assessments yet. Please contact your branch office.".format(
-            Student.getCSStudentName(student_user_id)))
+        error = "Your account[{}] is not open for assessments yet. Please contact your branch office.".format(
+            Student.getCSStudentName(student_user_id))
+        return render_template('404_student.html', error=error), 404
     guid_list = [row.assessment_guid for row in rows]
     guid_list = ','.join(guid_list)
     return redirect(url_for('web.assessment_list', guid_list=guid_list))
@@ -147,7 +147,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     markings = query_my_report_body(assessment_enroll_id, ts_id)
     explanation_link = {}
     for marking in markings:
-        explanation_link[marking.question_no] = view_explanation(testset_id=ts_id,item_id=marking.item_id)
+        explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
 
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
@@ -477,14 +477,14 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
-    query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).\
-                    filter_by(testset_id=testset_id)
+    query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
+        filter_by(testset_id=testset_id)
     # Query current_user's test center
     # If test_center 'All', query all
     # If test_center 'Administrator', query all
     if not current_user.is_administrator() and \
             current_user.get_branch_id() != test_center:
-        query = query.filter(1==0)
+        query = query.filter(1 == 0)
         flash("Forbidden branch data!")
     else:
         if Codebook.get_code_name(test_center) != 'All':
@@ -949,6 +949,7 @@ def report_test(type):
         attachment_filename=pdf_file_path)
     return rsp
 
+
 @report.route('/enroll_info/', methods=['GET'])
 @permission_required(Permission.ADMIN)
 def enroll_info():
@@ -956,24 +957,26 @@ def enroll_info():
     search_student_id = request.args.get('search_student_id')
     query = db.session.query(AssessmentEnroll)
     if search_student_id:
-        student_user_ids = [row.id for row in User.query.filter(User.username.ilike('%{}%'.format(search_student_id))).all()]
+        student_user_ids = [row.id for row in
+                            User.query.filter(User.username.ilike('%{}%'.format(search_student_id))).all()]
         query = query.filter(AssessmentEnroll.student_user_id.in_(student_user_ids))
     if not search_student_id and not search_date:
         query = query.filter(1 == 2)
     elif search_date:
         query = query.filter(func.date(AssessmentEnroll.start_time) == search_date)
-    enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id, AssessmentEnroll.student_user_id).all()
+    enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
+                             AssessmentEnroll.student_user_id).all()
     # Default set date as today
     if not search_student_id and not search_date:
         search_date = date.today().strftime('%Y-%m-%d')
-    return render_template('report/assessment_enroll_info.html', enrolls = enrolls, search_date=search_date)
+    return render_template('report/assessment_enroll_info.html', enrolls=enrolls, search_date=search_date)
 
 
 @report.route('/marking_info/<int:id>', methods=['GET'])
 @permission_required(Permission.ADMIN)
 def marking_info(id):
     enroll = AssessmentEnroll.query.filter_by(id=id).first()
-    markings = Marking.query.filter_by(assessment_enroll_id=id).\
-                order_by(Marking.question_no).all()
+    markings = Marking.query.filter_by(assessment_enroll_id=id). \
+        order_by(Marking.question_no).all()
 
-    return render_template('report/marking_info.html', markings = markings, enroll=enroll)
+    return render_template('report/marking_info.html', markings=markings, enroll=enroll)
