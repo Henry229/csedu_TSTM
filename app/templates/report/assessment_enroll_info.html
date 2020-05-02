@@ -140,10 +140,10 @@
 
         function reset_test(modal_name) {
             var enroll_obj = $('SELECT[name="enroll"] option:selected').val();
-            enroll_obj = enroll_obj.split(' ');
+            var enroll_info = enroll_obj.split(' ');
             var data = {
-                'enroll_id': enroll_obj[0],
-                'testset_id': enroll_obj[1],
+                'enroll_id': enroll_info[0],
+                'testset_id': enroll_info[1],
                 'cs_student_id': $('INPUT[name="cs_student_id"]').val(),
                 'week_no': $('INPUT[name="week_no"]').val(),
             };
@@ -165,10 +165,14 @@
                     });
                 },
                 success: function (response) {
-                    {#$('#'+modal_name).modal("hide");#}
-                    console.log(response);
+                    console.log(response.data);
                     $("#status").show();
-                    $("#status").html("Reset test successfully").fadeOut(6000, function () {
+                    $("#status").html("Reset test successfully: Enroll("
+                                    +$('SELECT[name="enroll"] option:selected').html()
+                                    +"), Student("
+                                    +$('INPUT[name="cs_student_id"]').val()
+                                    +")" ).fadeOut(6000, function ()
+                    {
                         $(this).hide()
                     });
                 }

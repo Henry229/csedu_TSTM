@@ -3,13 +3,14 @@ from collections import namedtuple
 from datetime import datetime
 
 from PIL import Image, ImageDraw
-from flask import current_app, render_template, request, jsonify
+from flask import current_app, render_template, request
 from flask_login import current_user
 
 from app.api import api
 from app.decorators import permission_required
 from app.models import Permission, refresh_mviews, Codebook, AssessmentEnroll, Student, Marking, Assessment, Testset, \
     MarkingForWriting
+from common.logger import log
 from .response import success
 from .. import db
 
@@ -1024,15 +1025,19 @@ def reset_test():
         data = {"assessment_enroll_id": enroll.id,
                 "assessment_id": enroll.assessment_id,
                 "testset_id": enroll.testset_id,
-                "student_user_id": enroll.student_user_id,
+                "cs_student_id": Student.getCSStudentId(enroll.student_user_id),
                 "testlet_ids": testlet_ids}
+        log.info(
+            "Reset Test: assessment_enroll_id({}), assessment_id({}), testset_id({}), student_user_id({},{})".format(
+                enroll.id, enroll.assessment_id, enroll.testset_id, enroll.student_user_id,
+                Student.getCSStudentId(enroll.student_user_id)))
+
     else:
         errors.append('No enroll')
-
     if len(errors):
         return ",".join(errors), 500
     else:
-        return "Success", 200
+        return success(data)
 
 
 # Report Centre > search assessment
@@ -1044,9 +1049,9 @@ def search_assessment():
     test_center = request.args.get('test_center', 0, type=int)
 
     query = db.session.query(Assessment.id, Assessment.name, Testset.id.label('testset_id'),
-                             Testset.version, Testset.name.label('testset_name')).\
+                             Testset.version, Testset.name.label('testset_name')). \
         join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
-        join(Testset, Testset.id==AssessmentEnroll.testset_id). \
+        join(Testset, Testset.id == AssessmentEnroll.testset_id). \
         filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
         filter(Assessment.test_type == test_type)
 
