@@ -39,7 +39,6 @@ def full_report(student_user_id):
     if error:
         flash(error)
     result = full_report_data(student_user_id)
-
     # result.headers["Content-Disposition"] = \
     #     "attachment;" \
     #     "attachment;filename=full_report.json"
