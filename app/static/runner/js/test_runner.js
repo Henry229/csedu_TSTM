@@ -96,6 +96,9 @@ var TestRunner = (function () {
         $('#timeoverModal .timeover-confirm').on('click', function () {
             _finishTest('time-over');
         });
+        $('#errorModal .error-confirm').on('click', function () {
+            $('#errorModal').modal('hide');
+        });
         document.addEventListener("contextmenu", function(e){
             e.preventDefault();
         }, false);

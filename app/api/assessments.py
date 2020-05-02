@@ -194,7 +194,7 @@ def create_session():
     o 2가지 경우가 있다.
         + 시험을 처음 시작하는 경우 : session_id 가 없다.
         + 시험을 다시 시작하는 경우 : session_id 가 있다.
-    1. session_id 가 있는 경우 session 을 찾는다.
+    1. session_id 가 있는 경우 session 을 찾는다.(/start 에서 처리)
         a. session 이 존재하고 active 인 경우
             + 중단한 시험을 바로 이어 시작하는 경우이다.
             + session 을 복사해서 새로 생성하고 이전 것은 inactive 로 변경한다.
@@ -204,15 +204,14 @@ def create_session():
         c. session 이 존재하재 하지 않는 경우
             + session 이 존재하지 않는 다는 것은 시간이 지나서 삭제되었다는 것을 의미함.
     2. session_id 가 없는 경우
-        a. DB 에 assessment_enroll 이 존재하지 않는 경우
+        a. DB 에 assessment_enroll 이 존재하지 않는 경우 (/session 에서 처리)
             + 새로운 session 을 시작한다.
-        b. DB 에 assessment_enroll 이 존재하는 경우
+        b. DB 에 assessment_enroll 이 존재하는 경우(/resume 에서 처리)
             + 시험 시간이 남은 경우는 시험 시간이 남았으니 다시 해 보라고 한다.
             + 시험 시간이 남지 않은 경우는 시험이 끝났다고 알려준다.
     :return:
     """
     assessment_guid = request.json.get('assessment_guid')
-    session_id = request.json.get('session_id')
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
     student_ip = request.json.get('student_ip')
@@ -290,6 +289,16 @@ def create_session():
 @permission_required(Permission.ITEM_EXEC)
 def test_start():
     """ Start the test with session_id.
+        전체적인 설명은 /session 참고
+            a. session 이 존재하고 active 인 경우
+                + 중단한 시험을 바로 이어 시작하는 경우이다.
+                + session 을 복사해서 새로 생성하고 이전 것은 inactive 로 변경한다.
+            b.  session 이 존재하고 inactive 인 경우
+                + 시험이 다른 기기나 브라우저에서 다시 시작된 경우이다.
+                + 서버에서는 에러를 주고, client 에서는 경고를 주고 시험을 진행할 수 없도록 한다.
+            c. session 이 존재하재 하지 않는 경우
+                + session 이 존재하지 않는 다는 것은 시간이 지나서 삭제되었다는 것을 의미함.
+
     :return:
     """
     session_id = request.json.get('session_id')
@@ -365,6 +374,27 @@ def test_start():
     return success(data)
 
 
+@api.route('/resume', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def test_resume():
+    """ Resume the test with session_id. 전체적인 설명은 /session 참고
+        b. DB 에 assessment_enroll 이 존재하는 경우(/resume 에서 처리)
+            + 시험 시간이 남은 경우는 시험 시간이 남았으니 다시 해 보라고 한다.
+            + 시험 시간이 남지 않은 경우는 시험이 끝났다고 알려준다.
+    :return:
+    """
+    session_key = request.json.get('session_key')
+    assessment_session = AssessmentSession(key=session_key)
+    if assessment_session.assessment is None:
+        return bad_request(message="session is expired or not exists.")
+    new_session_key = assessment_session.change_session_key()
+    enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
+    enroll.session_key = new_session_key
+    # db.session.add(enroll)
+    db.session.commit()
+    return success({'session_key': new_session_key})
+
+
 @api.route('/flag/<int:item_id>', methods=['PUT'])
 @permission_required(Permission.ITEM_EXEC)
 def flag(item_id):
@@ -389,19 +419,28 @@ def response_process(item_id):
     file_names = request.json.get('file_names')
 
     assessment_session = AssessmentSession(key=session_key)
+    if assessment_session.assessment is None:
+        assessment_enroll = AssessmentEnroll.query.join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id)\
+            .filter(Marking.id == marking_id).first()
+        if assessment_enroll.is_finished:
+            return bad_request(message="Test session is finished!")
+        elif assessment_enroll.session_key != session_key:
+            return bad_request(message="This test session is invalid! A new test has been started from another browser.")
+        else:
+            return bad_request(message='This test session is invalid!')
 
     # check session status
     if assessment_session.get_status() == AssessmentSession.STATUS_READY:
         return bad_request(message='Session status is wrong.')
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
-        return bad_request()
+        return bad_request(message='Student id is not valid!')
 
     # check timeout: give 5 seconds gap
     timeout = (assessment_session.get_value('test_duration') * 60
                - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
     if timeout <= 0:
-        return bad_request()
+        return bad_request(message="Test session is finished!")
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()

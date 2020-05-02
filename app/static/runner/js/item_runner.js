@@ -175,10 +175,22 @@ var ItemRunner = (function () {
             complete: function () {
 
             },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                console.log(jqXHR);
+                if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    $('#errorModal .modal-body').html(jqXHR.responseJSON.message);
+                    $('#errorModal').modal('show');
+                }
+            },
             success: function (response) {
                 if (response.result === 'success') {
                     if (_responseProcessedCb) {
                         _responseProcessedCb(response.data);
+                    }
+                } else {
+                    if (response.message) {
+                        $('#errorModal .modal-body').html(response.message);
+                        $('#errorModal').modal('show');
                     }
                 }
             }

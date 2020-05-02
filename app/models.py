@@ -748,6 +748,15 @@ class AssessmentEnroll(db.Model):
             testset = Testset.query.filter_by(id=self.testset_id).first()
             return self.start_time + timedelta(minutes=testset.test_duration + margin)
 
+    @property
+    def is_finished(self):
+        finished = self.finish_time is not None
+        if not finished:
+            elapsed = datetime.utcnow() - self.start_time
+            if elapsed.total_seconds() / 60 > self.test_duration:
+                finished = True
+        return finished
+
     @hybrid_property
     def markings(self):
         markings = Marking.query.filter_by(assessment_enroll_id=self.id).all()

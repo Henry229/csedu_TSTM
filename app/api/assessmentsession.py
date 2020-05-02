@@ -1,5 +1,4 @@
 import copy
-import hashlib
 from datetime import datetime
 from flask import current_app
 
@@ -38,11 +37,11 @@ class AssessmentSession:
                                      threshold=current_app.config['CACHE_THRESHOLD'],
                                      default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
         if key is None:
-            key_string = '{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count)
-            self.key = hashlib.sha256(key_string.encode()).hexdigest()
+            self.key = self.generate_key_string(user_id, enroll_id, testset_id, attempt_count)
             self.cache.delete(self.key)
             self.assessment = copy.deepcopy(self.assessment_default)
             self.assessment.update({
+                'user_id': user_id,
                 'assessment_enroll_id': enroll_id,
                 'attempt_count': attempt_count,
                 'testset_id': testset_id,
@@ -84,3 +83,21 @@ class AssessmentSession:
                 item['saved_answer'] = answer
                 self.save_assessment()
                 break
+
+    def change_session_key(self):
+        old_key = self.key
+        self.key = self.generate_key_string(self.assessment['user_id'], self.assessment['assessment_enroll_id'],
+                                            self.assessment['testset_id'], self.assessment['attempt_count'])
+        self.save_assessment()
+        # delete old cache
+        self.cache.delete(old_key)
+        return self.key
+
+    @staticmethod
+    def generate_key_string(user_id, enroll_id, testset_id, attempt_count):
+        import random
+        import string
+        import hashlib
+        key_string = '{}:{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count,
+                                             random.choices(string.ascii_lowercase + string.digits, k=24))
+        return hashlib.sha256(key_string.encode()).hexdigest()

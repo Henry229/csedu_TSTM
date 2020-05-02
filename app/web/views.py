@@ -275,9 +275,9 @@ def testset_list():
         return page_not_found(e="Invalid request - assessment information")
 
     # Get all assessment enroll to get testsets the student enrolled in already.
-    enrolled = AssessmentEnroll.query.join(Testset, Testset.id==AssessmentEnroll.testset_id)\
-        .filter(AssessmentEnroll.assessment_guid==assessment_guid,
-                AssessmentEnroll.student_user_id==student.user_id).all()
+    enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
+        .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                AssessmentEnroll.student_user_id == student.user_id).all()
     enrolled_guids = [en.testset.GUID for en in enrolled]
 
     # Get testsets in enrolled
@@ -342,26 +342,41 @@ def assessment_list():
             return page_not_found(e="Invalid request - assessment enroll information")
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.join(Testset, Testset.id==AssessmentEnroll.testset_id)\
-            .filter(AssessmentEnroll.assessment_guid==assessment_guid,
-                    AssessmentEnroll.student_user_id==current_user.id).all()
+        enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
+            .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                    AssessmentEnroll.student_user_id == current_user.id).all()
         enrolled_guids = [en.testset.GUID for en in enrolled]
 
         # Get testsets in enrolled
-        enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
+        # enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
+        enrolled_testsets = {}
+        for en in enrolled:
+            en.testset.resumable = False
+            if en.finish_time is None:
+                elapsed = datetime.utcnow() - en.start_time
+                if elapsed.total_seconds() / 60 < en.test_duration:
+                    en.testset.resumable = True
+                    en.testset.session_key = en.session_key
+            enrolled_testsets[en.testset_id] = en.testset
+
         student_testsets = []
+        # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
         for tset in assessment.testsets:
             if tset.GUID not in enrolled_guids:
+                tset.resumable = False
                 student_testsets.append(tset)
+        # 이미 시험을 본 것을 모은다.
         for ts_id in enrolled_testsets:
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
         for tset in student_testsets:
             # Compare GUID to check enrollment status
             enrolled = tset.GUID in enrolled_guids
+            # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
             if not enrolled and not tset.active:
-                tset_with_guid = Testset.query.filter_by(id=tset.id).first()
-                tset = Testset.query.filter_by(GUID=tset_with_guid.GUID, active=True).first()
+                # 최신 test set version 을 찾는다.
+                # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+                tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
             new_test_sets.append(tset)
             tset.enrolled = enrolled
             test_type = Codebook.get_code_name(tset.test_type)
@@ -371,7 +386,7 @@ def assessment_list():
             #   - False when Marker's comment not existing
             tset.enable_writing_report = False
             subject = Codebook.get_code_name(tset.subject)
-            if subject=='Writing' and tset.enable_report:
+            if subject == 'Writing' and tset.enable_report:
                 mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
                     join(AssessmentEnroll). \
                     filter(Marking.id == MarkingForWriting.marking_id). \
