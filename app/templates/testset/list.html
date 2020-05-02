@@ -82,7 +82,7 @@
                                                 </a>
                                             </td>
                                             <td> {{ testset.id }}</td>
-                                            <td> {{ testset.name }}</td>
+                                            <td> {{ testset.name }} <br> {{ testset.GUID }}</td>
                                             <td> v{{ testset.version }}</td>
                                             <td> {{ Codebook.get_code_name(testset.grade) }}</td>
                                             <td> {{ Codebook.get_code_name(testset.subject) }}</td>
