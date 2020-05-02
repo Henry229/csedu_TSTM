@@ -31,7 +31,7 @@
                                             {{ loop.index }}
                                         </td>
                                         <td>
-                                            {% if ts.enrolled %}
+                                            {% if ts.enrolled and not ts.resumable %}
                                                 <input type="button" class="btn btn-light btn-block"
                                                    data-testset-id="{{ ts.id }}" value="{{ ts.name }}" disabled>
                                             {% else %}
@@ -41,7 +41,15 @@
                                         </td>
                                         <td>
                                             {% if ts.enrolled %}
+                                              {% if ts.resumable %}
+                                                <input type="button" class="btn btn-primary btn-block resume"
+                                                        data-student-user-id="{{ student_user_id }}"
+                                                        data-assessment-guid="{{ assessment_guid }}"
+                                                        data-testset-id="{{ ts.id }}" data-session-key="{{ ts.session_key }}"
+                                                        value="Resume">
+                                              {% else %}
                                                  <input type="button" class="btn btn-secondary btn-block" value="Finished" disabled>
+                                              {% endif %}
                                             {% else %}
                                                  <input type="button" class="btn btn-primary btn-block start"
                                                         data-student-user-id="{{ student_user_id }}"
@@ -51,7 +59,7 @@
                                         </td>
                                         {% if enable_report %}
                                         <td>
-                                            {% if ts.enrolled %}
+                                            {% if ts.enrolled and not ts.resumable  %}
                                                 {% if Codebook.get_code_name(ts.subject)=='Writing' and not enable_writing_report %}
                                                     <input type="button" class="btn btn-secondary btn-block" value="Not Available" disabled>
                                                 {% else %}
@@ -66,7 +74,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if ts.enrolled %}
+                                            {% if ts.enrolled and not ts.resumable %}
 {#                                                <a id="view_explanation"#}
 {#                                                        class="btn btn-outline-danger" type="button"#}
 {#                                                        href="{{ ts.explanation_link}}"#}
@@ -105,6 +113,24 @@
                 var student_user_id = $(this).data('student-user-id');
                 window.location.replace('/testing?assessment=' + assessment_guid + '&testset_id='
                     + testset_id + '&student_user_id=' + student_user_id);
+            });
+            $('#testsets input.resume').on('click', function () {
+                var session_key = $(this).data('session-key');
+                $.ajax({
+                    url: '/api/resume',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({session_key: session_key}),
+                    complete: function () {
+                    },
+                    success: function (response) {
+                        if (response.result === 'success') {
+                            var rsp_data = response.data || {};
+                            var session_key = rsp_data.session_key;
+                            window.location.replace('/testing?session=' + session_key);
+                        }
+                    }
+                });
             });
             $('#testsets input.report').on('click', function () {
                 var assessment_guid = $(this).data('assessment-guid');
