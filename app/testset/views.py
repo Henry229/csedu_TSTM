@@ -421,6 +421,8 @@ def manage():
     rows = None
     query = Testset.query.filter(Testset.active.isnot(False))
     if flag:
+        if testset_name:
+            query = query.filter(Testset.name.ilike('%{}%'.format(testset_name)))
         if grade:
             query = query.filter_by(grade=grade)
         if subject:
@@ -469,6 +471,8 @@ def list():
     rows = None
     query = Testset.query.filter(Testset.active.isnot(False))
     if flag:
+        if testset_name:
+            query = query.filter(Testset.name.ilike('%{}%'.format(testset_name)))
         if grade:
             query = query.filter_by(grade=grade)
         if subject:
