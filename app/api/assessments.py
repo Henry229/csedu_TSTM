@@ -4,6 +4,7 @@ import random
 import string
 import subprocess
 from datetime import datetime, timezone
+from functools import wraps
 from time import time
 
 import pytz
@@ -19,10 +20,36 @@ from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
     Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
 from qti.itemservice.itemservice import ItemService
-from .response import success, bad_request
+from .response import success, bad_request, TEST_SESSION_ERROR
 from .. import db
 from ..models import Item, Codebook
 from ..writing.views import text_to_images
+
+
+def validate_session(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if request.method == 'GET':
+            session_key = request.args.get('session')
+        elif request.method == 'POST':
+            session_key = request.json.get('session')
+        else:
+            return bad_request(message="Session key is not provided!")
+        assessment_session = AssessmentSession(key=session_key)
+        if assessment_session.assessment is None:
+            enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
+            assessment_enroll = AssessmentEnroll.query.filter(AssessmentEnroll.id == enroll_id) \
+                .first()
+            if assessment_enroll.is_finished:
+                return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
+            elif assessment_enroll.session_key != session_key:
+                return bad_request(error_code=TEST_SESSION_ERROR,
+                                   message="This session is invalid! A new session has been started from another browser.")
+            else:
+                return bad_request(error_code=TEST_SESSION_ERROR, message='This test session is invalid!')
+        kwargs['assessment_session'] = assessment_session
+        return func(*args, **kwargs)
+    return decorated_view
 
 
 # Assessment > Testsets search Modal > Testsets return for apply
@@ -236,20 +263,19 @@ def create_session():
     test_duration = testset.test_duration or 70
 
     # 2. check if the student went through the testset.
-    # ToDo: What should we do if he already did?
     # If we only handle single test, it's time to check count and proceed or stop processing.
-    did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
-                                                        student_user_id=student_user_id).count()
+    # did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
+    #                                                     student_user_id=student_user_id).count()
 
-    # 3. Find out the test attempt count.
-    last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id) \
-        .order_by(desc(AssessmentEnroll.attempt_count)).first()
-    if last_attempt is None:
-        attempt_count = 1
-    else:
-        # attempt_count is added to the model. Old rows have None
-        attempt_count = 1 if last_attempt.attempt_count is None else last_attempt.attempt_count + 1
+    # 3. Find out the test attempt count. ==> 시험은 1회만 허용한다.
+    last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id,
+                                                    testset_id=testset_id) \
+        .first()
+    if last_attempt is not None:
+        return bad_request(error_code=TEST_SESSION_ERROR,
+                           message="This session is invalid! A new session has been started from another browser.")
 
+    attempt_count = 1
     # 4. Create a new enroll
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
                                 student_user_id=student_user_id, attempt_count=attempt_count,
@@ -287,7 +313,8 @@ def create_session():
 
 @api.route('/start', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
-def test_start():
+@validate_session
+def test_start(assessment_session):
     """ Start the test with session_id.
         전체적인 설명은 /session 참고
             a. session 이 존재하고 active 인 경우
@@ -302,8 +329,8 @@ def test_start():
     :return:
     """
     session_id = request.json.get('session_id')
-    question_no = request.json.get('question_no')
-    assessment_session = AssessmentSession(key=session_id)
+    # question_no = request.json.get('question_no')
+    # assessment_session = AssessmentSession(key=session_id)
     if assessment_session.assessment is None:
         return bad_request(message="session is expired or not exists.")
 
@@ -311,14 +338,16 @@ def test_start():
     if status == AssessmentSession.STATUS_TEST_SUBMITTED:
         return bad_request(message="Test session finished already!")
 
-    if question_no is None:
-        question_no = 1
-    else:
-        question_no = int(question_no)
-
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
+    last_read_marking = Marking.query.filter_by(is_read=True, assessment_enroll_id=assessment_enroll_id)\
+        .order_by(desc(Marking.read_time)).first()
+    if last_read_marking is None:
+        question_no = 1
+    else:
+        question_no = last_read_marking.question_no
+
     # Find markings.
     markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id) \
         .order_by(Marking.question_no).all()
@@ -353,6 +382,7 @@ def test_start():
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         marking.is_read = True
+        marking.read_time = datetime.utcnow()
         db.session.commit()
         data['is_flagged'] = marking.is_flagged
         data['is_read'] = marking.is_read
@@ -410,7 +440,8 @@ def flag(item_id):
 
 @api.route('/responses/<int:item_id>', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
-def response_process(item_id):
+@validate_session
+def response_process(item_id, assessment_session=None):
     # item_id = request.json.get('item_id')
     question_no = request.json.get('question_no')
     session_key = request.json.get('session')
@@ -418,20 +449,11 @@ def response_process(item_id):
     response = request.json.get('response')
     file_names = request.json.get('file_names')
 
-    assessment_session = AssessmentSession(key=session_key)
-    if assessment_session.assessment is None:
-        assessment_enroll = AssessmentEnroll.query.join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id)\
-            .filter(Marking.id == marking_id).first()
-        if assessment_enroll.is_finished:
-            return bad_request(message="Test session is finished!")
-        elif assessment_enroll.session_key != session_key:
-            return bad_request(message="This test session is invalid! A new test has been started from another browser.")
-        else:
-            return bad_request(message='This test session is invalid!')
+    # assessment_session = AssessmentSession(key=session_key)
 
     # check session status
     if assessment_session.get_status() == AssessmentSession.STATUS_READY:
-        return bad_request(message='Session status is wrong.')
+        return bad_request(error_code=TEST_SESSION_ERROR, message='Session status is wrong.')
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request(message='Student id is not valid!')
@@ -440,7 +462,7 @@ def response_process(item_id):
     timeout = (assessment_session.get_value('test_duration') * 60
                - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
     if timeout <= 0:
-        return bad_request(message="Test session is finished!")
+        return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
@@ -523,6 +545,7 @@ def response_process(item_id):
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         marking.is_read = True
+        marking.read_time = datetime.utcnow()
         db.session.commit()
         data['is_flagged'] = marking.is_flagged
         data['is_read'] = marking.is_read
@@ -544,7 +567,8 @@ def response_process(item_id):
 
 @api.route('/responses/file/<int:item_id>', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
-def response_process_file(item_id):
+@validate_session
+def response_process_file(item_id, assessment_session=None):
     session_key = request.form.get('session')
     marking_id = request.form.get('marking_id')
     writing_files = request.files.getlist('files')
@@ -555,7 +579,7 @@ def response_process_file(item_id):
         if allowed_file(f.filename) is False:
             return bad_request(message='File type is not supported.')
 
-    assessment_session = AssessmentSession(key=session_key)
+    # assessment_session = AssessmentSession(key=session_key)
     # check session status
     if assessment_session.get_status() == AssessmentSession.STATUS_READY:
         return bad_request(message='Session status is wrong.')
@@ -662,7 +686,8 @@ def parse_processed_response(candidate_response):
 
 @api.route('/rendered/<int:item_id>', methods=['GET'])
 @permission_required(Permission.ITEM_EXEC)
-def rendered(item_id):
+# @validate_session  : preview 를 처리하기 위해
+def rendered(item_id, assessment_session=None):
     session_key = request.args.get('session')
     assessment_session = AssessmentSession(key=session_key)
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
@@ -725,6 +750,7 @@ def next_stage():
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         marking.is_read = True
+        marking.read_time = datetime.utcnow()
         db.session.commit()
         data['is_read'] = True
         data['is_flagged'] = marking.is_flagged
@@ -749,10 +775,11 @@ def next_stage():
 
 @api.route('/finish', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
-def finish_test():
+@validate_session
+def finish_test(assessment_session):
     session_key = request.json.get('session')
     finish_time = request.json.get('finish_time')
-    assessment_session = AssessmentSession(key=session_key)
+    # assessment_session = AssessmentSession(key=session_key)
     # check session status
     # if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
     #     return bad_request(message='Session status is wrong.')

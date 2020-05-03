@@ -2,6 +2,7 @@
 
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {% block app_content %}
+  <input type="hidden" id="assessment_guid" name="assessment_guid" value="{{ assessment_guid }}">
   {% if session_id %}
     <div class="item-card">
       <div id="items_selected" class="display table table-hover" style="width:100%">
@@ -17,8 +18,8 @@
                 <span class="number">00</span>
                 <span class="label">Mins</span>
               </span>
-                        <span class="colon number last-min">:</span>
-                        <span class="seconds last-min">
+              <span class="colon number last-min">:</span>
+              <span class="seconds last-min">
                 <span class="number">00</span>
                 <span class="label">Secs</span>
               </span>
@@ -156,27 +157,7 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
-             aria-hidden="true" data-backdrop="static">
-          <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Error</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                        style="display: none">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                Please click the Okay button to return to test set.
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary error-confirm">Okay</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
     <div class="print-notice-hidden">
       <h3 style="text-align: center;font-weight: bold">Agreement of Copyright Policy ©Copyright</h3><br>
       <span>This is a reminder that CS Education has the full copyright of all the educational material that students use while studying under CS Education’s guidance.With the move to Online Learning, CS Education finds it necessary to remind students and parents of their legal right to the complete copyright of all their material.This means that no student or parent has the right to copy and/or distribute any of CS Education’s material to anyone else either in print or in electronic form.Copyright holders exclusively  retain 5 basic rights:</span>
@@ -196,11 +177,9 @@
       <span>In order to avoid any such issues, CS Education is asking all parents, in good faith, to sign in agreement that they will, not in any way, pass on any of CS Education’s material to any third party, even for example as a favour to a friend.Please could you AND your child sign the form below as indicative of your agreement and acceptance of CS Education’s legal right to the copyright of all their material and return to CS Education.do hereby acknowledge my agreement not to copy or distribute CS Education’s academic material to any other person or group.</span><br>
     </div>
   {% else %}
-    <input type="hidden" name="assessment_guid" value="{{ assessment_guid }}">
     <input type="hidden" name="testset_id" value="{{ testset.id }}">
     <input type="hidden" name="student_user_id" value="{{ student_user_id }}">
     <input type="hidden" name="student_ip">
-    <input type="hidden" name="student_external_id" value="{{ student_external_id }}">
 
     <div class="item-card">
       <div id="items_selected" class="display table table-hover" style="width:100%">
@@ -268,6 +247,28 @@
       </div>
     </div>
   {% endif %}
+  <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+             aria-hidden="true" data-backdrop="static">
+    <input type="hidden" class="error-code" value="">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dataModalLabel">Error</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                  style="display: none">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Please click the Okay button to return to test set.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary error-confirm">Okay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock app_content %}
 {% block scripts %}
   {{ super() }}
@@ -297,7 +298,6 @@
               $('.tools-protractor').hide();
           {% else %}
               var student_user_id = $('input[name="student_user_id"]').val();
-              var student_external_id = $('input[name="student_external_id"]').val();
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;

@@ -95,9 +95,24 @@ class AssessmentSession:
 
     @staticmethod
     def generate_key_string(user_id, enroll_id, testset_id, attempt_count):
+        """
+        Cache key 로 사용할 random 문자열을 생성합니다.
+        형식은 random_string:enroll_id 로 해서 session key 로부터 enroll id 를 바로 알아낼 수 있도록 합니다.
+        최종 session key 는 base64 로 encoding 해서 return 합니다.
+        """
+        import base64
         import random
         import string
         import hashlib
-        key_string = '{}:{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count,
-                                             random.choices(string.ascii_lowercase + string.digits, k=24))
-        return hashlib.sha256(key_string.encode()).hexdigest()
+        key_base = '{}:{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count,
+                                           random.choices(string.ascii_lowercase + string.digits, k=24))
+        hashed_string = hashlib.sha256(key_base.encode()).hexdigest()
+        key_string = '{}:{}'.format(hashed_string, enroll_id)
+        return base64.urlsafe_b64encode(key_string.encode()).decode()
+
+    @staticmethod
+    def enrol_id_from_session_key(session_key):
+        import base64
+        key_string = base64.urlsafe_b64decode(session_key.encode()).decode()
+        enroll_id = key_string.split(':')[1]
+        return int(enroll_id)

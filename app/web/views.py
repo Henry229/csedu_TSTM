@@ -424,9 +424,26 @@ def assessment_list():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def testing():
+    """
+    o testset 에서 start 를 클릭해서 들어오는 경우
+        - session_id is None을
+        - assessment_guid is not None
+    o testset 에서 resume 을 클릭해서 들어오는 경우
+    o 문제 화면에서 refresh 를 하는 경우
+        - session_id is not None
+        - assessment_guid is None
+
+    """
+    from app.api.assessmentsession import AssessmentSession
+
     session_id = request.args.get("session")
     testset_id = request.args.get("testset_id")
     assessment_guid = request.args.get("assessment")
+    # assessment_guid 가 없으면 session key 로 부터 enroll id 를 찾아서 알아 낸다.
+    if assessment_guid is None and session_id is not None:
+        enroll_id = AssessmentSession.enrol_id_from_session_key(session_id)
+        enroll = AssessmentEnroll.query.filter_by(id=enroll_id).first()
+        assessment_guid = enroll.assessment_guid
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return page_not_found(e="Login user not registered as student")
@@ -434,7 +451,8 @@ def testing():
         'session_id': session_id,
         'student_user_id': student.user_id,
         'student_external_id': student.student_id,
-        'student_branch': student.getCSCampusName(student.user_id)
+        'student_branch': student.getCSCampusName(student.user_id),
+        'assessment_guid': assessment_guid,
     }
 
     if testset_id is not None:
@@ -442,7 +460,6 @@ def testing():
         if testset is None:
             return redirect(url_for('web.testset_list', error="Invalid testset requested!"))
         context['testset'] = testset
-        context['assessment_guid'] = assessment_guid
 
     return render_template('runner/test_runner.html', **context)
 

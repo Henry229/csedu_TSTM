@@ -22,8 +22,16 @@ class ErrorType:
         self.message = message
 
 
+class ErrorCode:
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+
 AUTHENTICATION_ERROR = ErrorType('authentication_error', 'Authentication error')
 INVALID_REQUEST_ERROR = ErrorType('invalid_request_error', 'Invalid request error')
+
+TEST_SESSION_ERROR = ErrorCode('TEST_SESSION_ERROR', 'TEST_SESSION_ERROR')
 
 
 def success(data=None, meta=None, status_code=status.HTTP_200_OK):
@@ -81,18 +89,18 @@ def fail(error_type, message, param=None, code=None, status_code=400):
     )
 
 
-def bad_request(param=None, response_code=None, message=None):
+def bad_request(param=None, error_code=None, message=None):
     """
 
     :param param:
-    :param response_code: ResponseCodeItem
+    :param error_code: ResponseCodeItem
     :param message:
     :return:
     """
     code, msg = None, None
-    if response_code:
-        code = response_code.code
-        msg = response_code.message
+    if error_code:
+        code = error_code.code
+        msg = error_code.message
     if message:
         msg = message
     return fail(error_type=INVALID_REQUEST_ERROR.type, message=msg,

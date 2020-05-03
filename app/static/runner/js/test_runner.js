@@ -16,12 +16,12 @@ var TestLogger = (function () {
 })();
 
 var TestRunner = (function () {
-    var _assessment_guid, _assessment_enroll_guid, _testset_id, _testlet_id, _stage_data, _session,
+    var _assessment_guid, _testset_id, _testlet_id, _stage_data, _session,
         _question_no;
     var _item_info = [], _last_question_no = 0;
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
-        _finishTest, _session_cb, _tnc_agree_checked;
-    var _duration_timer, _start_time, _remained_time, _test_duration_minutes;
+        _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb;
+    var _duration_timer, _start_time, _test_duration_minutes;
     var init = function ($container, options) {
         _assessment_guid = options.assessment_guid;
         _testset_id = options.testset_id;
@@ -32,7 +32,7 @@ var TestRunner = (function () {
         _stage_data = [];
         if (!_session) {
             createSession();
-            setCookie('question_no', 1);
+            // setCookie('question_no', 1);
         }
         ItemRunner.init($container, {
             mode: 'assessment',
@@ -40,7 +40,8 @@ var TestRunner = (function () {
             renderedCb: _renderedCb,
             responseProcessingCb: _responseProcessingCb,
             responseProcessedCb: _responseProcessedCb,
-            toggleFlaggedCb: _toggleFlaggedCb
+            toggleFlaggedCb: _toggleFlaggedCb,
+            sessionErrorCb: _sessionErrorCb
         });
         // Start with seconds hidden.
         $('.last-min').hide();
@@ -97,7 +98,12 @@ var TestRunner = (function () {
             _finishTest('time-over');
         });
         $('#errorModal .error-confirm').on('click', function () {
-            $('#errorModal').modal('hide');
+            if ($('#errorModal .error-code').val() === 'TEST_SESSION_ERROR') {
+                var assessment_guid = $('#assessment_guid').val();
+                window.location.replace('/tests/testsets?assessment_guid=' + assessment_guid);
+            } else {
+                $('#errorModal').modal('hide');
+            }
         });
         document.addEventListener("contextmenu", function(e){
             e.preventDefault();
@@ -282,6 +288,9 @@ var TestRunner = (function () {
             data: JSON.stringify(data),
             complete: function () {
             },
+            error: function(jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
+            },
             success: function (response) {
                 var rsp_data = response.data || {};
                 _session = rsp_data.session;
@@ -293,10 +302,9 @@ var TestRunner = (function () {
         });
     };
     var startTest = function () {
-        var question_no = getCookie('question_no') || 1;
+        // var question_no = getCookie('question_no') || 1;
         var data = {
-            session_id: _session,
-            question_no: question_no
+            session: _session
         };
         $.ajax({
             url: '/api/start',
@@ -354,7 +362,7 @@ var TestRunner = (function () {
         _toggleSummary(false);
         var info = _getItemInfo(question_no);
         _toggleFlagged(info.is_flagged);
-        setCookie('question_no', question_no, 0);
+        // setCookie('question_no', question_no, 0);
     };
     _responseProcessedCb = function (rsp_data) {
         _setItemInfo(rsp_data.question_no, {'saved_answer': rsp_data.saved_answer});
@@ -395,6 +403,18 @@ var TestRunner = (function () {
         _setItemInfo(question_no, {is_flagged: flagged});
         _toggleFlagged(flagged);
     };
+
+    _sessionErrorCb = function(jqXHR) {
+        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+            $('#errorModal .modal-body').html(jqXHR.responseJSON.message);
+            if (jqXHR.responseJSON.code) {
+                $('#errorModal .error-code').val(jqXHR.responseJSON.code);
+            } else {
+                $('#errorModal .error-code').val('');
+            }
+            $('#errorModal').modal('show');
+        }
+    }
 
     _nextStage = function () {
         var data = {
@@ -447,7 +467,8 @@ var TestRunner = (function () {
             },
             success: function (response) {
                 var data = response.data;
-                window.location.replace(data.redirect_url + '?session=' + _session);
+                var assessment_guid = $('#assessment_guid').val();
+                window.location.replace(data.redirect_url + '?assessment_guid=' + assessment_guid);
             }
         });
     };

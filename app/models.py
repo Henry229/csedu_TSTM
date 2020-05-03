@@ -724,7 +724,7 @@ class AssessmentEnroll(db.Model):
     grade = db.Column(db.String(10))
     test_center = db.Column(db.Integer)
     # Test runner session key
-    session_key = db.Column(db.String(120))
+    session_key = db.Column(db.String(200))
     # Testlet stage change data
     stage_data = db.Column(JSONB)
     # Number of minutes the testset runs. 0 means no limit
@@ -869,6 +869,8 @@ class Marking(db.Model):
     item = db.relationship('Item', back_populates="marking")
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    # Time read the related question
+    read_time = db.Column(db.DateTime)
 
     @hybrid_property
     def scaled_outcome_score(self):

@@ -14,7 +14,7 @@ var ItemRunner = (function () {
     var _interaction_type;
     var _assessment_enroll_id = 0;
     var _testset_id = 0;
-    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb;
+    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb, _sessionErrorCb;
 
     var init = function ($container, options) {
         _$container = $container;
@@ -25,6 +25,7 @@ var ItemRunner = (function () {
         _responseProcessingCb = options.responseProcessingCb || emptyCb;
         _responseProcessedCb = options.responseProcessedCb || emptyCb;
         _toggleFlaggedCb = options.toggleFlaggedCb || emptyCb;
+        _sessionErrorCb = options.sessionErrorCb || emptyCb;
     };
     var emptyCb = function () {
 
@@ -176,11 +177,7 @@ var ItemRunner = (function () {
 
             },
             error: function (jqXHR, textStatus, errorThrown ) {
-                console.log(jqXHR);
-                if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-                    $('#errorModal .modal-body').html(jqXHR.responseJSON.message);
-                    $('#errorModal').modal('show');
-                }
+                _sessionErrorCb(jqXHR);
             },
             success: function (response) {
                 if (response.result === 'success') {
