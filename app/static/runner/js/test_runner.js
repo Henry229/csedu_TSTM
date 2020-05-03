@@ -313,6 +313,9 @@ var TestRunner = (function () {
             data: JSON.stringify(data),
             complete: function () {
             },
+            error: function(jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
+            },
             success: function (response) {
                 var rsp_data = response.data || {};
                 _session = rsp_data.session;
