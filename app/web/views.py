@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pytz
 import requests
 from flask import render_template, request, redirect, flash, url_for
-from flask_login import login_required, login_user, current_user
+from flask_login import login_required, login_user, current_user, logout_user
 
 from app import db
 from app.testset.forms import TestsetSearchForm
@@ -143,8 +143,8 @@ def update_campus_info(state):
 @web.route('/inward', methods=['GET'])
 def process_inward():
     if current_user.is_authenticated:
-        log.info("Already logged in user. Redirect to index")
-        return redirect(url_for('web.index'))
+        log.info("A user is logged in. Logging the user out first")
+        logout_user()
 
     error = request.args.get("error")
     if error:
