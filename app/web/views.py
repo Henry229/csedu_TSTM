@@ -102,6 +102,7 @@ def testset_simulator():
 
 
 def is_authorised(student, timeout=120):
+    errors = []
     # Get session info
     student_session = student['session']
     if student_session:
@@ -116,8 +117,14 @@ def is_authorised(student, timeout=120):
             session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
             session_age = datetime.now(pytz.utc) - session_time
             if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
-                return True
-    return False
+                return True, errors
+            else:
+                errors.append("Student's CSOnlineSchool session has been expired")
+        else:
+            errors.append("Student logged in different IP address from CSOnlineSchool")
+    else:
+        errors.append("Student not logged into CSOnlineSchool")
+    return False, errors
 
 
 def update_campus_info(state):
@@ -168,7 +175,8 @@ def process_inward():
         member = get_student_info(state, student_id)
     except:
         return forbidden("Invalid Request")
-    if is_authorised(member, session_timeout):
+    authorised, errors = is_authorised(member, session_timeout)
+    if authorised:
         registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
@@ -217,7 +225,10 @@ def process_inward():
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
                     return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
-    return forbidden('Insufficient permissions or no available test')
+            else:
+                logout_user()
+                return forbidden('No available test found')
+    return forbidden('<br>'.join(errors))
 
 
 def get_assessment_guids(guid):
