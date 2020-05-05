@@ -123,6 +123,9 @@
                     data: JSON.stringify({session_key: session_key}),
                     complete: function () {
                     },
+                    error: function (jqXHR, textStatus, errorThrown ) {
+                        location.reload();
+                    },
                     success: function (response) {
                         if (response.result === 'success') {
                             var rsp_data = response.data || {};

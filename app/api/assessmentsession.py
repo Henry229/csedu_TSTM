@@ -1,5 +1,6 @@
 import copy
 from datetime import datetime
+import pytz
 from flask import current_app
 
 # from app import cache
@@ -33,6 +34,8 @@ class AssessmentSession:
         :param attempt_count:
         :param key:
         """
+        self.error_code = None
+        self.error_message = None
         self.cache = FileSystemCache(current_app.config['CACHE_DIR'],
                                      threshold=current_app.config['CACHE_THRESHOLD'],
                                      default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
@@ -53,6 +56,18 @@ class AssessmentSession:
         else:
             self.key = key
             self.assessment = self.cache.get(self.key)
+
+    def reset(self, user_id, enroll_id, testset_id, duration, attempt_count, start_time):
+        self.assessment = copy.deepcopy(self.assessment_default)
+        self.assessment.update({
+            'user_id': user_id,
+            'assessment_enroll_id': enroll_id,
+            'attempt_count': attempt_count,
+            'testset_id': testset_id,
+            'test_duration': duration,
+            'status': self.STATUS_IN_TESTING,
+            'start_time': int(start_time.replace(tzinfo=pytz.UTC).timestamp())
+        })
 
     def save_assessment(self):
         timeout = ((self.get_value('test_duration') + 10) * 60
@@ -92,6 +107,10 @@ class AssessmentSession:
         # delete old cache
         self.cache.delete(old_key)
         return self.key
+
+    def set_error(self, error_code, error_message):
+        self.error_code = error_code
+        self.error_message = error_message
 
     @staticmethod
     def generate_key_string(user_id, enroll_id, testset_id, attempt_count):

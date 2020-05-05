@@ -433,6 +433,9 @@ var TestRunner = (function () {
             complete: function () {
                 $('#stageModal').modal('hide');
             },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
+            },
             success: function (response) {
                 var rsp_data = response.data || {};
                 var question_no = rsp_data.next_question_no;

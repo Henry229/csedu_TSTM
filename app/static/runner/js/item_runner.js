@@ -92,6 +92,9 @@ var ItemRunner = (function () {
             complete: function () {
 
             },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
+            },
             success: function (response) {
                 if (response.result === 'success') {
                     var data = response.data;
@@ -216,21 +219,24 @@ var ItemRunner = (function () {
             formData.append('has_files', "true");
         }
 
-		formData.append('session', _session);
-		formData.append('marking_id', _marking_id);
+		    formData.append('session', _session);
+		    formData.append('marking_id', _marking_id);
 
         $.ajax({
             url: url,
             type: 'POST',
             dataType: 'json',
-			contentType: false,
-			processData: false,
+			      contentType: false,
+			      processData: false,
             data: formData,
             beforeSend: function () {
 
             },
             complete: function () {
 
+            },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
             },
             success: function (response) {
                 if (response.result === 'success') {

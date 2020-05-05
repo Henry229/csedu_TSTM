@@ -35,18 +35,10 @@ def validate_session(func):
             session_key = request.json.get('session')
         else:
             return bad_request(message="Session key is not provided!")
-        assessment_session = AssessmentSession(key=session_key)
-        if assessment_session.assessment is None:
-            enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
-            assessment_enroll = AssessmentEnroll.query.filter(AssessmentEnroll.id == enroll_id) \
-                .first()
-            if assessment_enroll.is_finished:
-                return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
-            elif assessment_enroll.session_key != session_key:
-                return bad_request(error_code=TEST_SESSION_ERROR,
-                                   message="This session is invalid! A new session has been started from another browser.")
-            else:
-                return bad_request(error_code=TEST_SESSION_ERROR, message='This test session is invalid!')
+        assessment_session = get_assessment_session(session_key)
+        if assessment_session.error_code is not None:
+            return bad_request(error_code=assessment_session.error_code,
+                               message=assessment_session.error_message)
         kwargs['assessment_session'] = assessment_session
         return func(*args, **kwargs)
     return decorated_view
@@ -295,8 +287,8 @@ def create_session():
     db.session.commit()
     assessment_enroll_id = enrolled.id
 
-    assessment_session = AssessmentSession(current_user.id, assessment_enroll_id,
-                                           testset_id, test_duration, attempt_count)
+    assessment_session = new_assessment_session(current_user.id, assessment_enroll_id,
+                                                testset_id, test_duration, attempt_count)
     assessment_session.set_value('start_time', int(time()))
 
     # Start a new assessment session.
@@ -331,12 +323,12 @@ def test_start(assessment_session):
     session_id = request.json.get('session_id')
     # question_no = request.json.get('question_no')
     # assessment_session = AssessmentSession(key=session_id)
-    if assessment_session.assessment is None:
-        return bad_request(message="session is expired or not exists.")
+    # if assessment_session.assessment is None:
+    #     return bad_request(message="session is expired or not exists.")
 
-    status = assessment_session.get_value('status')
-    if status == AssessmentSession.STATUS_TEST_SUBMITTED:
-        return bad_request(message="Test session finished already!")
+    # status = assessment_session.get_value('status')
+    # if status == AssessmentSession.STATUS_TEST_SUBMITTED:
+    #     return bad_request(message="Test session finished already!")
 
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
@@ -414,9 +406,10 @@ def test_resume():
     :return:
     """
     session_key = request.json.get('session_key')
-    assessment_session = AssessmentSession(key=session_key)
-    if assessment_session.assessment is None:
-        return bad_request(message="session is expired or not exists.")
+    assessment_session = get_assessment_session(session_key)
+    if assessment_session.error_code is not None:
+        return bad_request(error_code=assessment_session.error_code,
+                           message=assessment_session.error_message)
     new_session_key = assessment_session.change_session_key()
     enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
     enroll.session_key = new_session_key
@@ -452,8 +445,8 @@ def response_process(item_id, assessment_session=None):
     # assessment_session = AssessmentSession(key=session_key)
 
     # check session status
-    if assessment_session.get_status() == AssessmentSession.STATUS_READY:
-        return bad_request(error_code=TEST_SESSION_ERROR, message='Session status is wrong.')
+    # if assessment_session.get_status() == AssessmentSession.STATUS_READY:
+    #     return bad_request(error_code=TEST_SESSION_ERROR, message='Session status is wrong.')
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request(message='Student id is not valid!')
@@ -581,8 +574,8 @@ def response_process_file(item_id, assessment_session=None):
 
     # assessment_session = AssessmentSession(key=session_key)
     # check session status
-    if assessment_session.get_status() == AssessmentSession.STATUS_READY:
-        return bad_request(message='Session status is wrong.')
+    # if assessment_session.get_status() == AssessmentSession.STATUS_READY:
+    #     return bad_request(message='Session status is wrong.')
 
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
@@ -686,10 +679,10 @@ def parse_processed_response(candidate_response):
 
 @api.route('/rendered/<int:item_id>', methods=['GET'])
 @permission_required(Permission.ITEM_EXEC)
-# @validate_session  : preview 를 처리하기 위해
+@validate_session
 def rendered(item_id, assessment_session=None):
     session_key = request.args.get('session')
-    assessment_session = AssessmentSession(key=session_key)
+    # assessment_session = AssessmentSession(key=session_key)
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
     response = {}
     rendered_item = ''
@@ -728,12 +721,13 @@ def rendered(item_id, assessment_session=None):
 
 @api.route('/next_stage', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
-def next_stage():
+@validate_session
+def next_stage(assessment_session):
     session_key = request.json.get('session')
     testlet_id = request.json.get('testlet_id')
     question_no = request.json.get('question_no')
 
-    assessment_session = AssessmentSession(key=session_key)
+    # assessment_session = AssessmentSession(key=session_key)
 
     # check session status
     if assessment_session.get_status() != AssessmentSession.STATUS_STAGE_FINISHED:
@@ -963,6 +957,47 @@ def set_student_marking():
     else:
         candidate_mark = 0
     return candidate_mark
+
+
+def new_assessment_session(user_id, enroll_id, testset_id, test_duration, attempt_count):
+    return AssessmentSession(user_id, enroll_id, testset_id, test_duration, attempt_count)
+
+
+def get_assessment_session(session_key):
+    assessment_session = AssessmentSession(key=session_key)
+    if assessment_session.assessment is None:
+        enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
+        # 동일한 assessment id, testset id 조합으로 enroll 은 유일해야한다.
+        # 혹시 몰라서 start_time 을 기준 최신을 확인.
+        enroll = AssessmentEnroll.query.filter(AssessmentEnroll.id == enroll_id) \
+            .order_by(desc(AssessmentEnroll.start_time)).first()
+        # session 이 없는 이유를 알아본다.
+        if enroll.is_finished:
+            assessment_session.set_error(TEST_SESSION_ERROR, "Test session is finished!")
+        elif enroll.session_key != session_key:
+            assessment_session.set_error(
+                TEST_SESSION_ERROR,
+                "This session is invalid! A new session has been started from another browser."
+            )
+        else:
+            # 이 경우라면 DB 로부터 session 을 복원한다.
+            assessment_session.reset(current_user.id, enroll_id, enroll.testset_id,
+                                     enroll.test_duration, enroll.attempt_count, enroll.start_time)
+            assessment_session.set_value('stage_data', enroll.stage_data)
+            markings = Marking.query.filter_by(assessment_enroll_id=enroll_id, testset_id=enroll.testset_id) \
+                .order_by(Marking.question_no).all()
+            # build test_items
+            test_items = []
+            for m in markings:
+                info = {'question_no': m.question_no, 'item_id': m.item_id,
+                        'marking_id': m.id, 'is_flagged': m.is_flagged,
+                        'is_read': m.is_read,
+                        'saved_answer': m.candidate_r_value if m.candidate_r_value is not None else ''
+                        }
+                test_items.append(info)
+            assessment_session.set_value('test_items', test_items)
+
+    return assessment_session
 
 
 # correct_r_value & candidate_r_value : JSON or string ?
