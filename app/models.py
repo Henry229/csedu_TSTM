@@ -753,7 +753,7 @@ class AssessmentEnroll(db.Model):
         finished = self.finish_time is not None
         if not finished:
             elapsed = datetime.utcnow() - self.start_time
-            if elapsed.total_seconds() / 60 > self.test_duration:
+            if elapsed.total_seconds() > self.test_duration * 60 + 5:
                 finished = True
         return finished
 
