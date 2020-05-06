@@ -1076,3 +1076,10 @@ textarea:focus.qti-item.qti-interaction.solid {
 #testsets .report {
     cursor: pointer;
 }
+
+button.footer-finish-btn {
+    background: #4DBD74 !important;
+    position: absolute;
+    left: 37%;
+    border: 1px solid #4DBD74 !important;
+}
