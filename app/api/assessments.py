@@ -715,6 +715,11 @@ def rendered(item_id, assessment_session=None):
     rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
     if rendered_item:
         rendered_template = rendered_template.replace('rendered_html', rendered_item)
+    # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 ream time 을 기록해 준다.
+    enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
+    marking = Marking.query.filter(Marking.assessment_enroll_id == enroll_id, Marking.item_id == item_id).first()
+    marking.read_time = datetime.utcnow()
+    db.session.commit()
     response['html'] = rendered_template
     return success(response)
 
