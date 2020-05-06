@@ -724,7 +724,7 @@ class AssessmentEnroll(db.Model):
     grade = db.Column(db.String(10))
     test_center = db.Column(db.Integer)
     # Test runner session key
-    session_key = db.Column(db.String(200))
+    session_key = db.Column(db.String(120))
     # Testlet stage change data
     stage_data = db.Column(JSONB)
     # Number of minutes the testset runs. 0 means no limit
