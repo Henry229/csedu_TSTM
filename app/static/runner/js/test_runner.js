@@ -471,6 +471,11 @@ var TestRunner = (function () {
             complete: function () {
                 $('#finishModal').modal('hide');
             },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                $('#finishModal').modal('hide');
+                var assessment_guid = $('#assessment_guid').val();
+                window.location.replace('/tests/testsets?assessment_guid=' + assessment_guid);
+            },
             success: function (response) {
                 var data = response.data;
                 var assessment_guid = $('#assessment_guid').val();
