@@ -147,17 +147,20 @@ def user_manage():
     username = request.args.get("username")
     role = request.args.get("role")
     error = request.args.get("error")
+    searchUserform = SearchUserForm()
+
     if error:
         flash(error)
 
     if not role:
         roles = Role.query.filter_by(name='Test_center').first()
         role = roles.id
-
-    searchUserform = SearchUserForm()
+    else:
+        searchUserform.role.default = int(role)
+        searchUserform.process()
     searchUserform.email.data = email
     searchUserform.username.data = username
-    searchUserform.role.data = role
+    searchUserform.role.data = int(role)
 
     query = User.query
     if searchUserform.email.data:
