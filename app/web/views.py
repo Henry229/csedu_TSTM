@@ -304,9 +304,9 @@ def testset_list():
         # If subject is 'Writing', report enabled:
         #   - True when Marker's comment existing for 'ALL' items in Testset
         #   - False when Marker's comment not existing
-        tset.enable_writing_report = False
+        enable_writing_report = False
         subject = Codebook.get_code_name(tset.subject)
-        if subject == 'Writing' and tset.enable_report:
+        if subject == 'Writing' and enable_report:
             mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
                 join(AssessmentEnroll). \
                 filter(Marking.id == MarkingForWriting.marking_id). \
@@ -314,13 +314,14 @@ def testset_list():
                 filter(AssessmentEnroll.student_user_id == current_user.id). \
                 filter(Marking.testset_id == tset.id).all()
             for mw in mws:
-                tset.enable_writing_report = True if mw.markers_comment else False
-                if not tset.enable_writing_report:
+                enable_writing_report = True if mw.markers_comment else False
+                if not enable_writing_report:
                     break
     sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
 
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
-                           testsets=sorted_testsets, assessment_id=assessment.id, enable_report=enable_report)
+                           testsets=sorted_testsets, assessment_id=assessment.id,
+                           enable_report=enable_report, enable_writing_report=enable_writing_report )
 
 
 @web.route('/tests/assessments', methods=['GET'])

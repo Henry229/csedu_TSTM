@@ -52,11 +52,15 @@
                                         {% if enable_report %}
                                         <td>
                                             {% if ts.enrolled %}
-                                                <input class="btn btn-primary report"
-                                                        data-student-user-id="{{ student_user_id }}"
-                                                        data-assessment-id="{{ assessment_id }}"
-                                                        data-assessment-guid="{{ assessment_guid }}"
-                                                        data-testset-id="{{ ts.id }}" value="Test# {{ assessment_id }}- {{ ts.id }} ">
+                                                {% if Codebook.get_code_name(ts.subject)=='Writing' and not enable_writing_report %}
+                                                    <input type="button" class="btn btn-secondary btn-block" value="Not Available" disabled>
+                                                {% else %}
+                                                    <input class="btn btn-primary report"
+                                                            data-student-user-id="{{ student_user_id }}"
+                                                            data-assessment-id="{{ assessment_id }}"
+                                                            data-assessment-guid="{{ assessment_guid }}"
+                                                            data-testset-id="{{ ts.id }}" value="Test# {{ assessment_id }}- {{ ts.id }} ">
+                                                {% endif %}
                                             {% else %}
                                                 <input type="button" class="btn btn-secondary btn-block" value="Not Available" disabled>
                                             {% endif %}
