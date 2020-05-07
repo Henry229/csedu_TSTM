@@ -285,9 +285,9 @@ def testset_list():
     enrolled_testsets = {}
     for en in enrolled:
         en.testset.resumable = False
-        if en.finish_time is None:
+        if en.finish_time is None and en.test_duration is not None:
             elapsed = datetime.utcnow() - en.start_time
-            if elapsed.total_seconds() / 60 < en.test_duration:
+            if elapsed.total_seconds() < en.test_duration * 60:
                 en.testset.resumable = True
                 en.testset.session_key = en.session_key
         enrolled_testsets[en.testset_id] = en.testset
@@ -366,9 +366,9 @@ def assessment_list():
         enrolled_testsets = {}
         for en in enrolled:
             en.testset.resumable = False
-            if en.finish_time is None:
+            if en.finish_time is None and en.test_duration is not None:
                 elapsed = datetime.utcnow() - en.start_time
-                if elapsed.total_seconds() / 60 < en.test_duration:
+                if elapsed.total_seconds() < en.test_duration * 60:
                     en.testset.resumable = True
                     en.testset.session_key = en.session_key
             enrolled_testsets[en.testset_id] = en.testset

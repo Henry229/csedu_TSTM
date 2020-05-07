@@ -752,9 +752,12 @@ class AssessmentEnroll(db.Model):
     def is_finished(self):
         finished = self.finish_time is not None
         if not finished:
-            elapsed = datetime.utcnow() - self.start_time
-            if elapsed.total_seconds() > self.test_duration * 60 + 5:
+            if self.test_duration is None:
                 finished = True
+            else:
+                elapsed = datetime.utcnow() - self.start_time
+                if elapsed.total_seconds() > self.test_duration * 60 + 5:
+                    finished = True
         return finished
 
     @hybrid_property
