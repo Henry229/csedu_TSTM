@@ -32,7 +32,12 @@ def validate_session(func):
         if request.method == 'GET':
             session_key = request.args.get('session')
         elif request.method == 'POST':
-            session_key = request.json.get('session')
+            if request.json:
+                session_key = request.json.get('session')
+            elif request.form:
+                session_key = request.form.get('session')
+            else:
+                return bad_request(message="Session key is not provided!")
         else:
             return bad_request(message="Session key is not provided!")
         assessment_session = get_assessment_session(session_key)
