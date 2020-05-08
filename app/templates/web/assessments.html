@@ -56,8 +56,8 @@
                                                            value="Finished" disabled>
                                                   {% endif %}
                                                 {% else %}
-                                                    {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(tset.test_type)=='Selective' %}
-                                                        <button class="btn btn-primary btn-block btn-instruction" onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">Instruction</button>
+                                                    {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                        <button class="btn btn-warning btn-block btn-instruction" onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">Instruction</button>
                                                     {% endif %}
                                                     <input type="button" class="btn btn-primary btn-block start"
                                                            data-student-user-id="{{ student_user_id }}"
@@ -92,7 +92,7 @@
                                                             <i class="fa fa-play" style="color: #FF7F6E"></i>
                                                         </a>
                                                     {% else %}
-                                                        <button class="btn btn-outline-secondarybtn-block" disabled><i
+                                                        <button class="btn btn-outline-secondary btn-block" disabled><i
                                                                 class="fa fa-stop"></i></button>
                                                     {% endif %}
                                                 </td>
