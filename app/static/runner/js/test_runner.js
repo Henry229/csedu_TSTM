@@ -20,7 +20,7 @@ var TestRunner = (function () {
         _question_no;
     var _item_info = [], _last_question_no = 0;
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
-        _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb;
+        _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb, _disableSubmitResponse;
     var _duration_timer, _start_time, _test_duration_minutes;
     var init = function ($container, options) {
         _assessment_guid = options.assessment_guid;
@@ -41,7 +41,8 @@ var TestRunner = (function () {
             responseProcessingCb: _responseProcessingCb,
             responseProcessedCb: _responseProcessedCb,
             toggleFlaggedCb: _toggleFlaggedCb,
-            sessionErrorCb: _sessionErrorCb
+            sessionErrorCb: _sessionErrorCb,
+            disableSubmitResponse: _disableSubmitResponse
         });
         // Start with seconds hidden.
         $('.last-min').hide();
@@ -382,6 +383,7 @@ var TestRunner = (function () {
             _setItemInfo(question_no, data);
             _goToQuestionNo(question_no);
         } else {
+            _disableSubmitResponse(false);
             if (rsp_data.status === 'stage_finished') {
                 _testlet_id = rsp_data.testlet_id;
                 _session = rsp_data.session;
@@ -401,6 +403,18 @@ var TestRunner = (function () {
         // var has_response = ItemHandlers.hasResponse(response);
         // _setItemInfo(question_no, {answer: response});
     };
+
+    _disableSubmitResponse = function(disable) {
+        var next_btn = $('.footer-next-btn');
+        var back_btn = $('.footer-back-btn');
+        if (disable) {
+            next_btn.prop('disabled', true);
+            back_btn.prop('disabled', true);
+        } else {
+            next_btn.prop('disabled', false);
+            back_btn.prop('disabled', false);
+        }
+    }
 
     _toggleFlaggedCb = function (question_no, flagged) {
         _setItemInfo(question_no, {is_flagged: flagged});

@@ -728,6 +728,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     vertical-align: middle;
 }
 
+.item-card .item-footer button:disabled {
+    cursor: not-allowed;
+}
+
 /**
  * Modal style
  */

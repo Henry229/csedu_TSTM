@@ -434,7 +434,9 @@ def testing():
         - assessment_guid is None
 
     """
+    import os
     from app.api.assessmentsession import AssessmentSession
+    from config import basedir
 
     session_id = request.args.get("session")
     testset_id = request.args.get("testset_id")
@@ -460,6 +462,13 @@ def testing():
         if testset is None:
             return redirect(url_for('web.testset_list', error="Invalid testset requested!"))
         context['testset'] = testset
+
+    try:
+        with open(os.path.join(basedir, 'runner_version.txt')) as f:
+            runner_version = f.readline().strip()
+    except FileNotFoundError:
+        runner_version = str(int(datetime.utcnow().timestamp()))
+    context['runner_version'] = runner_version
 
     return render_template('runner/test_runner.html', **context)
 

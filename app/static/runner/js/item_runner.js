@@ -14,7 +14,8 @@ var ItemRunner = (function () {
     var _interaction_type;
     var _assessment_enroll_id = 0;
     var _testset_id = 0;
-    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb, _sessionErrorCb;
+    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb, _sessionErrorCb,
+    _disableSubmitResponse;
 
     var init = function ($container, options) {
         _$container = $container;
@@ -26,6 +27,7 @@ var ItemRunner = (function () {
         _responseProcessedCb = options.responseProcessedCb || emptyCb;
         _toggleFlaggedCb = options.toggleFlaggedCb || emptyCb;
         _sessionErrorCb = options.sessionErrorCb || emptyCb;
+        _disableSubmitResponse = options.disableSubmitResponse || emptyCb;
     };
     var emptyCb = function () {
 
@@ -75,10 +77,11 @@ var ItemRunner = (function () {
         var loading = '<div class="fa-3x" style="margin: auto">\n' +
             '  <i class="fas fa-spinner fa-spin"></i> <span> Getting Test Item....</span>\n' +
             '</div>';
+        var url;
         if (_mode === 'peek') {
-            var url = '/item/' + item_id + '/peek';
+            url = '/item/' + item_id + '/peek';
         } else {
-            var url = '/item/' + item_id + '/rendered';
+            url = '/item/' + item_id + '/rendered';
         }
 
         if (_mode === 'assessment') {
@@ -87,6 +90,7 @@ var ItemRunner = (function () {
         $.ajax({
             url: url,
             beforeSend: function () {
+                _disableSubmitResponse(true);
                 _$container.html(loading);
             },
             complete: function () {
@@ -104,6 +108,7 @@ var ItemRunner = (function () {
                     postProcessRendered(data);
                     _renderedCb(_question_no);
                 }
+                _disableSubmitResponse(false);
             }
         });
     };
@@ -172,6 +177,7 @@ var ItemRunner = (function () {
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function () {
+                _disableSubmitResponse(true);
                 if (_responseProcessingCb) {
                     _responseProcessingCb(_question_no, response);
                 }
@@ -183,6 +189,7 @@ var ItemRunner = (function () {
                 _sessionErrorCb(jqXHR);
             },
             success: function (response) {
+                // _disableSubmitResponse(false);
                 if (response.result === 'success') {
                     if (_responseProcessedCb) {
                         _responseProcessedCb(response.data);
@@ -207,7 +214,7 @@ var ItemRunner = (function () {
     var processAssessmentFormResponse = function (response) {
         var url = '/api/responses/file/' + _item_id;
         var formData = new FormData();
-		var response_data = response;
+		    var response_data = response;
         if (response.formData) {
             formData = response.formData;
     		delete response_data['formData'];
@@ -230,7 +237,7 @@ var ItemRunner = (function () {
 			      processData: false,
             data: formData,
             beforeSend: function () {
-
+                _disableSubmitResponse(true);
             },
             complete: function () {
 
@@ -242,6 +249,7 @@ var ItemRunner = (function () {
                 if (response.result === 'success') {
                     processAssessmentResponse(response_data);
                 }
+                //_disableSubmitResponse(false);
             }
         });
     };
