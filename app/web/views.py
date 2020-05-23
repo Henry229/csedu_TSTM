@@ -247,10 +247,11 @@ def get_assessment_guids(guid):
         return [assessment.GUID for assessment in assessments]
 
 
-@web.route('/tests/testsets', methods=['GET'])
-@login_required
-@permission_required(Permission.ITEM_EXEC)
-def testset_list():
+# Use only assessment_list: Delete this function
+# @web.route('/tests/testsets', methods=['GET'])
+# @login_required
+# @permission_required(Permission.ITEM_EXEC)
+def testset_list_unused():
     from ..api.assessmentsession import AssessmentSession
     assessment_guid = request.args.get("assessment_guid")
     # If assessment_guid in None, try to find it from session.
@@ -344,8 +345,29 @@ def testset_list():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def assessment_list():
+    from ..api.assessmentsession import AssessmentSession
     # Parameter check
-    guid_list = request.args.get("guid_list").split(",")
+    guid_list = request.args.get("guid_list")
+    if guid_list is not None:
+        # it's coming from external link like cs online school
+        guid_list = guid_list.split(",")
+    else:
+        # it's coming from internal link like finishing test or errors.
+        assessment_guid = request.args.get("assessment_guid")
+        if assessment_guid is not None:
+            guid_list = [assessment_guid]
+        else:
+            # Exam is finished. it has only session key as a parameter.
+            session_id = request.args.get("session")
+            if session_id is None:
+                return page_not_found(e="Invalid request - session")
+            assessment_session = AssessmentSession(key=session_id)
+            if assessment_session.assessment is None:
+                return page_not_found(e="Invalid request - assessment information")
+            enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
+            assessment_guid = enroll.assessment_guid
+            guid_list = [assessment_guid]
+
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return page_not_found(e="Login user not registered as student")

@@ -101,7 +101,7 @@ var TestRunner = (function () {
         $('#errorModal .error-confirm').on('click', function () {
             if ($('#errorModal .error-code').val() === 'TEST_SESSION_ERROR') {
                 var assessment_guid = $('#assessment_guid').val();
-                window.location.replace('/tests/testsets?assessment_guid=' + assessment_guid);
+                window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
             } else {
                 $('#errorModal').modal('hide');
             }
@@ -488,7 +488,7 @@ var TestRunner = (function () {
             error: function (jqXHR, textStatus, errorThrown ) {
                 $('#finishModal').modal('hide');
                 var assessment_guid = $('#assessment_guid').val();
-                window.location.replace('/tests/testsets?assessment_guid=' + assessment_guid);
+                window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
             },
             success: function (response) {
                 var data = response.data;

@@ -799,7 +799,7 @@ def finish_test(assessment_session):
             db.session.add(enrolled)
             db.session.commit()
 
-    data = {'redirect_url': '/tests/testsets'}
+    data = {'redirect_url': '/tests/assessments'}
     return success(data)
 
 
