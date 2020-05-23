@@ -389,7 +389,7 @@ def assessment_list():
         enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
                     AssessmentEnroll.student_user_id == current_user.id).all()
-        enrolled_guids = [en.testset.GUID for en in enrolled]
+        enrolled_guid_assessment_types = {en.testset.GUID: en.assessment_type for en in enrolled}
 
         # Get testsets in enrolled
         # enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
@@ -406,7 +406,7 @@ def assessment_list():
         student_testsets = []
         # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
         for tset in assessment.testsets:
-            if tset.GUID not in enrolled_guids:
+            if tset.GUID not in enrolled_guid_assessment_types:
                 tset.resumable = False
                 student_testsets.append(tset)
         # 이미 시험을 본 것을 모은다.
@@ -416,16 +416,19 @@ def assessment_list():
         flag_finish_assessment = True
         for tset in student_testsets:
             # Compare GUID to check enrollment status
-            enrolled = tset.GUID in enrolled_guids
+            is_enrolled = tset.GUID in enrolled_guid_assessment_types
             # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
-            if not enrolled and not tset.active:
+            if not is_enrolled and not tset.active:
                 # 최신 test set version 을 찾는다.
                 # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
                 tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
-            if not enrolled or tset.resumable:
+            if not is_enrolled or tset.resumable:
                 flag_finish_assessment = False
+            if is_enrolled:
+                assessment_type = enrolled_guid_assessment_types[tset.GUID]
+                tset.report_type = 'error-note' if assessment_type == 'homework' else 'report'
             new_test_sets.append(tset)
-            tset.enrolled = enrolled
+            tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
             tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
             # If subject is 'Writing', report enabled:
@@ -459,7 +462,8 @@ def assessment_list():
         assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments, finished_assessments=finished_assessments)
+    # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
+    # finished_assessments=finished_assessments)
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list)
 
 

@@ -76,6 +76,9 @@ def create_app(config_name):
     from .report import report as report_blueprint
     app.register_blueprint(report_blueprint, url_prefix='/report')
 
+    from .errornote import errornote as errornote_blueprint
+    app.register_blueprint(errornote_blueprint, url_prefix='/errnote')
+
     from .plan import plan as plan_blueprint
     app.register_blueprint(plan_blueprint, url_prefix='/plan')
 

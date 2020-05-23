@@ -718,6 +718,8 @@ class AssessmentEnroll(db.Model):
     assessment_guid = db.Column(db.String(45))
     # Each assessment version has its own id.
     assessment_id = db.Column(db.Integer, db.ForeignKey('assessment.id'))
+    # homework or exam
+    assessment_type = db.Column(db.String(32))
     testset_id = db.Column(db.Integer, db.ForeignKey('testset.id'))
     student_user_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))  # user table - id
     attempt_count = db.Column(db.Integer)
