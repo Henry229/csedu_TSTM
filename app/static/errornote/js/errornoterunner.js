@@ -96,8 +96,9 @@ var ErrorNoteRunner = (function () {
         });
         $('#errorModal .error-confirm').on('click', function () {
             if ($('#errorModal .error-code').val() === 'TEST_SESSION_ERROR') {
-                var assessment_guid = $('#assessment_guid').val();
-                window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
+                // var assessment_guid = $('#assessment_guid').val();
+                // window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
+                $.magnificPopup.close();
             } else {
                 $('#errorModal').modal('hide');
             }

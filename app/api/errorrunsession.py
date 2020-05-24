@@ -6,6 +6,8 @@ from flask import current_app
 # from app import cache
 from cachelib.filesystemcache import FileSystemCache
 
+FIXED_CACHE_TIME = 3000  # 50 min
+
 
 class ErrorRunSession:
     STATUS_READY = 'ready'
@@ -56,6 +58,9 @@ class ErrorRunSession:
         else:
             self.key = key
             self.assessment = self.cache.get(self.key)
+            if self.assessment is not None:
+                # To just update session time
+                self.save_assessment()
 
     def reset(self, user_id, enroll_id, testset_id, duration, attempt_count, start_time):
         self.assessment = copy.deepcopy(self.assessment_default)
@@ -70,11 +75,11 @@ class ErrorRunSession:
         })
 
     def save_assessment(self):
-        timeout = ((self.get_value('test_duration') + 10) * 60
-                   - (int(datetime.now().timestamp()) - self.get_value('start_time')))
-        if timeout <= 0:
-            return
-        self.cache.set(self.key, self.assessment, timeout=timeout)
+        # timeout = ((self.get_value('test_duration') + 10) * 60
+        #            - (int(datetime.now().timestamp()) - self.get_value('start_time')))
+        # if timeout <= 0:
+        #     return
+        self.cache.set(self.key, self.assessment, timeout=FIXED_CACHE_TIME)
 
     def get_assessment(self):
         return self.assessment

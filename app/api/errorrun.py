@@ -42,6 +42,8 @@ def validate_session(func):
 
 def get_run_session(session_key):
     run_session = ErrorRunSession(key=session_key)
+    if run_session.assessment is None:
+        run_session.set_error(TEST_SESSION_ERROR, "Session is finished!")
     return run_session
 
 
