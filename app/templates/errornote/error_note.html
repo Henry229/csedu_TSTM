@@ -1,295 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="./">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>CS Education</title>
-    <!-- Icons-->
-    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
-    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
-    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
-    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
-    <!-- Main styles for this application-->
-    <link href="/static/runner/css/test_runner.css" rel="stylesheet">
-    <link href="/static/ui/css/style.css" rel="stylesheet">
-    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
-    <style>
-        #t_header th {
-            width: 85%;
-            text-align: center;
-        }
+  <base href="./">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>CS Education</title>
+  <!-- Icons-->
+  <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+  <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+  <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+  <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+  <!-- Magnific Popup core CSS file -->
+  <link rel="stylesheet" href="/static/ui/vendors/magnific-popup/magnific-popup.css">
 
-        #t_header td {
-            width: 15%;
-            text-align: right;
-        }
-
-        #t_student_info th {
-            width: 15%;
-            text-align: center;
-            border: 1px solid #0f0f0f;
-        }
-
-        #t_student_info td {
-            width: 35%;
-            text-align: left;
-            border: 1px solid #0f0f0f;
-            padding: 5px;
-        }
-
-        #t_mark_info th {
-            padding: 3px;
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        #t_mark_info td {
-            border: 0px black;
-            padding: 0px;
-        }
-
-        #t_assessment_info {
-            table-layout: auto;
-            width: 100%;
-            border: 1px solid #c8ced3;
-            padding: 10px;
-        }
-
-        #t_assessment_info th, td {
-            vertical-align: middle;
-            text-align: center;
-            border: 0px solid #c8ced3;
-        }
-
-        #t_assessment_info th {
-            background-color: #f0f3f5;
-        }
-
-        #t_graph {
-            table-layout: auto;
-            width: 100%;
-            border: 5px solid white;
-        }
-
-        #t_graph td {
-            vertical-align: middle;
-            border: 0px solid white;
-        }
-    </style>
+  <!-- Main styles for this application-->
+  <link href="/static/ui/css/style.css" rel="stylesheet">
+  <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+  <link href="/static/runner/css/test_runner.css" rel="stylesheet">
+  <link href="/static/errornote/css/errornote.css" rel="stylesheet">
 </head>
 <body>
 <h4 class="ml-3 mt-3"><a href="/" class="text-decoration-none"><i class="icon-arrow-left-circle mr-3"></i>Back to
-    list</a></h4>
+  list</a></h4>
 {% if markings %}
-    {% set marking_rep = markings[0] %}
+  {% set marking_rep = markings[0] %}
 {% else %}
-    {% set marking_rep = None %}
+  {% set marking_rep = None %}
 {% endif %}
 <div class="container">
-    <br><br>
-    <div class="card">
-        <div class="card-header">
-            <table style="width:100%" id="t_header">
-                <tr>
-                    <td>
-                        <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
-                    </td>
-                    <th colspan="2">
-                        <h3 style="color:#397e38"> {{ assessment_name }} ({{ subject }}) </h3>
-                    </th>
-                    <td>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="card-body">
-            <table style="width:100%" id="t_student_info">
-                <tr>
-                    <th> Student Name:</th>
-                    <td> {{ Student.getCSStudentName(student_user_id) }} </td>
-                    <th> Rank:</th>
-                    <td> {{ rank }} </td>
-                </tr>
-                <tr>
-                    <th> Student ID:</th>
-                    <td> {{ Student.getCSStudentId(student_user_id) }}</td>
-                    <th> Score:</th>
-                    <td> {{ score }} </td>
-                </tr>
-                <tr>
-                    <th> Grade:</th>
-                    <td> {{ grade }}</td>
-                    <th> Test Date:</th>
-                    <td> {{ marking_rep.created_time }}.</td>
-                </tr>
-            </table>
-            <br><br>
-            {% if markings %}
-                <div class="row">
-                    <div class="col">
-                        <table class="table" style="width:100%" id="t_mark_info">
-                            <thead>
-                            <tr>
-                                <th align="center" colspan="5">Mark</th>
-                                <th align="center">Description</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for marking in markings %}
-                                {% if loop.index<=20 %}
-                                    <tr>
-                                        <td>
-                                            {% if not marking.is_correct %}
-                                                <button class="btn btn-sm btn-outline-info" type="button"
-                                                        name="previewButton"
-                                                        data-toggle="modal" data-target="#dataModal"
-                                                        data-item-id="{{ marking.item_id }}">
-                                                    {{ marking.question_no }}
-                                                </button>
-                                            {% else %}
-                                                {{ marking.question_no }}
-                                            {% endif %}
-                                            {% if explanation_link.get(marking.question_no) %}
-                                                <a id="view_explanation_window"
-                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                                </a>
-                                            {% else %}
-                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
-                                            answer_unsubmission{% endif %}</td>
-                                        <td>{% if marking.is_correct %}
-                                            <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
-                                            <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
-                                            {{ marking.correct_r_value }}{% endif %}</td>
-                                        <td>{{ marking.item_percentile }}%</td>
-                                        <td>{{ Codebook.get_code_name(marking.category) }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col">
-                        <table class="table" style="width:100%" id="t_mark_info">
-                            <thead>
-                            <tr>
-                                <th align="center" colspan="5">Mark</th>
-                                <th align="center">Description</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for marking in markings %}
-                                {% if loop.index>20 %}
-                                    <tr>
-                                        <td>
-                                            {% if not marking.is_correct %}
-                                                <button class="btn btn-sm btn-outline-info" type="button"
-                                                        name="previewButton"
-                                                        data-toggle="modal" data-target="#dataModal"
-                                                        data-item-id="{{ marking.item_id }}">
-                                                    {{ marking.question_no }}
-                                                </button>
-                                            {% else %}
-                                                {{ marking.question_no }}
-                                            {% endif %}
-                                            {% if explanation_link.get(marking.question_no) %}
-                                                <a id="view_explanation_window"
-                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                                </a>
-                                            {% else %}
-                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
-                                            answer_unsubmission{% endif %}</td>
-                                        <td>{% if marking.is_correct %}
-                                            <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
-                                            <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
-                                            {{ marking.correct_r_value }}{% endif %}</td>
-                                        <td>{{ marking.item_percentile }}%</td>
-                                        <td>{{ Codebook.get_code_name(marking.category) }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        {% if ts_by_category %}
-            <table id="t_assessment_info">
-                <tr>
-                    <th align="center"> Category</th>
-                    <th align="center"> Weaker &nbsp;&nbsp;<i class="icons cui-arrow-left"></i> &nbsp;&nbsp;Average
-                        &nbsp;&nbsp;<i class="icons cui-arrow-right"></i>&nbsp;&nbsp; Stronger
-                    </th>
-                </tr>
-                {% for ts in ts_by_category %}
-                    <tr>
-                        <td><strong>{{ ts.category }}</strong></td>
-                        <td>
-                            <table id="t_graph">
-                                <tr>
-                                    <td width="15%"><small>My Score</small></td>
-                                    <td width="75%">
-                                        <div class="progress progress-xs">
-                                            <div class="progress-bar bg-warning" role="progressbar"
-                                                 style="width: {{ ts.percentile_score }}%"
-                                                 aria-valuenow="{{ ts.percentile_score }}" aria-valuemin="0"
-                                                 aria-valuemax="100"></div>
-                                        </div>
-                                    </td>
-                                    <td width="10%"><small> {{ ts.percentile_score }} </small></td>
-                                </tr>
-                                <tr>
-                                    <td width="15%"><small>Average</small></td>
-                                    <td width="75%">
-                                        <div class="progress progress-xs">
-                                            <div class="progress-bar bg-danger" role="progressbar"
-                                                 style="width: {{ ts.avg_score }}%" aria-valuenow="{{ ts.avg_score }}"
-                                                 aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </td>
-                                    <td width="10%"><small> {{ ts.avg_score }} </small></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
+  <br><br>
+  <input type="hidden" id="assessment_enroll_id" value="{{ assessment_enroll_id }}">
+  <div class="card">
+    <div class="card-header">
+      <table style="width:100%" id="t_header">
+        <tr>
+          <td>
+            <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+          </td>
+          <th colspan="2">
+            <h3 style="color:#397e38"> {{ assessment_name }} ({{ subject }}) </h3>
+          </th>
+          <td>
+          </td>
+        </tr>
+      </table>
     </div>
-    <br>
-    <br>
+    <div class="card-body">
+      <table style="width:100%" id="t_student_info">
+        <tr>
+          <th> Student Name:</th>
+          <td> {{ Student.getCSStudentName(student_user_id) }} </td>
+          <th> Rank:</th>
+          <td> {{ rank }} </td>
+        </tr>
+        <tr>
+          <th> Student ID:</th>
+          <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+          <th> Score:</th>
+          <td> {{ score }} </td>
+        </tr>
+        <tr>
+          <th> Grade:</th>
+          <td> {{ grade }}</td>
+          <th> Test Date:</th>
+          <td> {{ marking_rep.created_time }}.</td>
+        </tr>
+      </table>
+      <br><br>
+      {% if markings %}
+        <div class="row">
+          <button id="retry-errors-button">Retry errors</button>
+        </div>
+        <div class="row">
+          <div class="col">
+            <table class="table" style="width:100%" id="t_mark_info">
+              <thead>
+              <tr>
+                <th align="center" colspan="5">Mark</th>
+                <th align="center">Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for marking in markings %}
+                {% if loop.index<=20 %}
+                  <tr>
+                    <td>
+                      {% if not marking.is_correct %}
+                        <button class="btn btn-sm btn-outline-info" type="button"
+                                name="previewButton"
+                                data-toggle="modal" data-target="#dataModal"
+                                data-item-id="{{ marking.item_id }}">
+                          {{ marking.question_no }}
+                        </button>
+                      {% else %}
+                        {{ marking.question_no }}
+                      {% endif %}
+                      {% if explanation_link.get(marking.question_no) %}
+                        <a id="view_explanation_window"
+                           onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                          <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                        </a>
+                      {% else %}
+                        <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                      {% endif %}
+                    </td>
+                    <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                      answer_unsubmission{% endif %}</td>
+                    <td>{% if marking.is_correct %}
+                      <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                      <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                    <td>{% if not marking.is_correct and marking.correct_r_value %}
+                      {{ marking.correct_r_value }}{% endif %}</td>
+                    <td>{{ marking.item_percentile }}%</td>
+                    <td>{{ Codebook.get_code_name(marking.category) }}</td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="col">
+            <table class="table" style="width:100%" id="t_mark_info">
+              <thead>
+              <tr>
+                <th align="center" colspan="5">Mark</th>
+                <th align="center">Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for marking in markings %}
+                {% if loop.index>20 %}
+                  <tr>
+                    <td>
+                      {% if not marking.is_correct %}
+                        <button class="btn btn-sm btn-outline-info" type="button"
+                                name="previewButton"
+                                data-toggle="modal" data-target="#dataModal"
+                                data-item-id="{{ marking.item_id }}">
+                          {{ marking.question_no }}
+                        </button>
+                      {% else %}
+                        {{ marking.question_no }}
+                      {% endif %}
+                      {% if explanation_link.get(marking.question_no) %}
+                        <a id="view_explanation_window"
+                           onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                          <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                        </a>
+                      {% else %}
+                        <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                      {% endif %}
+                    </td>
+                    <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                      answer_unsubmission{% endif %}</td>
+                    <td>{% if marking.is_correct %}
+                      <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                      <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                    <td>{% if not marking.is_correct and marking.correct_r_value %}
+                      {{ marking.correct_r_value }}{% endif %}</td>
+                    <td>{{ marking.item_percentile }}%</td>
+                    <td>{{ Codebook.get_code_name(marking.category) }}</td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    {% if ts_by_category %}
+      <table id="t_assessment_info">
+        <tr>
+          <th align="center"> Category</th>
+          <th align="center"> Weaker &nbsp;&nbsp;<i class="icons cui-arrow-left"></i> &nbsp;&nbsp;Average
+            &nbsp;&nbsp;<i class="icons cui-arrow-right"></i>&nbsp;&nbsp; Stronger
+          </th>
+        </tr>
+        {% for ts in ts_by_category %}
+          <tr>
+            <td><strong>{{ ts.category }}</strong></td>
+            <td>
+              <table id="t_graph">
+                <tr>
+                  <td width="15%"><small>My Score</small></td>
+                  <td width="75%">
+                    <div class="progress progress-xs">
+                      <div class="progress-bar bg-warning" role="progressbar"
+                           style="width: {{ ts.percentile_score }}%"
+                           aria-valuenow="{{ ts.percentile_score }}" aria-valuemin="0"
+                           aria-valuemax="100"></div>
+                    </div>
+                  </td>
+                  <td width="10%"><small> {{ ts.percentile_score }} </small></td>
+                </tr>
+                <tr>
+                  <td width="15%"><small>Average</small></td>
+                  <td width="75%">
+                    <div class="progress progress-xs">
+                      <div class="progress-bar bg-danger" role="progressbar"
+                           style="width: {{ ts.avg_score }}%" aria-valuenow="{{ ts.avg_score }}"
+                           aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </td>
+                  <td width="10%"><small> {{ ts.avg_score }} </small></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+  </div>
+  <br>
+  <br>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
      aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Loading... Try again if the contents not shown
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Test Runner -->
+<div id="retry-errors-runner-container" style="display: none">
+<div id="retry-errors-runner">
+  <div class="item-card">
+      <div id="items_selected" class="display table table-hover" style="width:100%">
+        <div class="item-header">
+          <div class="header-timer">
+            <span class="timer-display">
+              <span class="hours">
+                <span class="number">00</span>
+                <span class="label">Hours</span>
+              </span>
+              <span class="colon number">:</span>
+              <span class="minutes">
+                <span class="number">00</span>
+                <span class="label">Mins</span>
+              </span>
+              <span class="colon number last-min">:</span>
+              <span class="seconds last-min">
+                <span class="number">00</span>
+                <span class="label">Secs</span>
+              </span>
+            </span>
+          </div>
+          <div class="header-center">
+            <button class="header-summary">
+					<span class="summary-text">
+						<span class="summary-label">Question</span>
+						<span class="summary-text-bold"> </span>
+						<span class="summary-text-bold question-number"></span>
+						<i class="fas fa-list-ul"></i>
+					</span>
+            </button>
+          </div>
+          <div class="header-tools" style="display: none">
+            <div class="header-tools-protractor-btn"><img src="/static/ui/img/protractor_icon.png"/></div>
+            <div class="tools-protractor"><img src="/static/ui/img/protractor.png"/></div>
+            <div class="header-tools-ruler-btn"><img src="/static/ui/img/ruler_icon.png"/></div>
+            <div class="tools-ruler"><img src="/static/ui/img/ruler.png"/></div>
+          </div>
+        </div>
+        <div class="item-container disable-select" spellcheck="false">
+
+        </div>
+        <div class="summary-container" style="display:none;">
+          <div class="question-summary-wrapper">
+            <h1 class="">Progress summary</h1>
+            <div class="question-filter">
+              <div class="filter-btn-group filter-show-all">
+                <button type="button" class="filter-btn all active" data-filter="all"><span>0</span>Show
+                  all
                 </button>
+              </div>
+              <div class="filter-btn-group filter-answered">
+                <button type="button" class="filter-btn answered" data-filter="answered"><span>0</span>Answered
+                </button>
+              </div>
+              <div class="filter-btn-group filter-answered">
+                <button type="button" class="filter-btn not_answered" data-filter="not_answered">
+                  <span>0</span>Not answered
+                </button>
+              </div>
+              <div class="filter-btn-group filter-answered">
+                <button type="button" class="filter-btn not_read" data-filter="not_read"><span>0</span>Not
+                  read
+                </button>
+              </div>
+              <div class="filter-btn-group filter-answered">
+                <button type="button" class="filter-btn flagged" data-filter="flagged"><span>0</span>Flagged
+                </button>
+              </div>
+            </div>
+            <h1 class="ng-binding">Questions</h1>
+            <p class="">Click a number to go to that question.</p>
+            <div class="question-list-summary">
+
+            </div>
+          </div>
+        </div>
+        <div class="item-footer">
+          <div class="footer-center"></div>
+          <div class="navigator">
+            <button class="footer-back-btn" style="display: none"><i class="fas fa-caret-left"></i>Back</button>
+            <div class="footer-right-buttons">
+              <button class="footer-flag-btn" style="display: none"><span>Flag</span><i class="far fa-flag"></i></button>
+              <button class="footer-next-btn">Next<i class="fas fa-caret-right"></i></button>
+            </div>
+            <div class="footer-right-buttons footer-finish">
+              <button class="footer-finish-btn">Finish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal -->
+      <div class="modal fade" id="stageModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+           aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="dataModalLabel">Stage finished</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                      style="display: none">
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
             <div class="modal-body">
-                Loading... Try again if the contents not shown
+              Loading...
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Review</button>
+              <button type="button" class="btn btn-primary next-stage">Next stage</button>
             </div>
+          </div>
         </div>
+      </div>
+      <div class="modal fade" id="finishModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+           aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="dataModalLabel">Stage finished</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                      style="display: none">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Loading...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Review</button>
+              <button type="button" class="btn btn-primary finish-test">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="timeoverModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+           aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="dataModalLabel">The test is over.</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                      style="display: none">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Please click the Confirm button to return to test set.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary timeover-confirm">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+</div>
 </div>
 <!-- Javascripts-->
 <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
@@ -300,6 +405,7 @@
 <script src="/static/ui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
 <script src="/static/ui/vendors/@coreui/coreui/js/coreui.min.js"></script>
 <script src="/static/ui/vendors/DataTables/datatables.min.js" type="text/javascript"></script>
+<script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
 <script src="/static/ui/js/main.js"></script>
 <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
 <script src="/static/common/js/csedu_common.js"></script>
@@ -307,10 +413,33 @@
 <script src="/static/runner/js/item_runner.js"></script>
 <script src="/static/runner/js/item_handlers.js"></script>
 <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+<!-- Magnific Popup core JS file -->
+<script src="/static/ui/vendors/magnific-popup/jquery.magnific-popup.js"></script>
+<script src="/static/errornote/js/errornoterunner.js"></script>
+
 <script type="text/javascript">
-    $(document).ready(function () {
-        ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
+  $(document).ready(function () {
+    $('#retry-errors-button').magnificPopup({
+      items: {
+        src: '#retry-errors-runner'
+      },
+      type: 'inline',
+      showCloseBtn: false,
+      callbacks: {
+        open: function() {
+          var options = {
+            assessment_enroll_id: $('#assessment_enroll_id').val()
+          };
+          ErrorNoteRunner.init($('.item-container'), options);
+          ErrorNoteRunner.startTest();
+        },
+        close: function () {
+          $('#video-popup').empty();
+        }
+      }
     });
+
+  });
 </script>
 </body>
 </html>

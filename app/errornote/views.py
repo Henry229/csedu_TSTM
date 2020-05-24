@@ -64,6 +64,7 @@ def error_note(assessment_id, ts_id, student_user_id):
 
     template_file = 'errornote/error_note.html'
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
+                                            assessment_enroll_id=assessment_enroll_id,
                                             subject=test_subject_string, rank=rank,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,

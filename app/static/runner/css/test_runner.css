@@ -1114,7 +1114,8 @@ textarea:focus.qti-item.qti-interaction.solid {
     display: none;
 }
 
-#testsets .report {
+#testsets .report,
+#testsets .error-note {
     cursor: pointer;
 }
 

@@ -78,15 +78,17 @@ var ItemRunner = (function () {
             '  <i class="fas fa-spinner fa-spin"></i> <span> Getting Test Item....</span>\n' +
             '</div>';
         var url;
-        if (_mode === 'peek') {
+
+        if (_mode === 'assessment') {
+            url = '/api/rendered/' + item_id + '?session=' + _session;
+        } else if (_mode === 'errornote') {
+            url = '/api/errorrun/rendered/' + item_id + '?session=' + _session;
+        } else if (_mode === 'peek') {
             url = '/item/' + item_id + '/peek';
         } else {
             url = '/item/' + item_id + '/rendered';
         }
 
-        if (_mode === 'assessment') {
-            url = '/api/rendered/' + item_id + '?session=' + _session;
-        }
         $.ajax({
             url: url,
             beforeSend: function () {
@@ -122,7 +124,7 @@ var ItemRunner = (function () {
     var processResponse = function () {
         var response = _handler.getResponse();
         if (response === null) return;
-        if (_mode === 'assessment') {
+        if (_mode === 'assessment' || _mode === 'errornote') {
             if (response.formData || response.writing_text)
                 processAssessmentFormResponse(response);
             else
@@ -157,6 +159,9 @@ var ItemRunner = (function () {
 
     var processAssessmentResponse = function (response) {
         var url = '/api/responses/' + _item_id;
+        if (_mode === 'errornote') {
+            url = '/api/errorrun/responses/' + _item_id;
+        }
         var data = {
             'session': _session,
             'question_no': _question_no,
@@ -213,6 +218,9 @@ var ItemRunner = (function () {
      */
     var processAssessmentFormResponse = function (response) {
         var url = '/api/responses/file/' + _item_id;
+        if (_mode === 'errornote') {
+            url = '/api/errorrun/responses/file/' + _item_id;
+        }
         var formData = new FormData();
 		    var response_data = response;
         if (response.formData) {

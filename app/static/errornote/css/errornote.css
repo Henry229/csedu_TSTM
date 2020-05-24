@@ -1,0 +1,61 @@
+#t_header th {
+    width: 85%;
+    text-align: center;
+}
+
+#t_header td {
+    width: 15%;
+    text-align: right;
+}
+
+#t_student_info th {
+    width: 15%;
+    text-align: center;
+    border: 1px solid #0f0f0f;
+}
+
+#t_student_info td {
+    width: 35%;
+    text-align: left;
+    border: 1px solid #0f0f0f;
+    padding: 5px;
+}
+
+#t_mark_info th {
+    padding: 3px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#t_mark_info td {
+    border: 0px black;
+    padding: 0px;
+}
+
+#t_assessment_info {
+    table-layout: auto;
+    width: 100%;
+    border: 1px solid #c8ced3;
+    padding: 10px;
+}
+
+#t_assessment_info th, td {
+    vertical-align: middle;
+    text-align: center;
+    border: 0px solid #c8ced3;
+}
+
+#t_assessment_info th {
+    background-color: #f0f3f5;
+}
+
+#t_graph {
+    table-layout: auto;
+    width: 100%;
+    border: 5px solid white;
+}
+
+#t_graph td {
+    vertical-align: middle;
+    border: 0px solid white;
+}
