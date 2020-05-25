@@ -511,6 +511,8 @@ def response_process(item_id, assessment_session=None):
     marking.outcome_score = processed.get('maxScore')
     marking.is_correct = marking.candidate_mark >= marking.outcome_score
     marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
+    marking.last_r_value = marking.candidate_r_value
+    marking.last_is_correct = marking.is_correct
     db.session.commit()
 
     assessment_session.set_saved_answer(marking_id, marking.candidate_r_value)

@@ -58,18 +58,11 @@ def get_next_item(error_run_session: ErrorRunSession, current_question_no=0):
     :return:
     """
     test_items = error_run_session.get_value('test_items')
-    if len(test_items) == 0:
-        return None
-    # If current_question_no == 0, it means it's the first time requesting a test item.
-    if current_question_no == 0:
-        index = 0
-    else:
-        if len(test_items) <= current_question_no:
-            return None
-        else:
-            index = current_question_no
+    for item in test_items:
+        if item['question_no'] > current_question_no:
+            return item
 
-    return test_items[index]
+    return None
 
 
 def parse_correct_response(correct_response):
@@ -109,11 +102,11 @@ def start_error_run():
     user_id = current_user.id
     error_run_session = new_error_run_session(user_id, assessment_enroll_id, enrolled.testset_id,
                                               enrolled.test_duration, 1)
-    question_no = 1
     # Find markings.
-    markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id) \
+    markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id,
+                                       last_is_correct=False) \
         .order_by(Marking.question_no).all()
-
+    question_no = -1
     # build test_items
     test_items = []
     for m in markings:
@@ -122,6 +115,9 @@ def start_error_run():
                 'is_read': False,
                 'saved_answer': ''
                 }
+        if question_no == -1:
+            question_no = m.question_no
+            info['is_read'] = True
         test_items.append(info)
     error_run_session.set_value('test_items', test_items)
     next_question_no = 0
@@ -129,7 +125,7 @@ def start_error_run():
     data = {'is_read': False, 'is_flagged': False}
     if next_item is not None:
         # next_item_id = next_item.get('item_id')
-        next_question_no = question_no
+        next_question_no = next_item['question_no']
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         marking.is_read = True
@@ -204,10 +200,10 @@ def error_run_response_process(item_id, run_session=None):
         return bad_request(message='Student id is not valid!')
 
     # check timeout: give 5 seconds gap
-    timeout = (run_session.get_value('test_duration') * 60
-               - (int(datetime.now().timestamp()) - run_session.get_value('start_time'))) + 5
-    if timeout <= 0:
-        return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
+    # timeout = (run_session.get_value('test_duration') * 60
+    #            - (int(datetime.now().timestamp()) - run_session.get_value('start_time'))) + 5
+    # if timeout <= 0:
+    #     return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
@@ -250,13 +246,14 @@ def error_run_response_process(item_id, run_session=None):
                 candidate_response["writing_text"] = writing_text
             if file_names is not None:
                 candidate_response["file_names"] = file_names
-        marking.candidate_r_value = candidate_response
+        candidate_r_value = candidate_response
     else:
-        marking.candidate_r_value = candidate_response
-    marking.candidate_mark = processed.get('SCORE')
-    marking.outcome_score = processed.get('maxScore')
-    marking.is_correct = marking.candidate_mark >= marking.outcome_score
-    marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
+        candidate_r_value = candidate_response
+    candidate_mark = processed.get('SCORE')
+    outcome_score = processed.get('maxScore')
+    is_correct = candidate_mark >= outcome_score
+    marking.last_r_value = candidate_r_value
+    marking.last_is_correct = is_correct
     db.session.commit()
 
     run_session.set_saved_answer(marking_id, marking.candidate_r_value)
@@ -269,7 +266,7 @@ def error_run_response_process(item_id, run_session=None):
         data['html'] = render_template("runner/test_finished.html")
     else:
         next_item_id = next_item.get('item_id')
-        next_question_no = question_no + 1
+        next_question_no = next_item['question_no']
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         # marking.is_read = True
@@ -291,6 +288,16 @@ def error_run_response_process(item_id, run_session=None):
         'start_time': run_session.get_value('start_time'),
     })
     return success(data)
+
+
+@api.route('/errorrun/responses/file/<int:item_id>', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+@validate_session
+def error_run_response_process_file(item_id, run_session=None):
+    """
+    Ignore file and just return success!!
+    """
+    return success({"result": "success"})
 
 
 @api.route('/errorrun/finish', methods=['POST'])

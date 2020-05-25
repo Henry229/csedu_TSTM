@@ -16,6 +16,7 @@ var ErrorNoteLogger = (function () {
 })();
 
 var ErrorNoteRunner = (function () {
+    var _is_initialized = false;
     var _assessment_guid, _assessment_enroll_id, _testset_id, _testlet_id, _stage_data, _session,
         _question_no;
     var _item_info = [], _last_question_no = 0;
@@ -23,6 +24,9 @@ var ErrorNoteRunner = (function () {
         _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb, _disableSubmitResponse;
     var _duration_timer, _start_time, _test_duration_minutes;
     var init = function ($container, options) {
+        if (_is_initialized) return;
+
+        _is_initialized = true;
         _assessment_enroll_id = options.assessment_enroll_id;
         _testset_id = options.testset_id;
         _testlet_id = options.testlet_id;
@@ -161,7 +165,7 @@ var ErrorNoteRunner = (function () {
         if (question_no > _last_question_no) _last_question_no = question_no;
     };
     var _getItemInfo = function (question_no) {
-        _item_info[question_no] = _item_info[question_no] || {};
+        _item_info[question_no] = _item_info[question_no] || null;
         return _item_info[question_no];
     };
 
@@ -226,6 +230,7 @@ var ErrorNoteRunner = (function () {
         for (i = 1; i <= _last_question_no; i++) {
             var btn = $('<button>');
             var itm = _getItemInfo(i);
+            if (itm === null) continue;
             var filtered = (filter === 'all');
             all_cnt++;
             btn.html(itm.question_no);

@@ -860,8 +860,14 @@ class Marking(db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
     weight = db.Column(db.Float)
     correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
-    candidate_r_value = db.Column(JSONB)  # Candidate Response Value
+    # Candidate Response Value
+    candidate_r_value = db.Column(JSONB)
+    # Response result
     is_correct = db.Column(db.Boolean)
+    # Last candidate Response Value for retry
+    last_r_value = db.Column(JSONB)
+    # Last Response result for retry
+    last_is_correct = db.Column(db.Boolean)
     outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
     candidate_mark = db.Column(db.Float, default=0)  # Student's score
     duration = db.Column(db.Interval)  # time - time:duration, DB column type:Interval,Python Type: datetime.timedelta?
