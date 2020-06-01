@@ -61,11 +61,18 @@
                                                                 onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
                                                             Exam Instructions
                                                         </button>
-                                                    {% elif Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Summative test' %}
-                                                        <button class="btn btn-warning btn-block btn-instruction"
-                                                                onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
-                                                            Exam Instructions
-                                                        </button>
+                                                    {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
+                                                        {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                            <button class="btn btn-warning btn-block btn-instruction"
+                                                                    onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                Exam Instructions
+                                                            </button>
+                                                        {% else %}
+                                                            <button class="btn btn-warning btn-block btn-instruction"
+                                                                    onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
+                                                                Exam Instructions
+                                                            </button>
+                                                        {% endif %}
                                                     {% endif %}
                                                     <input type="button" class="btn btn-primary btn-block start"
                                                            data-student-user-id="{{ student_user_id }}"
