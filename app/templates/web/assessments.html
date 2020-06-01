@@ -202,12 +202,8 @@
             });
 
             $('#testsets input.error-note').on('click', function () {
-                var assessment_guid = $(this).data('assessment-guid');
-                var assessment_id = $(this).data('assessment-id');
-                var testset_id = $(this).data('testset-id');
-                var student_user_id = $(this).data('student-user-id');
-                window.location = '/errnote/ts/' + assessment_id + '/'
-                    + testset_id + '/' + student_user_id;
+                var assessment_enroll_id = $(this).data('assessment-enroll-id');
+                window.location = '/errnote/' + assessment_enroll_id;
             });
         });
     </script>

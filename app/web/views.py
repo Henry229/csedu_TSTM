@@ -396,6 +396,7 @@ def assessment_list():
         enrolled_testsets = {}
         for en in enrolled:
             en.testset.resumable = False
+            en.testset.enroll_id = en.id
             if en.finish_time is None and en.test_duration is not None:
                 elapsed = datetime.utcnow() - en.start_time
                 if elapsed.total_seconds() < en.test_duration * 60:

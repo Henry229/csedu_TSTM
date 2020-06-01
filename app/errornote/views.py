@@ -1,6 +1,6 @@
 import os
 from flask import render_template, flash, request, current_app, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from . import errornote
 from ..decorators import permission_required
@@ -9,26 +9,26 @@ from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset
 from ..web.views import view_explanation
 
 
-@errornote.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@errornote.route('/<int:assessment_enroll_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
-def error_note(assessment_id, ts_id, student_user_id):
+def error_note(assessment_enroll_id):
     # Todo: Check accessibility to get report
     refresh_mviews()
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
-        filter_by(assessment_id=assessment_id). \
-        filter_by(testset_id=ts_id). \
-        filter_by(student_user_id=student_user_id)
-    row = query.order_by(AssessmentEnroll.id.desc()).first()
-    if row is None:
+    assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
+    if assessment_enroll is None:
         url = request.referrer
         flash('Assessment Enroll data not available')
         return redirect(url)
 
-    assessment_enroll_id = row.id
-    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade).filter_by(id=row.testset_id).first()
+    assessment_id = assessment_enroll.assessment_id
+    ts_id = assessment_enroll.testset_id
+    student_user_id = current_user.id
+    assessment = Assessment.query.filter_by(id=assessment_id).first()
+    assessment_name = assessment.name
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade)\
+        .filter_by(id=assessment_enroll.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
 
@@ -63,11 +63,11 @@ def error_note(assessment_id, ts_id, student_user_id):
         return redirect(url_i)
 
     template_file = 'errornote/error_note.html'
-    rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
-                                            assessment_enroll_id=assessment_enroll_id,
-                                            subject=test_subject_string, rank=rank,
-                                            score=score, markings=markings, ts_by_category=ts_by_category,
-                                            student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                            grade=grade,
-                                            explanation_link=explanation_link)
-    return rendered_template_pdf
+    rendered_template = render_template(template_file, assessment_name=assessment_name,
+                                        assessment_enroll_id=assessment_enroll_id,
+                                        subject=test_subject_string, rank=rank,
+                                        score=score, markings=markings, ts_by_category=ts_by_category,
+                                        student_user_id=student_user_id, static_folder=current_app.static_folder,
+                                        grade=grade,
+                                        explanation_link=explanation_link)
+    return rendered_template

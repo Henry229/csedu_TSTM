@@ -49,28 +49,30 @@
     <div class="card-body">
       <table style="width:100%" id="t_student_info">
         <tr>
-          <th> Student Name:</th>
+          <th> Name</th>
           <td> {{ Student.getCSStudentName(student_user_id) }} </td>
-          <th> Rank:</th>
-          <td> {{ rank }} </td>
-        </tr>
-        <tr>
-          <th> Student ID:</th>
-          <td> {{ Student.getCSStudentId(student_user_id) }}</td>
-          <th> Score:</th>
+          <th> Score</th>
           <td> {{ score }} </td>
         </tr>
         <tr>
-          <th> Grade:</th>
-          <td> {{ grade }}</td>
-          <th> Test Date:</th>
+          <th> Student ID</th>
+          <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+          <th> Test Date</th>
           <td> {{ marking_rep.created_time }}.</td>
+        </tr>
+        <tr>
+          <th> Grade</th>
+          <td> {{ grade }}</td>
+          <th> </th>
+          <td> </td>
         </tr>
       </table>
       <br><br>
       {% if markings %}
         <div class="row">
-          <button id="retry-errors-button">Retry errors</button>
+        <div class="col retry-wrapper">
+          <button id="retry-errors-button" class="btn btn-sm btn-outline-info">Retry errors</button>
+        </div>
         </div>
         <div class="row">
           <div class="col">
@@ -86,16 +88,12 @@
                 {% if loop.index<=20 %}
                   <tr>
                     <td>
-                      {% if not marking.is_correct %}
                         <button class="btn btn-sm btn-outline-info" type="button"
                                 name="previewButton"
                                 data-toggle="modal" data-target="#dataModal"
-                                data-item-id="{{ marking.item_id }}">
+                                data-item-id="{{ marking.item_id }}" disabled>
                           {{ marking.question_no }}
                         </button>
-                      {% else %}
-                        {{ marking.question_no }}
-                      {% endif %}
                       {% if explanation_link.get(marking.question_no) %}
                         <a id="view_explanation_window"
                            onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
