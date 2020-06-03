@@ -68,7 +68,7 @@ def insert():
                                 modified_by=current_user.id,
                                 modified_time=datetime.now(pytz.utc),
                                 created_time=datetime.now(pytz.utc))
-        # assessment.session_date = form.session_date.data
+        assessment.session_date = form.session_date.data
         # assessment.session_start_time = form.session_start_time.data
         # assessment.session_end_time = form.session_end_time.data
         db.session.add(assessment)
@@ -136,7 +136,7 @@ def edit(id):
     form.assessment_name.data = assessment.name
     form.year.data = assessment.year
     form.review_period.data = assessment.review_period
-    # form.session_date.data = assessment.session_date
+    form.session_date.data = assessment.session_date
     # form.session_start_time.data = assessment.session_start_time
     # form.session_end_time.data = assessment.session_end_time
     return render_template("assessment/new.html", assessment_form=form)
@@ -169,7 +169,7 @@ def update():
                 new_assessment.test_type = form.test_type.data
                 new_assessment.year = form.year.data
                 new_assessment.review_period = form.review_period.data
-                # new_assessment.session_date = form.session_date.data
+                new_assessment.session_date = form.session_date.data
                 # new_assessment.session_start_time = form.session_start_time.data
                 # new_assessment.session_end_time = form.session_end_time.data
                 new_assessment.modified_by = current_user.id
@@ -189,7 +189,7 @@ def update():
                 assessment.name = form.assessment_name.data
                 assessment.year = form.year.data
                 assessment.review_period = form.review_period.data
-                # assessment.session_date = form.session_date.data
+                assessment.session_date = form.session_date.data
                 # assessment.session_start_time = form.session_start_time.data
                 # assessment.session_end_time = form.session_end_time.data
                 assessment.modified_by = current_user.id
@@ -219,7 +219,7 @@ def clone(id):
     form.assessment_name.data = assessment.name + '_cloned'
     form.year.data = assessment.year
     form.review_period.data = assessment.review_period
-    # form.session_date.data = assessment.session_date
+    form.session_date.data = assessment.session_date
     # form.session_start_time.data = assessment.session_start_time
     # form.session_end_time.data = assessment.session_end_time
     return render_template("assessment/clone.html", assessment_form=form)
@@ -244,7 +244,7 @@ def clone_insert():
                                 modified_by=current_user.id,
                                 modified_time=datetime.now(pytz.utc),
                                 created_time=datetime.now(pytz.utc))
-        # assessment.session_date = form.session_date.data
+        assessment.session_date = form.session_date.data
         # assessment.session_start_time = form.session_start_time.data
         # assessment.session_end_time = form.session_end_time.data
         db.session.add(assessment)

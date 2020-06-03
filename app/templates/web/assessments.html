@@ -6,6 +6,9 @@
         <div class="col">
             <div class="card card-accent-info">
                 <div class="card-header">
+                    {% if assessments|length ==0 %}
+                        There is no test assessment available to start today.
+                    {% endif %}
                 </div>
                 {% for assessment in assessments %}
                     <div class="card-body">

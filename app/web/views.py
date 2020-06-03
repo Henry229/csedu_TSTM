@@ -354,6 +354,10 @@ def assessment_list():
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
         if assessment is None:
             return page_not_found(e="Invalid request - assessment enroll information")
+        elif assessment.session_date:
+            # if assessment session_date is comming after today, skip to display on student's assessment list page
+            if assessment.session_date > datetime.today():
+                continue
 
         # Get all assessment enroll to get testsets the student enrolled in already.
         enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
