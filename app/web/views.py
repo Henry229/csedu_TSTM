@@ -320,6 +320,8 @@ def testset_list():
         #   - False when Marker's comment not existing
         enable_writing_report = False
         subject = Codebook.get_code_name(tset.subject)
+        additional_info = Codebook.get_additional_info(tset.subject)
+        tset.sort_key = additional_info['subject_order'] if additional_info else 1
         if subject == 'Writing' and enable_report:
             mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
                 join(AssessmentEnroll). \
@@ -331,8 +333,8 @@ def testset_list():
                 enable_writing_report = True if mw.markers_comment else False
                 if not enable_writing_report:
                     break
-    sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
-
+    # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+    sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
     return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
                            testsets=sorted_testsets, assessment_id=assessment.id,
                            enable_report=enable_report, enable_writing_report=enable_writing_report )
@@ -348,7 +350,8 @@ def assessment_list():
     if student is None:
         return page_not_found(e="Login user not registered as student")
 
-    assessments = []
+    assessments, finished_assessments = [], []
+    assessments_list = {}
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
@@ -387,6 +390,7 @@ def assessment_list():
         for ts_id in enrolled_testsets:
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
+        flag_finish_assessment = True
         for tset in student_testsets:
             # Compare GUID to check enrollment status
             enrolled = tset.GUID in enrolled_guids
@@ -395,6 +399,8 @@ def assessment_list():
                 # 최신 test set version 을 찾는다.
                 # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
                 tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
+            if not enrolled or en.testset.resumable:
+                flag_finish_assessment = False
             new_test_sets.append(tset)
             tset.enrolled = enrolled
             test_type = Codebook.get_code_name(tset.test_type)
@@ -404,6 +410,8 @@ def assessment_list():
             #   - False when Marker's comment not existing
             tset.enable_writing_report = False
             subject = Codebook.get_code_name(tset.subject)
+            additional_info = Codebook.get_additional_info(tset.subject)
+            tset.sort_key = additional_info['subject_order'] if additional_info else 1
             if subject == 'Writing' and tset.enable_report:
                 mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
                     join(AssessmentEnroll). \
@@ -416,12 +424,20 @@ def assessment_list():
                     if not tset.enable_writing_report:
                         break
             tset.explanation_link = view_explanation(tset.id)
-        sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        sorted_testsets = sorted(new_test_sets, key=lambda x:x.sort_key)
         assessment.testsets = sorted_testsets
-        assessments.append(assessment)
+
+        # Split assessments and finished_assessments
+        if flag_finish_assessment:
+            finished_assessments.append(assessment)
+        else:
+            assessments.append(assessment)
+        assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments)
+    # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments, finished_assessments=finished_assessments)
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list)
 
 
 @web.route('/testing', methods=['GET'])
@@ -566,9 +582,12 @@ def modal_test():
             new_test_sets.append(tset)
             tset.enrolled = enrolled
             test_type = Codebook.get_code_name(tset.test_type)
+            additional_info = Codebook.get_additional_info(tset.subject)
+            tset.sort_key = additional_info['subject_order'] if additional_info else 1
             tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
             tset.explanation_link = view_explanation(tset.id)
-        sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        sorted_testsets = sorted(new_test_sets, key=lambda x:x.sort_key)
         assessment.testsets = sorted_testsets
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)

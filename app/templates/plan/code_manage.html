@@ -25,8 +25,12 @@
                                                                         style="color: #ec6701"></i></td>
                     <td><input type="text" class="update_code" value=""> <i class="icon-check icons update-icon"
                                                                             style="color: #0b4d75"></i></td>
-                    <td><textarea rows="1" class="additional_info" value=""> </textarea><i class="icon-check icons additional-info-icon"
-                                                                            style="color: #0b4d75"></i></td>
+                    <td><textarea rows="1" class="additional_info" value="" placeholder='{"subject_order":3}'></textarea><i class="icon-check icons additional-info-icon"
+                                                                            style="color: #0b4d75"></i><br>
+                        <small>Enter the {{ form.subject_order.label }} below: (ex, 3) </small><br>
+                        {{ form.subject_order(class='subject_order') }}
+                        <i class="icon-check icons subject-order-icon" style="color: #0b4d75"></i> <br>
+                    </td>
                 </tr>
                 <tr>
                     <th>&nbsp; - {{ form.category.label }}</th>

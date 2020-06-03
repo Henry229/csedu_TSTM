@@ -70,6 +70,7 @@ class CodebookForm(FlaskForm):
     test_center = SelectField('Test Centre', id='select_test_center', coerce=int)
     grade = SelectField('Grade', id='select_grade', coerce=int)
     subject = SelectField('Subject', id='select_subject', coerce=int)
+    subject_order = StringField('Subject Order')
     category = SelectField('Category', id='select_category', coerce=int)
     subcategory = SelectField('Sub Category',
                               id='select_subcategory',

@@ -95,7 +95,16 @@ def update_codebook():
                     continue
                 additional_info[x] = y
         codebook.additional_info = additional_info
-
+    elif code_value_field == 'subject_order':
+        additional_info = {
+            'subject_order': int(request.form.get('code_value'))
+        }
+        if codebook.additional_info:
+            for x, y in codebook.additional_info.items():
+                if x == 'subject_order':
+                    continue
+                additional_info[x] = y
+        codebook.additional_info = additional_info
     db.session.commit()
 
     query = Codebook.query.filter_by(code_type=codebook.code_type)

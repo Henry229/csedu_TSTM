@@ -28,6 +28,22 @@ $('.max-score-icon').on('click', function () {
     }
 });
 
+$('.subject-order-icon').on('click', function () {
+    var $codeObj = $(this).closest('tr').find("select.code_type");
+    var $codeTextObj = $(this).closest('tr').find("input.subject_order");
+    var code_id = $codeObj.children("option:selected").val();
+    var code_value = $codeTextObj.val();
+
+    if (code_value == null) {
+        alert('Please enter subject order value first.');
+        return;
+    }
+    if (code_id == 0) {
+        alert('Please select code from the list first.');
+    } else {
+        updateCodebook($codeObj, $codeTextObj, code_id, code_value, 'subject_order');
+    }
+});
 
 $('.branch-state-icon').on('click', function () {
     var $codeObj = $(this).closest('tr').find("select.code_type");
@@ -237,4 +253,5 @@ function reset_val() {
         $(".additional_info").val('');
         $(".branch_state").val('');
         $(".max_score").val('');
+        $(".subject_order").val('');
 }
