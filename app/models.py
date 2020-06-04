@@ -1106,6 +1106,135 @@ class Student(db.Model):
         return '<Student {}>'.format(self.user_id)
 
 
+class AssessmentRetry(db.Model):
+    """assessment enrollment Model: information which test taker enroll which assessment tet."""
+    __tablename__ = 'assessment_retry'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # An assessment can have multiple versions but has only one GUID
+    assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('assessment_enroll.id'))
+    # homework or exam
+    assessment_type = db.Column(db.String(32))
+    student_user_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))  # user table - id
+    attempt_count = db.Column(db.Integer)
+    # Test runner session key
+    session_key = db.Column(db.String(120))
+    # Number of minutes the testset runs. 0 means no limit
+    elapsed_time = db.Column(db.Integer, default=0)
+    start_time = db.Column(db.DateTime)
+    finish_time = db.Column(db.DateTime)
+    start_ip = db.Column(db.String(32))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    @staticmethod
+    def from_enroll(enroll: AssessmentEnroll):
+        """
+        :param enroll : AssessmentEnroll
+        """
+        retry = AssessmentRetry(assessment_enroll_id=enroll.id)
+        retry.assessment_type = enroll.assessment_type
+        retry.student_user_id = enroll.student_user_id
+        retry.attempt_count = 1
+        return retry
+
+    def end_time(self, margin=11):
+        if self.start_time:
+            testset = Testset.query.filter_by(id=self.testset_id).first()
+            return self.start_time + timedelta(minutes=testset.test_duration + margin)
+
+    @property
+    def is_finished(self):
+        finished = self.finish_time is not None
+        if not finished:
+            if self.test_duration is None:
+                finished = True
+            else:
+                elapsed = datetime.utcnow() - self.start_time
+                if elapsed.total_seconds() > self.test_duration * 60 + 5:
+                    finished = True
+        return finished
+
+    @hybrid_property
+    def markings(self):
+        markings = Marking.query.filter_by(assessment_enroll_id=self.id).all()
+        return markings
+
+    def __json__(self):
+        return ['id', 'assessment_guid', 'testset_id', 'attempt_count', 'start_time_client', "markings"]
+
+    def __repr__(self):
+        return '<Assessment Enrol {}>'.format(self.id)
+
+
+class RetryMarking(db.Model):
+    """marking Model: information of student marking status during the test"""
+    __tablename__ = 'retry_marking'
+
+    id = db.Column(db.Integer, primary_key=True)
+    assessment_retry_id = db.Column(db.Integer, db.ForeignKey('assessment_retry.id'))
+    marking_id = db.Column(db.Integer, db.ForeignKey('marking.id'))
+    question_no = db.Column(db.Integer)
+    testset_id = db.Column(db.Integer)
+    testlet_id = db.Column(db.Integer)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+    weight = db.Column(db.Float)
+    correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
+    # Candidate Response Value
+    candidate_r_value = db.Column(JSONB)
+    # Response result
+    is_correct = db.Column(db.Boolean)
+    outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
+    candidate_mark = db.Column(db.Float, default=0)  # Student's score
+    duration = db.Column(db.Interval)  # time - time:duration, DB column type:Interval,Python Type: datetime.timedelta?
+    # flag = db.Column(db.Boolean)
+    is_read = db.Column(db.Boolean, default=False)
+    # Time read the related question
+    read_time = db.Column(db.DateTime)
+    is_flagged = db.Column(db.Boolean, default=False)
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+    @staticmethod
+    def from_marking(assessment_retry_id, marking: Marking):
+        retry = RetryMarking(assessment_retry_id=assessment_retry_id)
+        retry.marking_id = marking.id
+        retry.question_no = marking.question_no
+        retry.testset_id = marking.testset_id
+        retry.testlet_id = marking.testlet_id
+        retry.item_id = marking.item_id
+        retry.weight = marking.weight
+        return retry
+
+    @hybrid_property
+    def scaled_outcome_score(self):
+        return self.outcome_score * self.weight
+
+    def getScore(self):
+        score = self.candidate_mark * self.weight
+        return score
+
+    @staticmethod
+    def getTotalOutcomeScore(assessment_enroll_id, testset_id, testlet_id):
+        if assessment_enroll_id:
+            total_score = Marking.query.with_entities(func.sum(Marking.scaled_outcome_score).label('score')). \
+                filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
+                          testlet_id=testlet_id).first()
+        else:
+            # ToDo: Remove these lines when assessment_enroll_id fixed
+            total_score = Marking.query.with_entities(func.sum(Marking.scaled_outcome_score).label('score')). \
+                filter(Marking.testset_id == testset_id). \
+                filter(Marking.testlet_id == testlet_id).first()
+
+        return total_score.score
+
+    def __json__(self):
+        return ['question_no', 'testset_id', 'testlet_id', 'item_id', 'weight',
+                'is_correct', 'correct_r_value', 'candidate_r_value', 'scaled_outcome_score', 'candidate_mark']
+
+    def __repr__(self):
+        return '<RetryMarking {}>'.format(self.id)
+
+
 class Codebook(db.Model):
     '''Codebook: to be used in various cases mainly in templates '''
 

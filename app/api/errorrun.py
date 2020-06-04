@@ -10,7 +10,7 @@ from flask_login import current_user
 
 from app.api import api
 from app.decorators import permission_required
-from app.models import Permission, AssessmentEnroll, Marking, Item, Codebook, Student
+from app.models import Permission, AssessmentEnroll, Marking, Item, Codebook, Student, AssessmentRetry, RetryMarking
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
 from .errorrunsession import ErrorRunSession
@@ -98,18 +98,46 @@ def parse_processed_response(candidate_response):
 @permission_required(Permission.ITEM_EXEC)
 def start_error_run():
     assessment_enroll_id = request.json.get('assessment_enroll_id')
+    # 이미 시작된 세션이 있으면 error 를 return 한다.
+    assessment_retry = AssessmentRetry.query.filter_by(id=assessment_enroll_id).first()
+    if assessment_retry is not None:
+        return bad_request(error_code=TEST_SESSION_ERROR,
+                           message="A new session has been started from another browser.")
+
     enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
     user_id = current_user.id
-    error_run_session = new_error_run_session(user_id, assessment_enroll_id, enrolled.testset_id,
+
+    # create AssessmentRetry
+    assessment_retry = AssessmentRetry.from_enroll(enrolled)
+    if 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
+        assessment_retry.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
+    else:
+        assessment_retry.start_ip = request.headers.environ['REMOTE_ADDR']
+    assessment_retry.start_time = datetime.utcnow()
+    db.session.add(assessment_retry)
+    db.session.commit()
+    assessment_retry_id = assessment_retry.id
+
+    # 새로운 세션을 만든다.
+    error_run_session = new_error_run_session(user_id, assessment_retry_id, enrolled.testset_id,
                                               enrolled.test_duration, 1)
-    # Find markings.
+
+    # Find markings that are marked incorrect in the last try.
     markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id,
                                        last_is_correct=False) \
         .order_by(Marking.question_no).all()
+    # create RetryMarking
+    retry_markings = []
+    for m in markings:
+        retry_marking = RetryMarking.from_marking(assessment_retry_id, m)
+        db.session.add(retry_marking)
+        retry_markings.append(retry_marking)
+    db.session.commit()
+
     question_no = -1
     # build test_items
     test_items = []
-    for m in markings:
+    for m in retry_markings:
         info = {'question_no': m.question_no, 'item_id': m.item_id,
                 'marking_id': m.id, 'is_flagged': m.is_flagged,
                 'is_read': False,
@@ -127,10 +155,10 @@ def start_error_run():
         # next_item_id = next_item.get('item_id')
         next_question_no = next_item['question_no']
         next_marking_id = next_item.get('marking_id')
-        marking = Marking.query.filter_by(id=next_marking_id).first()
+        marking = RetryMarking.query.filter_by(id=next_marking_id).first()
         marking.is_read = True
-        # marking.read_time = datetime.utcnow()
-        # db.session.commit()
+        marking.read_time = datetime.utcnow()
+        db.session.commit()
         data['is_flagged'] = marking.is_flagged
         data['is_read'] = marking.is_read
 
@@ -175,7 +203,10 @@ def error_run_rendered(item_id, run_session=None):
     if rendered_item:
         rendered_template = rendered_template.replace('rendered_html', rendered_item)
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 ream time 을 기록해 준다.
-    enroll_id = ErrorRunSession.enrol_id_from_session_key(session_key)
+    retry_id = ErrorRunSession.retry_id_from_session_key(session_key)
+    marking = RetryMarking.query.filter_by(assessment_retry_id=retry_id, item_id=item_id).first()
+    marking.read_time = datetime.utcnow()
+    db.session.commit()
     response['html'] = rendered_template
     return success(response)
 
@@ -231,7 +262,8 @@ def error_run_response_process(item_id, run_session=None):
     if processed is None:
         return bad_request(message="Processing response error")
 
-    marking = Marking.query.filter_by(id=marking_id).first()
+    retry = RetryMarking.query.filter_by(id=marking_id).first()
+    marking = Marking.query.filter_by(id=retry.marking_id).first()
     if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get(
             'file'):
         candidate_response = response.get("RESPONSE").get("base")
@@ -249,11 +281,19 @@ def error_run_response_process(item_id, run_session=None):
         candidate_r_value = candidate_response
     else:
         candidate_r_value = candidate_response
+
+    retry.candidate_r_value = candidate_r_value
+    retry.candidate_mark = processed.get('SCORE')
+    retry.outcome_score = processed.get('maxScore')
+    retry.is_correct = marking.candidate_mark >= marking.outcome_score
+    retry.correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
     candidate_mark = processed.get('SCORE')
     outcome_score = processed.get('maxScore')
     is_correct = candidate_mark >= outcome_score
     marking.last_r_value = candidate_r_value
     marking.last_is_correct = is_correct
+
     db.session.commit()
 
     run_session.set_saved_answer(marking_id, marking.candidate_r_value)
@@ -268,10 +308,10 @@ def error_run_response_process(item_id, run_session=None):
         next_item_id = next_item.get('item_id')
         next_question_no = next_item['question_no']
         next_marking_id = next_item.get('marking_id')
-        marking = Marking.query.filter_by(id=next_marking_id).first()
-        # marking.is_read = True
-        # marking.read_time = datetime.utcnow()
-        # db.session.commit()
+        marking = RetryMarking.query.filter_by(id=next_marking_id).first()
+        marking.is_read = True
+        marking.read_time = datetime.utcnow()
+        db.session.commit()
         data['is_flagged'] = marking.is_flagged
         data['is_read'] = True
         data['next_saved_answer'] = next_item.get('saved_answer')

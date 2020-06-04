@@ -135,7 +135,7 @@ class ErrorRunSession:
         return base64.urlsafe_b64encode(key_string.encode()).decode()
 
     @staticmethod
-    def enrol_id_from_session_key(session_key):
+    def retry_id_from_session_key(session_key):
         import base64
         key_string = base64.urlsafe_b64decode(session_key.encode()).decode()
         enroll_id = key_string.split(':')[1]
