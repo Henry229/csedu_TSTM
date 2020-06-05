@@ -10,139 +10,146 @@
         </div>
     {% endif %}
     {% for key, assessments in assessments_list.items() %}
-    <div class="accordion" id="accordion">
-        <div class="card card-accent-info">
-            <div class="card-header" id="headingOne">
-                <i class="icons cui-magnifying-glass"></i> {{ key }}
-                {% if assessments|length ==0 %}
-                    There is no available assessment test.
-                {% endif %}
-                <div class="card-header-actions">
-                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
-                       aria-expanded="false" aria-controls="collapseOne">
-                        <i class="icon-arrow-up"></i>
-                    </a>
+        <div class="accordion" id="accordion">
+            <div class="card card-accent-info">
+                <div class="card-header" id="headingOne">
+                    <i class="icons cui-magnifying-glass"></i> {{ key }}
+                    {% if assessments|length ==0 %}
+                        There is no available assessment test.
+                    {% endif %}
+                    <div class="card-header-actions">
+                        <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                           aria-expanded="false" aria-controls="collapseOne">
+                            <i class="icon-arrow-up"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                {% for assessment in assessments %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ assessment.name }}</h5>
-                        <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
-                        <div class="row">
-                            <div class="col">
-                                <input type="hidden" name="assessment_guid"
-                                       value="{{ assessment.GUID }}">
-                                <table id="testsets" class="display table table-hover" style="width:100%">
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>Test Set</th>
-                                        <th>Status</th>
-                                        {% if assessment.testsets and assessment.testsets[0].enable_report %}
-                                            <th>Report</th>
-                                            <th align="center"><span class="btn btn-default"><i
-                                                    class="fa fa-microphone"></i></span></th>
-                                        {% endif %}
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for ts in assessment.testsets %}
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                    {% for assessment in assessments %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ assessment.name }}</h5>
+                            <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
+                            <div class="row">
+                                <div class="col">
+                                    <input type="hidden" name="assessment_guid"
+                                           value="{{ assessment.GUID }}">
+                                    <table id="testsets" class="display table table-hover" style="width:100%">
+                                        <thead>
                                         <tr>
-                                            <td>
-                                                {{ loop.index }}
-                                            </td>
-                                            <td>
-                                                {% if ts.enrolled and not ts.resumable %}
-                                                    <input type="button" class="btn btn-light btn-block"
-                                                           data-testset-id="{{ ts.id }}" value="{{ ts.name }}" disabled>
-                                                {% else %}
-                                                    <input type="button" class="btn btn-success btn-block"
-                                                           data-testset-id="{{ ts.id }}" value="{{ ts.name }}" disabled>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if ts.enrolled %}
-                                                  {% if ts.resumable %}
-                                                    <input type="button" class="btn btn-primary btn-block resume"
-                                                           data-student-user-id="{{ student_user_id }}"
-                                                           data-assessment-guid="{{ assessment.GUID }}"
-                                                           data-testset-id="{{ ts.id }}" data-session-key="{{ ts.session_key }}"
-                                                            value="Resume">
-                                                  {% else %}
-                                                    <input type="button" class="btn btn-secondary btn-block"
-                                                           value="Finished" disabled>
-                                                  {% endif %}
-                                                {% else %}
-                                                    {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
-                                                        <button class="btn btn-warning btn-block btn-instruction"
-                                                                onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
-                                                            Exam Instructions
-                                                        </button>
-                                                    {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
-                                                        {% if Codebook.get_code_name(ts.subject)=='Writing' %}
-                                                            <button class="btn btn-warning btn-block btn-instruction"
-                                                                    onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
-                                                                Exam Instructions
-                                                            </button>
-                                                        {% else %}
-                                                            <button class="btn btn-warning btn-block btn-instruction"
-                                                                    onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
-                                                                Exam Instructions
-                                                            </button>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                    <input type="button" class="btn btn-primary btn-block start"
-                                                           data-student-user-id="{{ student_user_id }}"
-                                                           data-assessment-guid="{{ assessment.GUID }}"
-                                                           data-testset-id="{{ ts.id }}" value="Start">
-                                                {% endif %}
-                                            </td>
-                                            {% if ts.enable_report %}
-                                                <td>
-                                                    {% if ts.enrolled and not ts.resumable %}
-                                                        {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
-                                                            <input type="button" class="btn btn-secondary btn-block"
-                                                                   value="Not Available" disabled>
-                                                        {% else %}
-                                                            <input class="btn btn-primary report"
-                                                                   data-student-user-id="{{ student_user_id }}"
-                                                                   data-assessment-id="{{ assessment.id }}"
-                                                                   data-assessment-guid="{{ assessment.GUID }}"
-                                                                   data-testset-id="{{ ts.id }}"
-                                                                   value="Test# {{ assessment.id }}- {{ ts.id }} ">
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <input type="button" class="btn btn-secondary btn-block"
-                                                               value="Not Available" disabled>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if ts.enrolled and not ts.resumable %}
-                                                        <a id="view_explanation_window"
-                                                           class="btn btn-outline-danger" type="button"
-                                                           onclick="window.open('{{ ts.explanation_link }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                                                            <i class="fa fa-play" style="color: #FF7F6E"></i>
-                                                        </a>
-                                                    {% else %}
-                                                        <button class="btn btn-outline-secondary btn-block" disabled><i
-                                                                class="fa fa-stop"></i></button>
-                                                    {% endif %}
-                                                </td>
+                                            <th></th>
+                                            <th>Test Set</th>
+                                            <th>Status</th>
+                                            {% if assessment.testsets and assessment.testsets[0].enable_report %}
+                                                <th>Report</th>
+                                                <th align="center"><span class="btn btn-default"><i
+                                                        class="fa fa-microphone"></i></span></th>
                                             {% endif %}
                                         </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {% for ts in assessment.testsets %}
+                                            <tr>
+                                                <td>
+                                                    {{ loop.index }}
+                                                </td>
+                                                <td>
+                                                    {% if ts.enrolled and not ts.resumable %}
+                                                        <input type="button" class="btn btn-light btn-block"
+                                                               data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                               disabled>
+                                                    {% else %}
+                                                        <input type="button" class="btn btn-success btn-block"
+                                                               data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                               disabled>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if ts.enrolled %}
+                                                        {% if ts.resumable %}
+                                                            <input type="button"
+                                                                   class="btn btn-primary btn-block resume"
+                                                                   data-student-user-id="{{ student_user_id }}"
+                                                                   data-assessment-guid="{{ assessment.GUID }}"
+                                                                   data-testset-id="{{ ts.id }}"
+                                                                   data-session-key="{{ ts.session_key }}"
+                                                                   value="Resume">
+                                                        {% else %}
+                                                            <input type="button" class="btn btn-secondary btn-block"
+                                                                   value="Finished" disabled>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                            <button class="btn btn-warning btn-block btn-instruction"
+                                                                    onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
+                                                                Exam Instructions
+                                                            </button>
+                                                        {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
+                                                            {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                                <button class="btn btn-warning btn-block btn-instruction"
+                                                                        onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                    Exam Instructions
+                                                                </button>
+                                                            {% else %}
+                                                                <button class="btn btn-warning btn-block btn-instruction"
+                                                                        onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
+                                                                    Exam Instructions
+                                                                </button>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        <input type="button" class="btn btn-primary btn-block start"
+                                                               data-student-user-id="{{ student_user_id }}"
+                                                               data-assessment-guid="{{ assessment.GUID }}"
+                                                               data-testset-id="{{ ts.id }}" value="Start">
+                                                    {% endif %}
+                                                </td>
+                                                {% if ts.enable_report %}
+                                                    <td>
+                                                        {% if ts.enrolled and not ts.resumable %}
+                                                            {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
+                                                                <input type="button" class="btn btn-secondary btn-block"
+                                                                       value="Not Available" disabled>
+                                                            {% else %}
+                                                                <input class="btn btn-primary report"
+                                                                       data-student-user-id="{{ student_user_id }}"
+                                                                       data-assessment-id="{{ assessment.id }}"
+                                                                       data-assessment-guid="{{ assessment.GUID }}"
+                                                                       data-testset-id="{{ ts.id }}"
+                                                                       value="Test# {{ assessment.id }}- {{ ts.id }} ">
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <input type="button" class="btn btn-secondary btn-block"
+                                                                   value="Not Available" disabled>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if ts.enrolled and not ts.resumable %}
+                                                            <button class="btn btn-outline-danger" type="button"
+                                                                   id="view_explanation_window"
+                                                                   name="view_explanation_window"
+                                                                   data-toggle="modal" data-target="#videoModal"
+                                                                   data-link="{{ ts.explanation_link }}">
+                                                            <i class="fa fa-play" style="color: #FF7F6E"></i>
+                                                            </button>
+                                                        {% else %}
+                                                            <button class="btn btn-outline-secondary btn-block"
+                                                                    disabled><i
+                                                                    class="fa fa-stop"></i></button>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col"></div>
+                                <div class="col"></div>
                             </div>
-                            <div class="col"></div>
-                            <div class="col"></div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
     {% endfor %}
     {% include "_modal.html" %}
 {% endblock app_content %}
@@ -167,7 +174,7 @@
                     data: JSON.stringify({session_key: session_key}),
                     complete: function () {
                     },
-                    error: function (jqXHR, textStatus, errorThrown ) {
+                    error: function (jqXHR, textStatus, errorThrown) {
                         location.reload();
                     },
                     success: function (response) {
@@ -178,6 +185,11 @@
                         }
                     }
                 });
+            });
+
+            $("#videoModal").on("show.bs.modal", function () {
+                var explanation_link = $('#view_explanation_window').data('link');
+                $('#video').attr('src', explanation_link);
             });
 
             $('#testsets input.report').on('click', function () {
