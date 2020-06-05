@@ -399,7 +399,7 @@ def assessment_list():
                 # 최신 test set version 을 찾는다.
                 # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
                 tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
-            if not enrolled or en.testset.resumable:
+            if not enrolled or tset.resumable:
                 flag_finish_assessment = False
             new_test_sets.append(tset)
             tset.enrolled = enrolled
