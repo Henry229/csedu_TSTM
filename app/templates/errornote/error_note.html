@@ -51,33 +51,24 @@
         <tr>
           <th> Name</th>
           <td> {{ Student.getCSStudentName(student_user_id) }} </td>
-          <th> Score</th>
-          <td> {{ score }} </td>
-        </tr>
-        <tr>
-          <th> Student ID</th>
-          <td> {{ Student.getCSStudentId(student_user_id) }}</td>
-          <th> Test Date</th>
-          <td> {{ marking_rep.created_time }}.</td>
-        </tr>
-        <tr>
           <th> Grade</th>
           <td> {{ grade }}</td>
-          <th> </th>
-          <td> </td>
         </tr>
-      </table>
-      <br><br>
-      {% if markings %}
-        <div class="row">
-        <div class="col retry-wrapper">
-          {% if retry_session_key %}
+        <tr>
+          <th> Score</th>
+          <td> {{ score }}
+            {% if retry_session_key %}
             <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-sm btn-outline-info">Retry errors(Resume)</button>
           {% else %}
             <button id="retry-errors-button" class="btn btn-sm btn-outline-info">Retry errors</button>
           {% endif %}
-        </div>
-        </div>
+          </td>
+          <th> Test Date</th>
+          <td> {{ marking_rep.created_time }}.</td>
+        </tr>
+      </table>
+      <br><br>
+      {% if markings %}
         <div class="row">
           <div class="col">
             <table class="table" style="width:100%" id="t_mark_info">
