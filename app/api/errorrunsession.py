@@ -17,7 +17,7 @@ class ErrorRunSession:
     STATUS_TEST_SUBMITTED = 'test_submitted'
 
     assessment_default = {
-        'assessment_enroll_id': 0,
+        'assessment_retry_id': 0,
         'attempt_count': 0,
         'testset_id': 0,
         'status': STATUS_READY,
@@ -47,7 +47,7 @@ class ErrorRunSession:
             self.assessment = copy.deepcopy(self.assessment_default)
             self.assessment.update({
                 'user_id': user_id,
-                'assessment_enroll_id': enroll_id,
+                'assessment_retry_id': enroll_id,
                 'attempt_count': attempt_count,
                 'testset_id': testset_id,
                 'test_duration': duration,
@@ -66,7 +66,7 @@ class ErrorRunSession:
         self.assessment = copy.deepcopy(self.assessment_default)
         self.assessment.update({
             'user_id': user_id,
-            'assessment_enroll_id': enroll_id,
+            'assessment_retry_id': enroll_id,
             'attempt_count': attempt_count,
             'testset_id': testset_id,
             'test_duration': duration,
@@ -106,7 +106,7 @@ class ErrorRunSession:
 
     def change_session_key(self):
         old_key = self.key
-        self.key = self.generate_key_string(self.assessment['user_id'], self.assessment['assessment_enroll_id'],
+        self.key = self.generate_key_string(self.assessment['user_id'], self.assessment['assessment_retry_id'],
                                             self.assessment['testset_id'], self.assessment['attempt_count'])
         self.save_assessment()
         # delete old cache

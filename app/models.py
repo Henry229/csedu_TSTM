@@ -1145,13 +1145,13 @@ class AssessmentRetry(db.Model):
     @property
     def is_finished(self):
         finished = self.finish_time is not None
-        if not finished:
-            if self.test_duration is None:
-                finished = True
-            else:
-                elapsed = datetime.utcnow() - self.start_time
-                if elapsed.total_seconds() > self.test_duration * 60 + 5:
-                    finished = True
+        # if not finished:
+        #     if self.test_duration is None:
+        #         finished = True
+        #     else:
+        #         elapsed = datetime.utcnow() - self.start_time
+        #         if elapsed.total_seconds() > self.test_duration * 60 + 5:
+        #             finished = True
         return finished
 
     @hybrid_property
@@ -1203,6 +1203,7 @@ class RetryMarking(db.Model):
         retry.testlet_id = marking.testlet_id
         retry.item_id = marking.item_id
         retry.weight = marking.weight
+        retry.is_read = False
         return retry
 
     @hybrid_property

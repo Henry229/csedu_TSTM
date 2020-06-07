@@ -1,11 +1,12 @@
 import os
 from flask import render_template, flash, request, current_app, redirect, url_for
 from flask_login import login_required, current_user
+from sqlalchemy import desc
 
 from . import errornote
 from ..decorators import permission_required
 from ..api.reports import query_my_report_header, query_my_report_body
-from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews
+from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews, AssessmentRetry
 from ..web.views import view_explanation
 
 
@@ -49,12 +50,11 @@ def error_note(assessment_enroll_id):
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
 
-    # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
-    #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
-    # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
-    #       so it need to be discussed to branch out in "test analysed report"
-    ts_by_category = None
-    # ts_by_category = query_my_report_footer(assessment_id, student_user_id)
+    # Error note retry status
+    retry_session_key = None
+    retry = AssessmentRetry.query.filter_by(finish_time=None).order_by(desc(AssessmentRetry.start_time)).first()
+    if retry is not None:
+        retry_session_key = retry.session_key
 
     if test_subject_string == 'Writing':
         marking_writing_id = 0
@@ -66,7 +66,7 @@ def error_note(assessment_enroll_id):
     rendered_template = render_template(template_file, assessment_name=assessment_name,
                                         assessment_enroll_id=assessment_enroll_id,
                                         subject=test_subject_string, rank=rank,
-                                        score=score, markings=markings, ts_by_category=ts_by_category,
+                                        score=score, markings=markings, retry_session_key=retry_session_key,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
                                         grade=grade,
                                         explanation_link=explanation_link)

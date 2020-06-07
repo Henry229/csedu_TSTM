@@ -71,7 +71,11 @@
       {% if markings %}
         <div class="row">
         <div class="col retry-wrapper">
-          <button id="retry-errors-button" class="btn btn-sm btn-outline-info">Retry errors</button>
+          {% if retry_session_key %}
+            <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-sm btn-outline-info">Retry errors(Resume)</button>
+          {% else %}
+            <button id="retry-errors-button" class="btn btn-sm btn-outline-info">Retry errors</button>
+          {% endif %}
         </div>
         </div>
         <div class="row">
@@ -168,48 +172,6 @@
         </div>
       {% endif %}
     </div>
-    {% if ts_by_category %}
-      <table id="t_assessment_info">
-        <tr>
-          <th align="center"> Category</th>
-          <th align="center"> Weaker &nbsp;&nbsp;<i class="icons cui-arrow-left"></i> &nbsp;&nbsp;Average
-            &nbsp;&nbsp;<i class="icons cui-arrow-right"></i>&nbsp;&nbsp; Stronger
-          </th>
-        </tr>
-        {% for ts in ts_by_category %}
-          <tr>
-            <td><strong>{{ ts.category }}</strong></td>
-            <td>
-              <table id="t_graph">
-                <tr>
-                  <td width="15%"><small>My Score</small></td>
-                  <td width="75%">
-                    <div class="progress progress-xs">
-                      <div class="progress-bar bg-warning" role="progressbar"
-                           style="width: {{ ts.percentile_score }}%"
-                           aria-valuenow="{{ ts.percentile_score }}" aria-valuemin="0"
-                           aria-valuemax="100"></div>
-                    </div>
-                  </td>
-                  <td width="10%"><small> {{ ts.percentile_score }} </small></td>
-                </tr>
-                <tr>
-                  <td width="15%"><small>Average</small></td>
-                  <td width="75%">
-                    <div class="progress progress-xs">
-                      <div class="progress-bar bg-danger" role="progressbar"
-                           style="width: {{ ts.avg_score }}%" aria-valuenow="{{ ts.avg_score }}"
-                           aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                  </td>
-                  <td width="10%"><small> {{ ts.avg_score }} </small></td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
-    {% endif %}
   </div>
   <br>
   <br>
@@ -241,7 +203,7 @@
   <div class="item-card">
       <div id="items_selected" class="display table table-hover" style="width:100%">
         <div class="item-header">
-          <div class="header-timer">
+          <div class="header-timer" style="visibility: hidden">
             <span class="timer-display">
               <span class="hours">
                 <span class="number">00</span>
@@ -394,6 +356,29 @@
     </div>
 </div>
 </div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+             aria-hidden="true" data-backdrop="static">
+  <input type="hidden" class="error-code" value="">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dataModalLabel">Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                style="display: none">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Please click the Okay button to return to test set.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary error-confirm">Okay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Javascripts-->
 <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
 <script src="/static/ui/vendors/js.cookie/js.cookie.js"></script>
@@ -417,24 +402,31 @@
 
 <script type="text/javascript">
   $(document).ready(function () {
-    $('#retry-errors-button').magnificPopup({
-      items: {
-        src: '#retry-errors-runner .item-card'
-      },
-      type: 'inline',
-      closeBtnInside: true,
-      callbacks: {
-        open: function() {
-          var options = {
-            assessment_enroll_id: $('#assessment_enroll_id').val()
-          };
-          ErrorNoteRunner.init($('.item-container'), options);
-          ErrorNoteRunner.startTest();
+    $('#retry-errors-button').on('click', function () {
+      $.magnificPopup.open({
+        items: {
+          src: '#retry-errors-runner .item-card'
         },
-        close: function () {
-          $('#video-popup').empty();
+        type: 'inline',
+        closeBtnInside: true,
+        closeOnBgClick: false,
+        callbacks: {
+          open: function() {
+            var options = {
+              assessment_enroll_id: $('#assessment_enroll_id').val()
+            };
+            if ($('#retry-errors-button').data('session-key')) {
+              options['session'] = $('#retry-errors-button').data('session-key');
+            }
+            ErrorNoteRunner.init($('.item-container'), options);
+            ErrorNoteRunner.startTest();
+          },
+          close: function () {
+            $('#video-popup').empty();
+            window.location.reload();
+          }
         }
-      }
+      });
     });
 
   });

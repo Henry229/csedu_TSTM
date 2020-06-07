@@ -102,9 +102,7 @@ var ErrorNoteRunner = (function () {
         });
         $('#errorModal .error-confirm').on('click', function () {
             if ($('#errorModal .error-code').val() === 'TEST_SESSION_ERROR') {
-                // var assessment_guid = $('#assessment_guid').val();
-                // window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
-                $.magnificPopup.close();
+                location.reload();
             } else {
                 $('#errorModal').modal('hide');
             }
@@ -154,10 +152,10 @@ var ErrorNoteRunner = (function () {
         var time_lapsed = current_time - start_time;
         _start_time = Math.floor(Date.now() / 1000) - time_lapsed;
         _test_duration_minutes = test_duration_minutes;
-        _setDurationTimer();
-        if (_duration_timer)
-            clearInterval(_duration_timer);
-        _duration_timer = setInterval(_setDurationTimer, 1000);
+        // _setDurationTimer();
+        // if (_duration_timer)
+        //     clearInterval(_duration_timer);
+        // _duration_timer = setInterval(_setDurationTimer, 1000);
     };
 
     var _setItemInfo = function (question_no, data) {
@@ -289,6 +287,9 @@ var ErrorNoteRunner = (function () {
         var data = {
             assessment_enroll_id: _assessment_enroll_id
         };
+        if (_session) {
+            data['session_key'] = _session;
+        }
         $.ajax({
             url: '/api/errorrun/start',
             method: 'POST',
@@ -428,18 +429,12 @@ var ErrorNoteRunner = (function () {
             data: JSON.stringify(data),
             complete: function () {
                 $('#finishModal').modal('hide');
-                $.magnificPopup.close();
             },
             error: function (jqXHR, textStatus, errorThrown ) {
                 $('#finishModal').modal('hide');
-                var assessment_guid = $('#assessment_guid').val();
-                // window.location.replace('/tests/assessments?assessment_guid=' + assessment_guid);
-                $.magnificPopup.close();
             },
             success: function (response) {
                 var data = response.data;
-                var assessment_guid = $('#assessment_guid').val();
-                // window.location.replace(data.redirect_url + '?assessment_guid=' + assessment_guid);
             }
         });
     };

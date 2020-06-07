@@ -7,6 +7,7 @@ from functools import wraps
 
 from flask import jsonify, request, current_app, render_template
 from flask_login import current_user
+from sqlalchemy import desc
 
 from app.api import api
 from app.decorators import permission_required
@@ -43,7 +44,36 @@ def validate_session(func):
 def get_run_session(session_key):
     run_session = ErrorRunSession(key=session_key)
     if run_session.assessment is None:
-        run_session.set_error(TEST_SESSION_ERROR, "Session is finished!")
+        retry_id = ErrorRunSession.retry_id_from_session_key(session_key)
+        # 동일한 assessment id, testset id 조합으로 enroll 은 유일해야한다.
+        # 혹시 몰라서 start_time 을 기준 최신을 확인.
+        retry = AssessmentRetry.query.filter(AssessmentRetry.id == retry_id) \
+            .order_by(desc(AssessmentRetry.start_time)).first()
+        # session 이 없는 이유를 알아본다.
+        if retry.is_finished:
+            run_session.set_error(TEST_SESSION_ERROR, "Test session is finished!")
+        elif retry.session_key != session_key:
+            run_session.set_error(
+                TEST_SESSION_ERROR,
+                "This session is invalid! A new session has been started from another browser."
+            )
+        else:
+            # 이 경우라면 DB 로부터 session 을 복원한다.
+            run_session.reset(current_user.id, retry_id, retry.testset_id,
+                              retry.test_duration, retry.attempt_count, retry.start_time)
+            # retry has no stage data:  run_session.set_value('stage_data', enroll.stage_data)
+            markings = RetryMarking.query.filter_by(assessment_retry_id=retry_id, testset_id=retry.testset_id) \
+                .order_by(RetryMarking.question_no).all()
+            # build test_items
+            test_items = []
+            for m in markings:
+                info = {'question_no': m.question_no, 'item_id': m.item_id,
+                        'marking_id': m.id, 'is_flagged': m.is_flagged,
+                        'is_read': m.is_read,
+                        'saved_answer': m.candidate_r_value if m.candidate_r_value is not None else ''
+                        }
+                test_items.append(info)
+            run_session.set_value('test_items', test_items)
     return run_session
 
 
@@ -98,58 +128,80 @@ def parse_processed_response(candidate_response):
 @permission_required(Permission.ITEM_EXEC)
 def start_error_run():
     assessment_enroll_id = request.json.get('assessment_enroll_id')
-    # 이미 시작된 세션이 있으면 error 를 return 한다.
-    assessment_retry = AssessmentRetry.query.filter_by(id=assessment_enroll_id).first()
-    if assessment_retry is not None:
-        return bad_request(error_code=TEST_SESSION_ERROR,
-                           message="A new session has been started from another browser.")
+    session_key = request.json.get('session_key')
 
     enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
     user_id = current_user.id
 
-    # create AssessmentRetry
-    assessment_retry = AssessmentRetry.from_enroll(enrolled)
-    if 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
-        assessment_retry.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
+    if session_key is None:
+        # 이미 시작된 세션이 있으면 error 를 return 한다.
+        assessment_retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id,
+                                                           finish_time=None).first()
+        if assessment_retry is not None:
+            return bad_request(error_code=TEST_SESSION_ERROR,
+                               message="A new session has been started from another browser.")
+        # create AssessmentRetry
+        assessment_retry = AssessmentRetry.from_enroll(enrolled)
+        if 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
+            assessment_retry.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
+        else:
+            assessment_retry.start_ip = request.headers.environ['REMOTE_ADDR']
+        assessment_retry.start_time = datetime.utcnow()
+        db.session.add(assessment_retry)
+        db.session.commit()
+        assessment_retry_id = assessment_retry.id
+        # 새로운 세션을 만든다.
+        error_run_session = new_error_run_session(user_id, assessment_retry_id, enrolled.testset_id,
+                                                  enrolled.test_duration, 1)
+        # Find markings that are marked incorrect in the last try.
+        markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id,
+                                           last_is_correct=False) \
+            .order_by(Marking.question_no).all()
+        # create RetryMarking
+        retry_markings = []
+        for m in markings:
+            retry_marking = RetryMarking.from_marking(assessment_retry_id, m)
+            db.session.add(retry_marking)
+            retry_markings.append(retry_marking)
+        db.session.commit()
+        question_no = -1
+        # build test_items
+        test_items = []
+        for m in retry_markings:
+            info = {'question_no': m.question_no, 'item_id': m.item_id,
+                    'marking_id': m.id, 'is_flagged': m.is_flagged,
+                    'is_read': False,
+                    'saved_answer': ''
+                    }
+            if question_no == -1:
+                question_no = m.question_no
+                info['is_read'] = True
+            test_items.append(info)
+        error_run_session.set_value('test_items', test_items)
+        next_item = get_next_item(error_run_session, question_no - 1)
     else:
-        assessment_retry.start_ip = request.headers.environ['REMOTE_ADDR']
-    assessment_retry.start_time = datetime.utcnow()
-    db.session.add(assessment_retry)
+        # session 을 찾는다.
+        error_run_session = get_run_session(session_key)
+        if error_run_session.error_code is not None:
+            return bad_request(error_code=error_run_session.error_code,
+                               message=error_run_session.error_message)
+        new_session_key = error_run_session.change_session_key()
+        assessment_retry_id = error_run_session.get_value('assessment_retry_id')
+        assessment_retry = AssessmentRetry.query.filter_by(id=assessment_retry_id).first()
+        assessment_retry.session_key = new_session_key
+        db.session.commit()
+        test_items = error_run_session.get_value('test_items')
+        retry_marking = RetryMarking.query.filter_by(assessment_retry_id=assessment_retry_id, is_read=True)\
+            .order_by(desc(RetryMarking.read_time)).first()
+        question_no = 1
+        if retry_marking is not None:
+            question_no = retry_marking.question_no
+        next_item = get_next_item(error_run_session, question_no - 1)
+
+    assessment_retry.session_key = error_run_session.key
     db.session.commit()
-    assessment_retry_id = assessment_retry.id
 
-    # 새로운 세션을 만든다.
-    error_run_session = new_error_run_session(user_id, assessment_retry_id, enrolled.testset_id,
-                                              enrolled.test_duration, 1)
-
-    # Find markings that are marked incorrect in the last try.
-    markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id,
-                                       last_is_correct=False) \
-        .order_by(Marking.question_no).all()
-    # create RetryMarking
-    retry_markings = []
-    for m in markings:
-        retry_marking = RetryMarking.from_marking(assessment_retry_id, m)
-        db.session.add(retry_marking)
-        retry_markings.append(retry_marking)
-    db.session.commit()
-
-    question_no = -1
-    # build test_items
-    test_items = []
-    for m in retry_markings:
-        info = {'question_no': m.question_no, 'item_id': m.item_id,
-                'marking_id': m.id, 'is_flagged': m.is_flagged,
-                'is_read': False,
-                'saved_answer': ''
-                }
-        if question_no == -1:
-            question_no = m.question_no
-            info['is_read'] = True
-        test_items.append(info)
-    error_run_session.set_value('test_items', test_items)
     next_question_no = 0
-    next_item = get_next_item(error_run_session, question_no - 1)
     data = {'is_read': False, 'is_flagged': False}
     if next_item is not None:
         # next_item_id = next_item.get('item_id')
@@ -263,7 +315,7 @@ def error_run_response_process(item_id, run_session=None):
         return bad_request(message="Processing response error")
 
     retry = RetryMarking.query.filter_by(id=marking_id).first()
-    marking = Marking.query.filter_by(id=retry.marking_id).first()
+    # marking = Marking.query.filter_by(id=retry.marking_id).first()
     if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get(
             'file'):
         candidate_response = response.get("RESPONSE").get("base")
@@ -285,18 +337,18 @@ def error_run_response_process(item_id, run_session=None):
     retry.candidate_r_value = candidate_r_value
     retry.candidate_mark = processed.get('SCORE')
     retry.outcome_score = processed.get('maxScore')
-    retry.is_correct = marking.candidate_mark >= marking.outcome_score
+    retry.is_correct = retry.candidate_mark >= retry.outcome_score
     retry.correct_r_value = parse_correct_response(processed.get('correctResponses'))
 
-    candidate_mark = processed.get('SCORE')
-    outcome_score = processed.get('maxScore')
-    is_correct = candidate_mark >= outcome_score
-    marking.last_r_value = candidate_r_value
-    marking.last_is_correct = is_correct
+    # candidate_mark = processed.get('SCORE')
+    # outcome_score = processed.get('maxScore')
+    # is_correct = candidate_mark >= outcome_score
+    # marking.last_r_value = candidate_r_value
+    # marking.last_is_correct = is_correct
 
     db.session.commit()
 
-    run_session.set_saved_answer(marking_id, marking.candidate_r_value)
+    run_session.set_saved_answer(marking_id, retry.candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = get_next_item(run_session, question_no)
@@ -344,23 +396,32 @@ def error_run_response_process_file(item_id, run_session=None):
 @permission_required(Permission.ITEM_EXEC)
 @validate_session
 def error_run_finish_test(run_session):
-    session_key = request.json.get('session')
-    finish_time = request.json.get('finish_time')
-    # assessment_session = AssessmentSession(key=session_key)
-    # check session status
-    # if assessment_session.get_status() != AssessmentSession.STATUS_TEST_FINISHED:
-    #     return bad_request(message='Session status is wrong.')
+    # finish_time = request.json.get('finish_time')
+    retry_result = {}
 
     if run_session.assessment:
         run_session.set_status(ErrorRunSession.STATUS_TEST_SUBMITTED)
-        assessment_enroll_id = run_session.get_value('assessment_enroll_id')
-        enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
-        if enrolled:
-            enrolled.finish_time = datetime.utcnow()
-            enrolled.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
-            db.session.add(enrolled)
-            # db.session.commit()
+        assessment_retry_id = run_session.get_value('assessment_retry_id')
+        retry = AssessmentRetry.query.filter_by(id=assessment_retry_id).first()
+        if retry:
+            retry.finish_time = datetime.utcnow()
+            # retry.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
+            db.session.add(retry)
+            db.session.commit()
+        r_markings = RetryMarking.query.filter_by(assessment_retry_id=assessment_retry_id).all()
+        retry_markings = {}
+        questions = []
+        for rm in r_markings:
+            retry_markings[rm.question_no] = rm
+            retry_result[rm.question_no] = rm.is_correct
+            questions.append(rm.question_no)
+        markings = Marking.query.filter(Marking.assessment_enroll_id == retry.assessment_enroll_id,
+                                        Marking.question_no.in_(questions)).all()
+        for m in markings:
+            rm = retry_markings[m.question_no]
+            m.last_is_correct = rm.is_correct
+            m.last_r_value = rm.candidate_r_value
+        db.session.commit()
 
-    data = {}
-    return success(data)
+    return success(retry_result)
 
