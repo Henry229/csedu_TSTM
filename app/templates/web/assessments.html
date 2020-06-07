@@ -109,12 +109,18 @@
                                                                 <input type="button" class="btn btn-secondary btn-block"
                                                                        value="Not Available" disabled>
                                                             {% else %}
+                                                              {% if ts.report_type == 'report' %}
                                                                 <input class="btn btn-primary report"
                                                                        data-student-user-id="{{ student_user_id }}"
                                                                        data-assessment-id="{{ assessment.id }}"
                                                                        data-assessment-guid="{{ assessment.GUID }}"
                                                                        data-testset-id="{{ ts.id }}"
                                                                        value="Test# {{ assessment.id }}- {{ ts.id }} ">
+                                                              {% else %}
+                                                                <input class="btn btn-primary error-note"
+                                                                       data-assessment-enrol-id="{{ ts.enroll_id }}"
+                                                                       value="Error Note">
+                                                              {% endif %}
                                                             {% endif %}
                                                         {% else %}
                                                             <input type="button" class="btn btn-secondary btn-block"
@@ -202,7 +208,7 @@
             });
 
             $('#testsets input.error-note').on('click', function () {
-                var assessment_enroll_id = $(this).data('assessment-enroll-id');
+                var assessment_enroll_id = $(this).data('assessment-enrol-id');
                 window.location = '/errnote/' + assessment_enroll_id;
             });
         });
