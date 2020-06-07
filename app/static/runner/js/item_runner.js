@@ -14,6 +14,7 @@ var ItemRunner = (function () {
     var _interaction_type;
     var _assessment_enroll_id = 0;
     var _testset_id = 0;
+    var _review_mode = false;
     var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb, _sessionErrorCb,
     _disableSubmitResponse;
 
@@ -22,6 +23,7 @@ var ItemRunner = (function () {
         _mode = options.mode || _mode;
         _assessment_enroll_id = options.assessment_enroll_id || _assessment_enroll_id;
         _testset_id = options.testset_id || _testset_id;
+        _review_mode = options.review_mode || false;
         _renderedCb = options.renderedCb || emptyCb;
         _responseProcessingCb = options.responseProcessingCb || emptyCb;
         _responseProcessedCb = options.responseProcessedCb || emptyCb;
@@ -52,8 +54,13 @@ var ItemRunner = (function () {
         _marking_id = marking_id;
     };
 
+    var setReviewMode = function (review_mode) {
+        _review_mode = review_mode;
+    }
+
     var postProcessRendered = function (data) {
-        _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data});
+        _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data,
+            review_mode: _review_mode});
         if (_mode !== 'preview') {
             _handler.processUI(_item_info.saved_answer);
         }
@@ -299,6 +306,7 @@ var ItemRunner = (function () {
         setItemNo: setItemNo,
         setItemInfo: setItemInfo,
         setMarkingId: setMarkingId,
+        setReviewMode: setReviewMode,
         getRendered: getRendered,
         processResponse: processResponse,
         toggleFlag: toggleFlag

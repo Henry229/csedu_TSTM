@@ -51,7 +51,7 @@ def get_run_session(session_key):
             .order_by(desc(AssessmentRetry.start_time)).first()
         # session 이 없는 이유를 알아본다.
         if retry.is_finished:
-            run_session.set_error(TEST_SESSION_ERROR, "Test session is finished!")
+            run_session.set_error(TEST_SESSION_ERROR, "Retry session is finished!")
         elif retry.session_key != session_key:
             run_session.set_error(
                 TEST_SESSION_ERROR,
@@ -59,10 +59,12 @@ def get_run_session(session_key):
             )
         else:
             # 이 경우라면 DB 로부터 session 을 복원한다.
-            run_session.reset(current_user.id, retry_id, retry.testset_id,
-                              retry.test_duration, retry.attempt_count, retry.start_time)
+            assessment_enrol = AssessmentEnroll.query.filter_by(id=retry.assessment_enroll_id).first();
+            run_session.reset(current_user.id, retry_id, assessment_enrol.testset_id,
+                              assessment_enrol.test_duration, retry.attempt_count, retry.start_time)
             # retry has no stage data:  run_session.set_value('stage_data', enroll.stage_data)
-            markings = RetryMarking.query.filter_by(assessment_retry_id=retry_id, testset_id=retry.testset_id) \
+            markings = RetryMarking.query.filter_by(assessment_retry_id=retry_id,
+                                                    testset_id=assessment_enrol.testset_id) \
                 .order_by(RetryMarking.question_no).all()
             # build test_items
             test_items = []
@@ -134,14 +136,18 @@ def start_error_run():
     user_id = current_user.id
 
     if session_key is None:
-        # 이미 시작된 세션이 있으면 error 를 return 한다.
-        assessment_retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id,
-                                                           finish_time=None).first()
-        if assessment_retry is not None:
-            return bad_request(error_code=TEST_SESSION_ERROR,
-                               message="A new session has been started from another browser.")
-        # create AssessmentRetry
+        assessment_retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id)\
+            .order_by(desc(AssessmentRetry.start_time)).first()
+        if assessment_retry is None:
+            retry_count = 1
+        else:
+            # 이미 시작어 진행중인 세션이 있으면 error 를 return 한다.
+            if assessment_retry.finish_time is None:
+                return bad_request(error_code=TEST_SESSION_ERROR,
+                                   message="A new session has been started from another browser.")
+            retry_count = assessment_retry.attempt_count + 1
         assessment_retry = AssessmentRetry.from_enroll(enrolled)
+        assessment_retry.attempt_count = retry_count
         if 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
             assessment_retry.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
         else:
@@ -355,7 +361,7 @@ def error_run_response_process(item_id, run_session=None):
     data = {'is_read': False, 'is_flagged': False}
     if next_item is None:
         run_session.set_status(ErrorRunSession.STATUS_TEST_FINISHED)
-        data['html'] = render_template("runner/test_finished.html")
+        data['html'] = render_template("errornote/test_finished.html")
     else:
         next_item_id = next_item.get('item_id')
         next_question_no = next_item['question_no']

@@ -135,6 +135,9 @@ var ItemHandlers = (function () {
         var destMap = {};
         var _targets = [];
         var object_variables = options.data.object_variables;
+        // Error note review mode 에서는 답을 변경할 수 없다.
+        var _review_mode = options.review_mode || false;
+        var _answer_restored = false;
         for (var key in object_variables) {
             if (object_variables.hasOwnProperty(key)) {
                 this.object_variables = object_variables[key];
@@ -173,6 +176,9 @@ var ItemHandlers = (function () {
                 destMap[c.identifier] = shape;
                 _targets.push(shape);
                 var click_cb = function () {
+                    // Error note review mode 에서는 답을 변경할 수 없다.
+                    if (_answer_restored && _review_mode) return;
+
                     var index = this.attr('index');
                     var $selected = $('.source .ui-selected');
                     var c = choices[index];
@@ -192,6 +198,7 @@ var ItemHandlers = (function () {
                         'x': x, 'y': y, 'preserveAspectRatio': 'none'
                     });
                     image.on('click', function () {
+                        if (_review_mode) return;
                         this.remove();
                         c['result'] = null;
                     });
@@ -204,19 +211,21 @@ var ItemHandlers = (function () {
                 $(this).addClass('ui-selected');
             });
             $('.source .selectable img').draggable({
-                appendTo: 'body', helper: "clone", zIndex: 100,
+                appendTo: 'body', helper: "clone", zIndex: 5000,
                 start: function (event, ui) {
-                    $(event.target).click();
+                    // Error note review mode 에서는 답을 변경할 수 없다.
+                    if (_review_mode === false)
+                        $(event.target).click();
                 },
                 stop: function (event, ui) {
                     var m_x = event.pageX, m_y = event.pageY;
                     // console.log("Stop Mouse X: " + event.pageX + " Y: " + event.pageY);
-                    for (var i=0; i<_targets.length; i++) {
+                    for (var i = 0; i < _targets.length; i++) {
                         var t = _targets[i];
                         var bound = t.node.getBoundingClientRect();
                         // console.log("bound rect X: " + bound.x + " Y: " + bound.y);
                         if (m_x > bound.x && m_x < bound.x + bound.width
-                            && m_y > bound.y && m_y < bound.y + bound.height) {
+                          && m_y > bound.y && m_y < bound.y + bound.height) {
                             t.fire('click');
                         }
                     }
@@ -229,9 +238,11 @@ var ItemHandlers = (function () {
         this.setSavedAnswer = function (answer) {
             for (var i = 0; i < answer.length; i++) {
                 var ans = answer[i].split(" ");
+                if (ans.length < 2) continue;
                 $('.source [data-identifier=' + ans[1] + ']').click();
                 destMap[ans[0]].fire('click');
             }
+            _answer_restored = true;
         };
         this.getResponse = function () {
             var choices = this.object_variables.choices;

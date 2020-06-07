@@ -17,8 +17,8 @@ var ErrorNoteLogger = (function () {
 
 var ErrorNoteRunner = (function () {
     var _is_initialized = false;
-    var _assessment_guid, _assessment_enroll_id, _testset_id, _testlet_id, _stage_data, _session,
-        _question_no;
+    var _assessment_enroll_id, _testset_id, _testlet_id, _stage_data, _session,
+        _question_no, _review_mode = false, _answers_result = {};
     var _item_info = [], _last_question_no = 0;
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
         _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb, _disableSubmitResponse;
@@ -66,7 +66,13 @@ var ErrorNoteRunner = (function () {
         btn.on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            ItemRunner.processResponse();
+            if (_review_mode) {
+                var new_question_no = _findNextQuestionNo(_question_no);
+                if (new_question_no !== -1)
+                    _goToQuestionNo(new_question_no);
+            } else {
+                ItemRunner.processResponse();
+            }
         });
         btn = $('.footer-back-btn');
         btn.on('click', function () {
@@ -170,6 +176,14 @@ var ErrorNoteRunner = (function () {
     };
     var _findPrevQuestionNo = function (curr_question_no) {
         for(var i=curr_question_no - 1; i >= 0; i--) {
+            if (_item_info[i]) {
+                return i;
+            }
+        }
+        return -1;
+    };
+    var _findNextQuestionNo = function (curr_question_no) {
+        for(var i=curr_question_no + 1; i <= _last_question_no; i++) {
             if (_item_info[i]) {
                 return i;
             }
@@ -349,6 +363,16 @@ var ErrorNoteRunner = (function () {
         _toggleSummary(false);
         var info = _getItemInfo(question_no);
         _toggleFlagged(info.is_flagged);
+        // review mode 에서는 답을 변경할 수 없도록 한다. input 이 아닌 item 은 item handler 참고.
+        if (_review_mode) {
+            $('.item-container input').attr('disabled', true);
+            var header = $('.item-header');
+            header.removeClass('correct incorrect');
+            if (_answers_result[question_no])
+                header.addClass('correct');
+            else
+                header.addClass('incorrect');
+        }
         // setCookie('question_no', question_no, 0);
     };
     _responseProcessedCb = function (rsp_data) {
@@ -434,7 +458,13 @@ var ErrorNoteRunner = (function () {
                 $('#finishModal').modal('hide');
             },
             success: function (response) {
-                var data = response.data;
+                $('.item-footer .footer-finish').hide();
+                _answers_result = response.data;
+                _review_mode = true;
+                ItemRunner.setReviewMode(_review_mode);
+                var new_question_no = _findNextQuestionNo(-1);
+                if (new_question_no !== -1)
+                    _goToQuestionNo(new_question_no);
             }
         });
     };

@@ -203,23 +203,13 @@
   <div class="item-card">
       <div id="items_selected" class="display table table-hover" style="width:100%">
         <div class="item-header">
-          <div class="header-timer" style="visibility: hidden">
-            <span class="timer-display">
-              <span class="hours">
-                <span class="number">00</span>
-                <span class="label">Hours</span>
-              </span>
-              <span class="colon number">:</span>
-              <span class="minutes">
-                <span class="number">00</span>
-                <span class="label">Mins</span>
-              </span>
-              <span class="colon number last-min">:</span>
-              <span class="seconds last-min">
-                <span class="number">00</span>
-                <span class="label">Secs</span>
-              </span>
-            </span>
+          <div class="header-result" style="display: inherit">
+            <button class="header-result-text correct">
+              <i class="fas fa-check"></i><span class="timer-display"> Correct</span>
+            </button>
+            <button class="header-result-text incorrect">
+              <i class="fas fa-times"></i><span class="timer-display"> Incorrect</span>
+            </button>
           </div>
           <div class="header-center">
             <button class="header-summary">
@@ -285,7 +275,7 @@
               <button class="footer-next-btn">Next<i class="fas fa-caret-right"></i></button>
             </div>
             <div class="footer-right-buttons footer-finish" style="display: none">
-              <button class="footer-finish-btn">Finish</button>
+              <button class="footer-finish-btn">Submit</button>
             </div>
           </div>
         </div>
@@ -328,7 +318,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Review</button>
-              <button type="button" class="btn btn-primary finish-test">Confirm</button>
+              <button type="button" class="btn btn-primary finish-test">Submit</button>
             </div>
           </div>
         </div>

@@ -52,8 +52,9 @@ def error_note(assessment_enroll_id):
 
     # Error note retry status
     retry_session_key = None
-    retry = AssessmentRetry.query.filter_by(finish_time=None).order_by(desc(AssessmentRetry.start_time)).first()
-    if retry is not None:
+    retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id)\
+        .order_by(desc(AssessmentRetry.start_time)).first()
+    if retry is not None and retry.finish_time is None:
         retry_session_key = retry.session_key
 
     if test_subject_string == 'Writing':
