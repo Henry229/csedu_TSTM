@@ -63,3 +63,9 @@
 .retry-wrapper {
     margin-bottom: 3px;
 }
+
+.item-card .mfp-close {
+    color: #FFF;
+    text-align: right;
+    padding-right: 6px;
+}

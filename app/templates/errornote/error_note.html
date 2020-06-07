@@ -322,7 +322,7 @@
               <button class="footer-flag-btn" style="display: none"><span>Flag</span><i class="far fa-flag"></i></button>
               <button class="footer-next-btn">Next<i class="fas fa-caret-right"></i></button>
             </div>
-            <div class="footer-right-buttons footer-finish">
+            <div class="footer-right-buttons footer-finish" style="display: none">
               <button class="footer-finish-btn">Finish</button>
             </div>
           </div>
@@ -419,10 +419,10 @@
   $(document).ready(function () {
     $('#retry-errors-button').magnificPopup({
       items: {
-        src: '#retry-errors-runner'
+        src: '#retry-errors-runner .item-card'
       },
       type: 'inline',
-      showCloseBtn: false,
+      closeBtnInside: true,
       callbacks: {
         open: function() {
           var options = {

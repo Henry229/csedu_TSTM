@@ -72,7 +72,9 @@ var ErrorNoteRunner = (function () {
         btn.on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            _goToQuestionNo(_question_no - 1);
+            var new_question_no = _findPrevQuestionNo(_question_no);
+            if (new_question_no !== -1)
+                _goToQuestionNo(new_question_no);
         });
         btn = $('.footer-flag-btn');
         btn.on('click', function () {
@@ -167,6 +169,14 @@ var ErrorNoteRunner = (function () {
     var _getItemInfo = function (question_no) {
         _item_info[question_no] = _item_info[question_no] || null;
         return _item_info[question_no];
+    };
+    var _findPrevQuestionNo = function (curr_question_no) {
+        for(var i=curr_question_no - 1; i >= 0; i--) {
+            if (_item_info[i]) {
+                return i;
+            }
+        }
+        return -1;
     };
 
     var _toggleSummary = function (show) {
