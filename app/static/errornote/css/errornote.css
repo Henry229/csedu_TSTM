@@ -66,6 +66,8 @@
 
 .item-card .mfp-close {
     color: #FFF;
-    text-align: right;
+    text-align: center;
     padding-right: 6px;
+    font-size: 31px;
+    font-weight: 700;
 }
