@@ -1,12 +1,17 @@
 @media (max-height: 840px) {
-    .app-header {
+    .app-header,
+    .app-footer
+    {
         display: none;
     }
+
     .app-body {
         margin-top: 0 !important;
     }
 }
-
+.app-body .container {
+    overflow: hidden;
+}
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Common: qti-item
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
