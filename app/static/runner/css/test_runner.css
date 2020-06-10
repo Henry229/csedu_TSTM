@@ -1,3 +1,17 @@
+@media (max-height: 840px) {
+    .app-header,
+    .app-footer
+    {
+        display: none;
+    }
+
+    .app-body {
+        margin-top: 0 !important;
+    }
+}
+.app-body .container {
+    overflow: hidden;
+}
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Common: qti-item
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -197,7 +211,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 
 .qti-item label [class^="icon-"], .qti-item label [class*=" icon-"] {
     font-size: 16px;
-    font-size: 1.6rem;
+    /*font-size: 1.6rem;*/
     position: relative;
     top: 2px;
     color: #555;
@@ -261,7 +275,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 
 .qti-item label [class^="icon-"], .qti-item label [class*=" icon-"] {
     font-size: 16px;
-    font-size: 1.6rem;
+    /*font-size: 1.6rem;*/
     position: relative;
     top: 2px;
     color: #555;
@@ -526,6 +540,13 @@ textarea:focus.qti-item.qti-interaction.solid {
     background: #F4F4F4;
     border-color: #cfcfcf;
     margin: auto;
+}
+
+@media (max-height: 790px) {
+    .item-card {
+        height: 630px !important;
+        min-height: 630px !important;
+    }
 }
 
 .item-card .item-header {
@@ -1006,8 +1027,8 @@ textarea:focus.qti-item.qti-interaction.solid {
     border: 5px solid #d4dfe9;
     background: #ffffff;
     display: inline-block;
-    min-height: 484px;
-    max-height: 484px;
+    min-height: 580px;
+    max-height: 580px;
     min-width: 750px;
     max-width: 885px;
     font-weight: bold;
@@ -1029,7 +1050,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     padding-bottom: 3px;
     float: none;
     min-height: 198px;
-    max-height: 355px;
+    max-height: 424px;
     overflow-y: auto;
     border-bottom: 3px solid #d4dfe9;
 }
@@ -1043,15 +1064,21 @@ textarea:focus.qti-item.qti-interaction.solid {
     padding: 10px;
     margin-top: 40px;
 }
+.policy-notice .footer-center {
+    display: block;
+    margin: auto;
+    width: 50%;
+}
 
-.notice-container footer button {
+.policy-notice .footer-center button
+{
     float: none;
     left: 0;
     top: 0;
     text-decoration: none;
-    margin: 10px;
+    margin: 3px;
     font-size: 20px;
-    padding: 13px 26px;
+    padding: 9px 26px;
     position: relative;
     overflow: visible;
     border-radius: 0;
@@ -1059,13 +1086,23 @@ textarea:focus.qti-item.qti-interaction.solid {
     color: #ffffff;
     background-color: #005d93;
     border-color: #004d79;
+    border-style: solid;
 }
-.notice-container footer button:disabled {
+.policy-notice .footer-center button:disabled {
     background-color: grey;
     border-color: grey;
     cursor: not-allowed;
 }
 
+@media (max-height: 790px) {
+    .notice-container .notice-info {
+        min-height: 443px;
+        max-height: 443px;
+    }
+    .notice-container .notice-info .notice-content {
+        max-height: 310px;
+    }
+}
 .disable-select {
   -webkit-user-select: none;
   -moz-user-select: none;
