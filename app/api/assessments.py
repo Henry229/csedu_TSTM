@@ -123,9 +123,8 @@ def get_stage_testlet():
     if next_branch_json:
         next_testlet_id = next_branch_json.get("id")
     else:
+        # when last stage of branch, no next branch data formed and return empty data
         rows = [(0, '', 0, 0, 0, percentile)]
-        # Todo: Delete these temporary simulating data. It is just for 1 user tester.
-        #       and need to remove delete lator with valid assessment_enroll_id
         MarkingBySimulater.query.filter_by(assessment_enroll_id=None).delete()
         db.session.commit()
         return jsonify(rows)
@@ -864,7 +863,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     if next_branch_json is not None:
         testlet_id = next_branch_json.get("id")
         stage = len(stage_data) + 1
-        stage_data.append({'stage': stage, 'testlet_id': int(testlet_id)})
+        stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
         # stage 정보를 session 과 DB 에 저장한다.
         assessment_session.set_value('stage_data', stage_data)
         assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
@@ -898,8 +897,8 @@ def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
     if len(stage_data) == 0:
         next_branch = first_branch
     else:
-        c_stage_no = stage_data[-1].get("stage")  # candidate's
-        c_testlet_id = stage_data[-1].get("testlet_id")  # candidate's
+        c_stage_no = stage_data[-1].get("stage")  # candidate's current stage_no
+        c_testlet_id = stage_data[-1].get("testlet_id")  # candidate's current testlet_id
         if testlet_id != c_testlet_id:  # check if correct answer's testlet same as last testlet id
             return None
 
@@ -920,7 +919,6 @@ def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
                 if next_branches:
                     for b in next_branches:
                         _cond = b.get('condition')
-                        # Todo: check conditions if any other case
                         if percentile >= _cond:
                             next_branch = b
                             break
