@@ -1,13 +1,13 @@
 import json
 import os
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime
 from time import time
 from functools import wraps
 
-from flask import jsonify, request, current_app, render_template
+from flask import request, current_app, render_template
 from flask_login import current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 
 from app.api import api
 from app.decorators import permission_required
@@ -160,8 +160,8 @@ def start_error_run():
         error_run_session = new_error_run_session(user_id, assessment_retry_id, enrolled.testset_id,
                                                   enrolled.test_duration, 1)
         # Find markings that are marked incorrect in the last try.
-        markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=enrolled.testset_id,
-                                           last_is_correct=False) \
+        markings = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
+                                        or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
             .order_by(Marking.question_no).all()
         # create RetryMarking
         retry_markings = []
