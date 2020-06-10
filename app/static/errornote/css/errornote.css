@@ -18,35 +18,39 @@
     width: 35%;
     text-align: left;
     border: 1px solid #0f0f0f;
-    padding: 5px;
 }
-
-#t_mark_info th {
-    padding: 3px;
-    vertical-align: middle;
-    text-align: center;
-}
-
+#t_mark_info th,
 #t_mark_info td {
-    border: 0px black;
-    padding: 0px;
-}
-
-#t_assessment_info {
-    table-layout: auto;
-    width: 100%;
-    border: 1px solid #c8ced3;
-    padding: 10px;
-}
-
-#t_assessment_info th, td {
     vertical-align: middle;
     text-align: center;
-    border: 0px solid #c8ced3;
+}
+#t_mark_info tr th:nth-child(1),
+#t_mark_info tr td:nth-child(1)
+{
+    width: 100px;
+}
+#t_mark_info tr td:nth-child(2),
+#t_mark_info tr td:nth-child(4)
+{
+    width: 300px;
+    max-width: 300px;
+}
+#t_mark_info tr td:nth-child(3),
+#t_mark_info tr td:nth-child(5)
+{
+    width: 100px;
+    max-width: 100px;
+}
+#t_mark_info tr td:nth-child(6)
+{
+    width: 100px;
+    max-width: 100px;
 }
 
-#t_assessment_info th {
-    background-color: #f0f3f5;
+#t_assessment_info th,
+#t_assessment_info td {
+    vertical-align: middle;
+    text-align: center;
 }
 
 #t_graph {
@@ -57,7 +61,7 @@
 
 #t_graph td {
     vertical-align: middle;
-    border: 0px solid white;
+    border: 0 solid white;
 }
 
 .retry-wrapper {
