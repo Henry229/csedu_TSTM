@@ -76,7 +76,7 @@ def insert():
         register_to_csonlineschool(assessment)
         flash('Assessment {} has been created.'.format(assessment.id))
         return redirect(url_for('assessment.manage', test_type=assessment.test_type, test_center=assessment.branch_id))
-    return redirect(url_for('assessment.manage'), error="Assessment New - Form validation Error")
+    return redirect(url_for('assessment.manage', error="Assessment New - Form validation Error"))
 
 
 '''Delete Assessment Page - update row set delete True'''

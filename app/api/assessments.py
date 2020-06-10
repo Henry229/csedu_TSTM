@@ -110,6 +110,8 @@ def get_stage_testlet():
             marking.is_correct = item["iscorrect"]
             if item["iscorrect"]:
                 marking.candidate_mark = marking.outcome_score
+            else:
+                marking.candidate_mark = 0
             sum_score = sum_score + marking.getScore()
         outcomeTotal = MarkingBySimulater.getTotalOutcomeScore(assessment_enroll_id, id,
                                                                candidate_answers["testlet_id"])

@@ -3,7 +3,7 @@ import datetime
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import DateField, TimeField, SelectField, SubmitField, HiddenField, StringField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 from wtforms.widgets import html5
 
 from ..models import Choices, Codebook
@@ -48,7 +48,7 @@ class AssessmentCreateForm(FlaskForm):
     test_center = SelectField('CSEdu Branch', coerce=int, validators=[DataRequired()])
     year = SelectField('Year', default=datetime.date.today().year)
     review_period = IntegerField('Review Period', default=7, widget=html5.NumberInput(min=0, max=28, step=7))
-    session_date = DateField('Test Date')
+    session_date = DateField('Test Date', validators=[Optional()])
     session_start_time = TimeField('Session Time')
     session_end_time = TimeField('Session Time')
     submit = SubmitField('Save')
@@ -58,6 +58,7 @@ class AssessmentCreateForm(FlaskForm):
         self.test_type.choices = Choices.get_codes('test_type')
         self.test_center.choices = get_test_center()
         self.year.choices = Choices.get_ty_choices()
+
 
 class AssessmentTestsetCreateForm(FlaskForm):
     ordered_ids = HiddenField('ordered_ids', id='ordered_ids', default='')

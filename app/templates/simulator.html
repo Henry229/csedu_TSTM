@@ -64,7 +64,8 @@
                             {% for testset in testsets %}
                                 <tr>
                                     <td><input type="radio" name="r_tl" id="testset_{{ testset.id }}"
-                                               value="{{ testset.id }}" {% if loop.index==1 %}checked{% endif %}>
+                                               value="{{ testset.id }}">
+{#                                               value="{{ testset.id }}" {% if loop.index==1 %}checked{% endif %}>#}
                                         <a name="modalButton" onclick="invokeModalTestset({{ testset.id }})"
                                            data-toggle="modal" data-target="#dataModal">
                                             <i class="icons cui-info"></i>
@@ -118,9 +119,9 @@
         var _candidate_answers = [];
 
         $(document).ready(function () {
-            var $radio = $('input[name="r_tl"]:checked');
-            _testset_id = $radio.val();
-            getStageItems();
+            {#var $radio = $('input[name="r_tl"]:checked');#}
+            {#_testset_id = $radio.val();#}
+            {#getStageItems();#}
 
             $('input[name="r_tl"]').click(function () {
                 var div_body = $('#stages');

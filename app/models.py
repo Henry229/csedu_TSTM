@@ -918,8 +918,8 @@ class MarkingBySimulater(db.Model):
     correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
     candidate_r_value = db.Column(JSONB)  # Candidate Response Value
     is_correct = db.Column(db.Boolean)
-    outcome_score = db.Column(db.Float)  # SetOutcome Score
-    candidate_mark = db.Column(db.Float)  # Student's score
+    outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
+    candidate_mark = db.Column(db.Float, default=0)  # Student's score
     assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('assessment_enroll.id'))
 
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
