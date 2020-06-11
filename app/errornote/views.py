@@ -36,7 +36,8 @@ def error_note(assessment_enroll_id):
     retried_questions = RetryMarking.query.with_entities(RetryMarking.question_no)\
         .join(AssessmentRetry,
               and_(AssessmentRetry.assessment_enroll_id == assessment_enroll_id,
-                   RetryMarking.assessment_retry_id == AssessmentRetry.id))\
+                   RetryMarking.assessment_retry_id == AssessmentRetry.id,
+                   or_(AssessmentRetry.is_single_retry == True, AssessmentRetry.finish_time != None)))\
         .distinct().all()
     retried_questions = [q.question_no for q in retried_questions]
 
