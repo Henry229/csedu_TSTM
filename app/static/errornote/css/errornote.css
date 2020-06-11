@@ -41,10 +41,17 @@
     width: 100px;
     max-width: 100px;
 }
-#t_mark_info tr td:nth-child(6)
+#t_mark_info tr td:nth-child(6),
+#t_mark_info tr td:nth-child(7)
 {
     width: 100px;
     max-width: 100px;
+}
+
+#t_mark_info tr td:nth-child(6) i,
+#t_mark_info tr td:nth-child(7) i
+{
+    cursor: pointer;
 }
 
 #t_assessment_info th,

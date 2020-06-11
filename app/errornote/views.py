@@ -1,12 +1,12 @@
 from flask import render_template, flash, request, current_app, redirect
 from flask_login import login_required, current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, or_, and_
 
 from . import errornote
 from ..decorators import permission_required
-from ..api.reports import query_my_report_header, query_my_report_body
+from ..api.reports import query_my_report_header
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews, AssessmentRetry, \
-    Marking, Item
+    Marking, Item, RetryMarking
 from ..web.views import view_explanation
 
 
@@ -41,35 +41,59 @@ def error_note(assessment_enroll_id):
         return redirect(url)
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
 
-    # 가장 오래된 retry
-    retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id) \
-        .order_by(AssessmentRetry.start_time).first()
-    has_finished_retry = retry and retry.finish_time is not None
+    # 한번이라도 retry 를 한 question_no 를 찾는다.
+    retried_questions = RetryMarking.query.with_entities(RetryMarking.question_no)\
+        .join(AssessmentRetry,
+              and_(AssessmentRetry.assessment_enroll_id == assessment_enroll_id,
+                   RetryMarking.assessment_retry_id == AssessmentRetry.id))\
+        .distinct().all()
+    retried_questions = [q.question_no for q in retried_questions]
 
     marking_query = Marking.query.join(Item, Marking.item_id == Item.id)\
-        .join(Codebook, Item.category == Codebook.id).add_columns(Codebook.code_name)\
+        .outerjoin(Codebook, Item.category == Codebook.id).add_columns(Codebook.code_name)\
         .filter(Marking.assessment_enroll_id == assessment_enroll_id).order_by(Marking.question_no).all()
     markings = []
     for marking, code_name in marking_query:
         marking.category_name = code_name
+        if is_blank_answer(marking.candidate_r_value):
+            marking.candidate_r_value = ''
+        if is_blank_answer(marking.last_r_value):
+            marking.last_r_value = ''
         # retry 를 한번이라도 끝내야 설명을 볼 수 있다.
-        if marking.last_is_correct is not True:
+        if marking.is_correct is not True:
             marking.explanation_link = view_explanation(testset_id=ts_id, item_id=marking.item_id)
-            marking.explanation_link_enable = has_finished_retry
+            marking.explanation_link_enable = marking.question_no in retried_questions
         markings.append(marking)
 
-    # Error note retry status: 가장 최근 것.
+    last_error_count = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
+                                            or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
+        .count()
     retry_session_key = None
-    retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id)\
-        .order_by(desc(AssessmentRetry.start_time)).first()
-    if retry is not None and retry.finish_time is None:
-        retry_session_key = retry.session_key
+    if last_error_count > 0:
+        # Error note retry status: 가장 최근 것.
+        retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id, is_single_retry=False)\
+            .order_by(desc(AssessmentRetry.start_time)).first()
+        if retry is not None and retry.finish_time is None:
+            retry_session_key = retry.session_key
 
     template_file = 'errornote/error_note.html'
     rendered_template = render_template(template_file, assessment_name=assessment_name,
                                         assessment_enroll_id=assessment_enroll_id,
                                         subject=test_subject_string,
                                         score=score, markings=markings, retry_session_key=retry_session_key,
+                                        last_error_count=last_error_count,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
                                         grade=grade)
     return rendered_template
+
+
+def is_blank_answer(answer):
+    if answer is None:
+        return True
+    if type(answer) is not list:
+        return False
+    if len(answer) != 1:
+        return False
+    if answer[0] == '':
+        return True
+    return False

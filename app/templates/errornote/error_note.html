@@ -56,16 +56,18 @@
       </div>
       <br>
       {% if markings %}
+        {% if last_error_count > 0 %}
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
               <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry errors(Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry errors</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry All Errors</button>
             {% endif %}
           </div>
         </div>
         <br>
+        {% endif %}
         <div class="row">
           <div class="col">
             <table class="table table-bordered table-hover" style="width:100%" id="t_mark_info">
@@ -74,6 +76,7 @@
                 <th rowspan="2">Question</th>
                 <th colspan="2">Homework</th>
                 <th colspan="2">Last try</th>
+                <th rowspan="2">Retry</th>
                 <th rowspan="2">Explanation</th>
                 <th rowspan="2">Category</th>
               </tr>
@@ -91,11 +94,7 @@
                     {{- marking.question_no -}}
                     </td>
                     <td>
-                      {%- if marking.candidate_r_value -%}
-                        {{ marking.candidate_r_value }}
-                      {%- else -%}
-                      Blank
-                      {%- endif -%}
+                        {{- marking.candidate_r_value -}}
                     </td>
                     <td>
                       {%- if marking.is_correct -%}
@@ -103,10 +102,9 @@
                       {%- else -%}
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
-                    </td><td>
-                      {%- if marking.last_r_value -%}
-                        {{ marking.last_r_value }}
-                      {%- endif -%}
+                    </td>
+                    <td>
+                        {{- marking.last_r_value -}}
                     </td>
                     <td>
                       {%- if marking.last_is_correct -%}
@@ -116,14 +114,19 @@
                       {%- endif -%}
                     </td>
                     <td>
+                      {%- if not marking.last_is_correct -%}
+                      <i class="fa fa-play-circle retry-question-btn" data-question-no="{{ marking.question_no }}" style="color: #c0a16b"></i>
+                      {%- endif -%}
+                    </td>
+                    <td>
                       {% if marking.explanation_link %}
                         {% if marking.explanation_link_enable %}
                           <a id="view_explanation_window"
                              onclick="window.open('{{ marking.explanation_link }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                            <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                            <i class="fa fa-headphones" style="color: #c0a16b"></i>
                           </a>
                         {% else %}
-                          <i class="fa fa-play-circle" title="Finish retry to enable" style="color: lightgrey"></i>
+                          <i class="fa fa-headphones" title="Retry the question to enable" style="color: lightgrey"></i>
                         {% endif %}
                       {% endif %}
                     </td>
@@ -374,6 +377,34 @@
             }
             ErrorNoteRunner.init($('.item-container'), options);
             ErrorNoteRunner.startTest();
+          },
+          close: function () {
+            $('#video-popup').empty();
+            window.location.reload();
+          }
+        }
+      });
+    });
+
+    $('.retry-question-btn').on('click', function () {
+      var question_no = $(this).data('question-no');
+      $.magnificPopup.open({
+        items: {
+          src: '#retry-errors-runner .item-card'
+        },
+        type: 'inline',
+        closeBtnInside: true,
+        closeOnBgClick: false,
+        callbacks: {
+          open: function() {
+            var options = {
+              assessment_enroll_id: $('#assessment_enroll_id').val()
+            };
+            if ($('#retry-errors-button').data('session-key')) {
+              options['session'] = $('#retry-errors-button').data('session-key');
+            }
+            ErrorNoteRunner.init($('.item-container'), options);
+            ErrorNoteRunner.startTest(question_no);
           },
           close: function () {
             $('#video-popup').empty();

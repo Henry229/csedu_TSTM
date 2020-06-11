@@ -32,13 +32,24 @@ def validate_session(func):
                 return bad_request(message="Session key is not provided!")
         else:
             return bad_request(message="Session key is not provided!")
-        run_session = get_run_session(session_key)
+        retry_is_single = ErrorRunSession.retry_is_single_from_session_key(session_key)
+        if retry_is_single:
+            run_session = get_single_run_session(session_key)
+        else:
+            run_session = get_run_session(session_key)
         if run_session.error_code is not None:
             return bad_request(error_code=run_session.error_code,
                                message=run_session.error_message)
         kwargs['run_session'] = run_session
         return func(*args, **kwargs)
     return decorated_view
+
+
+def get_single_run_session(session_key):
+    run_session = ErrorRunSession(key=session_key)
+    if run_session.assessment is None:
+        run_session.set_error(TEST_SESSION_ERROR, "Retry session is finished!")
+    return run_session
 
 
 def get_run_session(session_key):
@@ -79,8 +90,8 @@ def get_run_session(session_key):
     return run_session
 
 
-def new_error_run_session(user_id, enroll_id, testset_id, test_duration, attempt_count):
-    return ErrorRunSession(user_id, enroll_id, testset_id, test_duration, attempt_count)
+def new_error_run_session(user_id, enroll_id, testset_id, test_duration, attempt_count, is_single=False):
+    return ErrorRunSession(user_id, enroll_id, testset_id, test_duration, attempt_count, is_single)
 
 
 def get_next_item(error_run_session: ErrorRunSession, current_question_no=0):
@@ -153,6 +164,7 @@ def start_error_run():
         else:
             assessment_retry.start_ip = request.headers.environ['REMOTE_ADDR']
         assessment_retry.start_time = datetime.utcnow()
+        assessment_retry.created_time = datetime.utcnow()
         db.session.add(assessment_retry)
         db.session.commit()
         assessment_retry_id = assessment_retry.id
@@ -205,6 +217,93 @@ def start_error_run():
         next_item = get_next_item(error_run_session, question_no - 1)
 
     assessment_retry.session_key = error_run_session.key
+    if len(test_items) is 0:
+        assessment_retry.finish_time = datetime.utcnow()
+    db.session.commit()
+
+    next_question_no = 0
+    data = {'is_read': False, 'is_flagged': False}
+    if next_item is not None:
+        # next_item_id = next_item.get('item_id')
+        next_question_no = next_item['question_no']
+        next_marking_id = next_item.get('marking_id')
+        marking = RetryMarking.query.filter_by(id=next_marking_id).first()
+        marking.is_read = True
+        marking.read_time = datetime.utcnow()
+        db.session.commit()
+        data['is_flagged'] = marking.is_flagged
+        data['is_read'] = marking.is_read
+
+    data.update({
+        'status': error_run_session.get_status(),
+        'session': error_run_session.key,
+        'next_question_no': next_question_no,
+        'test_duration': error_run_session.get_value('test_duration'),
+        'start_time': error_run_session.get_value('start_time'),
+        'current_time': int(time()),
+        'new_questions': test_items,
+    })
+    return success(data)
+
+
+@api.route('/errorrun/single', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def start_single_error_run():
+    assessment_enroll_id = request.json.get('assessment_enroll_id')
+    question_no = request.json.get('question_no')
+
+    enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
+    user_id = current_user.id
+
+    assessment_retry = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id,
+                                                       is_single_retry=True)\
+        .order_by(desc(AssessmentRetry.start_time)).first()
+    # 없으면 새로 만들고 있으면 재활용한다.
+    if assessment_retry is None:
+        assessment_retry = AssessmentRetry.from_enroll(enrolled)
+        assessment_retry.is_single_retry = True
+    if 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
+        assessment_retry.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
+    else:
+        assessment_retry.start_ip = request.headers.environ['REMOTE_ADDR']
+    assessment_retry.start_time = datetime.utcnow()
+    db.session.add(assessment_retry)
+    db.session.commit()
+    assessment_retry_id = assessment_retry.id
+    # 새로운 세션을 만든다.
+    error_run_session = new_error_run_session(user_id, assessment_retry_id, enrolled.testset_id,
+                                              enrolled.test_duration, 1, True)
+    # Find markings that are marked incorrect in the last try.
+    markings = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
+                                    Marking.question_no == question_no,
+                                    or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
+        .order_by(Marking.question_no).all()
+    # create RetryMarking
+    retry_markings = []
+    for m in markings:
+        retry_marking = RetryMarking.from_marking(assessment_retry_id, m)
+        db.session.add(retry_marking)
+        retry_markings.append(retry_marking)
+    db.session.commit()
+    question_no = -1
+    # build test_items
+    test_items = []
+    for m in retry_markings:
+        info = {'question_no': m.question_no, 'item_id': m.item_id,
+                'marking_id': m.id, 'is_flagged': m.is_flagged,
+                'is_read': False,
+                'saved_answer': ''
+                }
+        if question_no == -1:
+            question_no = m.question_no
+            info['is_read'] = True
+        test_items.append(info)
+    error_run_session.set_value('test_items', test_items)
+    next_item = get_next_item(error_run_session, question_no - 1)
+
+    assessment_retry.session_key = error_run_session.key
+    if len(test_items) is 0:
+        assessment_retry.finish_time = datetime.utcnow()
     db.session.commit()
 
     next_question_no = 0
@@ -409,12 +508,17 @@ def error_run_finish_test(run_session):
         run_session.set_status(ErrorRunSession.STATUS_TEST_SUBMITTED)
         assessment_retry_id = run_session.get_value('assessment_retry_id')
         retry = AssessmentRetry.query.filter_by(id=assessment_retry_id).first()
-        if retry:
-            retry.finish_time = datetime.utcnow()
-            # retry.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
-            db.session.add(retry)
-            db.session.commit()
-        r_markings = RetryMarking.query.filter_by(assessment_retry_id=assessment_retry_id).all()
+        assessment_enroll_id = retry.assessment_enroll_id
+        retry.finish_time = datetime.utcnow()
+        # retry.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
+        db.session.add(retry)
+        db.session.commit()
+        if ErrorRunSession.retry_is_single_from_session_key(run_session.key):
+            test_items = run_session.get_value('test_items')
+            marking_id = test_items[0]['marking_id']
+            r_markings = RetryMarking.query.filter_by(id=marking_id).all()
+        else:
+            r_markings = RetryMarking.query.filter_by(assessment_retry_id=assessment_retry_id).all()
         retry_markings = {}
         questions = []
         for rm in r_markings:
@@ -428,6 +532,16 @@ def error_run_finish_test(run_session):
             m.last_is_correct = rm.is_correct
             m.last_r_value = rm.candidate_r_value
         db.session.commit()
+
+        # 틀린 문제가 없다면 finish 가 안된 retry 를 모두 끝낸다.
+        error_count = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
+                                           or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
+            .count()
+        if error_count is 0:
+            retries = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id, finish_time=None).all()
+            for r in retries:
+                r.finish_time = datetime.utcnow()
+            db.session.commit()
 
     return success(retry_result)
 

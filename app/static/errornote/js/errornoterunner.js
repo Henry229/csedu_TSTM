@@ -297,15 +297,20 @@ var ErrorNoteRunner = (function () {
         $('.filter-btn.flagged span').html(flagged_cnt);
     };
 
-    var startTest = function () {
+    var startTest = function (question_no) {
         var data = {
             assessment_enroll_id: _assessment_enroll_id
         };
+        var endpoint_url = '/api/errorrun/start';
+        if (question_no) {
+            data['question_no'] = question_no;
+            endpoint_url = '/api/errorrun/single';
+        }
         if (_session) {
             data['session_key'] = _session;
         }
         $.ajax({
-            url: '/api/errorrun/start',
+            url: endpoint_url,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),
@@ -318,22 +323,27 @@ var ErrorNoteRunner = (function () {
                 var rsp_data = response.data || {};
                 _session = rsp_data.session;
 
-                var question_no = rsp_data.next_question_no;
-                for (var i = 0; i < rsp_data.new_questions.length; i++) {
-                    var q = rsp_data.new_questions[i];
-                    var data = {
-                        question_no: q.question_no,
-                        item_id: q.item_id,
-                        marking_id: q.marking_id,
-                        is_flagged: q.is_flagged,
-                        is_read: q.is_read,
-                        saved_answer: q.saved_answer
-                    };
-                    _setItemInfo(q.question_no, data);
-                }
+                if (rsp_data.new_questions.length > 0) {
+                    var question_no = rsp_data.next_question_no;
+                    for (var i = 0; i < rsp_data.new_questions.length; i++) {
+                        var q = rsp_data.new_questions[i];
+                        var data = {
+                            question_no: q.question_no,
+                            item_id: q.item_id,
+                            marking_id: q.marking_id,
+                            is_flagged: q.is_flagged,
+                            is_read: q.is_read,
+                            saved_answer: q.saved_answer
+                        };
+                        _setItemInfo(q.question_no, data);
+                    }
 
-                _goToQuestionNo(question_no);
-                _startDurationTimer(rsp_data.start_time, rsp_data.current_time, rsp_data.test_duration);
+                    _goToQuestionNo(question_no);
+                    _startDurationTimer(rsp_data.start_time, rsp_data.current_time, rsp_data.test_duration);
+
+                } else {
+                    location.reload();
+                }
             }
         });
     };
@@ -355,7 +365,7 @@ var ErrorNoteRunner = (function () {
 
     _renderedCb = function (question_no) {
         $('.question-number').html(question_no);
-        if (question_no === 1) {
+        if (_findPrevQuestionNo(question_no) === -1) {
             $('.footer-back-btn').hide();
         } else {
             $('.footer-back-btn').show();

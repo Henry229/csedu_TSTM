@@ -26,7 +26,7 @@ class ErrorRunSession:
         'test_duration': 50
     }
 
-    def __init__(self, user_id=0, enroll_id=0, testset_id=0, duration=50, attempt_count=0, key=None):
+    def __init__(self, user_id=0, enroll_id=0, testset_id=0, duration=50, attempt_count=0, is_single=False, key=None):
         """
         AssessmentSession can be created with only key.
         Or other parameters are used to generate a key.
@@ -42,13 +42,14 @@ class ErrorRunSession:
                                      threshold=current_app.config['CACHE_THRESHOLD'],
                                      default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
         if key is None:
-            self.key = self.generate_key_string(user_id, enroll_id, testset_id, attempt_count)
+            self.key = self.generate_key_string(user_id, enroll_id, testset_id, attempt_count, is_single)
             self.cache.delete(self.key)
             self.assessment = copy.deepcopy(self.assessment_default)
             self.assessment.update({
                 'user_id': user_id,
                 'assessment_retry_id': enroll_id,
                 'attempt_count': attempt_count,
+                'type': 'single' if is_single else 'multi',
                 'testset_id': testset_id,
                 'test_duration': duration,
                 'status': self.STATUS_READY,
@@ -118,7 +119,7 @@ class ErrorRunSession:
         self.error_message = error_message
 
     @staticmethod
-    def generate_key_string(user_id, enroll_id, testset_id, attempt_count):
+    def generate_key_string(user_id, enroll_id, testset_id, attempt_count, is_single=False):
         """
         Cache key 로 사용할 random 문자열을 생성합니다.
         형식은 random_string:enroll_id 로 해서 session key 로부터 enroll id 를 바로 알아낼 수 있도록 합니다.
@@ -131,7 +132,7 @@ class ErrorRunSession:
         key_base = '{}:{}:{}:{}:{}'.format(user_id, enroll_id, testset_id, attempt_count,
                                            random.choices(string.ascii_lowercase + string.digits, k=24))
         hashed_string = hashlib.sha256(key_base.encode()).hexdigest()
-        key_string = '{}:{}'.format(hashed_string, enroll_id)
+        key_string = '{}:{}:{}'.format(hashed_string, enroll_id, 'single' if is_single else 'multi')
         return base64.urlsafe_b64encode(key_string.encode()).decode()
 
     @staticmethod
@@ -140,3 +141,14 @@ class ErrorRunSession:
         key_string = base64.urlsafe_b64decode(session_key.encode()).decode()
         enroll_id = key_string.split(':')[1]
         return int(enroll_id)
+
+    @staticmethod
+    def retry_is_single_from_session_key(session_key):
+        import base64
+        key_string = base64.urlsafe_b64decode(session_key.encode()).decode()
+        key_list = key_string.split(':')
+        if len(key_list) < 3:
+            return False
+        if key_list[2] == 'single':
+            return True
+        return False

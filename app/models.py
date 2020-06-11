@@ -1115,6 +1115,8 @@ class AssessmentRetry(db.Model):
     assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('assessment_enroll.id'))
     # homework or exam
     assessment_type = db.Column(db.String(32))
+    # is_single_retry: single retry or multi retry
+    is_single_retry = db.Column(db.Boolean, default=False)
     student_user_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))  # user table - id
     attempt_count = db.Column(db.Integer)
     # Test runner session key
