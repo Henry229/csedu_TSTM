@@ -23,11 +23,6 @@
 <body>
 <h4 class="ml-3 mt-3"><a href="/" class="text-decoration-none"><i class="fas fa-arrow-left mr-3"></i>Back to
   list</a></h4>
-{% if markings %}
-  {% set marking_rep = markings[0] %}
-{% else %}
-  {% set marking_rep = None %}
-{% endif %}
 <div class="container">
   <br><br>
   <input type="hidden" id="assessment_enroll_id" value="{{ assessment_enroll_id }}">
@@ -48,8 +43,8 @@
             <tr>
               <th> Score</th>
               <td> {{ score }}</td>
-              <th> Test Date</th>
-              <td> {{ marking_rep.created_time }}.</td>
+              <th> Date</th>
+              <td> {{ test_datetime }}</td>
             </tr>
           </table>
         </div>

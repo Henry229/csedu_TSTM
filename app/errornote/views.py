@@ -4,7 +4,6 @@ from sqlalchemy import desc, or_, and_
 
 from . import errornote
 from ..decorators import permission_required
-from ..api.reports import query_my_report_header
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews, AssessmentRetry, \
     Marking, Item, RetryMarking
 from ..web.views import view_explanation
@@ -33,14 +32,6 @@ def error_note(assessment_enroll_id):
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
 
-    # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
-    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
-    if ts_header is None:
-        url = request.referrer
-        flash('Marking data not available')
-        return redirect(url)
-    score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
-
     # 한번이라도 retry 를 한 question_no 를 찾는다.
     retried_questions = RetryMarking.query.with_entities(RetryMarking.question_no)\
         .join(AssessmentRetry,
@@ -53,18 +44,23 @@ def error_note(assessment_enroll_id):
         .outerjoin(Codebook, Item.category == Codebook.id).add_columns(Codebook.code_name)\
         .filter(Marking.assessment_enroll_id == assessment_enroll_id).order_by(Marking.question_no).all()
     markings = []
+    question_count, correct_count = 0, 0
     for marking, code_name in marking_query:
+        question_count = question_count + 1
         marking.category_name = code_name
         if is_blank_answer(marking.candidate_r_value):
             marking.candidate_r_value = ''
         if is_blank_answer(marking.last_r_value):
             marking.last_r_value = ''
         # retry 를 한번이라도 끝내야 설명을 볼 수 있다.
-        if marking.is_correct is not True:
+        if marking.is_correct is True:
+            correct_count = correct_count + 1
+        else:
             marking.explanation_link = view_explanation(testset_id=ts_id, item_id=marking.item_id)
             marking.explanation_link_enable = marking.question_no in retried_questions
         markings.append(marking)
-
+    correct_percent = correct_count * 100.0 / question_count
+    score = '{} out of {} ({:.2f}%)'.format(correct_count, question_count, correct_percent)
     last_error_count = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
                                             or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
         .count()
@@ -76,12 +72,13 @@ def error_note(assessment_enroll_id):
         if retry is not None and retry.finish_time is None:
             retry_session_key = retry.session_key
 
+    test_datetime = assessment_enroll.start_time.strftime("%d/%m/%Y %H:%M:%S")
     template_file = 'errornote/error_note.html'
     rendered_template = render_template(template_file, assessment_name=assessment_name,
                                         assessment_enroll_id=assessment_enroll_id,
                                         subject=test_subject_string,
                                         score=score, markings=markings, retry_session_key=retry_session_key,
-                                        last_error_count=last_error_count,
+                                        last_error_count=last_error_count, test_datetime=test_datetime,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
                                         grade=grade)
     return rendered_template
