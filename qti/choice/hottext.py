@@ -12,5 +12,6 @@ class Hottext(ContainerChoice):
     def to_html(self, interaction=None):
         template = 'choices/hottext.html'
         variables = self.get_template_html_variables()
+        variables['cardinality'] = interaction.get_cardinality()
         html_rendered = self.render_item_html_template(template, variables)
         return html_rendered

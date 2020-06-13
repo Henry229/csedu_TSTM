@@ -174,7 +174,7 @@ class Container(IdentifiedElementContainerMixin, Element):
         body_variables = {}
         html_rendered = str(self.body)
         for name, element in self.get_elements().items():
-            body_variables[name] = element.to_html()
+            body_variables[name] = element.to_html(interaction)
         if len(body_variables) > 0:
             tpl = Template(html_rendered)
             html_rendered = tpl.render(body_variables)

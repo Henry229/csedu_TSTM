@@ -1,6 +1,10 @@
 <span class="qti-choice qti-hottext hottext" data-identifier="{{ attributes.identifier }}" data-serial="{{ serial }}">
     <label class="hottext-checkmark">
+      {% if cardinality == 'single' %}
+        <input type="radio" name="hottext-checkmark" value="{{ attributes.identifier }}">
+      {% else %}
         <input type="checkbox" value="{{ attributes.identifier }}">
+      {% endif %}
         <span class="icon-checkbox small"></span>
     </label>
     <span class="hottext-content">{{ body }}</span>

@@ -24,6 +24,9 @@ var ItemHandlers = (function () {
         this.cardinality = options.data.cardinality;
         this.processUI = function (answer) {
             this.setSavedAnswer(answer);
+            $('.label-box').on('click', function () {
+                $(this).prev().click();
+            });
         };
         this.setSavedAnswer = function (answer) {
             if (typeof answer === 'string')
@@ -728,7 +731,7 @@ var ItemHandlers = (function () {
             this.setSavedAnswer(answer);
             $('.qti-interaction .qti-choice input').on('click', function () {
                 var checked = $('.qti-interaction .qti-choice input:checked');
-                if (checked.length > self.maxChoices) {
+                if (self.cardinality !== 'single' && checked.length > self.maxChoices) {
                     $(this).prop('checked', false);
                 }
             });

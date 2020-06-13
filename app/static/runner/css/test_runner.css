@@ -233,10 +233,13 @@ textarea:focus.qti-item.qti-interaction.solid {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+.qti-item .pseudo-label-box > label input {
+    width: 18px;
+}
 
 .qti-item .pseudo-label-box > label + div {
     cursor: pointer;
-    margin-left: 24px;
+    margin-left: 28px;
 }
 
 .qti-item .qti-choiceInteraction .choice-area .label-content {
@@ -493,7 +496,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     min-width: auto;
     width: auto;
 }
-
+.qti-item .qti-hottextInteraction .qti-hottext .hottext-checkmark input {
+    width: 17px;
+    margin-top: 2px;
+}
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  GapMatch Interaction
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */

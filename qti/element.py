@@ -165,7 +165,7 @@ class Element(Exportable):
         is_horizontal = variables['attributes'].get('orientation', 'vertical') == 'horizontal'
         variables['horizontal'] = is_horizontal
         if isinstance(self, FlowContainerMixin):
-            variables['body'] = self.get_body().to_html()
+            variables['body'] = self.get_body().to_html(self.relatedItem)
 
         return variables
 
