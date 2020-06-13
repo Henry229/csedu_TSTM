@@ -107,7 +107,7 @@ var TestRunner = (function () {
             }
         });
         document.addEventListener("contextmenu", function(e){
-            e.preventDefault();
+            // e.preventDefault();
         }, false);
     };
     var _setDurationTimer = function () {

@@ -682,7 +682,36 @@ textarea:focus.qti-item.qti-interaction.solid {
     -webkit-transform: rotate(-45deg);
     transform: rotate(-45deg);
 }
-
+.item-header .usage-info-button {
+    float: right;
+}
+.item-header .usage-info-button i {
+    float: right;
+    margin: 5px;
+    margin-top: 35px;
+    font-size: 20px;
+    color: white;
+}
+.usage-info {
+    position: absolute;
+    top: 61px;
+    width: 100%;
+}
+.usage-info #effect {
+    position: relative;
+    background-color: yellowgreen;
+    z-index: 10;
+}
+.usage-info   #effect h3 {
+    margin: 0;
+    padding: 0.4em;
+    text-align: center;
+}
+.usage-info   #effect p {
+    padding: 10px;
+    text-align: center;
+    color: orangered;
+}
 .item-card .item-container {
     position: absolute;
     overflow: auto;

@@ -1,5 +1,17 @@
 var ItemHandlers = (function () {
     var _interaction_type, _handler, _subject;
+    var _dndMessageInfo = "* Drag and drop to mark your answer.<br>* Click an answer to remove it.";
+    function enableUsageInfo(messageInfo) {
+        $('.usage-info-button').show();
+        $('.usage-info .message').html(messageInfo);
+        $('.usage-info-button').on('click', function () {
+            $('.usage-info #effect').show();
+            setTimeout(function () {
+                $( ".usage-info #effect" ).hide( 'slide', {direction: 'up'}, 1000 );
+            }, 2000)
+        });
+        $('.usage-info-button').click();
+    }
     var emptyInteractionHandler = function (options) {
         if (this === window) return new emptyInteractionHandler(options);
 
@@ -237,6 +249,7 @@ var ItemHandlers = (function () {
                 }
             });
             this.setSavedAnswer(answer);
+            enableUsageInfo(_dndMessageInfo);
         };
         this.setSavedAnswer = function (answer) {
             for (var i = 0; i < answer.length; i++) {
@@ -447,6 +460,7 @@ var ItemHandlers = (function () {
                 c.shape = shape;
             }
             this.setSavedAnswer(answer);
+            enableUsageInfo(_dndMessageInfo);
         };
 
         this.setSavedAnswer = function (answer) {
@@ -723,15 +737,24 @@ var ItemHandlers = (function () {
         this.cardinality = options.data.cardinality;
         this.interaction = options.data.interactions[0];
         var attributes = this.interaction.attributes || {};
-        this.maxChoices = attributes.maxChoices || 1;
-        this.minChoices = attributes.minChoices || 1;
+        if (this.cardinality === 'multiple' && attributes.maxChoices === 0) {
+            this.maxChoices = 0;
+        } else {
+            this.maxChoices = attributes.maxChoices || 1;
+        }
+        if (this.cardinality === 'multiple' && attributes.maxChoices === 0) {
+            this.minChoices = 0;
+        } else {
+            this.minChoices = attributes.minChoices || 1;
+        }
+
 
         this.processUI = function (answer) {
             var self = this;
             this.setSavedAnswer(answer);
             $('.qti-interaction .qti-choice input').on('click', function () {
                 var checked = $('.qti-interaction .qti-choice input:checked');
-                if (self.cardinality !== 'single' && checked.length > self.maxChoices) {
+                if (self.cardinality !== 'single' && self.maxChoices !== 0 && checked.length > self.maxChoices) {
                     $(this).prop('checked', false);
                 }
             });

@@ -263,6 +263,8 @@ class Element(Exportable):
         return self.relatedItem
 
     def xmlize_options(self, formal_opts, recursive=False):
+        import numbers
+
         xmlized = ''
 
         options = formal_opts if recursive else self.get_attribute_values()
@@ -270,6 +272,8 @@ class Element(Exportable):
             if type(value) is str:
                 v = html.escape(value, True)
                 xmlized += ' ' + key + '="' + v + '"'
+            elif isinstance(value, numbers.Number):
+                xmlized += ' ' + key + '="' + str(value) + '"'
             elif type(value) is bool:
                 v = 'true' if value else 'false'
                 xmlized += ' ' + key + '="' + v + '"'
