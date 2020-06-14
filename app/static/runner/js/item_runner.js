@@ -122,6 +122,7 @@ var ItemRunner = (function () {
             beforeSend: function () {
                 _disableSubmitResponse(true);
                 _$container.html(loading);
+                $('.usage-info-button').hide();
             },
             complete: function () {
 

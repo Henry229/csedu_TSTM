@@ -5,14 +5,14 @@
         display: none;
     }
 
-    .app-body {
+    .app-body.test-runner {
         margin-top: 0 !important;
     }
 }
-.app-body .container {
+.app-body.test-runner .container {
     overflow: hidden;
 }
-.app-body .main {
+.app-body.assessments .main {
     margin: 0 auto !important;
 }
 .app-body.test-runner .main .container-fluid {
@@ -20,7 +20,7 @@
 }
 
 @media (min-width: 1010px) {
-    .app-body .container {
+    .app-body.test-runner .container {
         max-width: 100%;
         padding-left: 0;
         padding-right: 0;
