@@ -345,6 +345,8 @@ def testset_list_unused():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def assessment_list():
+    import os
+    from config import basedir
     from ..api.assessmentsession import AssessmentSession
     # Parameter check
     guid_list = request.args.get("guid_list")
@@ -465,7 +467,13 @@ def assessment_list():
 
     # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
     # finished_assessments=finished_assessments)
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list)
+    try:
+        with open(os.path.join(basedir, 'runner_version.txt')) as f:
+            runner_version = f.readline().strip()
+    except FileNotFoundError:
+        runner_version = str(int(datetime.utcnow().timestamp()))
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
+                           runner_version=runner_version)
 
 
 @web.route('/testing', methods=['GET'])
