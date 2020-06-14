@@ -536,7 +536,12 @@ textarea:focus.qti-item.qti-interaction.solid {
 .block-listing.source li img {
     width: inherit;
 }
-
+/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  Media container
+ * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+.item-card .qti-itemBody .media-container {
+    box-shadow: 0 4px 4px 4px rgba(0, 0, 0, 0.2), 0 4px 4px 4px rgba(0, 0, 0, 0.19);
+}
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Test Runner Layout
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
