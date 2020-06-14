@@ -12,6 +12,20 @@
 .app-body .container {
     overflow: hidden;
 }
+.app-body .main {
+    margin: 0 auto !important;
+}
+.app-body.test-runner .main .container-fluid {
+    padding: 0 !important;
+}
+
+@media (min-width: 1010px) {
+    .app-body .container {
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Common: qti-item
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */

@@ -197,6 +197,7 @@ var ItemHandlers = (function () {
                     var index = this.attr('index');
                     var $selected = $('.source .ui-selected');
                     var c = choices[index];
+                    if (c['result'] !== undefined && c['result'] !== null) return;
                     c['result'] = $selected.data('identifier');
                     if ($selected.length === 0) return;
                     var href = $selected.find('img').attr('src');
@@ -234,13 +235,17 @@ var ItemHandlers = (function () {
                 },
                 stop: function (event, ui) {
                     var m_x = event.pageX, m_y = event.pageY;
-                    // console.log("Stop Mouse X: " + event.pageX + " Y: " + event.pageY);
+                    //console.log("Stop Mouse X: " + event.pageX + " Y: " + event.pageY);
                     for (var i = 0; i < _targets.length; i++) {
                         var t = _targets[i];
                         var bound = t.node.getBoundingClientRect();
-                        // console.log("bound rect X: " + bound.x + " Y: " + bound.y);
-                        if (m_x > bound.x && m_x < bound.x + bound.width
-                          && m_y > bound.y && m_y < bound.y + bound.height) {
+                        //console.log("bound rect X: " + bound.x + " Y: " + bound.y);
+                        //console.log("bound rect X: " + bound.left + " Y: " + bound.top);
+                        //IE returns Returns a ClientRectList with ClientRect objects (which do not contain x and y properties) instead of DOMRect objects
+                        var bound_x = bound.x || bound.left;
+                        var bound_y = bound.y || bound.top;
+                        if (m_x > bound_x && m_x < bound_x + bound.width
+                          && m_y > bound_y && m_y < bound_y + bound.height) {
                             t.fire('click');
                         }
                     }
@@ -460,7 +465,7 @@ var ItemHandlers = (function () {
                 c.shape = shape;
             }
             this.setSavedAnswer(answer);
-            enableUsageInfo(_dndMessageInfo);
+            // enableUsageInfo(_dndMessageInfo);
         };
 
         this.setSavedAnswer = function (answer) {
