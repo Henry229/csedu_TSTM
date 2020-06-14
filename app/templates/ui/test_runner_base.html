@@ -8,6 +8,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <title>CS Education</title>
         {%- block styles %}
+            {# polyfill must be loaded before mathjax/mml-chtml.js #}
+            <script src="/static/ui/vendors/polyfill/polyfill.3.52.0.min.js"></script>
+{#            <script src="https://polyfill.io/v3/polyfill.js?features=es6&version=3.52.0"></script>#}
             <link rel="stylesheet" type="text/css" href="/static/runner/css/print.css" media="print" />
             <!-- Icons-->
             <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
