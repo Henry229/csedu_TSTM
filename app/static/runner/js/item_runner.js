@@ -58,6 +58,26 @@ var ItemRunner = (function () {
         _review_mode = review_mode;
     }
 
+    var _calculateSize = function() {
+      // reading with a long description
+      //Up and Down
+      var col_12s = $('.item-body .grid-row .col-12');
+      if (col_12s.length > 1 ) {
+          // var item_body_height = $('.item-body')[0].clientHeight;
+          // var first_row_height = col_12s[0].clientHeight;
+          // If the description occupies more than 80%
+          // if (first_row_height / item_body_height > 0.8) {
+          //     $(col_12s[0]).addClass('with-scroll');
+          // }
+          // image 가 있는 경우 dom 의 크기가 이미지를 다 불러온 후에 변경이 되어 크기를 계산할 수 없다
+          $(col_12s[0]).addClass('with-scroll');
+      }
+      var col_6s = $('.item-body .grid-row .col-6');
+      if (col_6s.length > 1 ) {
+          $(col_6s[0]).addClass('with-scroll');
+      }
+    };
+    // Left and Right
     var postProcessRendered = function (data) {
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data,
             review_mode: _review_mode});
@@ -65,7 +85,8 @@ var ItemRunner = (function () {
             _handler.processUI(_item_info.saved_answer);
         }
         if (MathJax)
-            MathJax.typeset()
+            MathJax.typeset();
+        _calculateSize();
     };
 
     var drawRendered = function (rendered_html) {

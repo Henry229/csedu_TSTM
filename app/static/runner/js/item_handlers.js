@@ -8,7 +8,7 @@ var ItemHandlers = (function () {
             $('.usage-info #effect').show();
             setTimeout(function () {
                 $( ".usage-info #effect" ).hide( 'slide', {direction: 'up'}, 1000 );
-            }, 2000)
+            }, 1500)
         });
         $('.usage-info-button').click();
     }

@@ -143,7 +143,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     border-radius: 2px;
     -webkit-border-radius: 2px;
     background: transparent;
-    padding: 5px;
+    padding: 2px 5px;
     margin: 3px;
     cursor: pointer;
     position: relative;
@@ -401,18 +401,6 @@ textarea:focus.qti-item.qti-interaction.solid {
     border: 2px solid #e0e0e0;
     display: inline-block;
 }
-
-.qti-item .block-listing > li {
-    border: 0 solid #e0e0e0;
-    border-radius: 2px;
-    -webkit-border-radius: 2px;
-    background: transparent;
-    padding: 5px;
-    margin: 3px;
-    cursor: pointer;
-    position: relative;
-}
-
 
 .qti-item .qti-associateInteraction .result-area {
     width: 40%;
@@ -687,8 +675,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 }
 .item-header .usage-info-button i {
     float: right;
-    margin: 5px;
-    margin-top: 35px;
+    margin: 35px 5px 5px;
     font-size: 20px;
     color: white;
 }
@@ -700,6 +687,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 .usage-info #effect {
     position: relative;
     background-color: yellowgreen;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 4px 0 rgba(0, 0, 0, 0.19);
     z-index: 10;
 }
 .usage-info   #effect h3 {
@@ -754,9 +742,33 @@ textarea:focus.qti-item.qti-interaction.solid {
     right: 0;
     bottom: 0;
     box-sizing: border-box;
-    padding: 30px;
+    padding: 0 30px;
 }
 
+.item-card .item-body .grid-row .col-12.with-scroll {
+    max-height: 440px;
+    height: 440px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.19);
+}
+.item-card .item-body .grid-row .col-6.with-scroll {
+    max-height: 620px;
+    height: 620px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.19);
+}
+@media (max-height: 790px) {
+    .item-card .item-body .grid-row .col-12.with-scroll {
+        max-height: 400px;
+        height: 400px;
+    }
+    .item-card .item-body .grid-row .col-6.with-scroll {
+        max-height: 485px;
+        height: 485px;
+    }
+}
 .item-card .item-footer .footer-right-buttons {
     float: right;
 }
@@ -824,6 +836,9 @@ textarea:focus.qti-item.qti-interaction.solid {
 /**
  * Modal style
  */
+.item-card .modal-content {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 6px 0 rgba(0, 0, 0, 0.19);
+}
 .item-card .modal-content .modal-title {
     font-size: large;
     font-weight: bold;
