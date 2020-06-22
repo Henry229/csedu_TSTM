@@ -275,9 +275,10 @@ def create_session():
 
     attempt_count = 1
     # 4. Create a new enroll
+    assessment_type_name = Codebook.get_code_name(assessment.test_type)
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
                                 student_user_id=student_user_id, attempt_count=attempt_count,
-                                test_duration=test_duration)
+                                test_duration=test_duration, assessment_type=assessment_type_name)
     if student_ip:
         enrolled.start_ip = student_ip
     elif 'HTTP_X_FORWARDED_FOR' in request.headers.environ:

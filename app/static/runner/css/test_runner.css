@@ -1,3 +1,13 @@
+.navbar-brand {
+    margin-left: 10px;
+}
+.navbar-nav.log-out {
+    margin-right: 10px;
+}
+.assessment-list-header {
+    margin: 5px;
+}
+
 @media (max-height: 840px) {
     .app-header,
     .app-footer
@@ -26,6 +36,16 @@
         padding-right: 0;
     }
 }
+/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  Assessment list view
+ * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+.app-body.assessments.exam .assessment-homework,
+.app-body.assessments.homework .assessment-exam
+{
+    display: none;
+}
+
+
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Common: qti-item
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */

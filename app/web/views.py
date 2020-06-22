@@ -247,100 +247,6 @@ def get_assessment_guids(guid):
         return [assessment.GUID for assessment in assessments]
 
 
-# Use only assessment_list: Delete this function
-# @web.route('/tests/testsets', methods=['GET'])
-# @login_required
-# @permission_required(Permission.ITEM_EXEC)
-def testset_list_unused():
-    from ..api.assessmentsession import AssessmentSession
-    assessment_guid = request.args.get("assessment_guid")
-    # If assessment_guid in None, try to find it from session.
-    if assessment_guid is None:
-        session_id = request.args.get("session")
-        if session_id is None:
-            return page_not_found(e="Invalid request - session")
-        assessment_session = AssessmentSession(key=session_id)
-        if assessment_session.assessment is None:
-            return page_not_found(e="Invalid request - assessment information")
-        enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
-        assessment_guid = enroll.assessment_guid
-
-    # Parameter check
-    student = Student.query.filter_by(user_id=current_user.id).first()
-    if student is None:
-        return page_not_found(e="Login user not registered as student")
-
-    # Check if there is an assessment with the guid
-    assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
-    if assessment is None:
-        return page_not_found(e="Invalid request - assessment information")
-
-    # Get all assessment enroll to get testsets the student enrolled in already.
-    enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
-        .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                AssessmentEnroll.student_user_id == student.user_id).all()
-    enrolled_guids = [en.testset.GUID for en in enrolled]
-
-    # Get testsets in enrolled
-    # enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
-    enrolled_testsets = {}
-    for en in enrolled:
-        en.testset.resumable = False
-        if en.finish_time is None and en.test_duration is not None:
-            elapsed = datetime.utcnow() - en.start_time
-            if elapsed.total_seconds() < en.test_duration * 60:
-                en.testset.resumable = True
-                en.testset.session_key = en.session_key
-        enrolled_testsets[en.testset_id] = en.testset
-
-    student_testsets = []
-    # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
-    for tset in assessment.testsets:
-        if tset.GUID not in enrolled_guids:
-            tset.resumable = False
-            student_testsets.append(tset)
-    for ts_id in enrolled_testsets:
-        student_testsets.append(enrolled_testsets[ts_id])
-    new_test_sets = []
-    enable_report = False
-    for tset in student_testsets:
-        # Compare GUID to check enrollment status
-        enrolled = tset.GUID in enrolled_guids
-        # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
-        if not enrolled and not tset.active:
-            # 최신 test set version 을 찾는다.
-            # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
-            tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
-        new_test_sets.append(tset)
-        tset.enrolled = enrolled
-        test_type = Codebook.get_code_name(tset.test_type)
-        tset.explanation_link = view_explanation(tset.id)
-        enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
-        # If subject is 'Writing', report enabled:
-        #   - True when Marker's comment existing for 'ALL' items in Testset
-        #   - False when Marker's comment not existing
-        enable_writing_report = False
-        subject = Codebook.get_code_name(tset.subject)
-        additional_info = Codebook.get_additional_info(tset.subject)
-        tset.sort_key = additional_info['subject_order'] if additional_info else 1
-        if subject == 'Writing' and enable_report:
-            mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
-                join(AssessmentEnroll). \
-                filter(Marking.id == MarkingForWriting.marking_id). \
-                filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
-                filter(AssessmentEnroll.student_user_id == current_user.id). \
-                filter(Marking.testset_id == tset.id).all()
-            for mw in mws:
-                enable_writing_report = True if mw.markers_comment else False
-                if not enable_writing_report:
-                    break
-    # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
-    sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
-    return render_template('web/testsets.html', student_user_id=student.user_id, assessment_guid=assessment_guid,
-                           testsets=sorted_testsets, assessment_id=assessment.id,
-                           enable_report=enable_report, enable_writing_report=enable_writing_report )
-
-
 @web.route('/tests/assessments', methods=['GET'])
 @login_required
 @permission_required(Permission.ITEM_EXEC)
@@ -356,19 +262,21 @@ def assessment_list():
     else:
         # it's coming from internal link like finishing test or errors.
         assessment_guid = request.args.get("assessment_guid")
+        session_id = request.args.get("session")
         if assessment_guid is not None:
             guid_list = [assessment_guid]
-        else:
+        elif session_id is not None:
             # Exam is finished. it has only session key as a parameter.
-            session_id = request.args.get("session")
-            if session_id is None:
-                return page_not_found(e="Invalid request - session")
             assessment_session = AssessmentSession(key=session_id)
             if assessment_session.assessment is None:
                 return page_not_found(e="Invalid request - assessment information")
             enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
             assessment_guid = enroll.assessment_guid
             guid_list = [assessment_guid]
+        else:
+            # Show all assessment enrols if there is no guid parameter.
+            enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
+            guid_list = list({e.assessment_guid for e in enrols})
 
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
@@ -376,6 +284,7 @@ def assessment_list():
 
     assessments, finished_assessments = [], []
     assessments_list = {}
+    exam_count, homework_count = 0, 0
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
@@ -417,6 +326,15 @@ def assessment_list():
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
         flag_finish_assessment = True
+        assessment_type_name = Codebook.get_code_name(assessment.test_type)
+        if assessment_type_name == 'Homework':
+            homework_count += 1
+            assessment.assessment_type_name = 'Homework'
+            assessment.assessment_type_class = 'assessment-homework'
+        else:
+            exam_count += 1
+            assessment.assessment_type_name = 'Exam'
+            assessment.assessment_type_class = 'assessment-exam'
         for tset in student_testsets:
             # Compare GUID to check enrollment status
             is_enrolled = tset.GUID in enrolled_guid_assessment_types
@@ -427,9 +345,10 @@ def assessment_list():
                 tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
             if not is_enrolled or tset.resumable:
                 flag_finish_assessment = False
-            if is_enrolled:
-                assessment_type = enrolled_guid_assessment_types[tset.GUID]
-                tset.report_type = 'error-note' if assessment_type == 'homework' else 'report'
+            # if is_enrolled:
+            #     assessment_type = enrolled_guid_assessment_types[tset.GUID]
+            #     tset.report_type = 'error-note' if assessment_type == 'Homework' else 'report'
+            tset.report_type = 'error-note' if assessment_type_name == 'Homework' else 'report'
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
@@ -465,6 +384,26 @@ def assessment_list():
         assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
+    if homework_count is 0 and exam_count is 0:
+        btn_group = ''
+        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+    elif homework_count is 0:
+        btn_group = ''
+        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': 'active', 'display': '', 'checked': 'checked'}
+        btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+    elif exam_count is 0:
+        btn_group = ''
+        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': 'active', 'display': '', 'checked': 'checked'}
+    else:
+        btn_group = 'btn-group'
+        btn_all = {'active': 'active', 'display': '', 'checked': 'checked'}
+        btn_exam = {'active': '', 'display': '', 'checked': ''}
+        btn_homework = {'active': '', 'display': '', 'checked': ''}
     # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
     # finished_assessments=finished_assessments)
     try:
@@ -473,7 +412,8 @@ def assessment_list():
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
-                           runner_version=runner_version)
+                           runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
+                           btn_homework=btn_homework, btn_group=btn_group)
 
 
 @web.route('/testing', methods=['GET'])
