@@ -352,7 +352,7 @@ def assessment_list():
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
-            tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.enable_report = True if test_type in ['Naplan', 'Online OC', 'Homework'] else Config.ENABLE_STUDENT_REPORT
             # If subject is 'Writing', report enabled:
             #   - True when Marker's comment existing for 'ALL' items in Testset
             #   - False when Marker's comment not existing
