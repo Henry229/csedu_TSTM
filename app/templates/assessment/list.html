@@ -65,24 +65,45 @@
                                 <tbody>
                                 {% if assessments %}
                                     {% for assessment in assessments %}
-                                        <tr>
-                                            <td><input type="radio" name="r_tl"
-                                                       id="assessment_{{ assessment.id }}_testsets"
-                                                       value="{{ assessment.id }}"
-                                                       {% if loop.index==1 %}checked{% endif %}>
-                                            </td>
-                                            <td class="assessment_id"> {{ assessment.id }}</td>
-                                            <td class="assessment_name"> {{ assessment.name }}</td>
-                                            <td class="assessment_year">{{ assessment.year }}</td>
-                                            <td class="assessment_type"
-                                                id="{{ assessment.test_type }}"> {{ Codebook.get_code_name(assessment.test_type) }}</td>
-                                            <td class="assessment_branch"
-                                                id="{{ assessment.branch_id }}"> {{ Codebook.get_code_name(assessment.branch_id) }}</td>
-                                            <td class="assessment_review_period">
-                                                {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
-{#                                            <td class="assessment_date"> {{ assessment.session_date }}</td>#}
-{#                                            <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
-                                        </tr>
+                                        {% if assessment.delete is sameas True %}
+                                            <tr>
+                                                <td><del><input type="radio" name="r_tl"
+                                                           id="assessment_{{ assessment.id }}_testsets"
+                                                           value="{{ assessment.id }}"
+                                                                {% if loop.index==1 %}checked{% endif %}></del>
+                                                </td>
+                                                <td class="assessment_id"> <del>{{ assessment.id }}</del></td>
+                                                <td class="assessment_name"><del><strong>{{ assessment.name }}</strong><br>{{ assessment.GUID }}</del></td>
+                                                <td class="assessment_year"><del>{{ assessment.year }}</del></td>
+                                                <td class="assessment_type"
+                                                    id="{{ assessment.test_type }}"><del> {{ Codebook.get_code_name(assessment.test_type) }}</del></td>
+                                                <td class="assessment_branch"
+                                                    id="{{ assessment.branch_id }}"><del> {{ Codebook.get_code_name(assessment.branch_id) }}</del></td>
+                                                <td class="assessment_review_period"><del>
+                                                    {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</del></td>
+    {#                                            <td class="assessment_date"> {{ assessment.session_date }}</td>#}
+    {#                                            <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td><input type="radio" name="r_tl"
+                                                           id="assessment_{{ assessment.id }}_testsets"
+                                                           value="{{ assessment.id }}"
+                                                           {% if loop.index==1 %}checked{% endif %}>
+                                                </td>
+                                                <td class="assessment_id"> {{ assessment.id }}</td>
+                                                <td class="assessment_name"><strong>{{ assessment.name }}</strong><br>{{ assessment.GUID }}</td>
+                                                <td class="assessment_year">{{ assessment.year }}</td>
+                                                <td class="assessment_type"
+                                                    id="{{ assessment.test_type }}"> {{ Codebook.get_code_name(assessment.test_type) }}</td>
+                                                <td class="assessment_branch"
+                                                    id="{{ assessment.branch_id }}"> {{ Codebook.get_code_name(assessment.branch_id) }}</td>
+                                                <td class="assessment_review_period">
+                                                    {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
+    {#                                            <td class="assessment_date"> {{ assessment.session_date }}</td>#}
+    {#                                            <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 {% endif %}
                                 </tbody>

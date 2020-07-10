@@ -80,10 +80,15 @@ def _search_testsets():
 def _get_testsets():
     id = request.args.get('id', 0, int)
     assessment = Assessment.query.filter_by(id=id).first()
-    rows = []
+    rows, testset_list = [], []
+    for testset in assessment.testsets:
+        if testset.delete == True:
+            continue
+        else:
+            testset_list.append(testset)
     if assessment is not None:
         rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
-                row in assessment.testsets]
+                row in testset_list]
     return jsonify(rows)
 
 
