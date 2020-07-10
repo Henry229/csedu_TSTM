@@ -98,6 +98,7 @@
                                 <tr>
                                     <th></th>
                                     <th>ID</th>
+                                    <th>GUID</th>
                                     <th>Assessment Name</th>
                                     <th>Ver.</th>
                                     <th>Year</th>
@@ -120,6 +121,9 @@
                                                 </td>
                                                 <td class="assessment_id">
                                                     <del>{{ assessment.id }}</del>
+                                                </td>
+                                                <td class="assessment_guid">
+                                                    <del>{{ assessment.GUID }}</del>
                                                 </td>
                                                 <td class="assessment_name">
                                                     <del> {{ assessment.name }}</del>
@@ -156,6 +160,7 @@
                                                            value="{{ assessment.id }}">
                                                 </td>
                                                 <td class="assessment_id"> {{ assessment.id }}</td>
+                                                <td class="assessment_guid"> {{ assessment.GUID }}</td>
                                                 <td class="assessment_name"> {{ assessment.name }}</td>
                                                 <td class="assessment_version">v{{ assessment.version }}</td>
                                                 <td class="assessment_year" id="{{ assessment.year }}">{{ assessment.year }}</td>
