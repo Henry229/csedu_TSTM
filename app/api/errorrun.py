@@ -217,7 +217,7 @@ def start_error_run():
         next_item = get_next_item(error_run_session, question_no - 1)
 
     assessment_retry.session_key = error_run_session.key
-    if len(test_items) is 0:
+    if len(test_items) == 0:
         assessment_retry.finish_time = datetime.utcnow()
     db.session.commit()
 
@@ -302,7 +302,7 @@ def start_single_error_run():
     next_item = get_next_item(error_run_session, question_no - 1)
 
     assessment_retry.session_key = error_run_session.key
-    if len(test_items) is 0:
+    if len(test_items) == 0:
         assessment_retry.finish_time = datetime.utcnow()
     db.session.commit()
 
@@ -537,7 +537,7 @@ def error_run_finish_test(run_session):
         error_count = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id,
                                            or_(Marking.last_is_correct == False, Marking.last_is_correct == None)) \
             .count()
-        if error_count is 0:
+        if error_count == 0:
             retries = AssessmentRetry.query.filter_by(assessment_enroll_id=assessment_enroll_id, finish_time=None).all()
             for r in retries:
                 r.finish_time = datetime.utcnow()

@@ -368,7 +368,7 @@ def test_start(assessment_session):
         if m.question_no == question_no:
             question_loaded = True
     assessment_session.set_value('test_items', test_items)
-    if len(test_items) is 0 and question_no == 1:
+    if len(test_items) == 0 and question_no == 1:
         load_next_testlet(assessment_session)
     else:
         if question_loaded is False:
@@ -856,7 +856,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     sum_score = 0
     percentile = 0
     last_question_no = 0
-    if testlet_id is not 0:
+    if testlet_id != 0:
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
             .order_by(Marking.question_no).all()
