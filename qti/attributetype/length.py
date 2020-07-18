@@ -18,5 +18,8 @@ class Length(AttributeType):
     @classmethod
     def fix(cls, value):
         val = value.replace('%', '')
-        fixed = int(val)
+        try:
+            fixed = int(val)
+        except Exception:
+            fixed = None
         return fixed
