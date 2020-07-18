@@ -170,6 +170,10 @@ def process_inward():
     student_id = args["sid"]
     test_guid = args["aid"]
     session_timeout = int(args["sto"]) if args["sto"] else 120  # Minutes
+    try:
+        test_type = args["type"]
+    except:
+        test_type = None
 
     try:
         member = get_student_info(state, student_id)
@@ -213,7 +217,7 @@ def process_inward():
 
         # test_guid can be a plan or an assessment.
         if test_guid:
-            guids = get_assessment_guids(test_guid)
+            guids = get_assessment_guids(test_guid, test_type)
             return redirect(url_for('web.assessment_list', guid_list=",".join(guids)))
         else:
             if member['sales']:
@@ -221,7 +225,7 @@ def process_inward():
                 if len(guid_list):
                     all_guids = []
                     for guid in guid_list:
-                        all_guids += get_assessment_guids(guid)
+                        all_guids += get_assessment_guids(guid, test_type)
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
                     return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
@@ -231,16 +235,23 @@ def process_inward():
     return forbidden('<br>'.join(errors))
 
 
-def get_assessment_guids(guid):
+def get_assessment_guids(guid, test_type=None):
     """
     Get assessments guids
+    :param test_type: A specific test type to search
     :param guid: GUID of an assessment or a plan
     :return: list of assessments guids
     """
-    if Assessment.query.filter_by(GUID=guid).first():
-        return [guid]
+    if test_type:
+        test_type_code = Codebook.get_code_id(test_type)
+        assessment_guid = Assessment.query.filter_by(GUID=guid, test_type=test_type_code).first()
+        plan = EducationPlan.query.filter_by(GUID=guid, test_type=test_type_code).first()
+    else:
+        assessment_guid = Assessment.query.filter_by(GUID=guid).first()
+        plan = EducationPlan.query.filter_by(GUID=guid).first()
 
-    plan = EducationPlan.query.filter_by(GUID=guid).first()
+    if assessment_guid:
+        return [assessment_guid]
     if plan:
         assessments = [item.Assessment for item in db.session.query(Assessment, EducationPlanDetail).filter(
             EducationPlanDetail.plan_id == plan.id).filter(Assessment.id == EducationPlanDetail.assessment_id).all()]
@@ -297,7 +308,7 @@ def assessment_list():
                 continue
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id)\
+        enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
                     AssessmentEnroll.student_user_id == current_user.id).all()
         enrolled_guid_assessment_types = {en.testset.GUID: en.assessment_type for en in enrolled}
@@ -352,7 +363,8 @@ def assessment_list():
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
-            tset.enable_report = True if test_type in ['Naplan', 'Online OC', 'Homework'] else Config.ENABLE_STUDENT_REPORT
+            tset.enable_report = True if test_type in ['Naplan', 'Online OC',
+                                                       'Homework'] else Config.ENABLE_STUDENT_REPORT
             # If subject is 'Writing', report enabled:
             #   - True when Marker's comment existing for 'ALL' items in Testset
             #   - False when Marker's comment not existing
@@ -373,7 +385,7 @@ def assessment_list():
                         break
             tset.explanation_link = view_explanation(tset.id)
         # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
-        sorted_testsets = sorted(new_test_sets, key=lambda x:x.sort_key)
+        sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
 
         # Split assessments and finished_assessments
@@ -535,9 +547,9 @@ def modal_test():
             return page_not_found(e="Invalid request - assessment enroll information")
 
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.join(Testset, Testset.id==AssessmentEnroll.testset_id)\
-            .filter(AssessmentEnroll.assessment_guid==assessment_guid,
-                    AssessmentEnroll.student_user_id==current_user.id).all()
+        enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+            .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                    AssessmentEnroll.student_user_id == current_user.id).all()
         enrolled_guids = [en.testset.GUID for en in enrolled]
 
         # Get testsets in enrolled
@@ -560,15 +572,17 @@ def modal_test():
             test_type = Codebook.get_code_name(tset.test_type)
             additional_info = Codebook.get_additional_info(tset.subject)
             tset.sort_key = additional_info['subject_order'] if additional_info else 1
-            tset.enable_report = True if (test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
+            tset.enable_report = True if (
+                    test_type == 'Naplan' or test_type == 'Online OC') else Config.ENABLE_STUDENT_REPORT
             tset.explanation_link = view_explanation(tset.id)
         # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
-        sorted_testsets = sorted(new_test_sets, key=lambda x:x.sort_key)
+        sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
         assessments.append(assessment)
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    return render_template('web/test_modal_video_assessments.html', student_user_id=current_user.id, assessments=assessments)
+    return render_template('web/test_modal_video_assessments.html', student_user_id=current_user.id,
+                           assessments=assessments)
 
 
 @web.route('/tests/mp4_testing', methods=['GET'])
