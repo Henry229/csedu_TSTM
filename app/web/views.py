@@ -251,7 +251,7 @@ def get_assessment_guids(guid, test_type=None):
         plan = EducationPlan.query.filter_by(GUID=guid).first()
 
     if assessment_guid:
-        return [assessment_guid]
+        return [guid]
     if plan:
         assessments = [item.Assessment for item in db.session.query(Assessment, EducationPlanDetail).filter(
             EducationPlanDetail.plan_id == plan.id).filter(Assessment.id == EducationPlanDetail.assessment_id).all()]
@@ -396,17 +396,17 @@ def assessment_list():
         assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    if homework_count is 0 and exam_count is 0:
+    if homework_count == 0 and exam_count == 0:
         btn_group = ''
         btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
         btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}
         btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-    elif homework_count is 0:
+    elif homework_count == 0:
         btn_group = ''
         btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
         btn_exam = {'active': 'active', 'display': '', 'checked': 'checked'}
         btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-    elif exam_count is 0:
+    elif exam_count == 0:
         btn_group = ''
         btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
         btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}

@@ -69,6 +69,7 @@ def insert():
                                 modified_time=datetime.now(pytz.utc),
                                 created_time=datetime.now(pytz.utc))
         assessment.session_date = form.session_date.data
+        assessment.session_valid_until = form.session_valid_until.data
         # assessment.session_start_time = form.session_start_time.data
         # assessment.session_end_time = form.session_end_time.data
         db.session.add(assessment)
@@ -137,6 +138,7 @@ def edit(id):
     form.year.data = assessment.year
     form.review_period.data = assessment.review_period
     form.session_date.data = assessment.session_date
+    form.session_valid_until.data = assessment.session_valid_until
     # form.session_start_time.data = assessment.session_start_time
     # form.session_end_time.data = assessment.session_end_time
     return render_template("assessment/new.html", assessment_form=form)
@@ -170,6 +172,7 @@ def update():
                 new_assessment.year = form.year.data
                 new_assessment.review_period = form.review_period.data
                 new_assessment.session_date = form.session_date.data
+                new_assessment.session_valid_until = form.session_valid_until.data
                 # new_assessment.session_start_time = form.session_start_time.data
                 # new_assessment.session_end_time = form.session_end_time.data
                 new_assessment.modified_by = current_user.id
@@ -190,6 +193,8 @@ def update():
                 assessment.year = form.year.data
                 assessment.review_period = form.review_period.data
                 assessment.session_date = form.session_date.data
+                assessment.session_valid_until = form.session_valid_until.data
+
                 # assessment.session_start_time = form.session_start_time.data
                 # assessment.session_end_time = form.session_end_time.data
                 assessment.modified_by = current_user.id

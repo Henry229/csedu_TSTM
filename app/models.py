@@ -636,6 +636,7 @@ class Assessment(db.Model):
     year = db.Column(db.String(4), default=datetime.today().year)
     review_period = db.Column(db.Integer, default=7)
     session_date = db.Column(db.DateTime)
+    session_valid_until = db.Column(db.DateTime)
     session_start_time = db.Column(db.Time)
     session_end_time = db.Column(db.Time)
     avg_score = db.Column(db.Float)

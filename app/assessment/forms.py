@@ -49,6 +49,7 @@ class AssessmentCreateForm(FlaskForm):
     year = SelectField('Year', default=datetime.date.today().year)
     review_period = IntegerField('Review Period', default=7, widget=html5.NumberInput(min=0, max=28, step=7))
     session_date = DateField('Test Date', validators=[Optional()])
+    session_valid_until = DateField('Valid Until(Homework only)', validators=[Optional()])
     session_start_time = TimeField('Session Time')
     session_end_time = TimeField('Session Time')
     submit = SubmitField('Save')
