@@ -84,6 +84,11 @@
                                                                  data-testset-id="{{ ts.id }}"
                                                                  data-session-key="{{ ts.session_key }}"
                                                                  value="Resume">
+                                                      {% elif ts.restartable %}
+                                                        <input type="button" class="btn btn-primary btn-block start"
+                                                             data-student-user-id="{{ student_user_id }}"
+                                                             data-assessment-guid="{{ assessment.GUID }}"
+                                                             data-testset-id="{{ ts.id }}" value="Retry">
                                                       {% else %}
                                                           <input type="button" class="btn btn-secondary btn-block"
                                                                  value="Finished" disabled>

@@ -8,6 +8,7 @@ import pytz
 import requests
 from flask import render_template, request, redirect, flash, url_for
 from flask_login import login_required, login_user, current_user, logout_user
+from sqlalchemy import asc
 
 from app import db
 from app.testset.forms import TestsetSearchForm
@@ -299,18 +300,36 @@ def assessment_list():
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
         assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+        au_tz = pytz.timezone('Australia/Sydney')
         if assessment is None:
             continue
             # return page_not_found(e="Invalid request - assessment enroll information")
         elif assessment.session_date:
-            # if assessment session_date is comming after today, skip to display on student's assessment list page
-            if assessment.session_date > datetime.today():
+            # if assessment session_date is coming after today, skip to display on student's assessment list page
+            session_date = datetime(assessment.session_date.year, assessment.session_date.month,
+                                    assessment.session_date.day, tzinfo=au_tz)
+            if session_date.astimezone(pytz.UTC) > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 continue
 
+        assessment_type_name = Codebook.get_code_name(assessment.test_type)
+        homework_type_assessment = assessment_type_name == 'Homework'
+
+        homework_session_finished = False
+        if homework_type_assessment and assessment.session_valid_until:
+            session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
+                                    assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
+            if session_date.astimezone(pytz.UTC) < datetime.utcnow().replace(tzinfo=pytz.UTC):
+                homework_session_finished = True
+
         # Get all assessment enroll to get testsets the student enrolled in already.
-        enrolled = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+        # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
+        enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                    AssessmentEnroll.student_user_id == current_user.id).all()
+                    AssessmentEnroll.student_user_id == current_user.id)\
+            .order_by(asc(AssessmentEnroll.attempt_count)).all()
+        enrolled = {e.testset.GUID: e for e in enrolled_q}
+        # list 로 변경.
+        enrolled = list(enrolled.values())
         enrolled_guid_assessment_types = {en.testset.GUID: en.assessment_type for en in enrolled}
 
         # Get testsets in enrolled
@@ -319,6 +338,8 @@ def assessment_list():
         for en in enrolled:
             en.testset.resumable = False
             en.testset.enroll_id = en.id
+            # Homework 는 session_valid_until 까지 무제한 재 시도 가능하다.
+            en.testset.restartable = homework_type_assessment and not homework_session_finished
             if en.finish_time is None and en.test_duration is not None:
                 elapsed = datetime.utcnow() - en.start_time
                 if elapsed.total_seconds() < en.test_duration * 60:
@@ -337,8 +358,7 @@ def assessment_list():
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
         flag_finish_assessment = True
-        assessment_type_name = Codebook.get_code_name(assessment.test_type)
-        if assessment_type_name == 'Homework':
+        if homework_type_assessment:
             homework_count += 1
             assessment.assessment_type_name = 'Homework'
             assessment.assessment_type_class = 'assessment-homework'
@@ -346,6 +366,7 @@ def assessment_list():
             exam_count += 1
             assessment.assessment_type_name = 'Exam'
             assessment.assessment_type_class = 'assessment-exam'
+
         for tset in student_testsets:
             # Compare GUID to check enrollment status
             is_enrolled = tset.GUID in enrolled_guid_assessment_types
@@ -359,7 +380,7 @@ def assessment_list():
             # if is_enrolled:
             #     assessment_type = enrolled_guid_assessment_types[tset.GUID]
             #     tset.report_type = 'error-note' if assessment_type == 'Homework' else 'report'
-            tset.report_type = 'error-note' if assessment_type_name == 'Homework' else 'report'
+            tset.report_type = 'error-note' if homework_type_assessment else 'report'
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
@@ -389,7 +410,10 @@ def assessment_list():
         assessment.testsets = sorted_testsets
 
         # Split assessments and finished_assessments
-        if flag_finish_assessment:
+        # homework 는 기간 내에 무제한 시험 가능하다.
+        if homework_type_assessment and homework_session_finished:
+            finished_assessments.append(assessment)
+        elif not homework_type_assessment and flag_finish_assessment:
             finished_assessments.append(assessment)
         else:
             assessments.append(assessment)
