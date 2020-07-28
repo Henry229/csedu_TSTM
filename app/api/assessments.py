@@ -3,7 +3,7 @@ import os
 import random
 import string
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 from functools import wraps
 from time import time
 
@@ -263,24 +263,38 @@ def create_session():
     testset = Testset.query.filter_by(id=testset_id).first()
     if testset is None:
         return bad_request('testset_id', message="Cannot find testset_id {}".format(testset_id))
-    test_duration = testset.test_duration or 70
 
     # 2. check if the student went through the testset.
     # If we only handle single test, it's time to check count and proceed or stop processing.
     # did_enroll_count = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid,
     #                                                     student_user_id=student_user_id).count()
 
-    # 3. Find out the test attempt count. ==> 시험은 1회만 허용한다.
+    # 3. Find out the test attempt count. ==> 시험은 1회만 허용한다. 단 homework 는 정해진 기간 안에 무제한 가능하다.
     last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id,
-                                                    testset_id=testset_id) \
-        .first()
-    if last_attempt is not None:
-        return bad_request(error_code=TEST_SESSION_ERROR,
-                           message="This session is invalid! A new session has been started from another browser.")
+                                                    testset_id=testset_id)\
+        .order_by(desc(AssessmentEnroll.attempt_count)).first()
 
     attempt_count = 1
+    if last_attempt is not None:
+        # Homework 가 아니거나 homework 이더라도 시험이 진행중이면 새로 시작할 수는 없다.
+        if not assessment.is_homework or not AssessmentEnroll.is_finished:
+            return bad_request(error_code=TEST_SESSION_ERROR,
+                               message="This session is invalid! A new session has been started from another browser.")
+        else:
+            attempt_count = last_attempt.attempt_count + 1
+
     # 4. Create a new enroll
-    assessment_type_name = Codebook.get_code_name(assessment.test_type)
+    # assessment_type_name = Codebook.get_code_name(assessment.test_type)
+    assessment_type_name = assessment.test_type_name
+    if assessment.is_homework:
+        au_tz = pytz.timezone('Australia/Sydney')
+        session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
+                                assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
+        now = datetime.now(tz=au_tz)
+        remaining = session_date - now
+        test_duration = int(remaining.total_seconds() / 60)
+    else:
+        test_duration = testset.test_duration or 70
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
                                 student_user_id=student_user_id, attempt_count=attempt_count,
                                 test_duration=test_duration, assessment_type=assessment_type_name)
@@ -294,7 +308,7 @@ def create_session():
     if test_center:
         enrolled.test_center = test_center.id
     enrolled.start_time = datetime.utcnow()
-    enrolled.start_time_client = datetime.fromtimestamp(start_time, timezone.utc)
+    enrolled.start_time_client = datetime.fromtimestamp(start_time, pytz.utc)
     db.session.add(enrolled)
     db.session.commit()
     assessment_enroll_id = enrolled.id
@@ -803,7 +817,7 @@ def finish_test(assessment_session):
         enrolled = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
         if enrolled:
             enrolled.finish_time = datetime.utcnow()
-            enrolled.finish_time_client = datetime.fromtimestamp(finish_time, timezone.utc)
+            enrolled.finish_time_client = datetime.fromtimestamp(finish_time, pytz.utc)
             db.session.add(enrolled)
             db.session.commit()
 

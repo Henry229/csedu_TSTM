@@ -308,17 +308,17 @@ def assessment_list():
             # if assessment session_date is coming after today, skip to display on student's assessment list page
             session_date = datetime(assessment.session_date.year, assessment.session_date.month,
                                     assessment.session_date.day, tzinfo=au_tz)
-            if session_date.astimezone(pytz.UTC) > datetime.utcnow().replace(tzinfo=pytz.UTC):
+            if session_date > datetime.now(tz=au_tz):
                 continue
 
-        assessment_type_name = Codebook.get_code_name(assessment.test_type)
-        homework_type_assessment = assessment_type_name == 'Homework'
+        # assessment_type_name = assessment.test_type_name
+        homework_type_assessment = assessment.is_homework
 
         homework_session_finished = False
         if homework_type_assessment and assessment.session_valid_until:
             session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
                                     assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
-            if session_date.astimezone(pytz.UTC) < datetime.utcnow().replace(tzinfo=pytz.UTC):
+            if session_date < datetime.now(tz=au_tz):
                 homework_session_finished = True
 
         # Get all assessment enroll to get testsets the student enrolled in already.

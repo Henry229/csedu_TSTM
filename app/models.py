@@ -652,6 +652,18 @@ class Assessment(db.Model):
                                order_by='AssessmentHasTestset.testset_id.asc()')
     enroll = db.relationship('AssessmentEnroll', back_populates="assessment")
 
+    _test_type_name = None
+
+    @property
+    def test_type_name(self):
+        if self._test_type_name is None:
+            self._test_type_name = Codebook.get_code_name(self.test_type)
+        return self._test_type_name
+
+    @property
+    def is_homework(self):
+        return self.test_type_name == 'Homework'
+
     @property
     def branch_state(self):
         branch_info = Codebook.get_additional_info(self.branch_id)
