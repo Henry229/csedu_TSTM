@@ -93,7 +93,8 @@ var TestRunner = (function () {
             _finishTest('finish-popup');
         });
         $('.footer-finish .footer-finish-btn').on('click', function () {
-            _finishTest('finish-button');
+            ItemRunner.processResponse(_finishTest, 'finish-button');
+            // _finishTest('finish-button');
         });
         $('#timeoverModal .timeover-confirm').on('click', function () {
             _finishTest('time-over');

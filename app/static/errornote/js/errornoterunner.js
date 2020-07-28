@@ -20,7 +20,7 @@ var ErrorNoteRunner = (function () {
     var _assessment_enroll_id, _testset_id, _testlet_id, _stage_data, _session,
         _question_no, _review_mode = false, _answers_result = {};
     var _item_info = [], _last_question_no = 0;
-    var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
+    var _renderedCb, _responseProcessedCb, _responseProcessedSimpleCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
         _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb, _disableSubmitResponse;
     var _duration_timer, _start_time, _test_duration_minutes;
     var init = function ($container, options) {
@@ -40,6 +40,7 @@ var ErrorNoteRunner = (function () {
             renderedCb: _renderedCb,
             responseProcessingCb: _responseProcessingCb,
             responseProcessedCb: _responseProcessedCb,
+            responseProcessedSimpleCb: _responseProcessedSimpleCb,
             toggleFlaggedCb: _toggleFlaggedCb,
             sessionErrorCb: _sessionErrorCb,
             disableSubmitResponse: _disableSubmitResponse
@@ -101,7 +102,8 @@ var ErrorNoteRunner = (function () {
             _finishTest('finish-popup');
         });
         $('.footer-finish .footer-finish-btn').on('click', function () {
-            _finishTest('finish-button');
+            ItemRunner.processResponse(_finishTest, 'finish-button');
+            // _finishTest('finish-button');
         });
         $('#timeoverModal .timeover-confirm').on('click', function () {
             _finishTest('time-over');
@@ -337,6 +339,13 @@ var ErrorNoteRunner = (function () {
                         };
                         _setItemInfo(q.question_no, data);
                     }
+                    if (rsp_data.new_questions.length === 1) {
+                        $('.footer-next-btn').hide();
+                        $('.item-footer .footer-finish').show();
+                    } else {
+                        $('.footer-next-btn').show();
+                        $('.item-footer .footer-finish').hide();
+                    }
 
                     _goToQuestionNo(question_no);
                     _startDurationTimer(rsp_data.start_time, rsp_data.current_time, rsp_data.test_duration);
@@ -376,6 +385,7 @@ var ErrorNoteRunner = (function () {
         // review mode 에서는 답을 변경할 수 없도록 한다. input 이 아닌 item 은 item handler 참고.
         if (_review_mode) {
             $('.item-container input').attr('disabled', true);
+            $('.item-container select').attr('disabled', true);
             var header = $('.item-header');
             header.removeClass('correct incorrect');
             if (_answers_result[question_no])
@@ -386,7 +396,7 @@ var ErrorNoteRunner = (function () {
         // setCookie('question_no', question_no, 0);
     };
     _responseProcessedCb = function (rsp_data) {
-        _setItemInfo(rsp_data.question_no, {'saved_answer': rsp_data.saved_answer});
+        _responseProcessedSimpleCb(rsp_data);
         if (rsp_data.status === 'in_testing' && rsp_data.next_item_id) {
             var question_no = rsp_data.next_question_no;
             var data = {
@@ -414,6 +424,10 @@ var ErrorNoteRunner = (function () {
                 $('.item-footer .footer-finish').show();
             }
         }
+    };
+
+    _responseProcessedSimpleCb = function (rsp_data) {
+        _setItemInfo(rsp_data.question_no, {'saved_answer': rsp_data.saved_answer});
     };
 
     _responseProcessingCb = function (question_no, response) {

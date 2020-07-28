@@ -599,6 +599,10 @@ textarea:focus.qti-item.qti-interaction.solid {
     background-color: #f86c6b;
 }
 
+.item-card .item-header.correct {
+    background-color: #28a745;
+}
+
 .item-header .header-timer {
     float: left;
     font-size: 12px;

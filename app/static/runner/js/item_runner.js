@@ -15,7 +15,8 @@ var ItemRunner = (function () {
     var _assessment_enroll_id = 0;
     var _testset_id = 0;
     var _review_mode = false;
-    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _toggleFlaggedCb, _sessionErrorCb,
+    var _renderedCb, _responseProcessingCb, _responseProcessedCb, _responseProcessedSimpleCb,
+      _toggleFlaggedCb, _sessionErrorCb,
     _disableSubmitResponse;
 
     var init = function ($container, options) {
@@ -27,6 +28,7 @@ var ItemRunner = (function () {
         _renderedCb = options.renderedCb || emptyCb;
         _responseProcessingCb = options.responseProcessingCb || emptyCb;
         _responseProcessedCb = options.responseProcessedCb || emptyCb;
+        _responseProcessedSimpleCb = options.responseProcessedSimpleCb || emptyCb;
         _toggleFlaggedCb = options.toggleFlaggedCb || emptyCb;
         _sessionErrorCb = options.sessionErrorCb || emptyCb;
         _disableSubmitResponse = options.disableSubmitResponse || emptyCb;
@@ -150,14 +152,14 @@ var ItemRunner = (function () {
      *    이 경우 우선 processAssessmentFormResponse 로 파일을 업로드 하고, 성공하면 success 에서 processAssessmentResponse 를
      *    실행한다.
      */
-    var processResponse = function () {
+    var processResponse = function (callbackFn, callbackData) {
         var response = _handler.getResponse();
         if (response === null) return;
         if (_mode === 'assessment' || _mode === 'errornote') {
             if (response.formData || response.writing_text)
-                processAssessmentFormResponse(response);
+                processAssessmentFormResponse(response, callbackFn, callbackData);
             else
-                processAssessmentResponse(response);
+                processAssessmentResponse(response, callbackFn, callbackData);
         } else {
             processPreviewResponse(response);
         }
@@ -186,7 +188,7 @@ var ItemRunner = (function () {
         });
     };
 
-    var processAssessmentResponse = function (response) {
+    var processAssessmentResponse = function (response, callbackFn, callbackData) {
         var url = '/api/responses/' + _item_id;
         if (_mode === 'errornote') {
             url = '/api/errorrun/responses/' + _item_id;
@@ -225,7 +227,10 @@ var ItemRunner = (function () {
             success: function (response) {
                 // _disableSubmitResponse(false);
                 if (response.result === 'success') {
-                    if (_responseProcessedCb) {
+                    if (callbackFn) {
+                        _responseProcessedSimpleCb(response.data);
+                        callbackFn(callbackData);
+                    } else if (_responseProcessedCb) {
                         _responseProcessedCb(response.data);
                     }
                 } else {
@@ -245,7 +250,7 @@ var ItemRunner = (function () {
      *      2. 처리가 success 로 나오면 일반적인 데이터를 processAssessmentResponse 보낸다.
      * @param response
      */
-    var processAssessmentFormResponse = function (response) {
+    var processAssessmentFormResponse = function (response, callbackFn, callbackData) {
         var url = '/api/responses/file/' + _item_id;
         if (_mode === 'errornote') {
             url = '/api/errorrun/responses/file/' + _item_id;
@@ -284,7 +289,7 @@ var ItemRunner = (function () {
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    processAssessmentResponse(response_data);
+                    processAssessmentResponse(response_data, callbackFn, callbackData);
                 }
                 //_disableSubmitResponse(false);
             }
