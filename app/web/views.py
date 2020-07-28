@@ -422,24 +422,24 @@ def assessment_list():
 
     if homework_count == 0 and exam_count == 0:
         btn_group = ''
-        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-        btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
     elif homework_count == 0:
         btn_group = ''
-        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': 'active', 'display': '', 'checked': 'checked'}
-        btn_homework = {'active': '', 'display': 'style="display:none"', 'checked': ''}
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
     elif exam_count == 0:
         btn_group = ''
-        btn_all = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': '', 'display': 'style="display:none"', 'checked': ''}
-        btn_homework = {'active': 'active', 'display': '', 'checked': 'checked'}
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
     else:
         btn_group = 'btn-group'
-        btn_all = {'active': 'active', 'display': '', 'checked': 'checked'}
-        btn_exam = {'active': '', 'display': '', 'checked': ''}
-        btn_homework = {'active': '', 'display': '', 'checked': ''}
+        btn_all = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
     # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
     # finished_assessments=finished_assessments)
     try:
