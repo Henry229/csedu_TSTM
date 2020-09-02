@@ -410,7 +410,7 @@ def virtual_omr(assessment_id):
     Check sync status to csonlineschool through CS_API
     :return: Sync status page
     '''
-    return virtual_omr_sync(assessment_id, duration=30)
+    return virtual_omr_sync(assessment_id, duration=7)
 
 
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
@@ -427,7 +427,7 @@ def virtual_omr_resync(assessment_id):
         enroll.synced = False
         enroll.synced_time = None
     db.session.commit()
-    return virtual_omr_sync(assessment_id, duration=30)
+    return virtual_omr_sync(assessment_id, duration=7)
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
