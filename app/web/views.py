@@ -176,6 +176,9 @@ def process_inward():
     except:
         test_type = None
 
+    if test_type != "homework":
+        test_type = None
+
     try:
         member = get_student_info(state, student_id)
     except:
