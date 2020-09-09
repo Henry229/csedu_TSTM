@@ -111,6 +111,23 @@
                                                                   Exam Instructions
                                                               </button>
                                                           {% endif %}
+                                                      {% elif Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                  Exam Instructions
+                                                              </button>
+                                                          {% else %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/STT%20Mul_submission%20guide.pdf','_blank')">
+                                                                  Exam Instructions
+                                                              </button>
+                                                          {% endif %}
+                                                      {% elif Codebook.get_code_name(ts.test_type)=='OC' or Codebook.get_code_name(ts.test_type)=='Extra OC'  %}
+                                                          <button class="btn btn-warning btn-block btn-instruction"
+                                                                  onclick="window.open('https://tstm.csonlineschool.com.au/static/common/instructions/OC%20submission%20guide.pdf','_blank')">
+                                                                  Exam Instructions
+                                                          </button>
                                                       {% endif %}
                                                       <input type="button" class="btn btn-primary btn-block start"
                                                              data-student-user-id="{{ student_user_id }}"
