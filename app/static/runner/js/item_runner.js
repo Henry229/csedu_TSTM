@@ -79,10 +79,37 @@ var ItemRunner = (function () {
           $(col_6s[0]).addClass('with-scroll');
       }
     };
+
+    var _addJWPlayer = function () {
+        var a_tags = _$container.find('a');
+        var jw_element = null;
+        var player_file = '';
+        for (var i=0; i< a_tags.length; i++) {
+            if (a_tags[i].href.indexOf('jwplayer-id') !== -1) {
+                player_file = a_tags[i].href;
+                jw_element = $(a_tags[i]);
+                break;
+            }
+        }
+        if (jw_element === null) return;
+        var parent_div = jw_element.parents('div')[0];
+        parent_div.id = 'jwPlayer';
+        $(parent_div).empty();
+        var media_id = player_file.split('jwplayer-id/')[1];
+        jwplayer("jwPlayer").setup({
+            playlist: 'https://cdn.jwplayer.com/v2/media/' + media_id,
+            height: 360,
+            width: 640,
+            skin: {
+                name: "csedu"
+            }
+       });
+    };
     // Left and Right
     var postProcessRendered = function (data) {
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data,
             review_mode: _review_mode});
+        _addJWPlayer();
         if (_mode !== 'preview') {
             _handler.processUI(_item_info.saved_answer);
         }
