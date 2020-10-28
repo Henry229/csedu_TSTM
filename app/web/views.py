@@ -491,6 +491,8 @@ def testing():
         'student_branch': student.getCSCampusName(student.user_id),
         'assessment_guid': assessment_guid,
     }
+    # jwpalyer_library_url = current_app.config['JWPLAYER_LIBRARY_URL']
+    # context['jwpalyer_library_url'] = jwpalyer_library_url
 
     if testset_id is not None:
         testset = Testset.query.filter_by(id=testset_id).first()

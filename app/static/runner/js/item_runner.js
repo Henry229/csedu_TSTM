@@ -79,10 +79,64 @@ var ItemRunner = (function () {
           $(col_6s[0]).addClass('with-scroll');
       }
     };
+
+    var _addJWPlayer = function () {
+        var a_tags = _$container.find('a');
+        var jw_element = null;
+        var player_file = '';
+        for (var i=0; i< a_tags.length; i++) {
+            if (a_tags[i].href.indexOf('jwplayer-id') !== -1) {
+                player_file = a_tags[i].href;
+                jw_element = $(a_tags[i]);
+                break;
+            }
+        }
+        if (jw_element === null) return;
+        var parent_div = jw_element.parents('div')[0];
+        parent_div.id = 'jwPlayer';
+        $(parent_div).empty();
+        var media_info = _parse_media_info(player_file);
+        var playerInstance = jwplayer("jwPlayer").setup({
+            playlist: 'https://cdn.jwplayer.com/v2/media/' + media_info.media_id,
+            height: 360,
+            width: 640,
+            skin: {
+                name: "csedu"
+            },
+            autostart: media_info.auto_play ? 'viewable': false
+        });
+        playerInstance.on('ready', function () {
+            var caption_list = playerInstance.getCaptionsList();
+            if (media_info.show_caption && caption_list.length > 1) {
+                playerInstance.setCurrentCaptions(1);
+            }
+            else if (caption_list.length > 1) {
+                playerInstance.setCurrentCaptions(0);
+            }
+        });
+    };
+    var _parse_media_info = function (media_info_string) {
+        var info = {media_id: '', auto_play: false, show_caption: true};
+        var media_info = (media_info_string.split('jwplayer-id/')[1]).split('?');
+        info.media_id = media_info[0];
+        if (media_info.length>1) {
+            var params = media_info[1].split('&');
+            for (var i=0; i<params.length; i++) {
+                if (params[i].indexOf('auto_play=') === 0) {
+                    info.auto_play = params[i].split('=')[1] === 'on';
+                }
+                else if (params[i].indexOf('caption=') === 0){
+                    info.show_caption = params[i].split('=')[1] !== 'off';
+                }
+            }
+        }
+        return info;
+    };
     // Left and Right
     var postProcessRendered = function (data) {
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data,
             review_mode: _review_mode});
+        _addJWPlayer();
         if (_mode !== 'preview') {
             _handler.processUI(_item_info.saved_answer);
         }

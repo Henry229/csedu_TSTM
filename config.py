@@ -55,6 +55,8 @@ class Config(metaclass=MetaFlaskEnv):
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
     CACHE_THRESHOLD = 1000
 
+    JWPLAYER_LIBRARY_URL = "https://cdn.jwplayer.com/libraries/5E64IHOL.js"
+
     @classmethod
     def init_app(cls, app):
         # log 저장 폴더가 없으면 생성한다.
