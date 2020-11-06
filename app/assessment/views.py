@@ -20,7 +20,7 @@ from .. import db
 from ..api.httpstatus import is_success
 from ..decorators import permission_required
 from ..models import Codebook, Permission, Assessment, AssessmentHasTestset, EducationPlan, EducationPlanDetail, \
-    AssessmentEnroll, Testset, MarkingForWriting
+    AssessmentEnroll, Testset, MarkingForWriting, Item
 from ..writing.views import get_merged_images
 
 v_handler = TimedRotatingFileHandler(os.path.join(Config.LOGS_DIR, 'virtual_omr.log'), when='W0')
@@ -561,7 +561,11 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     else:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
                         try:
-                            answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                            is_interaction_type = Item.query.filter_by(m.item_id, interaction_type="choiceInteraction").first()
+                            if is_interaction_type:
+                                answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                            else:
+                                answers[str(m.question_no)] = ord(m.candidate_r_value)
                         except:
                             pass
 
