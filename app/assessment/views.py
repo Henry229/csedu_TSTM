@@ -569,6 +569,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
                         except Exception as e:
                             vomr_logger.error(e)
+                            vomr_logger.error("(%s) interaction_type: item.interaction_type(%s) m.item_id(%s)" % (e, item.interaction_type, m.item_id))
                             pass
 
                 marking = {
