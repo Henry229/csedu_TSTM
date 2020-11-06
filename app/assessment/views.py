@@ -567,6 +567,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             else:
                                 answers[str(m.question_no)] = ord(m.candidate_r_value)
                         except:
+                            vomr_logger.error("Getting end interaction_type m.item_id : %s" % e)
                             pass
 
                 marking = {
