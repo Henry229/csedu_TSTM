@@ -561,14 +561,14 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     else:
                         # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
                         try:
-                            ', interaction_type="choiceInteraction"'
                             item = Item.query.filter_by(id=m.item_id).first()
                             if item.interaction_type == "choiceInteraction":
                                 answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
                             else:
                                 answers[str(m.question_no)] = ord(m.candidate_r_value)
-                        except:
-                            vomr_logger.error("Getting end interaction_type")
+
+                        except Exception as e:
+                            vomr_logger.error(e)
                             pass
 
                 marking = {
