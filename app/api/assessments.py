@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import random
 import re
@@ -751,14 +752,21 @@ def rendered(item_id, assessment_session=None):
     marking.read_time = datetime.utcnow()
     db.session.commit()
     response['html'] = rendered_template
-    m = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
-    if m:
-        media_id = m.group(1)
+    media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
+    if media_id_match:
+        test_duration_min = assessment_session.get_value('test_duration')
+        start_time_sec = assessment_session.get_value('start_time')
+        remained_sec = test_duration_min*60 - int(datetime.now().timestamp() - start_time_sec)
+        # Max time remained set to 50 minutes
+        remained_sec = min(max(remained_sec, 0), 3000)
+        # Link is valid for remained_sec but normalized to 5 minutes to promote better caching
+        expires = math.ceil((time() + remained_sec) / 300) * 300
+        media_id = media_id_match.group(1)
         jw_key = current_app.config['JWAPI_CREDENTIAL']
         player_id = current_app.config['JWPLAYER_ID']
-        signed_player_url = get_signed_player(player_id, jw_key)
+        signed_player_url = get_signed_player(player_id, jw_key, expires)
         path = "/v2/media/{media_id}".format(media_id=media_id)
-        media_url = jwt_signed_url(path, jw_key)
+        media_url = jwt_signed_url(path, jw_key, expires)
         response['jw_player'] = {
             'player_url': signed_player_url, 'media_url': media_url
         }

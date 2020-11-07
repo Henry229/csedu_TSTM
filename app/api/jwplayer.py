@@ -1,12 +1,10 @@
 import hashlib
-import math
-import time
 import urllib.parse
 
 from jose import jwt
 
 
-def signed_url(path, expires, secret='', host="https://cdn.jwplayer.com"):
+def signed_url(path, expires, secret, host="https://cdn.jwplayer.com"):
     """
     returns a signed url, can be used for any "non-JWT" endpoint
     Args:
@@ -23,36 +21,32 @@ def signed_url(path, expires, secret='', host="https://cdn.jwplayer.com"):
     )
 
 
-def get_signed_player(player_id, secret):
+def get_signed_player(player_id, secret, expires):
     """
     Return signed url for the single line embed javascript.
 
     Args:
       player_id (str): the player id (also referred to as player key)
       secret (str): api secret
+      expires (int): time to expire
     """
     path = "libraries/{player_id}.js".format(player_id=player_id)
-
-    # Link is valid for 1 hour but normalized to 5 minutes to promote better caching
-    expires = math.ceil((time.time() + 3600) / 300) * 300
 
     # Generate signature
     return signed_url(path, expires, secret)
 
 
-def jwt_signed_url(path, secret='', host="https://cdn.jwplayer.com"):
+def jwt_signed_url(path, secret, expires, host="https://cdn.jwplayer.com"):
     """
     Generate url with signature.
     Args:
       path (str): url path
       secret (str): API secret
+      expires (int): time to expire
       host (str): url host
     """
 
-    # Link is valid for 1 hour but normalized to 6 minutes to promote better caching
-    exp = math.ceil((time.time() + 3600) / 300) * 300
-
-    params = {"resource": path, "exp": exp}
+    params = {"resource": path, "exp": expires}
 
     # Generate token
     # note that all parameters must be included here

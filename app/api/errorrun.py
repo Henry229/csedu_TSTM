@@ -1,5 +1,7 @@
 import json
+import math
 import os
+import re
 import subprocess
 from datetime import datetime
 from time import time
@@ -11,6 +13,7 @@ from sqlalchemy import desc, or_
 
 from app.api import api
 from app.decorators import permission_required
+from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.models import Permission, AssessmentEnroll, Marking, Item, Codebook, Student, AssessmentRetry, RetryMarking
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
@@ -365,6 +368,24 @@ def error_run_rendered(item_id, run_session=None):
     marking.read_time = datetime.utcnow()
     db.session.commit()
     response['html'] = rendered_template
+    media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
+    if media_id_match:
+        test_duration_min = run_session.get_value('test_duration')
+        start_time_sec = run_session.get_value('start_time')
+        remained_sec = test_duration_min * 60 - int(datetime.now().timestamp() - start_time_sec)
+        # Max time remained set to 50 minutes
+        remained_sec = min(max(remained_sec, 0), 3000)
+        # Link is valid for remained_sec but normalized to 5 minutes to promote better caching
+        expires = math.ceil((time() + remained_sec) / 300) * 300
+        media_id = media_id_match.group(1)
+        jw_key = current_app.config['JWAPI_CREDENTIAL']
+        player_id = current_app.config['JWPLAYER_ID']
+        signed_player_url = get_signed_player(player_id, jw_key, expires)
+        path = "/v2/media/{media_id}".format(media_id=media_id)
+        media_url = jwt_signed_url(path, jw_key, expires)
+        response['jw_player'] = {
+            'player_url': signed_player_url, 'media_url': media_url
+        }
     return success(response)
 
 
