@@ -80,8 +80,9 @@ var ItemRunner = (function () {
       }
     };
 
-    var _addJWPlayer = function () {
+    var _addJWPlayer = function (media_url) {
         if (!window.jwplayer) {
+            setTimeout(_addJWPlayer, 400, media_url);
             return;
         }
         var a_tags = _$container.find('a');
@@ -98,9 +99,10 @@ var ItemRunner = (function () {
         var parent_div = jw_element.parents('div')[0];
         parent_div.id = 'jwPlayer';
         $(parent_div).empty();
+        $(parent_div).show();
         var media_info = _parse_media_info(player_file);
         var playerInstance = jwplayer("jwPlayer").setup({
-            playlist: 'https://cdn.jwplayer.com/v2/media/' + media_info.media_id,
+            playlist: media_url,
             height: 360,
             width: 640,
             skin: {
@@ -117,6 +119,21 @@ var ItemRunner = (function () {
                 playerInstance.setCurrentCaptions(0);
             }
         });
+    };
+    var _hideJWPlayer = function (container) {
+        var a_tags = container.find('a');
+        var jw_element = null;
+        var player_file = '';
+        for (var i=0; i< a_tags.length; i++) {
+            if (a_tags[i].href.indexOf('jwplayer-id') !== -1) {
+                player_file = a_tags[i].href;
+                jw_element = $(a_tags[i]);
+                break;
+            }
+        }
+        if (jw_element === null) return;
+        var parent_div = jw_element.parents('div')[0];
+        $(parent_div).hide();
     };
     var _parse_media_info = function (media_info_string) {
         var info = {media_id: '', auto_play: false, show_caption: true};
@@ -139,7 +156,8 @@ var ItemRunner = (function () {
     var postProcessRendered = function (data) {
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data,
             review_mode: _review_mode});
-        _addJWPlayer();
+        if (data.jw_player)
+            _addJWPlayer(data.jw_player.media_url);
         if (_mode !== 'preview') {
             _handler.processUI(_item_info.saved_answer);
         }
@@ -148,9 +166,17 @@ var ItemRunner = (function () {
         _calculateSize();
     };
 
-    var drawRendered = function (rendered_html) {
+    var drawRendered = function (data) {
+        var rendered_html = data.html;
         _$container.empty();
         var div = $(rendered_html);
+        if (data.jw_player) {
+            _hideJWPlayer(div);
+            if (data.jw_player.player_url) {
+                _$container.append($('<script src="' + data.jw_player.player_url + '"></script>'));
+                window.jwplayer = null;
+            }
+        }
         _$container.append(div);
         if (_mode === 'preview') {
             div = $('<div class="alert alert-secondary" role="alert">');
@@ -194,7 +220,7 @@ var ItemRunner = (function () {
                     var data = response.data;
                     _item_id = item_id;
                     _interaction_type = data.type;
-                    drawRendered(data.html);
+                    drawRendered(data);
                     postProcessRendered(data);
                     _renderedCb(_question_no);
                 }

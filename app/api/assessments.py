@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 import string
 import subprocess
 from datetime import datetime, timedelta
@@ -16,6 +17,7 @@ from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
+from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
     Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
@@ -743,12 +745,23 @@ def rendered(item_id, assessment_session=None):
     rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
     if rendered_item:
         rendered_template = rendered_template.replace('rendered_html', rendered_item)
-    # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 ream time 을 기록해 준다.
+    # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
     enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
     marking = Marking.query.filter(Marking.assessment_enroll_id == enroll_id, Marking.item_id == item_id).first()
     marking.read_time = datetime.utcnow()
     db.session.commit()
     response['html'] = rendered_template
+    m = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
+    if m:
+        media_id = m.group(1)
+        jw_key = current_app.config['JWAPI_CREDENTIAL']
+        player_id = current_app.config['JWPLAYER_ID']
+        signed_player_url = get_signed_player(player_id, jw_key)
+        path = "/v2/media/{media_id}".format(media_id=media_id)
+        media_url = jwt_signed_url(path, jw_key)
+        response['jw_player'] = {
+            'player_url': signed_player_url, 'media_url': media_url
+        }
     return success(response)
 
 
