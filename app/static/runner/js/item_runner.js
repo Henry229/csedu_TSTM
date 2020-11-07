@@ -81,6 +81,9 @@ var ItemRunner = (function () {
     };
 
     var _addJWPlayer = function () {
+        if (!window.jwplayer) {
+            return;
+        }
         var a_tags = _$container.find('a');
         var jw_element = null;
         var player_file = '';

@@ -55,7 +55,7 @@ class Config(metaclass=MetaFlaskEnv):
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
     CACHE_THRESHOLD = 1000
 
-    JWPLAYER_LIBRARY_URL = "https://cdn.jwplayer.com/libraries/5E64IHOL.js"
+    # JWPLAYER_LIBRARY_URL = "https://cdn.jwplayer.com/libraries/rChucGVz.js"
 
     @classmethod
     def init_app(cls, app):
