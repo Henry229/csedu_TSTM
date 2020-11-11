@@ -55,9 +55,6 @@ class Config(metaclass=MetaFlaskEnv):
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
     CACHE_THRESHOLD = 1000
 
-    'JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "rChucGVz"
-    'JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "Fhg5KkfQ2IDcWSXF3FMPf07I"
-
     JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "EIV2hlne"
     JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "g3dW3bZQLNl4HfE7lR7dg2Ba"
 
