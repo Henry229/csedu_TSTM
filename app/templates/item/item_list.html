@@ -140,6 +140,9 @@
     <script>
         $(document).ready(function () {
             ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+            $('#dataModal').on('hidden.bs.modal', function (e) {
+                $('#dataModal .modal-content').empty();
+            });
             $('#export').on('click', function () {
                 var url = '/item/export?export=1';
                 if ($('#grade').val() !== '0')

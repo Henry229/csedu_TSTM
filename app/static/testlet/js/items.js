@@ -167,6 +167,9 @@ function drawItemListModal() {
 // invoke from items.html - Modal box
 function invokeModalItemInfo(id) {
     ItemRunner.init($('#dataModalInfo .modal-content'), {mode: 'preview'});
+    $('#dataModalInfo').on('hidden.bs.modal', function (e) {
+        $('#dataModalInfo .modal-content').empty();
+    });
 
     $('#dataModalInfo .modal-content').html("Loading... Try again if data not shown");
 

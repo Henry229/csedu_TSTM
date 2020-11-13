@@ -331,6 +331,9 @@
 <script type="text/javascript">
     $(document).ready(function () {
         ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
+        $('#dataModal').on('hidden.bs.modal', function (e) {
+            $('#dataModal .modal-content').empty();
+        });
     });
     $("#videoModal").on("show.bs.modal", function () {
         var explanation_link = $('#view_explanation_window').data('link');

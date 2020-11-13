@@ -264,6 +264,9 @@ function drawItemList(id, name, category, level) {
 
 function invokeModalItem(id) {
     ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+    $('#dataModal').on('hidden.bs.modal', function (e) {
+        $('#dataModal .modal-content').empty();
+    });
 
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
 

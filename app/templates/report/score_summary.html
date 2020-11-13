@@ -145,6 +145,9 @@
 <script type="text/javascript">
     $(document).ready(function () {
         ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
+        $('#dataModal').on('hidden.bs.modal', function (e) {
+            $('#dataModal .modal-content').empty();
+        });
     });
 </script>
 </body>

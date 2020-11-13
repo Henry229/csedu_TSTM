@@ -1,12 +1,15 @@
 import io
 import json
+import math
 import os
 import random
+import re
 import shutil
 import subprocess
 import time
 import uuid
 from datetime import datetime
+from time import time
 
 import pytz
 from flask import render_template, flash, current_app, send_from_directory, request, redirect, url_for, send_file
@@ -27,6 +30,7 @@ from .. import db
 from ..api.response import success
 from ..decorators import permission_required
 from ..models import Codebook, Item, Permission, Choices, ItemExplanation
+from app.api.jwplayer import get_signed_player, jwt_signed_url
 
 
 @item.route('/<int:id>', methods=['GET'])
@@ -622,6 +626,22 @@ def rendered(item_id):
         rendered_template = rendered_template.replace('Preview not available', rendered_item)
 
     response['html'] = rendered_template
+    media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
+    if media_id_match:
+        remained_sec = 60
+        # Max time remained set to 50 minutes
+        remained_sec = min(max(remained_sec, 0), 3000)
+        # Link is valid for remained_sec but normalized to 5 minutes to promote better caching
+        expires = math.ceil((time() + remained_sec) / 300) * 300
+        media_id = media_id_match.group(1)
+        jw_key = current_app.config['JWAPI_CREDENTIAL']
+        player_id = current_app.config['JWPLAYER_ID']
+        signed_player_url = get_signed_player(player_id, jw_key, expires)
+        path = "/v2/media/{media_id}".format(media_id=media_id)
+        media_url = jwt_signed_url(path, jw_key, expires)
+        response['jw_player'] = {
+            'player_url': signed_player_url, 'media_url': media_url
+        }
     return success(response)
 
 
