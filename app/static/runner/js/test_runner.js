@@ -64,6 +64,16 @@ var TestRunner = (function () {
         });
         var btn = $('.footer-next-btn');
         btn.on('click', function () {
+            var input = $('#rendered_item .qti-textEntryInteraction');
+			if (typeof(input) != 'undefined' && input != null)
+			{
+			    console.log(input.val());
+				var valid = /^\d+$/.test(input.val());
+				if(!valid){
+					alert("Please enter numbers only");
+					return false;
+				}
+			}
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
             ItemRunner.processResponse();
