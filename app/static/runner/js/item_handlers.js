@@ -895,6 +895,7 @@ var ItemHandlers = (function () {
                 answer = [answer];
             for (var i = 0; i < answer.length; i++) {
                 var ans = answer[i].split(" ");
+                if (ans[0] === "" || ans[0] === null ) continue;
                 var $source = $('.source [data-identifier=' + ans[0] + ']');
                 var $target = $('.qti-gap[data-identifier=' + ans[1] + ']');
                 $target[0].source = $source;
