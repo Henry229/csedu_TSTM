@@ -526,7 +526,7 @@ textarea:focus.qti-item.qti-interaction.solid {
  *  GapMatch Interaction
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 .qti-item .qti-gapMatchInteraction .gapmatch-content {
-    background: #f3f1ef;
+    background: #e4e7ea;
     color: #222;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
