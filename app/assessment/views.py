@@ -563,7 +563,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                         try:
 
                             item = Item.query.filter_by(id=m.item_id).first()
-                            if item.interaction_type == "choiceInteraction" and len(m.candidate_r_value) > 0:
+                            if item.interaction_type == "choiceInteraction" and m.candidate_r_value is not None:
                                 answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
                             else:
                                 answers[str(m.question_no)] = m.candidate_r_value
