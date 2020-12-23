@@ -73,13 +73,13 @@ var ItemRunner = (function () {
           // }
           // image 가 있는 경우 dom 의 크기가 이미지를 다 불러온 후에 변경이 되어 크기를 계산할 수 없다
           // if there is a question and answers in this div, skip addClass
-         if($(col_12s[0]).children("div").attr("data-serial") !== undefined){
+         if($(col_12s[0]).children("div").attr("data-serial") === undefined){
               $(col_12s[0]).addClass('with-scroll');
           }
       }
       var col_6s = $('.item-body .grid-row .col-6');
       if (col_6s.length > 1 ) {
-          if($(col_6s[0]).children("div").attr("data-serial") !== undefined) {
+          if($(col_6s[0]).children("div").attr("data-serial") === undefined) {
               $(col_6s[0]).addClass('with-scroll');
           }
       }
