@@ -55,8 +55,8 @@
                         </a>
                     </li>
                 {% endif %}
-                <li class="nav-title">Item</li>
                 {% if current_user.can(Permission.ITEM_MANAGE) %}
+                <li class="nav-title">Item</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/item/import">
                             <i class="fas fa-upload nav-icon"></i>Item Import</a>
@@ -74,8 +74,8 @@
                             <i class="nav-icon icons cui-layers"></i>Item Manage</a>
                     </li>
                 {% endif %}
-                <li class="nav-title">Testlet</li>
                 {% if current_user.can(Permission.TESTSET_READ) %}
+                <li class="nav-title">Testlet</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/testlet/list">
                             <i class="nav-icon icons cui-list"></i>Testlet Search</a>
@@ -87,8 +87,8 @@
                             <i class="fas fa-calendar-plus nav-icon"></i>Testlet Manage</a>
                     </li>
                 {% endif %}
-                <li class="nav-title">Testset</li>
                 {% if current_user.can(Permission.TESTSET_MANAGE) %}
+                <li class="nav-title">Testset</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/testset/create">
                             <i class="icons cui-map nav-icon"></i>Testset Create</a>
@@ -112,8 +112,8 @@
                             <i class="icons cui-graph nav-icon"></i> Testset Simulator</a>
                     </li>
                 {% endif %}
-                <li class="nav-title">Assessment</li>
                 {% if current_user.can(Permission.ASSESSMENT_READ) %}
+                <li class="nav-title">Assessment</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/assessment/list">
                             <i class="nav-icon icons cui-list"></i>Assessment Search</a>
@@ -125,16 +125,16 @@
                             <i class="fas fa-calendar-check nav-icon"></i> Assessment Manage</a>
                     </li>
                 {% endif %}
-                <li class="nav-title">Plan</li>
                 {% if current_user.can(Permission.ADMIN) %}
+                <li class="nav-title">Plan</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/plan/manage">
                             <i class="icons cui-globe nav-icon"></i> Package </a>
 {#                            <i class="icons cil-aperture nav-icon"></i>#}
                     </li>
                 {% endif %}
-                <li class="nav-title">Writing</li>
                 {% if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) %}
+                <li class="nav-title">Writing</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/writing/manage">
                             <i class="icons cui-monitor nav-icon"></i> Marking </a>

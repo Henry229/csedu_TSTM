@@ -495,8 +495,9 @@ def center():
     else:
         if Codebook.get_code_name(test_center) != 'All':
             # query = query.filter(AssessmentEnroll.test_center == test_center)
-            add_query_str = " and s.branch=\'\'"+str(test_center)+"\'\' "
-    # enrolls = query.order_by(AssessmentEnroll.student_user_id.asc()).all()
+            s_branch = Codebook.query.filter_by(id=test_center).first()
+            campus_prefix = s_branch.additional_info['campus_prefix']
+            add_query_str = " and s.branch=\'\'" + str(campus_prefix) + "\'\' "
 
     # {\"STT34 Mathematical Reasoning Skills\",\"STT34 Thinking Skills\"}
     test_type_name = Codebook.get_code_name(test_type)
@@ -518,7 +519,6 @@ def center():
         if len(t_items) > t_items_count:
             testset_name_list += ','
             columns_query += ','
-    flash(testset_dic)
 
     '''
     codebook.code_type = test_type 
