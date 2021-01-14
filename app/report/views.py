@@ -476,6 +476,143 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
+    if assessment_id == 0:
+        return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
+
+    # query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
+    #    filter_by(testset_id=testset_id)
+
+    assessment_name = Assessment.query.filter_by(id=assessment_id).first().name
+    add_query_str = ''
+    # Query current_user's test center
+    # If test_center 'All', query all
+    # If test_center 'Administrator', query all
+    if not current_user.is_administrator() and \
+            current_user.get_branch_id() != test_center:
+        query = query.filter(1 == 0)
+        new_query = query.filter(1 == 0)
+        flash("Forbidden branch data!")
+    else:
+        if Codebook.get_code_name(test_center) != 'All':
+            # query = query.filter(AssessmentEnroll.test_center == test_center)
+            add_query_str = " and s.branch=\'\'"+str(test_center)+"\'\' "
+    # enrolls = query.order_by(AssessmentEnroll.student_user_id.asc()).all()
+
+    # {\"STT34 Mathematical Reasoning Skills\",\"STT34 Thinking Skills\"}
+    test_type_name = Codebook.get_code_name(test_type)
+
+    t_items = AssessmentHasTestset.query.filter_by(assessment_id=assessment_id).all()
+    testset_name_list = ''
+    columns_query = ''
+    columns_list = []
+    testset_dic = {}
+    t_items_count = 0
+    for i in t_items:
+        i_testset = Testset.query.filter_by(id=i.testset_id).first()
+        testset_name_list += '\"' + i_testset.name + '\"'
+        columns_query += '\"' + i_testset.name + '\" Decimal'
+        columns_list.append(i_testset.name)
+        testset_dic[i_testset.id] = i_testset.name
+        # testset_list[t_items_count]['id'] = i_testset.id
+        t_items_count = t_items_count + 1
+        if len(t_items) > t_items_count:
+            testset_name_list += ','
+            columns_query += ','
+    flash(testset_dic)
+
+    '''
+    codebook.code_type = test_type 
+    Naplan, OC, Selective, Naplan-P, Homework, V_Y5 Scholarshop, V_Y7 Scholarship, V_Selective
+    Online OC, Summative test, Entry Test, Holiday OC, Extra OC, Selective Lesson, 
+    Preliminary Selective, Selective Sample
+    '''
+    score_query = '{' + testset_name_list + '}'  # candidate score by testset
+
+    new_query = text("SELECT  * FROM CROSSTAB \
+        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
+        a2.id, t2.name, \
+        CASE WHEN m.outcome_score <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) ELSE 0 END \
+        from marking m \
+        join assessment_enroll ae ON m.assessment_enroll_id = ae.id \
+        join student s on ae.student_user_id = s.user_id \
+        join users u on s.user_id = u.id \
+        join assessment a2 on ae.assessment_id = a2.id \
+        join assessment_testsets at2 on a2.id = at2.assessment_id \
+        join testset t2 on ae.testset_id = t2.id \
+        join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
+        where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
+        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
+        t2.name, m.outcome_score \
+        order by s.student_id', \
+        $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
+        AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
+        assessment_name VARCHAR, assessment_id integer,\
+        " + columns_query + ");")
+
+    report_list = db.session.execute(new_query)
+
+    '''
+    for enroll in enrolls:
+        # If subject is 'Writing', report enabled:
+        #   - True when Marker's comment existing for 'ALL' items in Testset
+        #   - False when Marker's comment not existing
+        enroll.enable_writing_report = False
+        enroll.is_writing = False
+        subject = Codebook.get_code_name(enroll.testset.subject)
+        if subject == 'Writing':
+            enroll.is_writing = True
+            mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                filter(Marking.id == MarkingForWriting.marking_id). \
+                filter(Marking.assessment_enroll_id == enroll.id).all()
+            for mw in mws:
+                enroll.enable_writing_report = True if mw.markers_comment else False
+                if not enroll.enable_writing_report:
+                    break
+    '''
+    return render_template('report/report_center.html', form=search_form, report_list=report_list,\
+                           columns_list=columns_list, testset_dic=testset_dic)
+
+
+@report.route('/center_old', methods=['GET'])
+@login_required
+@permission_required(Permission.ASSESSMENT_READ)
+def center_old():
+    test_type = request.args.get("test_type")
+    test_center = request.args.get("test_center")
+    year = request.args.get("year")
+    assessment = request.args.get("assessment")  # "assessment_id testset_id"
+    if assessment:
+        assessment_id = assessment.split("_")[0]
+        testset_id = assessment.split("_")[1]
+    else:
+        assessment_id = 0
+        testset_id = 0
+    if test_type or test_center or year:
+        flag = True
+    else:
+        flag = False
+
+    error = request.args.get("error")
+    if error:
+        flash(error)
+    if test_type:
+        test_type = int(test_type)
+    if test_center:
+        test_center = int(test_center)
+
+    search_form = ReportSearchForm()
+    if test_type is None:
+        search_form.test_type.data = Codebook.get_code_id('Naplan')
+    else:
+        search_form.test_type.data = test_type
+    # default setting value into test_center list
+    branch_id = current_user.get_branch_id()
+    if branch_id:
+        search_form.test_center.data = branch_id
+    else:
+        search_form.test_center.data = test_center
+    search_form.year.data = year
+
     query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=testset_id)
     # Query current_user's test center
@@ -507,7 +644,7 @@ def center():
                 if not enroll.enable_writing_report:
                     break
 
-    return render_template('report/report_center.html', form=search_form, enrolls=enrolls)
+    return render_template('report/report_center_old.html', form=search_form, enrolls=enrolls)
 
 
 @report.route('/test_ranking/<string:year>/<int:test_type>/<int:sequence>/<int:assessment_id>/<int:test_center>',

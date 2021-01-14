@@ -66,33 +66,37 @@
             </div>
             <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
                 <div class="card-body">
-                    {% if report_list %}
+                    {% if enrolls %}
                         <table id="table_info" class="table table-bordered table-hover">
                         <thead>
                             <tr bgcolor="#f5f5dc">
                                 <th>Student</th>
                                 <th>Assessment</th>
-                                {% for tsetname in testset_dic.values() %}
-                                    <th>{{ tsetname }}</th>
-                                {% endfor %}
-                                <th>Branch</th>
+                                <th>Testset</th>
+                                <th>Test Center</th>
+                                <th>Start Time</th>
+                                <th>Finish Time</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for rl in report_list %}
+                            {% for enroll in enrolls %}
                                 <tr>
-                                    <td>{{ rl.username }}</td>
-                                    <td>{{ rl.assessment_name }}</td>
-                                    {% for tsset in testset_dic %}
-                                        <td>
-                                        {% if rl[testset_dic[tsset]]: %}
-                                            {{ rl[testset_dic[tsset]] }}
-                                            <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
-                                        {% else: %}
+                                    <td>{{ User.getUserName(enroll.student_user_id) }}</td>
+                                    <td>{{ enroll.assessment_id }}<br>({{ enroll.assessment.name }})</td>
+                                    <td>{{ enroll.testset_id }}<br>({{ enroll.testset.name }} v.{{ enroll.testset.version }})</td>
+                                    <td>{{ enroll.test_center }}<br>({{ Codebook.get_code_name(enroll.test_center) }})</td>
+                                    <td>{{ enroll.start_time }}t</td>
+                                    <td>{{ enroll.finish_time }}</td>
+                                    <td>
+
+                                        <a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=enroll.assessment_id, student_user_id=enroll.student_user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>
+                                        {% if enroll.is_writing and not enroll.enable_writing_report %}
+                                            <span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>
+                                        {% else %}
+                                            <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=enroll.assessment_id, ts_id=enroll.testset_id, student_user_id=enroll.student_user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
                                         {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                    <td>{{ Codebook.get_code_name(rl.test_center) }}</td>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -100,10 +104,11 @@
                             <tr bgcolor="#f5f5dc">
                                 <th>Student</th>
                                 <th>Assessment</th>
-                                {% for column in columns_list %}
-                                    <th>{{ column }}</th>
-                                {% endfor %}
-                                <th>Branch</th>
+                                <th>Testset</th>
+                                <th>Test Center</th>
+                                <th>Start Time</th>
+                                <th>Finish Time</th>
+                                <td></td>
                             </tr>
                         </tfoot>
                         </table>
