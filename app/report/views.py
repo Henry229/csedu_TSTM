@@ -4,7 +4,7 @@ from datetime import datetime, date
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
