@@ -324,7 +324,8 @@ def query_my_report_body(assessment_enroll_id, ts_id):
                       'correct_r_value',
                       'item_percentile',
                       'item_id',
-                      'category'
+                      'category',
+                      'subcategory'
                       ]
     sql_stmt_1 = 'SELECT {columns} ' \
                  'FROM my_report_body_v ' \

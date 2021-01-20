@@ -11,7 +11,8 @@ AS SELECT m.assessment_enroll_id,
     get_marking_item_percentage(e.assessment_id, m.testset_id, m.item_id) AS item_percentile,
     m.question_no,
     m.item_id,
-    i.category
+    i.category,
+    i.subcategory
    FROM marking m,
     assessment_enroll e,
     item i
