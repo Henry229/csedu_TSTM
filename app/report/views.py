@@ -527,27 +527,27 @@ def center():
     score_query = '{' + testset_name_list + '}'  # candidate score by testset
 
     new_query = text("SELECT  * FROM CROSSTAB \
-            ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
-            a2.id, t2.name, \
-            CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
-            ELSE 0 END, ''('', Max(ts.rank_v), '')'')  score \
-            from marking m \
-            join assessment_enroll ae ON m.assessment_enroll_id = ae.id \
-            join student s on ae.student_user_id = s.user_id \
-            join users u on s.user_id = u.id \
-            join assessment a2 on ae.assessment_id = a2.id \
-            join assessment_testsets at2 on a2.id = at2.assessment_id \
-            join testset t2 on ae.testset_id = t2.id \
-            join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
-            join test_summary_mview ts on m.assessment_enroll_id= ts.assessment_enroll_id   \
-            where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
-            group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
-            t2.name \
-            order by s.student_id',\
-            $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
-            AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
-            assessment_name VARCHAR, assessment_id integer,\
-            " + columns_query + ");")
+        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
+        a2.id, t2.name, \
+        CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
+        ELSE 0 END, ''('', Max(ts.rank_v), '')'')  score \
+        from marking m \
+        join assessment_enroll ae ON m.assessment_enroll_id = ae.id \
+        join student s on ae.student_user_id = s.user_id \
+        join users u on s.user_id = u.id \
+        join assessment a2 on ae.assessment_id = a2.id \
+        join assessment_testsets at2 on a2.id = at2.assessment_id \
+        join testset t2 on ae.testset_id = t2.id \
+        join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
+        join test_summary_mview ts on m.assessment_enroll_id= ts.assessment_enroll_id   \
+        where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
+        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
+        t2.name \
+        order by s.student_id',\
+        $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
+        AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
+        assessment_name VARCHAR, assessment_id integer,\
+        " + columns_query + ");")
 
     report_list = db.session.execute(new_query)
 

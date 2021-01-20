@@ -73,8 +73,8 @@
                                 <th>No.</th>
                                 <th>Student</th>
                                 <th>Assessment</th>
-                                {% for tsetname in testset_dic.values() %}
-                                    <th>{{ tsetname }}</th>
+                                {% for column in columns_list %}
+                                    <th>{{ column }}</th>
                                 {% endfor %}
                                 <th>Branch</th>
                             </tr>
@@ -87,9 +87,11 @@
                                     <td>{{ rl.assessment_name }}</td>
                                     {% for tsset in testset_dic %}
                                         <td>
-                                        {% if rl[testset_dic[tsset]]: %}
-                                            {{ rl[testset_dic[tsset]] }}
-                                            <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                        {% if rl[testset_dic[tsset]["name"]]: %}
+                                            {{ rl[testset_dic[tsset]["name"]] }}
+                                            {% if rl[testset_dic[tsset]["subject"]] != 'Writing': %}
+                                                <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                            {% endif %}
                                         {% else: %}
                                         {% endif %}
                                         </td>
