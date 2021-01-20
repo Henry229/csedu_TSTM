@@ -89,7 +89,7 @@ class Config(metaclass=MetaFlaskEnv):
                         'VIC': 'Branches in VIC'}
 
     # Student Reports
-    ENABLE_STUDENT_REPORT = False
+    ENABLE_STUDENT_REPORT = True
 
 
 class DevelopmentConfig(Config):
