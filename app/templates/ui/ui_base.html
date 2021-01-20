@@ -112,14 +112,15 @@
                             <i class="icons cui-graph nav-icon"></i> Testset Simulator</a>
                     </li>
                 {% endif %}
-                {% if current_user.can(Permission.ASSESSMENT_READ) %}
+                {% if current_user.can(Permission.ADMIN) %}
                 <li class="nav-title">Assessment</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/assessment/list">
                             <i class="nav-icon icons cui-list"></i>Assessment Search</a>
                     </li>
                 {% endif %}
-                {% if current_user.can(Permission.ASSESSMENT_MANAGE) %}
+                {# if current_user.can(Permission.ASSESSMENT_MANAGE) #}
+                {% if current_user.can(Permission.ADMIN) %}
                     <li class="nav-item">
                         <a class="nav-link" href="/assessment/manage">
                             <i class="fas fa-calendar-check nav-icon"></i> Assessment Manage</a>
@@ -133,7 +134,8 @@
 {#                            <i class="icons cil-aperture nav-icon"></i>#}
                     </li>
                 {% endif %}
-                {% if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) %}
+                {# if current_user.can(Permission.WRITING_MANAGE) or current_user.can(Permission.WRITING_READ) #}
+                {% if current_user.can(Permission.ADMIN) %}
                 <li class="nav-title">Writing</li>
                     <li class="nav-item">
                         <a class="nav-link" href="/writing/manage">
@@ -204,17 +206,17 @@
                     {#            <li class="breadcrumb-item"><a href="/">Admin</a></li>#}
                     {#            <li class="breadcrumb-item active">Dashboard</li>#}
                     {#            {%- block breadcrumb-menu %}#}
-                    {#			<li class="breadcrumb-menu d-md-down-none">#}
-                    {#				<div class="btn-group" role="group" aria-label="Button group">#}
-                    {#					<a class="btn" href="#">#}
-                    {#						<i class="icon-speech"></i>#}
-                    {#					</a>#}
-                    {#					<a class="btn" href="./">#}
-                    {#						<i class="icon-graph"></i>  Dashboard</a>#}
-                    {#					<a class="btn" href="#">#}
-                    {#						<i class="icon-settings"></i>  Settings</a>#}
-                    {#				</div>#}
-                    {#			</li>#}
+                    {#       <li class="breadcrumb-menu d-md-down-none">#}
+                    {#          <div class="btn-group" role="group" aria-label="Button group">#}
+                    {#             <a class="btn" href="#">#}
+                    {#                <i class="icon-speech"></i>#}
+                    {#             </a>#}
+                    {#             <a class="btn" href="./">#}
+                    {#                <i class="icon-graph"></i>  Dashboard</a>#}
+                    {#             <a class="btn" href="#">#}
+                    {#                <i class="icon-settings"></i>  Settings</a>#}
+                    {#          </div>#}
+                    {#       </li>#}
                     {#            {%- endblock breadcrumb-menu %}#}
                 </ol>
             </nav>
