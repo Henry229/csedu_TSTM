@@ -70,6 +70,7 @@
                         <table id="table_info" class="table table-bordered table-hover">
                         <thead>
                             <tr bgcolor="#f5f5dc">
+                                <th>No.</th>
                                 <th>Student</th>
                                 <th>Assessment</th>
                                 {% for tsetname in testset_dic.values() %}
@@ -81,6 +82,7 @@
                         <tbody>
                             {% for rl in report_list %}
                                 <tr>
+                                    <td>{{ loop.index }}</td>
                                     <td>{{ rl.username }}</td>
                                     <td>{{ rl.assessment_name }}</td>
                                     {% for tsset in testset_dic %}
@@ -98,6 +100,7 @@
                         </tbody>
                         <tfoot>
                             <tr bgcolor="#f5f5dc">
+                                <th>No.</th>
                                 <th>Student</th>
                                 <th>Assessment</th>
                                 {% for column in columns_list %}
