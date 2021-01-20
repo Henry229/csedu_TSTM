@@ -44,7 +44,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
-            return redirect(url_for('web.index'))
+            return redirect(url_for('report.center'))
         flash('Login Failed. Please check if email address or password is correct.')
     return render_template('auth/login.html', form=form)
 
