@@ -19,7 +19,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer
-from ..decorators import permission_required
+from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting
 from ..web.views import view_explanation
@@ -100,7 +100,8 @@ def list_my_report():
 
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
-@permission_required(Permission.ITEM_EXEC)
+# @permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def my_report(assessment_id, ts_id, student_user_id):
     '''
      @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_user_id>', methods=['GET'])
