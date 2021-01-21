@@ -230,7 +230,7 @@
             $("#videoModal").on("show.bs.modal", function (event) {
                 var button = $(event.relatedTarget) //Button that triggered the modal
                 var explanation_link = button.data('link');
-                $('#video').attr('src', explanation_link);
+                $('#csmovie').attr('src', explanation_link);
             });
 
             $('#testsets input.report').on('click', function () {
