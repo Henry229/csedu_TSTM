@@ -165,7 +165,7 @@
                                                           <button class="btn btn-outline-danger" type="button"
                                                                  id="view_explanation_window"
                                                                  name="view_explanation_window"
-                                                                 data-toggle="modal" data-target="#videoModal"
+                                                                 data-toggle="modal" data-target="#csmovieModal"
                                                                  data-testset-id="{{ ts.id }}"
                                                                  data-link="{{ ts.explanation_link }}">
                                                           <i class="fa fa-play" style="color: #FF7F6E"></i>
@@ -227,7 +227,7 @@
                 });
             });
 
-            $("#videoModal").on("show.bs.modal", function (event) {
+            $("#csmovieModal").on("show.bs.modal", function (event) {
                 var button = $(event.relatedTarget) //Button that triggered the modal
                 var explanation_link = button.data('link');
                 $('#csmovie').attr('src', explanation_link);
