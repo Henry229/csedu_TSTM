@@ -595,10 +595,10 @@ def preview(item_id):
     return rendered_template
 
 
-@item.route('/<int:item_id>/review', methods=['GET'])
+@item.route('/<int:item_id>/review/<int:test_type>', methods=['GET'])
 @login_required
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
-def review(item_id):
+def review(item_id, test_type=None):
     rendered_preview = None
     from qti.itemservice.itemservice import ItemService
     qti_item_obj = Item.query.filter_by(id=item_id).first()
@@ -614,6 +614,9 @@ def review(item_id):
         qti_item = item_service.get_item()
         rendered_preview = qti_item.to_html()
     rendered_template = render_template("item/item_peek.html", item=qti_item_obj)
+
+    if Codebook.get_code_name(test_type) == 'CBOCTT' or Codebook.get_code_name(test_type) == 'CBSTT':
+        rendered_preview = None
     if rendered_preview:
         rendered_template = rendered_template.replace('Preview not available', rendered_preview)
     return rendered_template
