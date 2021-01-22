@@ -615,7 +615,7 @@ def review(item_id, test_type=None):
         rendered_preview = qti_item.to_html()
     rendered_template = render_template("item/item_peek.html", item=qti_item_obj)
 
-    if Codebook.get_code_name(test_type) == 'CBOCTT' or Codebook.get_code_name(test_type) == 'CBSTT':
+    if Codebook.get_code_name(test_type) != 'CBOCTT' and Codebook.get_code_name(test_type) != 'CBSTT':
         rendered_preview = None
     if rendered_preview:
         rendered_template = rendered_template.replace('Preview not available', rendered_preview)
