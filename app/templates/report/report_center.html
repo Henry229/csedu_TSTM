@@ -44,7 +44,7 @@
                              <div class="float-right">
                                  {% if test_type  %}
                                  {% if Codebook.get_code_name(test_type) == 'CBOCTT' or Codebook.get_code_name(test_type) == 'CBSTT' %}
-                                    {{ test_type }}
+
                                 <!-- <button class="btn btn-sm btn-outline-dark" style="background-color:#c8ced3;" type="button" id="btn_allqn">
                                                    Review All Questions
                                                 </button>-->
@@ -54,7 +54,7 @@
                                 <select id="review_item_id">
                                     <option value="">No.</option>
                                 {% for review_item in review_items %}
-                                <option value="{{review_item.item_id}}">{{review_item.item_id}}</option>
+                                <option value="{{review_item.item_id}}">{{ loop.index }}</option>
                                 {% endfor %}
                                 </select>
                                  <button class="btn btn-outline-dark" type="button" id="review-qn">Review Question </button>
