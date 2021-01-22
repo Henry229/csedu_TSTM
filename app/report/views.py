@@ -446,7 +446,7 @@ def center():
     test_center = request.args.get("test_center")
     year = request.args.get("year")
     assessment = request.args.get("assessment")  # "assessment_id testset_id"
-    if assessment:
+    if assessment is not None and assessment is not 0 and "_" in assessment:
         assessment_id = assessment.split("_")[0]
         testset_id = assessment.split("_")[1]
     else:
