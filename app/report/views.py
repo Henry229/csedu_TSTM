@@ -21,7 +21,8 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
-    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting
+    Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \
+    TestletHasItem
 from ..web.views import view_explanation
 
 ''' 
@@ -552,6 +553,15 @@ def center():
 
     report_list = db.session.execute(new_query)
 
+    if int(testset_id) > 0:
+        testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.branching).filter_by(
+            id=testset_id).first()
+        branching = testset.branching.get("data")
+        testlet_id = branching[0].get("id")
+        # testlet_id = 426
+        review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
+        # flash(review_items)
+
     '''
     for enroll in enrolls:
         # If subject is 'Writing', report enabled:
@@ -570,9 +580,9 @@ def center():
                 if not enroll.enable_writing_report:
                     break
     '''
-    return render_template('report/report_center.html', form=search_form, report_list=report_list,\
-                           columns_list=columns_list, testset_dic=testset_dic)
-
+    return render_template('report/report_center.html', form=search_form, report_list=report_list, \
+                           columns_list=columns_list, testset_dic=testset_dic, review_items=review_items, \
+                           test_type=test_type)
 
 @report.route('/center_old', methods=['GET'])
 @login_required

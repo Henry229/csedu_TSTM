@@ -41,21 +41,34 @@
                             {{ form.assessment.label }}
                             {{ form.assessment }}
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search Report</button>
+                             <div class="float-right">
+                                 {% if test_type  %}
+                                 {% if Codebook.get_code_name(test_type) == 'CBOCTT' or Codebook.get_code_name(test_type) == 'CBSTT' %}
+                                    {{ test_type }}
+                                <!-- <button class="btn btn-sm btn-outline-dark" style="background-color:#c8ced3;" type="button" id="btn_allqn">
+                                                   Review All Questions
+                                                </button>-->
+                                   <div id="status" class="alert alert-success" role="alert"></div>
+                             {% if review_items %}
+                                 Question No.
+                                <select id="review_item_id">
+                                    <option value="">No.</option>
+                                {% for review_item in review_items %}
+                                <option value="{{review_item.item_id}}">{{review_item.item_id}}</option>
+                                {% endfor %}
+                                </select>
+                                 <button class="btn btn-outline-dark" type="button" id="review-qn">Review Question </button>
+                                {% endif %}
+
+                                 {% endif %}
+                                 {% endif %}
                             {% if current_user.can(Permission.ADMIN) %}
-                                <div class="float-right">
-                                <!--<span class="btn btn-sm btn-outline-dark" data-toggle="modal"
-                                          data-target="#review-allquestions">Review All Questions</span>-->
-                                    <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
-                                          data-target="#confirm-generate">Refresh Collected Report Data</span>
-                                </div>
-                            {% else %}
-                                <!--<div class="float-right">
-                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
-                                          data-target="#review-allquestions">Review All Questions</span>
-                                </div>-->
+                                <!-- <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
+                                          data-target="#confirm-generate">Refresh Collected Report Data</span>-->
                             {% endif %}
-                        <br>
-                        <small>* Click Search assessment List and select Test Type to retrieve assessment</small>
+                            </div>
+                            <br>
+                            <small>* Click Search assessment List and select Test Type to retrieve assessment and review questions</small>
                         </form>
                         <p/>
                         <div id="status" class="alert alert-success" role="alert"></div>
@@ -150,6 +163,16 @@
                 var test_center = $('SELECT[name="test_center"] option:selected').val();
                 search_assessment(year, test_type, test_center);
             });
+
+            $("#review-qn").click(function (event) {
+               var review_item_id = $('SELECT[id="review_item_id"] option:selected').val();
+               if(review_item_id ==''){
+                    alert('Please select a question number.');
+               }else {
+                   var link = "https://tstm.csonlineschool.com.au/item/"+review_item_id+"/preview";
+                   window.open(link, '_blank','width=700,height=768,scrollbars=yes,location=no');
+               }
+           });
         });
 
     </script>
