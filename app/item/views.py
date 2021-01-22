@@ -28,7 +28,7 @@ from .forms import ItemSearchForm, ItemLoadForm, ItemListForm, FileLoadForm, Ite
     ItemEditSubForm, ItemEditExplanationForm
 from .. import db
 from ..api.response import success
-from ..decorators import permission_required
+from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Item, Permission, Choices, ItemExplanation
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 
@@ -590,6 +590,30 @@ def preview(item_id):
         qti_item = item_service.get_item()
         rendered_preview = qti_item.to_html()
     rendered_template = render_template("item/item_info.html", item=qti_item_obj)
+    if rendered_preview:
+        rendered_template = rendered_template.replace('Preview not available', rendered_preview)
+    return rendered_template
+
+
+@item.route('/<int:item_id>/review', methods=['GET'])
+@login_required
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
+def review(item_id):
+    rendered_preview = None
+    from qti.itemservice.itemservice import ItemService
+    qti_item_obj = Item.query.filter_by(id=item_id).first()
+    if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
+        try:
+            item_service = ItemService(qti_item_obj.file_link)
+            qti_item = item_service.get_item()
+            rendered_preview = qti_item.to_html()
+        except Exception as e:
+            print(e)
+    else:
+        item_service = ItemService(qti_item_obj.file_link)
+        qti_item = item_service.get_item()
+        rendered_preview = qti_item.to_html()
+    rendered_template = render_template("item/item_peek.html", item=qti_item_obj)
     if rendered_preview:
         rendered_template = rendered_template.replace('Preview not available', rendered_preview)
     return rendered_template

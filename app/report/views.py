@@ -582,7 +582,8 @@ def center():
     '''
     return render_template('report/report_center.html', form=search_form, report_list=report_list, \
                            columns_list=columns_list, testset_dic=testset_dic, review_items=review_items, \
-                           test_type=test_type)
+                           test_type=test_type, assessment=assessment)
+
 
 @report.route('/center_old', methods=['GET'])
 @login_required
