@@ -148,7 +148,7 @@
                                                                      data-assessment-id="{{ assessment.id }}"
                                                                      data-assessment-guid="{{ assessment.GUID }}"
                                                                      data-testset-id="{{ ts.id }}"
-                                                                     value="Test# {{ assessment.id }}- {{ ts.id }} ">
+                                                                     value="View Report">
                                                             {% else %}
                                                               <input class="btn btn-primary error-note"
                                                                      data-assessment-enrol-id="{{ ts.enroll_id }}"
@@ -166,6 +166,7 @@
                                                                  id="view_explanation_window"
                                                                  name="view_explanation_window"
                                                                  data-toggle="modal" data-target="#videoModal"
+                                                                 data-testset-id="{{ ts.id }}"
                                                                  data-link="{{ ts.explanation_link }}">
                                                           <i class="fa fa-play" style="color: #FF7F6E"></i>
                                                           </button>
@@ -226,8 +227,9 @@
                 });
             });
 
-            $("#videoModal").on("show.bs.modal", function () {
-                var explanation_link = $('#view_explanation_window').data('link');
+            $("#videoModal").on("show.bs.modal", function (event) {
+                var button = $(event.relatedTarget) //Button that triggered the modal
+                var explanation_link = button.data('link');
                 $('#video').attr('src', explanation_link);
             });
 

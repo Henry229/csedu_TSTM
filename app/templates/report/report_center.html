@@ -43,10 +43,19 @@
                             <button type="submit" class="btn btn-success btn-sm" id="btn_search">Search Report</button>
                             {% if current_user.can(Permission.ADMIN) %}
                                 <div class="float-right">
+                                <!--<span class="btn btn-sm btn-outline-dark" data-toggle="modal"
+                                          data-target="#review-allquestions">Review All Questions</span>-->
                                     <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
                                           data-target="#confirm-generate">Refresh Collected Report Data</span>
                                 </div>
+                            {% else %}
+                                <!--<div class="float-right">
+                                <span class="btn btn-sm btn-outline-dark" data-toggle="modal"
+                                          data-target="#review-allquestions">Review All Questions</span>
+                                </div>-->
                             {% endif %}
+                        <br>
+                        <small>* Click Search assessment List and select Test Type to retrieve assessment</small>
                         </form>
                         <p/>
                         <div id="status" class="alert alert-success" role="alert"></div>
