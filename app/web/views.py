@@ -176,14 +176,34 @@ def process_inward():
     except:
         test_type = None
 
-    if test_type != "homework":
+    if test_type != "homework" or test_type != "stresstest":
         test_type = None
 
-    try:
-        member = get_student_info(state, student_id)
-    except:
-        return forbidden("Invalid Request")
-    authorised, errors = is_authorised(member, session_timeout)
+    if test_type == 'stresstest':
+        log.debug("Stress Test")
+        try:
+            if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:
+                log.error("Wrong stress test token")
+                exit(1)
+        except Exception as e:
+            log.error(e)
+            exit(1)
+        authorised = True
+        student_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        member = {
+            'member': {
+                'stud_first_name': 'student_'+''.join(
+                random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+                'stud_last_name': 'stresstest',
+                'branch': 15
+            }
+        }
+    else:
+        try:
+            member = get_student_info(state, student_id)
+        except:
+            return forbidden("Invalid Request")
+        authorised, errors = is_authorised(member, session_timeout)
     if authorised:
         registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         if registered_student:
@@ -204,6 +224,7 @@ def process_inward():
                 active=True)
             student_user.password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+            log.debug(f"Stress test student: {student_user.username}:{student_user.password}")
             db.session.add(student_user)
             db.session.commit()  # Commit to get the student_user.id
 

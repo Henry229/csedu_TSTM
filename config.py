@@ -91,6 +91,9 @@ class Config(metaclass=MetaFlaskEnv):
     # Student Reports
     ENABLE_STUDENT_REPORT = False
 
+    # StressTest
+    STRESS_TEST_TOKEN = os.environ.get('STRESS_TEST_TOKEN') or '7QXgZGbIdVC1fSJB3pnXE28ZZjSfhktp'
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
