@@ -267,7 +267,7 @@ def get_assessment_guids(guid, test_type=None):
     :param guid: GUID of an assessment or a plan
     :return: list of assessments guids
     """
-    if test_type:
+    if test_type and test_type != "stresstest":
         test_type_code = Codebook.get_code_id(test_type)
         assessment_guid = Assessment.query.filter_by(GUID=guid, test_type=test_type_code).first()
         plan = EducationPlan.query.filter_by(GUID=guid, test_type=test_type_code).first()
