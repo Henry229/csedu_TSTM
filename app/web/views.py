@@ -189,13 +189,13 @@ def process_inward():
             log.error(e)
             exit(1)
         authorised = True
-        student_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        student_id = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(16))
         member = {
             'member': {
                 'stud_first_name': 'student_'+''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10)),
                 'stud_last_name': 'stresstest',
-                'branch': 15
+                'branch': 32
             }
         }
     else:
@@ -221,10 +221,12 @@ def process_inward():
                     member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
-                active=True)
-            student_user.password = ''.join(
+                active=True,
+                email=student_id+'@cseducation.com.au')
+            temp_password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
-            log.debug(f"Stress test student: {student_user.username}:{student_user.password}")
+            student_user.password = temp_password
+            log.debug(f"Stress test student: {student_user.username}:{temp_password}")
             db.session.add(student_user)
             db.session.commit()  # Commit to get the student_user.id
 
@@ -235,7 +237,8 @@ def process_inward():
             db.session.add(student)
 
         # Update campus info in the code book
-        update_campus_info(state)
+        if test_type != "stresstest":
+            update_campus_info(state)
         db.session.commit()
         login_user(student_user)
         # student_data = get_member_info(student_user_id)
@@ -267,7 +270,8 @@ def get_assessment_guids(guid, test_type=None):
     :param guid: GUID of an assessment or a plan
     :return: list of assessments guids
     """
-    if test_type:
+    log.debug(test_type)
+    if test_type and test_type != "stresstest":
         test_type_code = Codebook.get_code_id(test_type)
         assessment_guid = Assessment.query.filter_by(GUID=guid, test_type=test_type_code).first()
         plan = EducationPlan.query.filter_by(GUID=guid, test_type=test_type_code).first()
