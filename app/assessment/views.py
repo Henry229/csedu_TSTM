@@ -493,14 +493,13 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                 subject = Codebook.get_subject_name(testset.id)
                 # Sync only ended or timed out test. Give extra 11min to be safe
                 end_time = pytz.utc.localize(enroll.end_time(margin=11))
-                start_time = pytz.utc.localize(enroll.start_time(margin=11))
                 vomr_logger.info("Sync [%s] %s, %s(%s), %s(%s)" % (
                     assessment.name, assessment.GUID, testset.GUID, testset.id, enroll.student.student_id,
                     enroll.student.user_id))
-                if enroll.start_time:
-                    vomr_logger.info(" > Test started at %s" % enroll.start_time)
+                if enroll.finish_time:
+                    vomr_logger.info(" > Test finished at %s" % enroll.finish_time)
                     sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
-                    if start_time < sync_after_utc:
+                    if end_time < sync_after_utc:
                         vomr_logger.info(" > Result older than %s days. Skip" % duration)
                         continue
                 else:
