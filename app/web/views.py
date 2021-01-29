@@ -28,7 +28,7 @@ from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll
     @admin_required
     def for_admins_only():
         return "For administrators!"
-        
+
     @web.route'/testlet')
     @login_required
     @permission_required(Permission.TESTSET_MANAGEMENT)
@@ -175,8 +175,8 @@ def process_inward():
         test_type = args["type"]
     except:
         test_type = None
-
-    if test_type != "homework" or test_type != "stresstest":
+    log.debug(test_type)
+    if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
     if test_type == 'stresstest':
@@ -192,8 +192,8 @@ def process_inward():
         student_id = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(16))
         member = {
             'member': {
-                'stud_first_name': 'student_'+''.join(
-                random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+                'stud_first_name': 'student_' + ''.join(
+                    random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10)),
                 'stud_last_name': 'stresstest',
                 'branch': 32
             }
@@ -222,7 +222,7 @@ def process_inward():
                 role=role,
                 confirmed=True,
                 active=True,
-                email=student_id+'@cseducation.com.au')
+                email=student_id + '@cseducation.com.au')
             temp_password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
             student_user.password = temp_password
@@ -353,7 +353,7 @@ def assessment_list():
         # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
         enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                    AssessmentEnroll.student_user_id == current_user.id)\
+                    AssessmentEnroll.student_user_id == current_user.id) \
             .order_by(asc(AssessmentEnroll.attempt_count)).all()
         enrolled = {e.testset.GUID: e for e in enrolled_q}
         # list 로 변경.
@@ -377,7 +377,9 @@ def assessment_list():
 
         student_testsets = []
         # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
+        log.debug(assessment.testsets)
         for tset in assessment.testsets:
+            log.debug(tset)
             if tset.GUID not in enrolled_guid_assessment_types:
                 tset.resumable = False
                 student_testsets.append(tset)
