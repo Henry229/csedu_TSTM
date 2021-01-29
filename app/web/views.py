@@ -28,7 +28,7 @@ from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll
     @admin_required
     def for_admins_only():
         return "For administrators!"
-        
+
     @web.route'/testlet')
     @login_required
     @permission_required(Permission.TESTSET_MANAGEMENT)
@@ -175,15 +175,35 @@ def process_inward():
         test_type = args["type"]
     except:
         test_type = None
-
-    if test_type != "homework":
+    log.debug(test_type)
+    if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
-    try:
-        member = get_student_info(state, student_id)
-    except:
-        return forbidden("Invalid Request")
-    authorised, errors = is_authorised(member, session_timeout)
+    if test_type == 'stresstest':
+        log.debug("Stress Test")
+        try:
+            if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:
+                log.error("Wrong stress test token")
+                exit(1)
+        except Exception as e:
+            log.error(e)
+            exit(1)
+        authorised = True
+        student_id = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(16))
+        member = {
+            'member': {
+                'stud_first_name': 'student_' + ''.join(
+                    random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+                'stud_last_name': 'stresstest',
+                'branch': 32
+            }
+        }
+    else:
+        try:
+            member = get_student_info(state, student_id)
+        except:
+            return forbidden("Invalid Request")
+        authorised, errors = is_authorised(member, session_timeout)
     if authorised:
         registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         if registered_student:
@@ -201,9 +221,12 @@ def process_inward():
                     member['member']['stud_first_name'], member['member']['stud_last_name'], student_id),
                 role=role,
                 confirmed=True,
-                active=True)
-            student_user.password = ''.join(
+                active=True,
+                email=student_id + '@cseducation.com.au')
+            temp_password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+            student_user.password = temp_password
+            log.debug(f"Stress test student: {student_user.username}:{temp_password}")
             db.session.add(student_user)
             db.session.commit()  # Commit to get the student_user.id
 
@@ -214,7 +237,8 @@ def process_inward():
             db.session.add(student)
 
         # Update campus info in the code book
-        update_campus_info(state)
+        if test_type != "stresstest":
+            update_campus_info(state)
         db.session.commit()
         login_user(student_user)
         # student_data = get_member_info(student_user_id)
@@ -246,7 +270,8 @@ def get_assessment_guids(guid, test_type=None):
     :param guid: GUID of an assessment or a plan
     :return: list of assessments guids
     """
-    if test_type:
+    log.debug(test_type)
+    if test_type and test_type != "stresstest":
         test_type_code = Codebook.get_code_id(test_type)
         assessment_guid = Assessment.query.filter_by(GUID=guid, test_type=test_type_code).first()
         plan = EducationPlan.query.filter_by(GUID=guid, test_type=test_type_code).first()
@@ -328,7 +353,7 @@ def assessment_list():
         # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
         enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                    AssessmentEnroll.student_user_id == current_user.id)\
+                    AssessmentEnroll.student_user_id == current_user.id) \
             .order_by(asc(AssessmentEnroll.attempt_count)).all()
         enrolled = {e.testset.GUID: e for e in enrolled_q}
         # list 로 변경.
@@ -352,7 +377,9 @@ def assessment_list():
 
         student_testsets = []
         # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
+        log.debug(assessment.testsets)
         for tset in assessment.testsets:
+            log.debug(tset)
             if tset.GUID not in enrolled_guid_assessment_types:
                 tset.resumable = False
                 student_testsets.append(tset)
