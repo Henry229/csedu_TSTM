@@ -29,6 +29,7 @@ class QuickstartUser(HttpUser):
     # Assessment 관련된 정보
     assessment_guid = "4716ca6d-7be2-4ad7-aff8-b0c417aa95e6"
     testset_id = 633
+    # Local 시험용
     # assessment_guid = "3a7b5e92-208b-4cf8-8a99-c0cb14416a29"
     # testset_id = 8
     # {item_id: response} 형식입니다.
