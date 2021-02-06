@@ -180,10 +180,8 @@ def process_inward():
         test_type = None
 
     if test_type == 'stresstest':
-        log.debug("Stress Test")
         try:
             if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:
-                log.error("Wrong stress test token")
                 exit(1)
         except Exception as e:
             log.error(e)
@@ -226,7 +224,6 @@ def process_inward():
             temp_password = ''.join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
             student_user.password = temp_password
-            log.debug(f"Stress test student: {student_user.username}:{temp_password}")
             db.session.add(student_user)
             db.session.commit()  # Commit to get the student_user.id
 
