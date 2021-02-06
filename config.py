@@ -33,6 +33,12 @@ class Config(metaclass=MetaFlaskEnv):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 90,
+        'pool_timeout': 900,
+        'pool_size': 10,
+        'max_overflow': 5,
+    }
 
     # log 저장 폴더: LOGS_DIR 환경변수가 지정되지 않으면, 소스 폴더에 logs 폴더를 사용함.
     LOGS_DIR = os.environ.get('LOGS_DIR') or os.path.join(basedir, 'logs')
@@ -96,7 +102,7 @@ class Config(metaclass=MetaFlaskEnv):
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
+    # DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:P@ssword1@localhost/tailored'
     # SQLALCHEMY_ECHO = True
     PREFERRED_URL_SCHEME = 'https'
