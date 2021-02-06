@@ -1,6 +1,7 @@
 import json
 import base64
 import random
+import string
 import time
 from locust import HttpUser, task, between
 
@@ -20,6 +21,11 @@ locust -f locustfile.py
 """
 
 STRESS_TEST_TOKEN = "7QXgZGbIdVC1fSJB3pnXE28ZZjSfhktp"
+
+
+def get_random_string(length=16):
+    letters_and_digits = string.ascii_letters + string.digits
+    return ''.join((random.choice(letters_and_digits) for i in range(length)))
 
 
 class QuickstartUser(HttpUser):
@@ -55,7 +61,8 @@ class QuickstartUser(HttpUser):
     def rendered01(self):
         question = self.select_question()
         item_id = question.get('item_id')
-        response = self.client.get(f'/api/rendered/{item_id}', params={"session": self.session},
+        response = self.client.get(f'/api/rendered/{item_id}', name='/api/rendered/item_id',
+                                   params={"session": self.session, "r_key": get_random_string()},
                                    cookies=self.client.cookies.get_dict())
         # print(response.text)
 
@@ -66,7 +73,8 @@ class QuickstartUser(HttpUser):
         marking_id = question.get('marking_id')
         question_no = question.get('question_no')
         answer = self.responses.get(item_id, self.responses_default)
-        response = self.client.post(f"/api/responses/{item_id}",
+        response = self.client.post(f"/api/responses/{item_id}", name='/api/responses/item_id',
+                                    params={"r_key": get_random_string()},
                                     json={"session": self.session, "question_no": question_no,
                                           "marking_id": marking_id,
                                           "response": {"RESPONSE": answer}})
@@ -77,19 +85,33 @@ class QuickstartUser(HttpUser):
         token = {"sid": "csetest5", "aid": self.assessment_guid, "sto": 120,
                  "type": "stresstest", "stresstest_token": STRESS_TEST_TOKEN}
         token_base64 = base64.b64encode(json.dumps(token).encode()).decode()
-        # 1. inward 로 로그인함.
-        self.client.get("/inward?token=" + token_base64)
-        # print(self.client.cookies.get_dict())
+        retry_max = 30
+        try_count = 0
+        while try_count < retry_max:
+            try_count += 1
+            # 1. inward 로 로그인함.
+            response = self.client.get("/inward?token=" + token_base64, name='/inward',
+                                       params={"r_key": get_random_string()})
+            # print(self.client.cookies.get_dict())
+            if response.status_code != 200:
+                continue
 
-        # 2. 시험용 session 값을 받아와 저장
-        response = self.client.post("/api/session",
-                                    json={"assessment_guid": self.assessment_guid, "testset_id": self.testset_id,
-                                          "student_ip": "123.243.86.1", "start_time": int(time.time()),
-                                          "tnc_agree_checked": True}, cookies=self.client.cookies.get_dict())
-        self.session = response.json().get('data').get('session')
+            # 2. 시험용 session 값을 받아와 저장
+            response = self.client.post("/api/session", name='/api/session',
+                                        params={"r_key": get_random_string()},
+                                        json={"assessment_guid": self.assessment_guid, "testset_id": self.testset_id,
+                                              "student_ip": "123.243.86.1", "start_time": int(time.time()),
+                                              "tnc_agree_checked": True}, cookies=self.client.cookies.get_dict())
+            if response.status_code != 200:
+                continue
+            self.session = response.json().get('data').get('session')
 
-        # 3. test 를 시작하면서 문제를 받아옴.
-        response = self.client.post("/api/start", json={"session": self.session}, cookies=self.client.cookies.get_dict())
-        # print(response.json())
-        self.questions = response.json().get('data').get('new_questions')
+            # 3. test 를 시작하면서 문제를 받아옴.
+            response = self.client.post("/api/start", name='/api/start',
+                                        params={"r_key": get_random_string()},
+                                        json={"session": self.session}, cookies=self.client.cookies.get_dict())
+            # print(response.json())
+            if response.status_code == 200:
+                self.questions = response.json().get('data').get('new_questions')
+                try_count = retry_max
 
