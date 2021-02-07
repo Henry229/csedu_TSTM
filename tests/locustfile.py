@@ -30,7 +30,7 @@ def get_random_string(length=16):
 
 class QuickstartUser(HttpUser):
     # 각 request 간에 1초에서 2.5 초 간격을 둡니다.
-    wait_time = between(1, 2.5)
+    wait_time = between(0.5, 3.5)
 
     # Assessment 관련된 정보
     assessment_guid = "4716ca6d-7be2-4ad7-aff8-b0c417aa95e6"
@@ -95,7 +95,7 @@ class QuickstartUser(HttpUser):
             # print(self.client.cookies.get_dict())
             if response.status_code != 200:
                 continue
-
+            time.sleep(15)
             # 2. 시험용 session 값을 받아와 저장
             response = self.client.post("/api/session", name='/api/session',
                                         params={"r_key": get_random_string()},
@@ -104,6 +104,7 @@ class QuickstartUser(HttpUser):
                                               "tnc_agree_checked": True}, cookies=self.client.cookies.get_dict())
             if response.status_code != 200:
                 continue
+            time.sleep(15)
             self.session = response.json().get('data').get('session')
 
             # 3. test 를 시작하면서 문제를 받아옴.
@@ -114,4 +115,5 @@ class QuickstartUser(HttpUser):
             if response.status_code == 200:
                 self.questions = response.json().get('data').get('new_questions')
                 try_count = retry_max
+                time.sleep(40)
 
