@@ -73,7 +73,7 @@ class Config(metaclass=MetaFlaskEnv):
         import_temp_dir = app.config['IMPORT_TEMP_DIR']
         if os.path.exists(import_temp_dir):
             shutil.rmtree(import_temp_dir, ignore_errors=True)
-        os.mkdir(import_temp_dir)
+        os.makedirs(import_temp_dir, exist_ok=True)
         storage_dir = app.config['STORAGE_DIR']
         if not os.path.exists(storage_dir):
             os.mkdir(storage_dir)
