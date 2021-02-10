@@ -90,8 +90,8 @@ class QuickstartUser(HttpUser):
         while try_count < retry_max:
             try_count += 1
             # 1. inward 로 로그인함.
-            response = self.client.get("/inward?token=" + token_base64, name='/inward',
-                                       params={"r_key": get_random_string()})
+            response = self.client.get("/inward", name='/inward',
+                                       params={"token": token_base64, "r_key": get_random_string()})
             # print(self.client.cookies.get_dict())
             if response.status_code != 200:
                 continue
