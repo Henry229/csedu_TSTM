@@ -8,7 +8,7 @@ import pytz
 import requests
 from flask import render_template, request, redirect, flash, url_for
 from flask_login import login_required, login_user, current_user, logout_user
-from sqlalchemy import asc
+from sqlalchemy import asc, func
 
 from app import db
 from app.testset.forms import TestsetSearchForm
@@ -203,7 +203,9 @@ def process_inward():
             return forbidden("Invalid Request")
         authorised, errors = is_authorised(member, session_timeout)
     if authorised:
-        registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
+        # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
+        # ilike can't find exact matching student id e.g. ethan_H
+        registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(), Student.state == state).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
