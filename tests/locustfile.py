@@ -59,28 +59,30 @@ class QuickstartUser(HttpUser):
 
     @task
     def rendered01(self):
-        question = self.select_question()
-        item_id = question.get('item_id')
-        response = self.client.get(f'/api/rendered/{item_id}' + "?r_key=" + get_random_string(),
-                                   verify=False, name='/api/rendered/item_id',
-                                   params={"session": self.session},
-                                   cookies=self.client.cookies.get_dict())
-        # print(response.text)
+        if self.questions:
+            question = self.select_question()
+            item_id = question.get('item_id')
+            response = self.client.get(f'/api/rendered/{item_id}' + "?r_key=" + get_random_string(),
+                                       verify=False, name='/api/rendered/item_id',
+                                       params={"session": self.session},
+                                       cookies=self.client.cookies.get_dict())
+            # print(response.text)
 
     @task
     def response01(self):
-        question = self.select_question()
-        item_id = question.get('item_id')
-        marking_id = question.get('marking_id')
-        question_no = question.get('question_no')
-        answer = self.responses.get(item_id, self.responses_default)
-        response = self.client.post(f"/api/responses/{item_id}" + "?r_key=" + get_random_string(),
-                                    verify=False, name='/api/responses/item_id',
-                                    json={"session": self.session, "question_no": question_no,
-                                          "marking_id": marking_id,
-                                          "response": {"RESPONSE": answer}})
-        # print(response.json())
-        # print(response)
+        if self.questions:
+            question = self.select_question()
+            item_id = question.get('item_id')
+            marking_id = question.get('marking_id')
+            question_no = question.get('question_no')
+            answer = self.responses.get(item_id, self.responses_default)
+            response = self.client.post(f"/api/responses/{item_id}" + "?r_key=" + get_random_string(),
+                                        verify=False, name='/api/responses/item_id',
+                                        json={"session": self.session, "question_no": question_no,
+                                              "marking_id": marking_id,
+                                              "response": {"RESPONSE": answer}})
+            # print(response.json())
+            # print(response)
 
     def on_start(self):
         token = {"sid": "csetest5", "aid": self.assessment_guid, "sto": 120,

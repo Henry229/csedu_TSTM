@@ -905,10 +905,11 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     new_questions = []
     if next_branch_json is not None:
         testlet_id = next_branch_json.get("id")
-        stage = len(stage_data) + 1
-        stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
-        # stage 정보를 session 과 DB 에 저장한다.
-        assessment_session.set_value('stage_data', stage_data)
+        if stage_data:
+            stage = len(stage_data) + 1
+            stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
+            # stage 정보를 session 과 DB 에 저장한다.
+            assessment_session.set_value('stage_data', stage_data)
         assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
         assessment_enroll.stage_data = stage_data
         db.session.add(assessment_enroll)
@@ -937,7 +938,7 @@ def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
     testset = Testset.query.filter_by(id=testset_id).first()
     first_branch = testset.branching.get('data')[0]
 
-    if len(stage_data) == 0:
+    if stage_data is None or len(stage_data) == 0:
         next_branch = first_branch
     else:
         c_stage_no = stage_data[-1].get("stage")  # candidate's current stage_no
