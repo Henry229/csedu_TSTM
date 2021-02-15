@@ -915,6 +915,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         db.session.add(assessment_enroll)
         db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
+        marking_objects = []
         for item in items:
             last_question_no += 1
             marking = Marking(testset_id=testset_id,
@@ -922,14 +923,21 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                               item_id=item.item_id, question_no=last_question_no,
                               weight=item.weight,
                               assessment_enroll_id=assessment_enroll_id)
-            db.session.add(marking)
-            db.session.commit()
-            item_info = {'question_no': last_question_no, 'item_id': marking.item_id,
+            marking_objects.append(marking)
+        # higher performing “executemany” operations
+        # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
+        db.session.bulk_save_objects(marking_objects, return_defaults=False)
+        markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
+                                           testset_id=testset_id, testlet_id=testlet_id) \
+            .order_by(Marking.question_no).all()
+        for marking in markings:
+            item_info = {'question_no': marking.question_no, 'item_id': marking.item_id,
                          'marking_id': marking.id, 'is_flagged': marking.is_flagged, 'is_read': marking.is_read,
                          'saved_answer': marking.candidate_r_value if marking.candidate_r_value is not None else ''
                          }
             test_items.append(item_info)
             new_questions.append(item_info)
+
         assessment_session.set_value('test_items', test_items)
     return new_questions
 
