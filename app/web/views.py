@@ -413,8 +413,20 @@ def assessment_list():
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
             test_type = Codebook.get_code_name(tset.test_type)
-            tset.enable_report = True if test_type in ['Naplan', 'Online OC',
-                                                       'Homework', 'CBSTT', 'CBOCTT'] else Config.ENABLE_STUDENT_REPORT
+            # tset.enable_report = True if test_type in ['Naplan', 'Online OC',
+            #                                           'Homework', 'CBSTT', 'CBOCTT'] else Config.ENABLE_STUDENT_REPORT
+            # managing how showing video,report with Codebook not the code above
+            test_type_additional_info = Codebook.get_additional_info(tset.test_type)
+            tset.enable_report = False
+            tset.enable_video = False
+            if test_type_additional_info is not None and test_type_additional_info['enable_report']:
+                if test_type_additional_info['enable_report'] == 'true':
+                    tset.enable_report = True
+
+            if test_type_additional_info is not None and test_type_additional_info['enable_video']:
+                if test_type_additional_info['enable_video'] == 'true':
+                    tset.enable_video = True
+
             # If subject is 'Writing', report enabled:
             #   - True when Marker's comment existing for 'ALL' items in Testset
             #   - False when Marker's comment not existing

@@ -52,6 +52,8 @@
                                           <th>Status</th>
                                           {% if assessment.testsets and assessment.testsets[0].enable_report %}
                                               <th>Report</th>
+                                          {% endif %}
+                                          {% if assessment.testsets and assessment.testsets[0].enable_video %}
                                               <th align="center"><span class="btn btn-default"><i
                                                       class="fa fa-microphone"></i></span></th>
                                           {% endif %}
@@ -160,6 +162,8 @@
                                                                  value="Not Available" disabled>
                                                       {% endif %}
                                                   </td>
+                                              {% endif %}
+                                              {% if ts.enable_video %}
                                                   <td>
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <button class="btn btn-outline-danger" type="button"
