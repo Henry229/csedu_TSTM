@@ -88,12 +88,12 @@
     {% set marking_rep = None %}
 {% endif %}
 
-{% if Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
     {% set enable_video = True %}
 {% else %}
     {% set enable_video = None %}
 {% endif %}
-{% if Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
     {% set enable_report = True %}
 {% else %}
     {% set enable_report = None %}
