@@ -129,10 +129,10 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade).filter_by(id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
-    # test_type = Codebook.get_code_name(testset.test_type)
+    test_type = Codebook.get_code_name(testset.test_type)
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
@@ -173,7 +173,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
-                                            explanation_link=explanation_link)
+                                            explanation_link=explanation_link, test_type=test_type)
     if not pdf:
         return rendered_template_pdf
     # PDF download
