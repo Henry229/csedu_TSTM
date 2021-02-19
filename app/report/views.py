@@ -132,7 +132,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
-    test_type = Codebook.get_code_id(testset.test_type)
+    test_type = Codebook.get_code_id(int(testset.test_type))
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
