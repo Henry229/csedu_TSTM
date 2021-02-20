@@ -133,7 +133,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = Codebook.get_code_id(testset.test_type)
-
+    flash(testset.test_type)
+    flash(test_type)
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
@@ -173,7 +174,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
-                                            explanation_link=explanation_link, test_type=test_type)
+                                            explanation_link=explanation_link, test_type=391)
     if not pdf:
         return rendered_template_pdf
     # PDF download
