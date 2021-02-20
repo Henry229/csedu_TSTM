@@ -71,6 +71,7 @@
                 <th colspan="2">Homework</th>
                 <th colspan="2">Last try</th>
                 <th rowspan="2">Retry</th>
+                <th rowspan="2">Answers</th>
                 <th rowspan="2">Explanation</th>
                 <th rowspan="2">Category</th>
               </tr>
@@ -111,6 +112,11 @@
                       {%- if not marking.last_is_correct -%}
                       <i class="fa fa-play-circle retry-question-btn" data-question-no="{{ marking.question_no }}" style="color: #c0a16b"></i>
                       {%- endif -%}
+                    </td>
+                    <td>
+                    {% if marking.correct_r_value %}
+                     {{- marking.correct_r_value -}}
+                    {% endif %}
                     </td>
                     <td>
                       {% if marking.explanation_link %}
