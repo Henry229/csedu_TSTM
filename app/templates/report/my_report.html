@@ -98,12 +98,6 @@
 {% else %}
     {% set enable_report = None %}
 {% endif %}
-
-{%  if enable_report %}
-    {{ enable_report }}
-{% else %}
-    {{ test_type }} , {{ enable_report }}
-{% endif %}
 <div class="container">
     <br><br>
     <div class="card">
