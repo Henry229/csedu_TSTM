@@ -59,7 +59,7 @@ class Config(metaclass=MetaFlaskEnv):
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = os.path.join(STORAGE_DIR, 'cache')
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
-    CACHE_THRESHOLD = 1000
+    CACHE_THRESHOLD = 0     # No threshold
 
     JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "2PIaOszO"
     JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "g3dW3bZQLNl4HfE7lR7dg2Ba"
