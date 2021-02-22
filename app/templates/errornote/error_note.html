@@ -67,24 +67,25 @@
             <table class="table table-bordered table-hover" style="width:100%" id="t_mark_info">
               <thead class="thead-light">
               <tr>
+                <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
                 <th colspan="2">Homework</th>
                 <th colspan="2">Last try</th>
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
                 <th rowspan="2">Explanation</th>
-                <th rowspan="2">Category</th>
               </tr>
               <tr>
-                <th>Answer</th>
+                <th>My Answer</th>
                 <th>Mark</th>
-                <th>Answer</th>
+                <th>My Answer</th>
                 <th>Mark</th>
               </tr>
               </thead>
               <tbody>
               {% for marking in markings %}
                   <tr>
+                    <td>{{ marking.category_name }}</td>
                     <td>
                     {{- marking.question_no -}}
                     </td>
@@ -130,7 +131,6 @@
                         {% endif %}
                       {% endif %}
                     </td>
-                    <td>{{ marking.category_name }}</td>
                   </tr>
               {% endfor %}
               </tbody>
