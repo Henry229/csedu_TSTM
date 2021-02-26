@@ -320,6 +320,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
                       'student_user_id',
                       'grade',
                       "to_char(created_time,'YYYY-MM-DD Dy') as created_time",
+                      "to_char(read_time,'YYYY-MM-DD Dy') as read_time",
                       'is_correct',
                       'correct_r_value',
                       'item_percentile',
