@@ -1,4 +1,16 @@
+{% if test_type %}
+    {% set test_type_name = Codebook.get_code_name(test_type) %}
+{% else %}
+    {% set test_type_name = None %}
+{% endif %}
+{%  if test_type_name == 'Homework' %}
+<div class="card-body">
+    Homework Finished !! <br>
+    Do you want to submit this homework?
+</div>
+{% else %}
 <div class="card-body">
     Test Finished !! <br>
     Do you want to finish this test?
 </div>
+{% endif %}
