@@ -54,7 +54,7 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry errors(Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry (Resume)</button>
             {% else %}
               <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry</button>
             {% endif %}
@@ -115,9 +115,11 @@
                       {%- endif -%}
                     </td>
                     <td>
-                    {% if marking.correct_r_value %}
-                     {{- marking.correct_r_value -}}
-                    {% endif %}
+                      {% if marking.view_answer_enable %}
+                        {% if marking.correct_r_value %}
+                         {{- marking.correct_r_value -}}
+                        {% endif %}
+                      {% endif %}
                     </td>
                     <td>
                       {% if marking.explanation_link %}
