@@ -355,14 +355,16 @@
             $('#dataModal .modal-content').empty();
         });
     });
-    $("#videoModal").on("show.bs.modal", function () {
+    $("#videoModal").on("show.bs.modal", function (event) {
+        //var explanation_link = $('#view_explanation_window').data('link');
+        var explanation_link = $(event.relatedTarget).data('link');
+        $('#video').attr('src', explanation_link);
+    });
+    /*$("#videoModal").on("show.bs.modal", function () {
+        var explanation_link = $('#view_explanation_window').data('link');
         var explanation_link = $('#view_explanation_window').data('link');
         $('#video').attr('src', explanation_link);
-    });
-    $("#videoModal").on("hidden.bs.modal", function () {
-        var explanation_link = "";
-        $('#video').attr('src', explanation_link);
-    });
+    });*/
 </script>
 </body>
 </html>
