@@ -359,6 +359,10 @@
         var explanation_link = $('#view_explanation_window').data('link');
         $('#video').attr('src', explanation_link);
     });
+    $("#videoModal").on("hidden.bs.modal", function () {
+        var explanation_link = "";
+        $('#video').attr('src', explanation_link);
+    });
 </script>
 </body>
 </html>
