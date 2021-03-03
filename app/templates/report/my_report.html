@@ -217,11 +217,14 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            {% if explanation_link.get(marking.question_no) %}
-                                                <a id="view_explanation_window"
-                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                                </a>
+                                            {% if enable_video and explanation_link.get(marking.question_no) %}
+                                                <span
+                                                       id="view_explanation_window"
+                                                       name="view_explanation_window"
+                                                       data-toggle="modal" data-target="#videoModal"
+                                                       data-link="{{ explanation_link.get(marking.question_no) }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </span>
                                             {% else %}
                                                 <i class="fa fa-play-circle" style="color: lightgrey"></i>
                                             {% endif %}
