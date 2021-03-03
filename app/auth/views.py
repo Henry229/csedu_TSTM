@@ -47,7 +47,7 @@ def login():
             if current_user.role.name == 'Test_center':
                 return redirect(url_for('report.center'))
             else:
-                return redirect(url_for('report.center'))
+                return redirect(url_for('web.index'))
         flash('Login Failed. Please check if email address or password is correct.')
     return render_template('auth/login.html', form=form)
 
