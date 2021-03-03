@@ -165,7 +165,7 @@
                                               {% endif %}
                                               {% if ts.enable_video %}
                                                   <td>
-                                                      {% if ts.enrolled and not ts.resumable %}
+                                                      {% if ts.enrolled and not ts.resumable  and ts.explanation_link %}
                                                           <button class="btn btn-outline-danger" type="button"
                                                                  id="view_explanation_window"
                                                                  name="view_explanation_window"
