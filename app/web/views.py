@@ -669,12 +669,15 @@ def assessment_list_sampletest():
                         tset.score = float(ts_header.percentile_score)
                         '''
                         if subject.find('Writing') and tset.score > 0:
-                            tset.score = int(tset.score) * 0.7
-                        elif subject.find('Reading') and tset.score > 0:
                             tset.score = int(tset.score) * 0.3
+                        elif subject.find('Reading') and tset.score > 0:
+                            tset.score = int(tset.score) * 0.7
                         else:
                             tset.score = int(tset.score)
                         '''
+                    flash(enrolled_q.id + ":" + enrolled_q.assessment_id + ":" + tset.id)
+                else:
+                    flash(test_type + ":" + assessment_guid + ":" + current_user.id)
 
             # ------------------------------------- #
 
