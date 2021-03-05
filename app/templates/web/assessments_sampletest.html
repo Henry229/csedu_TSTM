@@ -41,7 +41,7 @@
                           <div>
                           <h5 class="card-title">{{ assessment.name }}<small class="text-uppercase text-muted"> -{{ assessment.assessment_type_name }}</small></h5>
 
-                              {% if assessment.testsets and Codebook.get_code_name(assessment.testsets[0].test_type)=='Selective' %}
+                              {% if assessment.testsets and Codebook.get_code_name(assessment.testsets[0].test_type)=='Online Selective' %}
                               <div>
                                   <table class="table-bordered">
                                       <thead><tr bgcolor="#f5f5dc">
@@ -59,8 +59,8 @@
                                       </tr>
                                   </table>
                               </div>
-                          </div>
                           {% endif %}
+                          </div>
                           <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
                           <div class="row">
                               <div class="col">
