@@ -665,13 +665,16 @@ def assessment_list_sampletest():
                     if ts_header:
                         # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
                         # ts_header.percentile_score)
-                        tset.score = float(ts_header.score)
+                        # tset.score = float(ts_header.score)
+                        tset.score = float(ts_header.percentile_score)
+                        '''
                         if subject.find('Writing') and tset.score > 0:
                             tset.score = int(tset.score) * 0.7
                         elif subject.find('Reading') and tset.score > 0:
                             tset.score = int(tset.score) * 0.3
                         else:
                             tset.score = int(tset.score)
+                        '''
 
             # ------------------------------------- #
 
