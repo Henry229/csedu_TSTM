@@ -676,9 +676,6 @@ def assessment_list_sampletest():
                         else:
                             tset.score = int(tset.score)
                         '''
-                    flash(enrolled_q.id)
-                else:
-                    flash(test_type)
 
             # ------------------------------------- #
 

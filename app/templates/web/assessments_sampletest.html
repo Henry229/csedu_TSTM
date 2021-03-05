@@ -1,6 +1,14 @@
 {% extends "ui/assessments_base.html" %}
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {% block app_content %}
+ <style>
+    .score-summary {
+         margin: 10px 0 10px 0;
+    }
+    .score-summary th, .score-summary td {
+        padding:10px;
+    }
+</style>
   <div class="assessment-list-header">
     <div class="{{ btn_group }} btn-group-toggle test-type-group" data-toggle="buttons">
       <label class="btn {{ btn_all.class }} all {{ btn_all.active }}" {{ btn_all.display|safe }}>
@@ -43,19 +51,21 @@
 
                               {% if assessment.testsets and Codebook.get_code_name(assessment.testsets[0].test_type)=='Online Selective' %}
                               <div>
-                                  <table class="table-bordered">
+                                  <table class="table-bordered score-summary">
                                       <thead><tr bgcolor="#f5f5dc">
+                                      <th>Subject</th>
                                       {% for tset in assessment.testsets %}
                                       <th>{{ Codebook.get_code_name(tset.subject) }}</th>
                                       {% endfor %}
                                       <th>Total</th></tr></thead>
                                       <tr>
+                                      <td>Score(%)</td>
                                       {% set vars = {'total_amount': 0}  %}
                                       {% for tset in assessment.testsets %}
                                          {% if vars.update({'total_amount': vars.total_amount + tset.score}) %}{% endif %}
                                       <td>{{ tset.score }} &nbsp;</td>
                                       {% endfor %}
-                                       <td>{{ vars.total_amount }}</td>
+                                       <td>{{ vars.total_amount|round }}</td>
                                       </tr>
                                   </table>
                               </div>
