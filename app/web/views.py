@@ -658,7 +658,8 @@ def assessment_list_sampletest():
             if test_type == "Online Selective":
                 enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
                     .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                            AssessmentEnroll.student_user_id == current_user.id) \
+                            AssessmentEnroll.student_user_id == current_user.id,
+                            AssessmentEnroll.testset_id == tset.id) \
                     .order_by(asc(AssessmentEnroll.attempt_count)).first()
                 if enrolled_q:
                     ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
