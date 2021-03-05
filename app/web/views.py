@@ -497,249 +497,229 @@ def assessment_list():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def assessment_list_sampletest():
-   import os
-   from config import basedir
-   from ..api.assessmentsession import AssessmentSession
+    import os
+    from config import basedir
+    from ..api.assessmentsession import AssessmentSession
 
-   # Parameter check
-   guid_list = request.args.get("guid_list")
-   if guid_list is not None:
-       # it's coming from external link like cs online school
-       guid_list = guid_list.split(",")
-   else:
-       # it's coming from internal link like finishing test or errors.
-       assessment_guid = request.args.get("assessment_guid")
-       session_id = request.args.get("session")
-       if assessment_guid is not None:
-           guid_list = [assessment_guid]
-       elif session_id is not None:
-           # Exam is finished. it has only session key as a parameter.
-           assessment_session = AssessmentSession(key=session_id)
-           if assessment_session.assessment is None:
-               return page_not_found(e="Invalid request - assessment information")
-           enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
-           assessment_guid = enroll.assessment_guid
-           guid_list = [assessment_guid]
-       else:
-           # Show all assessment enrols if there is no guid parameter.
-           enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
-           guid_list = list({e.assessment_guid for e in enrols})
+    # Parameter check
+    guid_list = request.args.get("guid_list")
+    if guid_list is not None:
+        # it's coming from external link like cs online school
+        guid_list = guid_list.split(",")
+    else:
+        # it's coming from internal link like finishing test or errors.
+        assessment_guid = request.args.get("assessment_guid")
+        session_id = request.args.get("session")
+        if assessment_guid is not None:
+            guid_list = [assessment_guid]
+        elif session_id is not None:
+            # Exam is finished. it has only session key as a parameter.
+            assessment_session = AssessmentSession(key=session_id)
+            if assessment_session.assessment is None:
+                return page_not_found(e="Invalid request - assessment information")
+            enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
+            assessment_guid = enroll.assessment_guid
+            guid_list = [assessment_guid]
+        else:
+            # Show all assessment enrols if there is no guid parameter.
+            enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
+            guid_list = list({e.assessment_guid for e in enrols})
 
-   student = Student.query.filter_by(user_id=current_user.id).first()
-   if student is None:
-       return page_not_found(e="Login user not registered as student")
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return page_not_found(e="Login user not registered as student")
 
-   assessments, finished_assessments = [], []
-   assessments_list = {}
-   exam_count, homework_count = 0, 0
-   for assessment_guid in guid_list:
-       # Check if there is an assessment with the guid
-       assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
-       au_tz = pytz.timezone('Australia/Sydney')
-       if assessment is None:
-           continue
-           # return page_not_found(e="Invalid request - assessment enroll information")
-       elif assessment.session_date:
-           # if assessment session_date is coming after today, skip to display on student's assessment list page
-           session_date = datetime(assessment.session_date.year, assessment.session_date.month,
-                                   assessment.session_date.day, tzinfo=au_tz)
-           if session_date > datetime.now(tz=au_tz):
-               continue
+    assessments, finished_assessments = [], []
+    assessments_list = {}
+    exam_count, homework_count = 0, 0
+    for assessment_guid in guid_list:
+        # Check if there is an assessment with the guid
+        assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+        au_tz = pytz.timezone('Australia/Sydney')
+        if assessment is None:
+            continue
+            # return page_not_found(e="Invalid request - assessment enroll information")
+        elif assessment.session_date:
+            # if assessment session_date is coming after today, skip to display on student's assessment list page
+            session_date = datetime(assessment.session_date.year, assessment.session_date.month,
+                                    assessment.session_date.day, tzinfo=au_tz)
+            if session_date > datetime.now(tz=au_tz):
+                continue
 
-       # assessment_type_name = assessment.test_type_name
-       homework_type_assessment = assessment.is_homework
+        # assessment_type_name = assessment.test_type_name
+        homework_type_assessment = assessment.is_homework
 
-       homework_session_finished = False
-       if homework_type_assessment and assessment.session_valid_until:
-           session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
-                                   assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
-           if session_date < datetime.now(tz=au_tz):
-               homework_session_finished = True
+        homework_session_finished = False
+        if homework_type_assessment and assessment.session_valid_until:
+            session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
+                                    assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
+            if session_date < datetime.now(tz=au_tz):
+                homework_session_finished = True
 
-       # Get all assessment enroll to get testsets the student enrolled in already.
-       # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
-       enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
-           .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                   AssessmentEnroll.student_user_id == current_user.id) \
-           .order_by(asc(AssessmentEnroll.attempt_count)).all()
-       enrolled = {e.testset.GUID: e for e in enrolled_q}
-       # list 로 변경.
-       enrolled = list(enrolled.values())
-       enrolled_guid_assessment_types = {en.testset.GUID: en.assessment_type for en in enrolled}
+        # Get all assessment enroll to get testsets the student enrolled in already.
+        # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
+        enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+            .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                    AssessmentEnroll.student_user_id == current_user.id) \
+            .order_by(asc(AssessmentEnroll.attempt_count)).all()
+        enrolled = {e.testset.GUID: e for e in enrolled_q}
+        # list 로 변경.
+        enrolled = list(enrolled.values())
+        enrolled_guid_assessment_types = {en.testset.GUID: en.assessment_type for en in enrolled}
 
-       # Get testsets in enrolled
-       # enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
-       enrolled_testsets = {}
-       for en in enrolled:
-           en.testset.resumable = False
-           en.testset.enroll_id = en.id
-           # Homework 는 session_valid_until 까지 무제한 재 시도 가능하다.
-           en.testset.restartable = homework_type_assessment and not homework_session_finished
-           if en.finish_time is None and en.test_duration is not None:
-               elapsed = datetime.utcnow() - en.start_time
-               if elapsed.total_seconds() < en.test_duration * 60:
-                   en.testset.resumable = True
-                   en.testset.session_key = en.session_key
-           enrolled_testsets[en.testset_id] = en.testset
+        # Get testsets in enrolled
+        # enrolled_testsets = {en.testset_id: en.testset for en in enrolled}
+        enrolled_testsets = {}
+        for en in enrolled:
+            en.testset.resumable = False
+            en.testset.enroll_id = en.id
+            # Homework 는 session_valid_until 까지 무제한 재 시도 가능하다.
+            en.testset.restartable = homework_type_assessment and not homework_session_finished
+            if en.finish_time is None and en.test_duration is not None:
+                elapsed = datetime.utcnow() - en.start_time
+                if elapsed.total_seconds() < en.test_duration * 60:
+                    en.testset.resumable = True
+                    en.testset.session_key = en.session_key
+            enrolled_testsets[en.testset_id] = en.testset
 
-       student_testsets = []
-       # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
-       log.debug(assessment.testsets)
-       for tset in assessment.testsets:
-           log.debug(tset)
-           if tset.GUID not in enrolled_guid_assessment_types:
-               tset.resumable = False
-               student_testsets.append(tset)
-       # 이미 시험을 본 것을 모은다.
-       for ts_id in enrolled_testsets:
-           student_testsets.append(enrolled_testsets[ts_id])
-       new_test_sets = []
-       flag_finish_assessment = True
-       if homework_type_assessment:
-           homework_count += 1
-           assessment.assessment_type_name = 'Homework'
-           assessment.assessment_type_class = 'assessment-homework'
-       else:
-           exam_count += 1
-           assessment.assessment_type_name = 'Exam'
-           assessment.assessment_type_class = 'assessment-exam'
+        student_testsets = []
+        # 전체 testset 에서 학생이 아직 시험을 안 본 것을 우선 모든다.
+        log.debug(assessment.testsets)
+        for tset in assessment.testsets:
+            log.debug(tset)
+            if tset.GUID not in enrolled_guid_assessment_types:
+                tset.resumable = False
+                student_testsets.append(tset)
+        # 이미 시험을 본 것을 모은다.
+        for ts_id in enrolled_testsets:
+            student_testsets.append(enrolled_testsets[ts_id])
+        new_test_sets = []
+        flag_finish_assessment = True
+        if homework_type_assessment:
+            homework_count += 1
+            assessment.assessment_type_name = 'Homework'
+            assessment.assessment_type_class = 'assessment-homework'
+        else:
+            exam_count += 1
+            assessment.assessment_type_name = 'Exam'
+            assessment.assessment_type_class = 'assessment-exam'
 
-       for tset in student_testsets:
-           # Compare GUID to check enrollment status
-           is_enrolled = tset.GUID in enrolled_guid_assessment_types
-           # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
-           if not is_enrolled and not tset.active:
-               # 최신 test set version 을 찾는다.
-               # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
-               tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
-           if not is_enrolled or tset.resumable:
-               flag_finish_assessment = False
-           # if is_enrolled:
-           #     assessment_type = enrolled_guid_assessment_types[tset.GUID]
-           #     tset.report_type = 'error-note' if assessment_type == 'Homework' else 'report'
-           tset.report_type = 'error-note' if homework_type_assessment else 'report'
-           test_type = Codebook.get_code_name(tset.test_type)
-           tset.test_type_name = test_type
-           if test_type == 'Selective' or test_type == 'OC':
-               enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id).\
-                   filter(AssessmentEnroll.assessment_guid == tset.GUID,
-                          AssessmentEnroll.student_user_id == current_user.id).\
-                   order_by(asc(AssessmentEnroll.attempt_count)).first()
-               flash(enrolled_q)
+        for tset in student_testsets:
+            # Compare GUID to check enrollment status
+            is_enrolled = tset.GUID in enrolled_guid_assessment_types
+            # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
+            if not is_enrolled and not tset.active:
+                # 최신 test set version 을 찾는다.
+                # tset_with_guid = Testset.query.filter_by(id=tset.id).first()
+                tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
+            if not is_enrolled or tset.resumable:
+                flag_finish_assessment = False
 
-               '''
-               if enrolled_q:
-                   assessment_enroll_id = enrolled_q.id
-                   ts_id = enrolled_q.testset_id
-                   # ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
-                   ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, ts_id, current_user.id)
-                   if ts_header:
-                       score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
-                                                           ts_header.percentile_score)
-                       flash(score)
-               '''
-           '''
-           # display summary score for Selective sample test
-       for assess in assessments:
-           if assess.test_type_name == 'Selective':
-               enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
-                   .filter(AssessmentEnroll.assessment_guid == assess.GUID,
-                           AssessmentEnroll.student_user_id == current_user.id) \
-                   .order_by(asc(AssessmentEnroll.attempt_count)).first()
-               if enrolled_q:
-                   assessment_enroll_id = enrolled_q.id
-                   ts_id = enrolled_q.testset_id
-                   # ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
-                   ts_header = query_my_report_header(assessment_enroll_id, assess.id, ts_id, current_user.id)
-                   if ts_header:
-                       score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
-                       flash(score)
+            tset.report_type = 'error-note' if homework_type_assessment else 'report'
+            new_test_sets.append(tset)
+            tset.enrolled = is_enrolled
+            test_type = Codebook.get_code_name(tset.test_type)
+            # tset.enable_report = True if test_type in ['Naplan', 'Online OC',
+            #                                           'Homework', 'CBSTT', 'CBOCTT'] else Config.ENABLE_STUDENT_REPORT
+            # managing how showing video,report with Codebook not the code above
+            test_type_additional_info = Codebook.get_additional_info(tset.test_type)
+            tset.enable_report = False
+            tset.enable_video = False
+            if test_type_additional_info is not None and test_type_additional_info['enable_report']:
+                if test_type_additional_info['enable_report'] == 'true':
+                    tset.enable_report = True
 
-           '''
-           new_test_sets.append(tset)
-           tset.enrolled = is_enrolled
-           # flash(tset.id)
+            if test_type_additional_info is not None and test_type_additional_info['enable_video']:
+                if test_type_additional_info['enable_video'] == 'true':
+                    tset.enable_video = True
 
-           # tset.enable_report = True if test_type in ['Naplan', 'Online OC',
-           #                                           'Homework', 'CBSTT', 'CBOCTT'] else Config.ENABLE_STUDENT_REPORT
-           # managing how showing video,report with Codebook not the code above
-           test_type_additional_info = Codebook.get_additional_info(tset.test_type)
-           tset.enable_report = False
-           tset.enable_video = False
-           if test_type_additional_info is not None and test_type_additional_info['enable_report']:
-               if test_type_additional_info['enable_report'] == 'true':
-                   tset.enable_report = True
+            # If subject is 'Writing', report enabled:
+            #   - True when Marker's comment existing for 'ALL' items in Testset
+            #   - False when Marker's comment not existing
+            tset.enable_writing_report = False
+            subject = Codebook.get_code_name(tset.subject)
+            additional_info = Codebook.get_additional_info(tset.subject)
+            tset.sort_key = additional_info['subject_order'] if additional_info else 1
+            if subject == 'Writing' and tset.enable_report:
+                mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                    join(AssessmentEnroll). \
+                    filter(Marking.id == MarkingForWriting.marking_id). \
+                    filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
+                    filter(AssessmentEnroll.student_user_id == current_user.id). \
+                    filter(Marking.testset_id == tset.id).all()
+                for mw in mws:
+                    tset.enable_writing_report = True if mw.markers_comment else False
+                    if not tset.enable_writing_report:
+                        break
+            tset.explanation_link = view_explanation(tset.id)
 
-           if test_type_additional_info is not None and test_type_additional_info['enable_video']:
-               if test_type_additional_info['enable_video'] == 'true':
-                   tset.enable_video = True
+            # ------------------------------------- #
+            tset.score = 0
+            if test_type == "Online Selective":
+                enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+                    .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                            AssessmentEnroll.student_user_id == current_user.id) \
+                    .order_by(asc(AssessmentEnroll.attempt_count)).first()
+                if enrolled_q:
+                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
+                    if ts_header:
+                        # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
+                        # ts_header.percentile_score)
+                        tset.score = float(ts_header.score)
+                        if subject.find('Writing') and tset.score > 0:
+                            tset.score = int(tset.score) * 0.7
+                        elif subject.find('Reading') and tset.score > 0:
+                            tset.score = int(tset.score) * 0.3
+                        else:
+                            tset.score = int(tset.score)
 
-           # If subject is 'Writing', report enabled:
-           #   - True when Marker's comment existing for 'ALL' items in Testset
-           #   - False when Marker's comment not existing
-           tset.enable_writing_report = False
-           subject = Codebook.get_code_name(tset.subject)
-           additional_info = Codebook.get_additional_info(tset.subject)
-           tset.sort_key = additional_info['subject_order'] if additional_info else 1
-           if subject == 'Writing' and tset.enable_report:
-               mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
-                   join(AssessmentEnroll). \
-                   filter(Marking.id == MarkingForWriting.marking_id). \
-                   filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
-                   filter(AssessmentEnroll.student_user_id == current_user.id). \
-                   filter(Marking.testset_id == tset.id).all()
-               for mw in mws:
-                   tset.enable_writing_report = True if mw.markers_comment else False
-                   if not tset.enable_writing_report:
-                       break
-           tset.explanation_link = view_explanation(tset.id)
+            # ------------------------------------- #
 
-       # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
-       sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
-       assessment.testsets = sorted_testsets
+        # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+        sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
+        assessment.testsets = sorted_testsets
 
-       # Split assessments and finished_assessments
-       # homework 는 기간 내에 무제한 시험 가능하다.
-       if homework_type_assessment and homework_session_finished:
-           finished_assessments.append(assessment)
-       elif not homework_type_assessment and flag_finish_assessment:
-           finished_assessments.append(assessment)
-       else:
-           assessments.append(assessment)
+        # Split assessments and finished_assessments
+        # homework 는 기간 내에 무제한 시험 가능하다.
+        if homework_type_assessment and homework_session_finished:
+            finished_assessments.append(assessment)
+        elif not homework_type_assessment and flag_finish_assessment:
+            finished_assessments.append(assessment)
+        else:
+            assessments.append(assessment)
+        assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
+        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-       assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
-       log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
-
-   if homework_count == 0 and exam_count == 0:
-       btn_group = ''
-       btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-       btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-       btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-   elif homework_count == 0:
-       btn_group = ''
-       btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-       btn_exam = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
-       btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-   elif exam_count == 0:
-       btn_group = ''
-       btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-       btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-       btn_homework = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
-   else:
-       btn_group = 'btn-group'
-       btn_all = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
-       btn_exam = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
-       btn_homework = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
-   # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
-   # finished_assessments=finished_assessments)
-   try:
-       with open(os.path.join(basedir, 'runner_version.txt')) as f:
-           runner_version = f.readline().strip()
-   except FileNotFoundError:
-       runner_version = str(int(datetime.utcnow().timestamp()))
-   return render_template('web/assessments_sampletest.html', student_user_id=current_user.id, assessments_list=assessments_list,
-                          runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
-                          btn_homework=btn_homework, btn_group=btn_group)
+    if homework_count == 0 and exam_count == 0:
+        btn_group = ''
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+    elif homework_count == 0:
+        btn_group = ''
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+    elif exam_count == 0:
+        btn_group = ''
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_homework = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+    else:
+        btn_group = 'btn-group'
+        btn_all = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_exam = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
+    # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
+    # finished_assessments=finished_assessments)
+    try:
+        with open(os.path.join(basedir, 'runner_version.txt')) as f:
+            runner_version = f.readline().strip()
+    except FileNotFoundError:
+        runner_version = str(int(datetime.utcnow().timestamp()))
+    return render_template('web/assessments_sampletest.html', student_user_id=current_user.id, assessments_list=assessments_list,
+                           runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
+                           btn_homework=btn_homework, btn_group=btn_group)
 
 
 @web.route('/testing', methods=['GET'])
