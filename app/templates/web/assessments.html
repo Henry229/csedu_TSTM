@@ -145,14 +145,14 @@
                                                                      value="Not Available" disabled>
                                                           {% else %}
                                                             {% if ts.report_type == 'report' %}
-                                                              <input class="btn btn-primary report"
+                                                              <input type="button" class="btn btn-primary report"
                                                                      data-student-user-id="{{ student_user_id }}"
                                                                      data-assessment-id="{{ assessment.id }}"
                                                                      data-assessment-guid="{{ assessment.GUID }}"
                                                                      data-testset-id="{{ ts.id }}"
                                                                      value="View Report">
                                                             {% else %}
-                                                              <input class="btn btn-primary error-note"
+                                                              <input type="button" class="btn btn-primary error-note"
                                                                      data-assessment-enrol-id="{{ ts.enroll_id }}"
                                                                      value="View Report">
                                                             {% endif %}
