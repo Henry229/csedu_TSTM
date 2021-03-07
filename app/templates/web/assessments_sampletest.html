@@ -63,9 +63,9 @@
                                       {% set vars = {'total_amount': 0}  %}
                                       {% for tset in assessment.testsets %}
                                          {% if vars.update({'total_amount': vars.total_amount + tset.score}) %}{% endif %}
-                                      <td>{{ tset.score }} &nbsp;</td>
+                                      <td>{{ tset.score|round(1, 'floor') }} &nbsp;</td>
                                       {% endfor %}
-                                       <td>{{ vars.total_amount|round }}</td>
+                                       <td>{{ vars.total_amount|round(1, 'floor') }}</td>
                                       </tr>
                                   </table>
                               </div>
