@@ -293,6 +293,7 @@ def assessment_list():
     import os
     from config import basedir
     from ..api.assessmentsession import AssessmentSession
+
     # Parameter check
     guid_list = request.args.get("guid_list")
     if guid_list is not None:
@@ -406,9 +407,7 @@ def assessment_list():
                 tset = Testset.query.filter_by(GUID=tset.GUID, active=True).first()
             if not is_enrolled or tset.resumable:
                 flag_finish_assessment = False
-            # if is_enrolled:
-            #     assessment_type = enrolled_guid_assessment_types[tset.GUID]
-            #     tset.report_type = 'error-note' if assessment_type == 'Homework' else 'report'
+
             tset.report_type = 'error-note' if homework_type_assessment else 'report'
             new_test_sets.append(tset)
             tset.enrolled = is_enrolled
@@ -446,6 +445,40 @@ def assessment_list():
                     if not tset.enable_writing_report:
                         break
             tset.explanation_link = view_explanation(tset.id)
+
+            '''
+            # ------------------------------------- #
+            모든 점수는 소수점 한자리까지 표시
+            Writing             actual score/30         max score 100.0
+            English             actual score/30*100     max score 100.0
+            Math                actual score/35*100     max score 100.0
+            Thinking skill      actual score/40*100     max score 100.0
+            Total     writing actual + English actual / 30 * 70 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
+            '''
+            tset.score = 0
+            if test_type == "Online Selective":
+                enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+                    .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                            AssessmentEnroll.student_user_id == current_user.id,
+                            AssessmentEnroll.testset_id == tset.id) \
+                    .order_by(asc(AssessmentEnroll.attempt_count)).first()
+                if enrolled_q:
+                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
+                    if ts_header:
+                        # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
+                        # ts_header.percentile_score)
+                        # tset.score = float(ts_header.score)
+                        tset.score = float(ts_header.percentile_score)
+                        '''
+                        if subject.find('Writing') and tset.score > 0:
+                            tset.score = int(tset.score) * 0.3
+                        elif subject.find('Reading') and tset.score > 0:
+                            tset.score = int(tset.score) * 0.7
+                        else:
+                            tset.score = int(tset.score)
+                        '''
+            # ------------------------------------- #
+
         # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
@@ -488,7 +521,7 @@ def assessment_list():
             runner_version = f.readline().strip()
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
-    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
+    return render_template('web/assessments_sampletest.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
                            btn_homework=btn_homework, btn_group=btn_group)
 
@@ -653,7 +686,15 @@ def assessment_list_sampletest():
                         break
             tset.explanation_link = view_explanation(tset.id)
 
+            '''
             # ------------------------------------- #
+            모든 점수는 소수점 한자리까지 표시
+            Writing             actual score/30         max score 100.0
+            English             actual score/30*100     max score 100.0
+            Math                actual score/35*100     max score 100.0
+            Thinking skill      actual score/40*100     max score 100.0
+            Total     writing actual + English actual / 30 * 70 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
+            '''
             tset.score = 0
             if test_type == "Online Selective":
                 enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
@@ -676,7 +717,6 @@ def assessment_list_sampletest():
                         else:
                             tset.score = int(tset.score)
                         '''
-
             # ------------------------------------- #
 
         # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
