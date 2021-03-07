@@ -4,7 +4,8 @@ import pytz
 from flask import current_app
 
 # from app import cache
-from cachelib.filesystemcache import FileSystemCache
+from cachelib import FileSystemCache
+from cachelib import RedisCache
 
 
 class AssessmentSession:
@@ -36,9 +37,14 @@ class AssessmentSession:
         """
         self.error_code = None
         self.error_message = None
-        self.cache = FileSystemCache(current_app.config['CACHE_DIR'],
-                                     threshold=current_app.config['CACHE_THRESHOLD'],
-                                     default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
+        if current_app.config['RUNNER_SESSION_STORAGE'] == 'redis':
+            self.cache = RedisCache(host=current_app.config['CACHE_REDIS_HOST'], key_prefix='runner',
+                                    default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
+        else:
+            self.cache = FileSystemCache(current_app.config['CACHE_DIR'],
+                                         threshold=current_app.config['CACHE_THRESHOLD'],
+                                         default_timeout=current_app.config['CACHE_DEFAULT_TIMEOUT'])
+
         if key is None:
             self.key = self.generate_key_string(user_id, enroll_id, testset_id, attempt_count)
             self.cache.delete(self.key)
