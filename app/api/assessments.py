@@ -905,7 +905,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     new_questions = []
     if next_branch_json is not None:
         testlet_id = next_branch_json.get("id")
-        if stage_data:
+        if stage_data is not None:
             stage = len(stage_data) + 1
             stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
             # stage 정보를 session 과 DB 에 저장한다.
