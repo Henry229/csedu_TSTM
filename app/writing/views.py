@@ -786,8 +786,8 @@ def query_writing_report_score(marking_id):
     marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
         .order_by(MarkingForWriting.id.desc()).first()
     if marking_writing is not None:
-        candidate_mark_detail = json.loads(marking_writing.candidate_mark_detail)
-        for f_n in candidate_mark_detail.values():
+        # candidate_mark_detail = json.loads(marking_writing.candidate_mark_detail)
+        for f_n in marking_writing.candidate_mark_detail.values():
             log.debug("candidate_mark_detail: (%s) " % (f_n))
 
     # sql_stmt = 'SELECT candidate_mark_detail FROM marking_writing WHERE marking_id=:marking_id'
