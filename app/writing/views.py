@@ -789,9 +789,10 @@ def query_writing_report_score(marking_id):
     score = 0
     percentile_score = 0
     if candidate_mark_detail:
-        for x, y in candidate_mark_detail.values():
-            log.debug('candidate_mark_detail y (%s) ' % (y))
-            score += int(y)
+        score = int(candidate_mark_detail['Content']) + int(candidate_mark_detail['Grammar']) + \
+               int(candidate_mark_detail['Spelling']) + int(candidate_mark_detail['Structure']) + \
+               int(candidate_mark_detail['Creativity']) + int(candidate_mark_detail['Expression']) + \
+               int(candidate_mark_detail['Punctuation'])
         percentile_score = score / total_score * 100
 
     return_value = {"score": score, "total_score": total_score, "percentile_score": percentile_score}
