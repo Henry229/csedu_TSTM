@@ -410,7 +410,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
                 flash('Marking data not available')
                 return redirect(url)
             # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
-            score = '{} out of {} ({}%)'.format(my_score.score, my_score.total_score, my_score.percentile_score)
+            score = '{} out of {} ({}%)'.format(my_score['score'], my_score['total_score'], my_score['percentile_score'])
             rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
 
             template_file = 'writing/my_report_writing.html'
@@ -788,6 +788,8 @@ def query_writing_report_score(marking_id):
     candidate_mark_detail = cursor.fetchone()
     score = 0
     percentile_score = 0
+    log.debug("candidate_mark_detail: (%s) " % (candidate_mark_detail))
+
     '''
     if candidate_mark_detail:
         score = int(candidate_mark_detail['Content']) + int(candidate_mark_detail['Grammar']) + \
