@@ -783,12 +783,19 @@ def getBranchIds(marker_id):
 
 def query_writing_report_score(marking_id):
     total_score = 30
-    sql_stmt = 'SELECT candidate_mark_detail FROM marking_writing WHERE marking_id=:marking_id'
-    cursor = db.session.execute(sql_stmt, {'marking_id': marking_id})
-    candidate_mark_detail = cursor.fetchone()
+    marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
+        .order_by(MarkingForWriting.id.desc()).first()
+    if marking_writing is not None:
+        candidate_mark_detail = json.loads(marking_writing.candidate_mark_detail)
+        for f_n in candidate_mark_detail.values():
+            log.debug("candidate_mark_detail: (%s) " % (f_n))
+
+    # sql_stmt = 'SELECT candidate_mark_detail FROM marking_writing WHERE marking_id=:marking_id'
+    # cursor = db.session.execute(sql_stmt, {'marking_id': marking_id})
+    # candidate_mark_detail = cursor.fetchone()
     score = 0
     percentile_score = 0
-    log.debug("candidate_mark_detail: (%s) " % (candidate_mark_detail))
+
 
     '''
     if candidate_mark_detail:
