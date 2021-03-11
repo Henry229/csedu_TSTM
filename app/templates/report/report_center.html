@@ -120,11 +120,14 @@
                                     {% for tsset in testset_dic %}
                                         <td>
                                         {% if rl[testset_dic[tsset]["name"]]: %}
-                                            {{ rl[testset_dic[tsset]["name"]] }}
-                                            {% if testset_dic[tsset]["subject"] != 'Writing' and enable_report: %}
+                                            {% if testset_dic[tsset]["subject"] != 'Writing' %}
+                                                {{ rl[testset_dic[tsset]["name"]] }}
+                                            {% endif %}
+                                            {#% if testset_dic[tsset]["subject"] != 'Writing' and enable_report: %#}
+                                            {% if enable_report: %}
                                                 <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
                                                 {% else %}
-                                                <span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>
+                                                <!--<span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>-->
                                                 {% endif %}
                                         {% else: %}
                                         {% endif %}
