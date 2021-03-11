@@ -648,7 +648,7 @@ def center():
         join test_summary_mview ts on m.assessment_enroll_id= ts.assessment_enroll_id   \
         where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
-        t2.name \
+        t2.name, t2.subject \
         order by s.student_id',\
         $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
