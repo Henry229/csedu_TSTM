@@ -655,7 +655,8 @@ def center():
         assessment_name VARCHAR, assessment_id integer, subject integer, \
         " + columns_query + ");")
 
-    report_list = db.session.execute(new_query)
+    cursor = db.session.execute(new_query)
+    report_list = list(cursor.fetchall())
 
     if int(testset_id) > 0:
         testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.branching).filter_by(
