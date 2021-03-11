@@ -727,8 +727,7 @@ def assessment_list_sampletest():
                     if subject == 'Writing' and tset.enable_report:
                         if tset.my_writing_score:
                             log.debug("tset.my_writing_score: %s" % tset.my_writing_score)
-                            # tset.score = float(tset.my_writing_score.percentile_score)
-                            tset.score = 0
+                            tset.score = float(tset.my_writing_score['percentile_score'])
 
                             # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
