@@ -54,7 +54,7 @@ def before_request():
 def after_request(response):
     import json
     if request.path.startswith('/static') or request.path.startswith('/itemstatic') \
-            or request.path.startswith('/favicon.ico') or response.status_code == 500:
+            or request.path.startswith('/favicon.ico'):
         return response
 
     ts = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -76,7 +76,8 @@ def after_request(response):
             'ip': public_ip,
             'tailored_id': tailored_id,
             'user_id': user_id,
-            'user_name': User.getUserName(user_id),
+            # 'user_name': User.getUserName(user_id),
+            'user_name': "{}".format(user_id),
             'start_time': g.start_time,
             'lapsed_time': lapsed_time,
             'method': request.method,

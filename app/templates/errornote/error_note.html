@@ -54,9 +54,9 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry errors(Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry (Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry All Errors</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry</button>
             {% endif %}
           </div>
         </div>
@@ -67,23 +67,25 @@
             <table class="table table-bordered table-hover" style="width:100%" id="t_mark_info">
               <thead class="thead-light">
               <tr>
+                <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
                 <th colspan="2">Homework</th>
                 <th colspan="2">Last try</th>
                 <th rowspan="2">Retry</th>
+                <th rowspan="2">Answers</th>
                 <th rowspan="2">Explanation</th>
-                <th rowspan="2">Category</th>
               </tr>
               <tr>
-                <th>Answer</th>
+                <th>My Answer</th>
                 <th>Mark</th>
-                <th>Answer</th>
+                <th>My Answer</th>
                 <th>Mark</th>
               </tr>
               </thead>
               <tbody>
               {% for marking in markings %}
                   <tr>
+                    <td>{{ marking.category_name }}</td>
                     <td>
                     {{- marking.question_no -}}
                     </td>
@@ -113,6 +115,13 @@
                       {%- endif -%}
                     </td>
                     <td>
+                      {% if marking.view_answer_enable %}
+                        {% if marking.correct_r_value %}
+                         {{- marking.correct_r_value -}}
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td>
                       {% if marking.explanation_link %}
                         {% if marking.explanation_link_enable %}
                           <a id="view_explanation_window"
@@ -124,7 +133,6 @@
                         {% endif %}
                       {% endif %}
                     </td>
-                    <td>{{ marking.category_name }}</td>
                   </tr>
               {% endfor %}
               </tbody>

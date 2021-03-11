@@ -6,6 +6,16 @@
     <link rel="stylesheet" href="/static/csedu_style.css">
 {% endblock %}
 {% block app_content %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
+   {% set enable_video = True %}
+{% else %}
+   {% set enable_video = None %}
+{% endif %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
+   {% set enable_report = True %}
+{% else %}
+   {% set enable_report = None %}
+{% endif %}
     <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report Centre </h3>
     <div class="accordion" id="accordion">
         <div class="card card-accent-success">
@@ -111,7 +121,7 @@
                                         <td>
                                         {% if rl[testset_dic[tsset]["name"]]: %}
                                             {{ rl[testset_dic[tsset]["name"]] }}
-                                            {% if rl[testset_dic[tsset]["subject"]] != 'Writing': %}
+                                            {% if rl[testset_dic[tsset]["subject"]] != 'Writing' and enable_report: %}
                                                 <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
                                             {% endif %}
                                         {% else: %}

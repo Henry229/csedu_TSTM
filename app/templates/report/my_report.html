@@ -87,6 +87,17 @@
 {% else %}
     {% set marking_rep = None %}
 {% endif %}
+
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
+    {% set enable_video = True %}
+{% else %}
+    {% set enable_video = None %}
+{% endif %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
+    {% set enable_report = True %}
+{% else %}
+    {% set enable_report = None %}
+{% endif %}
 <div class="container">
     <br><br>
     <div class="card">
@@ -100,17 +111,18 @@
                         <h3 style="color:#397e38"> {{ assessment_name }} ({{ subject }}) </h3>
                     </th>
                     <td>
-                        {% if pdf_url %}
+                        {% if pdf_url and enable_report %}
                             <a class="badge badge-primary" href="{{ pdf_url }}">Download Result (PDF)</a>
                         {% endif %}
                     </td>
                 </tr>
             </table>
         </div>
+    {% if enable_report %}
         <div class="card-body">
             <table style="width:100%" id="t_student_info">
                 <tr>
-                    <th> Student Name:</th>
+                    <th> Student Name: </th>
                     <td> {{ Student.getCSStudentName(student_user_id) }} </td>
                     <th> Rank:</th>
                     <td> {{ rank }} </td>
@@ -153,8 +165,9 @@
                                                 </button>
                                             {% else %}
                                                 {{ marking.question_no }}
+
                                             {% endif %}
-                                            {% if explanation_link.get(marking.question_no) %}
+                                            {% if enable_video and explanation_link.get(marking.question_no) %}
                                                 <span
                                                        id="view_explanation_window"
                                                        name="view_explanation_window"
@@ -204,11 +217,14 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            {% if explanation_link.get(marking.question_no) %}
-                                                <a id="view_explanation_window"
-                                                   onclick="window.open('{{ explanation_link.get(marking.question_no) }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
-                                                    <i class="fa fa-play-circle" style="color: #c0a16b"></i>
-                                                </a>
+                                            {% if enable_video and explanation_link.get(marking.question_no) %}
+                                                <span
+                                                       id="view_explanation_window"
+                                                       name="view_explanation_window"
+                                                       data-toggle="modal" data-target="#videoModal"
+                                                       data-link="{{ explanation_link.get(marking.question_no) }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </span>
                                             {% else %}
                                                 <i class="fa fa-play-circle" style="color: lightgrey"></i>
                                             {% endif %}
@@ -274,6 +290,13 @@
             </table>
         {% endif %}
     </div>
+    {% else %}
+    <div class="card-body">
+            <table style="width:100%">
+                <tr><td>This report is not available</td></tr>
+            </table>
+    </div>
+    {% endif %}
     <br>
     <br>
 </div>
@@ -335,9 +358,13 @@
             $('#dataModal .modal-content').empty();
         });
     });
-    $("#videoModal").on("show.bs.modal", function () {
-        var explanation_link = $('#view_explanation_window').data('link');
+    $("#videoModal").on("show.bs.modal", function (event) {
+        //var explanation_link = $('#view_explanation_window').data('link');
+        var explanation_link = $(event.relatedTarget).data('link');
         $('#video').attr('src', explanation_link);
+    });
+   $("#videoModal").on("hidden.bs.modal", function (event) {
+        $('#video').attr('src', "");
     });
 </script>
 </body>

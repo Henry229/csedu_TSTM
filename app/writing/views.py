@@ -402,11 +402,15 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
             test_date = row.start_time_client
 
             ts_header = query_my_report_header(assessment_enroll_id, row.assessment_id, ts_id, student_user_id)
+            # get writing score from marking_writing table
+            my_score = query_writing_report_score(marking.id)
+
             if ts_header is None:
                 url = request.referrer
                 flash('Marking data not available')
                 return redirect(url)
-            score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+            # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+            score = '{} out of {} ({}%)'.format(my_score['score'], my_score['total_score'], my_score['percentile_score'])
             rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
 
             template_file = 'writing/my_report_writing.html'
@@ -775,3 +779,32 @@ def getBranchIds(marker_id):
             break
     branch_ids += all_branches
     return branch_ids
+
+
+def query_writing_report_score(marking_id):
+    total_score = 30
+    score = 0
+    percentile_score = 0
+    marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
+        .order_by(MarkingForWriting.id.desc()).first()
+    if marking_writing is not None:
+        # candidate_mark_detail = json.loads(marking_writing.candidate_mark_detail)
+        for f_n in marking_writing.candidate_mark_detail.values():
+            # log.debug("candidate_mark_detail: (%s) " % (f_n))
+            score += int(f_n)
+
+    # sql_stmt = 'SELECT candidate_mark_detail FROM marking_writing WHERE marking_id=:marking_id'
+    # cursor = db.session.execute(sql_stmt, {'marking_id': marking_id})
+    # candidate_mark_detail = cursor.fetchone()
+
+
+    '''
+    if candidate_mark_detail:
+        score = int(candidate_mark_detail['Content']) + int(candidate_mark_detail['Grammar']) + \
+               int(candidate_mark_detail['Spelling']) + int(candidate_mark_detail['Structure']) + \
+               int(candidate_mark_detail['Creativity']) + int(candidate_mark_detail['Expression']) + \
+               int(candidate_mark_detail['Punctuation'])
+    '''
+    percentile_score = score / total_score * 100
+    return_value = {"score": score, "total_score": total_score, "percentile_score": percentile_score}
+    return return_value

@@ -53,12 +53,13 @@ def error_note(assessment_enroll_id):
             marking.candidate_r_value = ''
         if is_blank_answer(marking.last_r_value):
             marking.last_r_value = ''
-        # retry 를 한번이라도 끝내야 설명을 볼 수 있다.
+        # retry 를 한번이라도 끝내야 설명을 볼 수 있다. (answer as well)
         if marking.is_correct is True:
             correct_count = correct_count + 1
         else:
             marking.explanation_link = view_explanation(testset_id=ts_id, item_id=marking.item_id)
             marking.explanation_link_enable = marking.question_no in retried_questions
+            marking.view_answer_enable = marking.question_no in retried_questions
         markings.append(marking)
     correct_percent = correct_count * 100.0 / question_count
     score = '{} out of {} ({:.2f}%)'.format(correct_count, question_count, correct_percent)
