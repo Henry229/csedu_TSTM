@@ -788,23 +788,8 @@ def query_writing_report_score(marking_id):
     marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
         .order_by(MarkingForWriting.id.desc()).first()
     if marking_writing is not None:
-        # candidate_mark_detail = json.loads(marking_writing.candidate_mark_detail)
         for f_n in marking_writing.candidate_mark_detail.values():
-            # log.debug("candidate_mark_detail: (%s) " % (f_n))
             score += int(f_n)
-
-    # sql_stmt = 'SELECT candidate_mark_detail FROM marking_writing WHERE marking_id=:marking_id'
-    # cursor = db.session.execute(sql_stmt, {'marking_id': marking_id})
-    # candidate_mark_detail = cursor.fetchone()
-
-
-    '''
-    if candidate_mark_detail:
-        score = int(candidate_mark_detail['Content']) + int(candidate_mark_detail['Grammar']) + \
-               int(candidate_mark_detail['Spelling']) + int(candidate_mark_detail['Structure']) + \
-               int(candidate_mark_detail['Creativity']) + int(candidate_mark_detail['Expression']) + \
-               int(candidate_mark_detail['Punctuation'])
-    '''
-    percentile_score = score / total_score * 100
+    percentile_score = round(score / total_score * 100, 1)
     return_value = {"score": score, "total_score": total_score, "percentile_score": percentile_score}
     return return_value

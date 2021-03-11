@@ -521,7 +521,7 @@ def assessment_list():
             runner_version = f.readline().strip()
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
-    return render_template('web/assessments_sampletest.html', student_user_id=current_user.id, assessments_list=assessments_list,
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
                            btn_homework=btn_homework, btn_group=btn_group)
 
@@ -674,14 +674,21 @@ def assessment_list_sampletest():
             additional_info = Codebook.get_additional_info(tset.subject)
             tset.sort_key = additional_info['subject_order'] if additional_info else 1
             if subject == 'Writing' and tset.enable_report:
-                mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                mws = db.session.query(MarkingForWriting.markers_comment,
+                                       MarkingForWriting.candidate_mark_detail).join(Marking). \
                     join(AssessmentEnroll). \
                     filter(Marking.id == MarkingForWriting.marking_id). \
                     filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
                     filter(AssessmentEnroll.student_user_id == current_user.id). \
                     filter(Marking.testset_id == tset.id).all()
                 for mw in mws:
-                    tset.enable_writing_report = True if mw.markers_comment else False
+                    # tset.enable_writing_report = True if mw.markers_comment else False
+                    if mw.markers_comment:
+                        tset.enable_writing_report = True
+                        tset.my_writing_score = get_writing_report_score(mw.candidate_mark_detail)
+                    else:
+                        tset.enable_writing_report = False
+                        tset.my_writing_score = {}
                     if not tset.enable_writing_report:
                         break
             tset.explanation_link = view_explanation(tset.id)
@@ -717,7 +724,8 @@ def assessment_list_sampletest():
                         else:
                             tset.score = int(tset.score)
                         '''
-            # ------------------------------------- #
+                    if tset.my_writing_score:
+                        tset.score = float(tset.my_writing_score.percentile_score)
 
         # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
@@ -949,3 +957,15 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                                 'testset_id': ts_id, 'student_user_id': student_user_id})
    ts_header = cursor.fetchone()
    return ts_header
+
+
+def get_writing_report_score(candidate_mark_detail):
+    total_score = 30
+    score = 0
+    percentile_score = 0
+    if candidate_mark_detail is not None:
+        for f_n in candidate_mark_detail.values():
+            score += int(f_n)
+    percentile_score = round(score / total_score * 100, 1)
+    return_value = {"score": score, "total_score": total_score, "percentile_score": percentile_score}
+    return return_value
