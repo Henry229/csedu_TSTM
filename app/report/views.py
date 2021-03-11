@@ -652,7 +652,7 @@ def center():
         order by s.student_id',\
         $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
-        assessment_name VARCHAR, assessment_id integer, subject integer \
+        assessment_name VARCHAR, assessment_id integer, subject integer, \
         " + columns_query + ");")
 
     report_list = db.session.execute(new_query)
