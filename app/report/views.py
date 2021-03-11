@@ -6,6 +6,7 @@ from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
 from sqlalchemy import func, text
 
+from common.logger import log
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
 from .. import db
@@ -633,7 +634,7 @@ def center():
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
-        a2.id, t2.name, \
+        a2.id, t2.subject, t2.name, \
         CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
         ELSE 0 END, ''('', Max(ts.rank_v), '')'')  score \
         from marking m \
@@ -651,7 +652,7 @@ def center():
         order by s.student_id',\
         $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
-        assessment_name VARCHAR, assessment_id integer,\
+        assessment_name VARCHAR, assessment_id integer, subject integer \
         " + columns_query + ");")
 
     report_list = db.session.execute(new_query)
@@ -664,6 +665,14 @@ def center():
         # testlet_id = 426
         review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         # flash(review_items)
+
+    for rl in report_list:
+        rl.enable_writing_report = False
+        rl.is_writing = False
+        subject = Codebook.get_code_name(rl.subject)
+        log.debug("report.subject: %s" % subject)
+        if subject == 'Writing':
+            rl.is_writing = True
 
     '''
     for enroll in enrolls:

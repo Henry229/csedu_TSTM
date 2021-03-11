@@ -434,26 +434,32 @@ def assessment_list():
             additional_info = Codebook.get_additional_info(tset.subject)
             tset.sort_key = additional_info['subject_order'] if additional_info else 1
             if subject == 'Writing' and tset.enable_report:
-                mws = db.session.query(MarkingForWriting.markers_comment).join(Marking). \
+                mws = db.session.query(MarkingForWriting.markers_comment,
+                                       MarkingForWriting.candidate_mark_detail).join(Marking). \
                     join(AssessmentEnroll). \
                     filter(Marking.id == MarkingForWriting.marking_id). \
                     filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
                     filter(AssessmentEnroll.student_user_id == current_user.id). \
                     filter(Marking.testset_id == tset.id).all()
                 for mw in mws:
-                    tset.enable_writing_report = True if mw.markers_comment else False
+                    # tset.enable_writing_report = True if mw.markers_comment else False
+                    if mw.markers_comment:
+                        tset.enable_writing_report = True
+                        tset.my_writing_score = get_writing_report_score(mw.candidate_mark_detail)
+                    else:
+                        tset.enable_writing_report = False
+                        tset.my_writing_score = {"score": 0, "total_score": 0, "percentile_score": 0}
                     if not tset.enable_writing_report:
                         break
             tset.explanation_link = view_explanation(tset.id)
 
             '''
-            # ------------------------------------- #
             모든 점수는 소수점 한자리까지 표시
             Writing             actual score/30         max score 100.0
             English             actual score/30*100     max score 100.0
             Math                actual score/35*100     max score 100.0
             Thinking skill      actual score/40*100     max score 100.0
-            Total     writing actual + English actual / 30 * 70 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
+            Total     writing actual + English actual / 30 * 100 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
             '''
             tset.score = 0
             if test_type == "Online Selective":
@@ -465,21 +471,13 @@ def assessment_list():
                 if enrolled_q:
                     ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
                     if ts_header:
-                        # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
-                        # ts_header.percentile_score)
-                        # tset.score = float(ts_header.score)
                         tset.score = float(ts_header.percentile_score)
-                        '''
-                        if subject.find('Writing') and tset.score > 0:
-                            tset.score = int(tset.score) * 0.3
-                        elif subject.find('Reading') and tset.score > 0:
-                            tset.score = int(tset.score) * 0.7
-                        else:
-                            tset.score = int(tset.score)
-                        '''
-            # ------------------------------------- #
+                    if subject == 'Writing' and tset.enable_report:
+                        if hasattr(tset, 'my_writing_score'):
+                            # log.debug("tset.my_writing_score: %s" % tset.my_writing_score)
+                            tset.score = float(tset.my_writing_score['percentile_score'])
 
-        # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
+                            # sorted_testsets = sorted(new_test_sets, key=lambda x: x.name)
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
 
@@ -694,13 +692,12 @@ def assessment_list_sampletest():
             tset.explanation_link = view_explanation(tset.id)
 
             '''
-            # ------------------------------------- #
             모든 점수는 소수점 한자리까지 표시
             Writing             actual score/30         max score 100.0
             English             actual score/30*100     max score 100.0
             Math                actual score/35*100     max score 100.0
             Thinking skill      actual score/40*100     max score 100.0
-            Total     writing actual + English actual / 30 * 70 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
+            Total     writing actual + English actual / 30 * 100 +  Math actual / 35 * 100 +  Thinking actual / 40 * 100
             '''
             tset.score = 0
             if test_type == "Online Selective":
@@ -712,18 +709,7 @@ def assessment_list_sampletest():
                 if enrolled_q:
                     ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
                     if ts_header:
-                        # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score,
-                        # ts_header.percentile_score)
-                        # tset.score = float(ts_header.score)
                         tset.score = float(ts_header.percentile_score)
-                        '''
-                        if subject.find('Writing') and tset.score > 0:
-                            tset.score = int(tset.score) * 0.3
-                        elif subject.find('Reading') and tset.score > 0:
-                            tset.score = int(tset.score) * 0.7
-                        else:
-                            tset.score = int(tset.score)
-                        '''
                     if subject == 'Writing' and tset.enable_report:
                         if hasattr(tset, 'my_writing_score'):
                             # log.debug("tset.my_writing_score: %s" % tset.my_writing_score)
