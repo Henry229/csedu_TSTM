@@ -668,12 +668,12 @@ def center():
         # flash(review_items)
 
     for rl in report_list:
-        rl.enable_writing_report = False
-        rl.is_writing = False
+        # rl.enable_writing_report = False
+        # rl.is_writing = False
         subject = Codebook.get_code_name(rl.subject)
         log.debug("report.subject: %s" % subject)
-        if subject == 'Writing':
-            rl.is_writing = True
+        # if subject == 'Writing':
+        #    rl.is_writing = True
 
     '''
     for enroll in enrolls:
