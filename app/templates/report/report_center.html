@@ -118,7 +118,7 @@
                                     <td>{{ rl.username }}</td>
                                     <td>{{ rl.assessment_name }}</td>
                                     {% for tsset in testset_dic %}
-                                        <td>
+                                        <td> {{ rl[testset_dic[tsset]["subject"]]  }}
                                         {% if rl[testset_dic[tsset]["name"]]: %}
                                             {{ rl[testset_dic[tsset]["name"]] }}
                                             {% if rl[testset_dic[tsset]["subject"]] != 'Writing' and enable_report: %}
