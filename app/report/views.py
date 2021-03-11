@@ -675,7 +675,7 @@ def center():
         # if subject == 'Writing':
         #    rl.is_writing = True
     for tsset in testset_dic:
-        log.debug("testset_dic tsset: %s" % tsset)
+        log.debug("testset_dic tsset: %s , %s " % (tsset.name, tsset.subject))
     '''
     for enroll in enrolls:
         # If subject is 'Writing', report enabled:
