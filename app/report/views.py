@@ -634,7 +634,7 @@ def center():
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
-        a2.id, t2.subject, t2.name, \
+        a2.id,t2.name, \
         CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
         ELSE 0 END, ''('', Max(ts.rank_v), '')'')  score \
         from marking m \
@@ -648,11 +648,11 @@ def center():
         join test_summary_mview ts on m.assessment_enroll_id= ts.assessment_enroll_id   \
         where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
-        t2.name, t2.subject \
+        t2.name \
         order by s.student_id',\
         $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
-        assessment_name VARCHAR, assessment_id integer, subject integer, \
+        assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
 
     cursor = db.session.execute(new_query)
@@ -667,14 +667,15 @@ def center():
         review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         # flash(review_items)
 
-    for rl in report_list:
+    # for rl in report_list:
         # rl.enable_writing_report = False
         # rl.is_writing = False
-        subject = Codebook.get_code_name(rl.subject)
-        log.debug("report.subject: %s" % subject)
+        # subject = Codebook.get_code_name(rl.subject)
+        # log.debug("report.subject: %s" % subject)
         # if subject == 'Writing':
         #    rl.is_writing = True
-
+    for tsset in testset_dic:
+        log.debug("testset_dic tsset: %s" % tsset)
     '''
     for enroll in enrolls:
         # If subject is 'Writing', report enabled:
