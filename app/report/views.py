@@ -617,7 +617,7 @@ def center():
         testset_name_list += '\"' + i_testset.name + '\"'
         columns_query += '\"' + i_testset_name + '\" VARCHAR'
         columns_list.append(i_testset_name)
-        testset_dic[i_testset.id] = {"name": i_testset_name, "subject": i_testset.subject}
+        testset_dic[i_testset.id] = {"name": i_testset_name, "subject": Codebook.get_code_name(i_testset.subject)}
         # testset_list[t_items_count]['id'] = i_testset.id
         t_items_count = t_items_count + 1
         if len(t_items) > t_items_count:
@@ -667,15 +667,8 @@ def center():
         review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         # flash(review_items)
 
-    # for rl in report_list:
-        # rl.enable_writing_report = False
-        # rl.is_writing = False
-        # subject = Codebook.get_code_name(rl.subject)
-        # log.debug("report.subject: %s" % subject)
-        # if subject == 'Writing':
-        #    rl.is_writing = True
-    for tsset in testset_dic:
-        log.debug("testset_dic tsset: %s , %s " % (testset_dic[tsset]["name"], testset_dic[tsset]["subject"]))
+    # for tsset in testset_dic:
+    #    log.debug("testset_dic tsset: %s , %s " % (testset_dic[tsset]["name"], testset_dic[tsset]["subject"]))
     '''
     for enroll in enrolls:
         # If subject is 'Writing', report enabled:
