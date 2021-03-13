@@ -118,6 +118,13 @@ class AssessmentSession:
         self.error_code = error_code
         self.error_message = error_message
 
+    def marking_id_from_item_id(self, item_id):
+        test_items = self.assessment['test_items']
+        for t_item in test_items:
+            if t_item['item_id'] == item_id:
+                return t_item['marking_id']
+        return 0
+
     @staticmethod
     def generate_key_string(user_id, enroll_id, testset_id, attempt_count):
         """

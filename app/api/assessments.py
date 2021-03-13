@@ -18,6 +18,7 @@ from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
+from app.api.apicache import ApiCache
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
@@ -715,26 +716,13 @@ def parse_processed_response(candidate_response):
 @permission_required(Permission.ITEM_EXEC)
 @validate_session
 def rendered(item_id, assessment_session=None):
-    session_key = request.args.get('session')
-    # assessment_session = AssessmentSession(key=session_key)
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
     response = {}
     rendered_item = ''
     qti_item_obj = Item.query.filter_by(id=item_id).first()
     item_subject = Codebook.get_code_name(qti_item_obj.subject)
-    if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
-        try:
-            item_service = ItemService(qti_item_obj.file_link)
-            qti_item = item_service.get_item()
-            rendered_item = qti_item.to_html()
-            response['type'] = qti_item.get_interaction_type()
-            response['cardinality'] = qti_item.get_cardinality()
-            response['object_variables'] = qti_item.get_interaction_object_variables()
-            response['interactions'] = qti_item.get_interaction_info()
-            response['subject'] = item_subject
-        except Exception as e:
-            print(e)
-    else:
+
+    try:
         item_service = ItemService(qti_item_obj.file_link)
         qti_item = item_service.get_item()
         rendered_item = qti_item.to_html()
@@ -743,17 +731,29 @@ def rendered(item_id, assessment_session=None):
         response['object_variables'] = qti_item.get_interaction_object_variables()
         response['interactions'] = qti_item.get_interaction_info()
         response['subject'] = item_subject
+    except Exception as e:
+        print(e)
 
-    # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
-    debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
-    rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
-    if rendered_item:
-        rendered_template = rendered_template.replace('rendered_html', rendered_item)
+    # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
+    # 없다면 새로 만들어서 캐시에 저장해 둔다.
+    rendered_template_key = "item-{}-rendered".format(item_id)
+    rendered_cache = ApiCache()
+    rendered_template = rendered_cache.get(rendered_template_key)
+    if rendered_template is None:
+        # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
+        debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
+        rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
+        if rendered_item:
+            rendered_template = rendered_template.replace('rendered_html', rendered_item)
+        # 캐시에 저장한다.
+        # timeout ==> 20 minutes
+        rendered_cache.set(rendered_template_key, rendered_template, timeout=20*60)
+
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
-    enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
-    marking = Marking.query.filter(Marking.assessment_enroll_id == enroll_id, Marking.item_id == item_id).first()
-    marking.read_time = datetime.utcnow()
-    db.session.commit()
+    # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.
+    marking_id = assessment_session.marking_id_from_item_id(item_id)
+    db.session.query(Marking).filter(Marking.id == marking_id).update({"read_time": datetime.utcnow()})
+
     response['html'] = rendered_template
     media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
     if media_id_match:

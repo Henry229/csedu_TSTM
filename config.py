@@ -65,7 +65,7 @@ class Config(metaclass=MetaFlaskEnv):
 
     CACHE_DIR = os.path.join(STORAGE_DIR, 'cache')
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
-    CACHE_THRESHOLD = 1000  # The number of files to start deleting session files(filesystem only). 0 is No threshold
+    CACHE_THRESHOLD = 3000  # The number of files to start deleting session files(filesystem only). 0 is No threshold
 
     CACHE_REDIS_HOST = os.environ.get('CACHE_REDIS_HOST') or 'localhost'
 
