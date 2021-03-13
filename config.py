@@ -72,6 +72,8 @@ class Config(metaclass=MetaFlaskEnv):
     JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "2PIaOszO"
     JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "g3dW3bZQLNl4HfE7lR7dg2Ba"
 
+    API_RENDERED_CACHE = 'enabled'  # if it's not 'enabled', the api will not use cache.
+
     @classmethod
     def init_app(cls, app):
         # log 저장 폴더가 없으면 생성한다.
