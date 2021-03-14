@@ -720,9 +720,10 @@ def rendered(item_id, assessment_session=None):
 
     # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
     # 없다면 새로 만들어서 캐시에 저장해 둔다.
-    rendered_template_key = "item-{}-rendered".format(item_id)
+    rendered_template_key = "item-{id:08d}-rendered".format(id=item_id)
     rendered_cache = ApiCache()
-    if current_app.config['API_RENDERED_CACHE'] == 'enabled':
+    cache_enabled = current_app.config['API_RENDERED_CACHE'] == 'enabled'
+    if cache_enabled:
         response = rendered_cache.get(rendered_template_key)
     else:
         response = None
@@ -751,8 +752,9 @@ def rendered(item_id, assessment_session=None):
         response['html'] = rendered_template
 
         # 캐시에 저장한다.
-        # timeout ==> 20 minutes
-        rendered_cache.set(rendered_template_key, response, timeout=20*60)
+        # timeout ==> defined in config.py as API_RENDERED_CACHE_TIMEOUT
+        if cache_enabled:
+            rendered_cache.set(rendered_template_key, response)
 
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
     # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.

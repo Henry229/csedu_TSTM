@@ -72,7 +72,10 @@ class Config(metaclass=MetaFlaskEnv):
     JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "2PIaOszO"
     JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "g3dW3bZQLNl4HfE7lR7dg2Ba"
 
-    API_RENDERED_CACHE = 'enabled'  # if it's not 'enabled', the api will not use cache.
+    # /api/rendered : Enable caching rendered response or not
+    # Any value other than 'enabled' will make the api not use cache.
+    API_RENDERED_CACHE = os.environ.get('API_RENDERED_CACHE') or 'enabled'
+    API_RENDERED_CACHE_TIMEOUT = 3600  # 1 hour
 
     @classmethod
     def init_app(cls, app):
