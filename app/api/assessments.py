@@ -480,6 +480,8 @@ def response_process(item_id, assessment_session=None):
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request(message='Student id is not valid!')
+    # remove from the db session
+    db.session.expunge(student)
 
     # check timeout: give 5 seconds gap
     timeout = (assessment_session.get_value('test_duration') * 60
@@ -489,6 +491,8 @@ def response_process(item_id, assessment_session=None):
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+    # remove from the db session
+    db.session.expunge(qti_item_obj)
     item_subject = Codebook.get_code_name(qti_item_obj.subject)
     writing_text = None
     if item_subject.lower() == 'writing':
@@ -513,7 +517,6 @@ def response_process(item_id, assessment_session=None):
     if processed is None:
         return bad_request(message="Processing response error")
 
-    marking = Marking.query.filter_by(id=marking_id).first()
     if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get(
             'file'):
         candidate_response = response.get("RESPONSE").get("base")
@@ -528,18 +531,38 @@ def response_process(item_id, assessment_session=None):
                 candidate_response["writing_text"] = writing_text
             if file_names is not None:
                 candidate_response["file_names"] = file_names
-        marking.candidate_r_value = candidate_response
+        candidate_r_value = candidate_response
     else:
-        marking.candidate_r_value = candidate_response
-    marking.candidate_mark = processed.get('SCORE')
-    marking.outcome_score = processed.get('maxScore')
-    marking.is_correct = marking.candidate_mark >= marking.outcome_score
-    marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
-    marking.last_r_value = marking.candidate_r_value
-    marking.last_is_correct = marking.is_correct
+        candidate_r_value = candidate_response
+
+    # Get the last marking of this question.
+    last_marking = Marking.query.filter_by(id=marking_id).first()
+    # We don't need to read back the changes.
+    db.session.expunge(last_marking)
+    marking_testlet_id = last_marking.testlet_id
+
+    candidate_mark = processed.get('SCORE')
+    outcome_score = processed.get('maxScore')
+    is_correct = candidate_mark >= outcome_score
+    correct_r_value = parse_correct_response(processed.get('correctResponses'))
+    last_r_value = last_marking.candidate_r_value
+    last_is_correct = last_marking.is_correct
+    # Update changes
+    marking_updated = {
+        "candidate_r_value": candidate_r_value,
+        "candidate_mark": candidate_mark,
+        "outcome_score": outcome_score,
+        "is_correct": is_correct,
+        "correct_r_value": correct_r_value,
+    }
+    if last_r_value is not None:
+        marking_updated["last_r_value"] = last_r_value
+    if last_is_correct is not None:
+        marking_updated["last_is_correct"] = last_is_correct
+    db.session.query(Marking).filter(Marking.id == marking_id).update(marking_updated)
     db.session.commit()
 
-    assessment_session.set_saved_answer(marking_id, marking.candidate_r_value)
+    assessment_session.set_saved_answer(marking_id, candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = get_next_item(assessment_session, question_no)
@@ -548,17 +571,16 @@ def response_process(item_id, assessment_session=None):
         # There is 2 cases where next_item is None
         #   1. It consumed all of the current testlet items. ==> Ask to proceed to a next testlet.
         #   2. It consumed all of the current testset items.  ==> Ask to submit the testset.
-        if can_load_next_testlet(assessment_session, marking.testlet_id):
+        if can_load_next_testlet(assessment_session, marking_testlet_id):
             assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
             testset_id = assessment_session.get_value('testset_id')
-            testlet_id = marking.testlet_id
             markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
-                                               testset_id=testset_id, testlet_id=testlet_id) \
+                                               testset_id=testset_id, testlet_id=marking_testlet_id) \
                 .order_by(Marking.question_no).all()
             start = markings[0].question_no
             end = markings[-1].question_no
             data['html'] = render_template("runner/stage_finished.html", start=start, end=end)
-            data['testlet_id'] = testlet_id
+            data['testlet_id'] = marking_testlet_id
             data['question_no'] = question_no
             assessment_session.set_status(AssessmentSession.STATUS_STAGE_FINISHED)
         else:
@@ -572,12 +594,13 @@ def response_process(item_id, assessment_session=None):
         next_question_no = question_no + 1
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
-        marking.is_read = True
-        marking.read_time = datetime.utcnow()
-        db.session.commit()
         data['is_flagged'] = marking.is_flagged
-        data['is_read'] = marking.is_read
+        data['is_read'] = True
         data['next_saved_answer'] = marking.candidate_r_value if marking.candidate_r_value is not None else ""
+        # Comment out codes. Update will be done in rendered.
+        # marking.is_read = True
+        # marking.read_time = datetime.utcnow()
+        # db.session.commit()
 
     data.update({
         'status': assessment_session.get_status(),
@@ -759,7 +782,8 @@ def rendered(item_id, assessment_session=None):
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
     # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.
     marking_id = assessment_session.marking_id_from_item_id(item_id)
-    db.session.query(Marking).filter(Marking.id == marking_id).update({"read_time": datetime.utcnow()})
+    db.session.query(Marking).filter(Marking.id == marking_id).update({"is_read": True, "read_time": datetime.utcnow()})
+    db.session.commit()
 
     media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", response['html'])
     if media_id_match:
@@ -907,6 +931,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         for marking in markings:
             sum_score = sum_score + marking.getScore()
             last_question_no = marking.question_no
+            db.session.expunge(marking)
         outcome_total = Marking.getTotalOutcomeScore(assessment_enroll_id, testset_id, testlet_id)
         percentile = sum_score / outcome_total * 100  # Student's marked percentile
 
@@ -922,7 +947,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
         assessment_enroll.stage_data = stage_data
         db.session.add(assessment_enroll)
-        db.session.commit()
+        # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         marking_objects = []
         for item in items:
@@ -933,9 +958,11 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                               weight=item.weight,
                               assessment_enroll_id=assessment_enroll_id)
             marking_objects.append(marking)
+            db.session.expunge(item)
         # higher performing “executemany” operations
         # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
         db.session.bulk_save_objects(marking_objects, return_defaults=False)
+        db.session.commit()
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
             .order_by(Marking.question_no).all()
