@@ -47,7 +47,7 @@ class FileSystemCache(BaseCache):
     def __init__(
         self,
         cache_dir,
-        threshold=500,
+        threshold=0,
         default_timeout=300,
         mode=0o600,
         hash_method=hashlib.md5,

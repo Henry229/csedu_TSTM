@@ -18,6 +18,7 @@ from werkzeug.utils import secure_filename
 
 from app.api import api
 from app.api.assessmentsession import AssessmentSession
+from app.api.apicache import ApiCache
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
@@ -479,6 +480,8 @@ def response_process(item_id, assessment_session=None):
     student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return bad_request(message='Student id is not valid!')
+    # remove from the db session
+    db.session.expunge(student)
 
     # check timeout: give 5 seconds gap
     timeout = (assessment_session.get_value('test_duration') * 60
@@ -488,6 +491,8 @@ def response_process(item_id, assessment_session=None):
 
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+    # remove from the db session
+    db.session.expunge(qti_item_obj)
     item_subject = Codebook.get_code_name(qti_item_obj.subject)
     writing_text = None
     if item_subject.lower() == 'writing':
@@ -512,7 +517,6 @@ def response_process(item_id, assessment_session=None):
     if processed is None:
         return bad_request(message="Processing response error")
 
-    marking = Marking.query.filter_by(id=marking_id).first()
     if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get("base").get(
             'file'):
         candidate_response = response.get("RESPONSE").get("base")
@@ -527,18 +531,38 @@ def response_process(item_id, assessment_session=None):
                 candidate_response["writing_text"] = writing_text
             if file_names is not None:
                 candidate_response["file_names"] = file_names
-        marking.candidate_r_value = candidate_response
+        candidate_r_value = candidate_response
     else:
-        marking.candidate_r_value = candidate_response
-    marking.candidate_mark = processed.get('SCORE')
-    marking.outcome_score = processed.get('maxScore')
-    marking.is_correct = marking.candidate_mark >= marking.outcome_score
-    marking.correct_r_value = parse_correct_response(processed.get('correctResponses'))
-    marking.last_r_value = marking.candidate_r_value
-    marking.last_is_correct = marking.is_correct
+        candidate_r_value = candidate_response
+
+    # Get the last marking of this question.
+    last_marking = Marking.query.filter_by(id=marking_id).first()
+    # We don't need to read back the changes.
+    db.session.expunge(last_marking)
+    marking_testlet_id = last_marking.testlet_id
+
+    candidate_mark = processed.get('SCORE')
+    outcome_score = processed.get('maxScore')
+    is_correct = candidate_mark >= outcome_score
+    correct_r_value = parse_correct_response(processed.get('correctResponses'))
+    last_r_value = last_marking.candidate_r_value
+    last_is_correct = last_marking.is_correct
+    # Update changes
+    marking_updated = {
+        "candidate_r_value": candidate_r_value,
+        "candidate_mark": candidate_mark,
+        "outcome_score": outcome_score,
+        "is_correct": is_correct,
+        "correct_r_value": correct_r_value,
+    }
+    if last_r_value is not None:
+        marking_updated["last_r_value"] = last_r_value
+    if last_is_correct is not None:
+        marking_updated["last_is_correct"] = last_is_correct
+    db.session.query(Marking).filter(Marking.id == marking_id).update(marking_updated)
     db.session.commit()
 
-    assessment_session.set_saved_answer(marking_id, marking.candidate_r_value)
+    assessment_session.set_saved_answer(marking_id, candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = get_next_item(assessment_session, question_no)
@@ -547,17 +571,16 @@ def response_process(item_id, assessment_session=None):
         # There is 2 cases where next_item is None
         #   1. It consumed all of the current testlet items. ==> Ask to proceed to a next testlet.
         #   2. It consumed all of the current testset items.  ==> Ask to submit the testset.
-        if can_load_next_testlet(assessment_session, marking.testlet_id):
+        if can_load_next_testlet(assessment_session, marking_testlet_id):
             assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
             testset_id = assessment_session.get_value('testset_id')
-            testlet_id = marking.testlet_id
             markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
-                                               testset_id=testset_id, testlet_id=testlet_id) \
+                                               testset_id=testset_id, testlet_id=marking_testlet_id) \
                 .order_by(Marking.question_no).all()
             start = markings[0].question_no
             end = markings[-1].question_no
             data['html'] = render_template("runner/stage_finished.html", start=start, end=end)
-            data['testlet_id'] = testlet_id
+            data['testlet_id'] = marking_testlet_id
             data['question_no'] = question_no
             assessment_session.set_status(AssessmentSession.STATUS_STAGE_FINISHED)
         else:
@@ -571,12 +594,13 @@ def response_process(item_id, assessment_session=None):
         next_question_no = question_no + 1
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
-        marking.is_read = True
-        marking.read_time = datetime.utcnow()
-        db.session.commit()
         data['is_flagged'] = marking.is_flagged
-        data['is_read'] = marking.is_read
+        data['is_read'] = True
         data['next_saved_answer'] = marking.candidate_r_value if marking.candidate_r_value is not None else ""
+        # Comment out codes. Update will be done in rendered.
+        # marking.is_read = True
+        # marking.read_time = datetime.utcnow()
+        # db.session.commit()
 
     data.update({
         'status': assessment_session.get_status(),
@@ -715,14 +739,22 @@ def parse_processed_response(candidate_response):
 @permission_required(Permission.ITEM_EXEC)
 @validate_session
 def rendered(item_id, assessment_session=None):
-    session_key = request.args.get('session')
-    # assessment_session = AssessmentSession(key=session_key)
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
-    response = {}
-    rendered_item = ''
-    qti_item_obj = Item.query.filter_by(id=item_id).first()
-    item_subject = Codebook.get_code_name(qti_item_obj.subject)
-    if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
+
+    # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
+    # 없다면 새로 만들어서 캐시에 저장해 둔다.
+    rendered_template_key = "item-{id:08d}-rendered".format(id=item_id)
+    rendered_cache = ApiCache()
+    cache_enabled = current_app.config['API_RENDERED_CACHE'] == 'enabled'
+    if cache_enabled:
+        response = rendered_cache.get(rendered_template_key)
+    else:
+        response = None
+    if response is None:
+        rendered_item = ''
+        response = {}
+        qti_item_obj = Item.query.filter_by(id=item_id).first()
+        item_subject = Codebook.get_code_name(qti_item_obj.subject)
         try:
             item_service = ItemService(qti_item_obj.file_link)
             qti_item = item_service.get_item()
@@ -734,28 +766,26 @@ def rendered(item_id, assessment_session=None):
             response['subject'] = item_subject
         except Exception as e:
             print(e)
-    else:
-        item_service = ItemService(qti_item_obj.file_link)
-        qti_item = item_service.get_item()
-        rendered_item = qti_item.to_html()
-        response['type'] = qti_item.get_interaction_type()
-        response['cardinality'] = qti_item.get_cardinality()
-        response['object_variables'] = qti_item.get_interaction_object_variables()
-        response['interactions'] = qti_item.get_interaction_info()
-        response['subject'] = item_subject
 
-    # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
-    debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
-    rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
-    if rendered_item:
-        rendered_template = rendered_template.replace('rendered_html', rendered_item)
+        # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
+        debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
+        rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
+        if rendered_item:
+            rendered_template = rendered_template.replace('rendered_html', rendered_item)
+        response['html'] = rendered_template
+
+        # 캐시에 저장한다.
+        # timeout ==> defined in config.py as API_RENDERED_CACHE_TIMEOUT
+        if cache_enabled:
+            rendered_cache.set(rendered_template_key, response)
+
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
-    enroll_id = AssessmentSession.enrol_id_from_session_key(session_key)
-    marking = Marking.query.filter(Marking.assessment_enroll_id == enroll_id, Marking.item_id == item_id).first()
-    marking.read_time = datetime.utcnow()
+    # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.
+    marking_id = assessment_session.marking_id_from_item_id(item_id)
+    db.session.query(Marking).filter(Marking.id == marking_id).update({"is_read": True, "read_time": datetime.utcnow()})
     db.session.commit()
-    response['html'] = rendered_template
-    media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", rendered_template)
+
+    media_id_match = re.search(r"http://jwplayer-id/([a-zA-Z0-9]+)", response['html'])
     if media_id_match:
         test_duration_min = assessment_session.get_value('test_duration')
         start_time_sec = assessment_session.get_value('start_time')
@@ -901,6 +931,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         for marking in markings:
             sum_score = sum_score + marking.getScore()
             last_question_no = marking.question_no
+            db.session.expunge(marking)
         outcome_total = Marking.getTotalOutcomeScore(assessment_enroll_id, testset_id, testlet_id)
         percentile = sum_score / outcome_total * 100  # Student's marked percentile
 
@@ -908,15 +939,17 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     new_questions = []
     if next_branch_json is not None:
         testlet_id = next_branch_json.get("id")
-        stage = len(stage_data) + 1
-        stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
-        # stage 정보를 session 과 DB 에 저장한다.
-        assessment_session.set_value('stage_data', stage_data)
+        if stage_data is not None:
+            stage = len(stage_data) + 1
+            stage_data.append({'stage': stage, 'testlet_id': int(testlet_id), 'percentile': percentile})
+            # stage 정보를 session 과 DB 에 저장한다.
+            assessment_session.set_value('stage_data', stage_data)
         assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
         assessment_enroll.stage_data = stage_data
         db.session.add(assessment_enroll)
-        db.session.commit()
+        # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
+        marking_objects = []
         for item in items:
             last_question_no += 1
             marking = Marking(testset_id=testset_id,
@@ -924,14 +957,23 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                               item_id=item.item_id, question_no=last_question_no,
                               weight=item.weight,
                               assessment_enroll_id=assessment_enroll_id)
-            db.session.add(marking)
-            db.session.commit()
-            item_info = {'question_no': last_question_no, 'item_id': marking.item_id,
+            marking_objects.append(marking)
+            db.session.expunge(item)
+        # higher performing “executemany” operations
+        # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
+        db.session.bulk_save_objects(marking_objects, return_defaults=False)
+        db.session.commit()
+        markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
+                                           testset_id=testset_id, testlet_id=testlet_id) \
+            .order_by(Marking.question_no).all()
+        for marking in markings:
+            item_info = {'question_no': marking.question_no, 'item_id': marking.item_id,
                          'marking_id': marking.id, 'is_flagged': marking.is_flagged, 'is_read': marking.is_read,
                          'saved_answer': marking.candidate_r_value if marking.candidate_r_value is not None else ''
                          }
             test_items.append(item_info)
             new_questions.append(item_info)
+
         assessment_session.set_value('test_items', test_items)
     return new_questions
 
@@ -940,7 +982,7 @@ def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
     testset = Testset.query.filter_by(id=testset_id).first()
     first_branch = testset.branching.get('data')[0]
 
-    if len(stage_data) == 0:
+    if stage_data is None or len(stage_data) == 0:
         next_branch = first_branch
     else:
         c_stage_no = stage_data[-1].get("stage")  # candidate's current stage_no

@@ -19,6 +19,7 @@ psycopg2==2.8.*
 pyjwt==1.7.*
 python-jose==3.2.0
 pytz==2019.*
+redis==3.5.3
 requests==2.22.*
 seaborn==0.9.*
 WeasyPrint==50

@@ -21,6 +21,7 @@ locust -f locustfile.py
 """
 
 STRESS_TEST_TOKEN = "7QXgZGbIdVC1fSJB3pnXE28ZZjSfhktp"
+verify = True
 
 
 def get_random_string(length=16):
@@ -59,27 +60,30 @@ class QuickstartUser(HttpUser):
 
     @task
     def rendered01(self):
-        question = self.select_question()
-        item_id = question.get('item_id')
-        response = self.client.get(f'/api/rendered/{item_id}', name='/api/rendered/item_id',
-                                   params={"session": self.session, "r_key": get_random_string()},
-                                   cookies=self.client.cookies.get_dict())
-        # print(response.text)
+        if self.questions:
+            question = self.select_question()
+            item_id = question.get('item_id')
+            response = self.client.get(f'/api/rendered/{item_id}' + "?r_key=" + get_random_string(),
+                                       verify=verify, name='/api/rendered/item_id',
+                                       params={"session": self.session},
+                                       cookies=self.client.cookies.get_dict())
+            # print(response.text)
 
     @task
     def response01(self):
-        question = self.select_question()
-        item_id = question.get('item_id')
-        marking_id = question.get('marking_id')
-        question_no = question.get('question_no')
-        answer = self.responses.get(item_id, self.responses_default)
-        response = self.client.post(f"/api/responses/{item_id}", name='/api/responses/item_id',
-                                    params={"r_key": get_random_string()},
-                                    json={"session": self.session, "question_no": question_no,
-                                          "marking_id": marking_id,
-                                          "response": {"RESPONSE": answer}})
-        # print(response.json())
-        # print(response)
+        if self.questions:
+            question = self.select_question()
+            item_id = question.get('item_id')
+            marking_id = question.get('marking_id')
+            question_no = question.get('question_no')
+            answer = self.responses.get(item_id, self.responses_default)
+            response = self.client.post(f"/api/responses/{item_id}" + "?r_key=" + get_random_string(),
+                                        verify=verify, name='/api/responses/item_id',
+                                        json={"session": self.session, "question_no": question_no,
+                                              "marking_id": marking_id,
+                                              "response": {"RESPONSE": answer}})
+            # print(response.json())
+            # print(response)
 
     def on_start(self):
         token = {"sid": "csetest5", "aid": self.assessment_guid, "sto": 120,
@@ -90,15 +94,16 @@ class QuickstartUser(HttpUser):
         while try_count < retry_max:
             try_count += 1
             # 1. inward 로 로그인함.
-            response = self.client.get("/inward", name='/inward',
-                                       params={"token": token_base64, "r_key": get_random_string()})
+            response = self.client.get("/inward" + "?r_key=" + get_random_string(), verify=verify,
+                                       name='/inward',
+                                       params={"token": token_base64})
             # print(self.client.cookies.get_dict())
             if response.status_code != 200:
                 continue
             time.sleep(30)
             # 2. 시험용 session 값을 받아와 저장
-            response = self.client.post("/api/session", name='/api/session',
-                                        params={"r_key": get_random_string()},
+            response = self.client.post("/api/session" + "?r_key=" + get_random_string(), verify=verify,
+                                        name='/api/session',
                                         json={"assessment_guid": self.assessment_guid, "testset_id": self.testset_id,
                                               "student_ip": "123.243.86.1", "start_time": int(time.time()),
                                               "tnc_agree_checked": True}, cookies=self.client.cookies.get_dict())
@@ -108,8 +113,8 @@ class QuickstartUser(HttpUser):
             self.session = response.json().get('data').get('session')
 
             # 3. test 를 시작하면서 문제를 받아옴.
-            response = self.client.post("/api/start", name='/api/start',
-                                        params={"r_key": get_random_string()},
+            response = self.client.post("/api/start" + "?r_key=" + get_random_string(), verify=verify,
+                                        name='/api/start',
                                         json={"session": self.session}, cookies=self.client.cookies.get_dict())
             # print(response.json())
             if response.status_code == 200:

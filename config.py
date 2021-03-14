@@ -55,14 +55,27 @@ class Config(metaclass=MetaFlaskEnv):
     # Response processing PHP location
     QTI_RSP_PROCESSING_PHP = os.path.join(basedir, 'rspProcessing/rspProcess.php')
 
+    # Test Runner, Error Runner session storage. filesystem(default) or redis
+    # Note: It shares some configuration values with Flask-Caching but it's an independent cache storage.
+    #       The implementations are placed under cachelib. They are clones of Flask-Caching 1.7.*
+    RUNNER_SESSION_STORAGE = os.environ.get('RUNNER_SESSION_STORAGE') or 'filesystem'
+
     # Flask-Caching
     CACHE_TYPE = 'filesystem'
+
     CACHE_DIR = os.path.join(STORAGE_DIR, 'cache')
     CACHE_DEFAULT_TIMEOUT = 3600  # 1 hour
-    CACHE_THRESHOLD = 1000
+    CACHE_THRESHOLD = 3000  # The number of files to start deleting session files(filesystem only). 0 is No threshold
+
+    CACHE_REDIS_HOST = os.environ.get('CACHE_REDIS_HOST') or 'localhost'
 
     JWPLAYER_ID = os.environ.get('JWPLAYER_ID') or "2PIaOszO"
     JWAPI_CREDENTIAL = os.environ.get('JWAPI_CREDENTIAL') or "g3dW3bZQLNl4HfE7lR7dg2Ba"
+
+    # /api/rendered : Enable caching rendered response or not
+    # Any value other than 'enabled' will make the api not use cache.
+    API_RENDERED_CACHE = os.environ.get('API_RENDERED_CACHE') or 'enabled'
+    API_RENDERED_CACHE_TIMEOUT = 3600  # 1 hour
 
     @classmethod
     def init_app(cls, app):
