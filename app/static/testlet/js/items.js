@@ -66,6 +66,11 @@ function updateChildCodeItem(parentObj, childObj) {
 }
 
 function applyItem() {
+    if ($('#items_searched > tbody > tr').filter(':has(:checkbox:checked)').length == 0) {
+         alert('Please choose item.');
+         return false;
+    }
+
     $('#items_searched > tbody > tr').filter(':has(:checkbox:checked)').each(function () {
         var $row = $(this);
         var $item_id = $row.find('#item_id');
