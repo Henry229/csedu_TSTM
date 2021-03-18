@@ -437,7 +437,7 @@ textarea:focus.qti-item.qti-interaction.solid {
 }
 
 .qti-item .qti-associateInteraction .result-area {
-    width: 40%;
+    width: 60%;
     min-width: 260px;
     margin: auto;
 }

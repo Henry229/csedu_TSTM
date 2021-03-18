@@ -355,6 +355,7 @@ var ItemHandlers = (function () {
         this._$container = options.container;
 
         this.processUI = function (answer) {
+            var self = this;
             var $choices = $('.choice-area li');
             var choice_num = $choices.length;
             var $result_area = $('.result-area');
@@ -374,8 +375,23 @@ var ItemHandlers = (function () {
             $('.target div').sortable({
                 connectWith: ".choice-area"
             }).disableSelection();
+            $('.source').on("sortout", function () {
+                self.adjustUISize();
+            });
 
             this.setSavedAnswer(answer);
+            setTimeout(function(){ self.adjustUISize(); }, 800);
+        };
+
+        this.adjustUISize = function () {
+                var source_els = $('.qti-choice');
+                var height = 33, el_height;
+                for (var i = 0; i < source_els.length; i++) {
+                    el_height = $(source_els[i]).height();
+                    if (height < el_height)
+                        height = el_height;
+                }
+                $('.target').height(height);
         };
 
         this.setSavedAnswer = function (answer) {
