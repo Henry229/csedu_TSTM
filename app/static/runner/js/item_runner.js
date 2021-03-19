@@ -192,7 +192,7 @@ var ItemRunner = (function () {
 
     var getRendered = function (item_id) {
         item_id = item_id || _item_id;
-        var loading = '<div class="fa-3x" style="margin: auto">\n' +
+        var loading = '<div class="fa-3x item-rendered-empty" style="margin: auto">\n' +
             '  <i class="fas fa-spinner fa-spin"></i> <span> Getting Test Item....</span>\n' +
             '</div>';
         var url;
@@ -210,7 +210,7 @@ var ItemRunner = (function () {
         $.ajax({
             url: url,
             beforeSend: function () {
-                _disableSubmitResponse(true);
+                _disableSubmitResponse(true, false);
                 _$container.html(loading);
                 $('.usage-info-button').hide();
             },
@@ -301,7 +301,7 @@ var ItemRunner = (function () {
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function () {
-                _disableSubmitResponse(true);
+                _disableSubmitResponse(true, true);
                 if (_responseProcessingCb) {
                     _responseProcessingCb(_question_no, response);
                 }
@@ -367,7 +367,7 @@ var ItemRunner = (function () {
 			      processData: false,
             data: formData,
             beforeSend: function () {
-                _disableSubmitResponse(true);
+                _disableSubmitResponse(true, true);
             },
             complete: function () {
 

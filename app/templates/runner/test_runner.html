@@ -51,6 +51,9 @@
           </div>
         </div>
         <div class="item-container disable-select" spellcheck="false">
+            <div class="fa-3x item-rendered-empty" style="margin: auto;padding: 4px">
+             <i class="fas fa-spinner fa-spin"></i> <span> Getting ready.... Please wait.</span>
+            </div>
         </div>
         <div class="summary-container" style="display:none;">
           <div class="question-summary-wrapper">
@@ -90,10 +93,10 @@
         <div class="item-footer">
           <div class="footer-center"></div>
           <div class="navigator">
-            <button class="footer-back-btn" style="display: none"><i class="fas fa-caret-left"></i>Back</button>
+            <button class="footer-back-btn" style="display: none"><i class="fas fa-spinner fa-spin back-loading" style="display: none"></i><i class="fas fa-caret-left back-caret"></i>Back</button>
             <div class="footer-right-buttons">
-              <button class="footer-flag-btn"><span>Flag</span><i class="far fa-flag"></i></button>
-              <button class="footer-next-btn">Next<i class="fas fa-caret-right"></i></button>
+              <button class="footer-flag-btn" disabled><span>Flag</span><i class="far fa-flag"></i></button>
+              <button class="footer-next-btn" disabled>Next<i class="fas fa-spinner fa-spin next-loading" style="display: none"></i><i class="fas fa-caret-right next-caret"></i></button>
             </div>
             <div class="footer-right-buttons footer-finish" style="display: none">
               <button class="footer-finish-btn">Finish</button>

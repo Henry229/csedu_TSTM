@@ -22,6 +22,8 @@ var TestRunner = (function () {
     var _renderedCb, _responseProcessedCb, _responseProcessingCb, _toggleFlaggedCb, _goToQuestionNo, _nextStage,
         _finishTest, _session_cb, _tnc_agree_checked, _sessionErrorCb, _disableSubmitResponse;
     var _duration_timer, _start_time, _test_duration_minutes;
+    var _disable_submit_timer = null;
+    var _$container;
     var init = function ($container, options) {
         _assessment_guid = options.assessment_guid;
         _testset_id = options.testset_id;
@@ -30,6 +32,7 @@ var TestRunner = (function () {
         _session_cb = options.session_cb;
         _tnc_agree_checked = options.tnc_agree_checked || false;
         _stage_data = [];
+        _$container = $container;
         if (!_session) {
             createSession();
             // setCookie('question_no', 1);
@@ -66,7 +69,11 @@ var TestRunner = (function () {
         btn.on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            ItemRunner.processResponse();
+            if (_$container.find('.item-rendered-empty').length > 0) {
+                _goToQuestionNo(_question_no);
+            } else {
+                ItemRunner.processResponse();
+            }
         });
         btn = $('.footer-back-btn');
         btn.on('click', function () {
@@ -405,15 +412,33 @@ var TestRunner = (function () {
         // _setItemInfo(question_no, {answer: response});
     };
 
-    _disableSubmitResponse = function(disable) {
+    _disableSubmitResponse = function(disable, is_next) {
+        if (_disable_submit_timer !== null)
+            clearTimeout(_disable_submit_timer);
         var next_btn = $('.footer-next-btn');
         var back_btn = $('.footer-back-btn');
+        var flag_btn = $('.footer-flag-btn');
         if (disable) {
             next_btn.prop('disabled', true);
             back_btn.prop('disabled', true);
+            flag_btn.prop('disabled', true);
+            if (is_next) {
+                $('.footer-next-btn .next-caret').hide();
+                $('.footer-next-btn .next-loading').show();
+            } else {
+                $('.footer-back-btn .back-caret').hide();
+                $('.footer-back-btn .back-loading').show();
+            }
+            _disable_submit_timer = setTimeout(_disableSubmitResponse, 30000, false);
         } else {
+            _disable_submit_timer = null;
             next_btn.prop('disabled', false);
             back_btn.prop('disabled', false);
+            flag_btn.prop('disabled', false);
+            $('.footer-next-btn .next-caret').show();
+            $('.footer-next-btn .next-loading').hide();
+            $('.footer-back-btn .back-caret').show();
+            $('.footer-back-btn .back-loading').hide();
         }
     }
 
