@@ -706,12 +706,24 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in current_app.config['WRITING_ALLOWED_EXTENSIONS']
 
 
-def parse_correct_response(correct_response):
-    correct_response = correct_response.strip()
+def parse_correct_response(correct_response_org):
+    """
+    PHP 에서 parsing 해서 넘어온 정답이 리스트 형태인 경우 최대한 리스트 object 로 변환을 해 본다.
+    안되면 그냥 그대로 string 으로 저장을 한다.
+    """
+    correct_response = correct_response_org.strip()
     if correct_response != '' and correct_response[0] == '[':
-        correct_response = correct_response.replace("'", '"')
-        correct_response = json.loads(correct_response)
-    return correct_response
+        try:
+            correct_response = json.loads(correct_response)
+        except json.decoder.JSONDecodeError:
+            try:
+                # correct_response 가 "['red', 'blue']" 로 넘어 오는 경우.
+                correct_response = correct_response.replace("'", '"')
+                correct_response = json.loads(correct_response)
+            except json.decoder.JSONDecodeError:
+                correct_response = correct_response_org
+        return correct_response
+    return correct_response_org
 
 
 def parse_processed_response(candidate_response):
