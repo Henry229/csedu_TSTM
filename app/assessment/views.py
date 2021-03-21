@@ -443,6 +443,9 @@ def virtual_omr_sync(assessment_id=None, duration=3):
     result = {}
 
     sync_hash = uuid.uuid4().hex
+    start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
+    vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
+
     start_time = time.time()
     vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
 
@@ -488,8 +491,6 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
             vomr_logger.info("=" * 80)
 
-            start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
-            vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
             enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
                 AssessmentEnroll.start_time >= start_day).all()
             responses = []
