@@ -431,7 +431,7 @@ def virtual_omr_resync(assessment_id):
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=2):
+def virtual_omr_sync(assessment_id=None, duration=3):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
@@ -470,7 +470,8 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                 except os.error as e:
                     vomr_logger.error(f'[{sync_hash}] {e}')
             else:
-                return f'[{sync_hash}] Lock file found. Sync may be in progress. Please try again in %ss' % (locktimeout - age), 200
+                return f'[{sync_hash}] Lock file found. Sync may be in progress. Please try again in %ss' % (
+                        locktimeout - age), 200
 
         with open(lockfile, 'w') as f:
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
@@ -486,7 +487,11 @@ def virtual_omr_sync(assessment_id=None, duration=2):
             vomr_logger.info("=" * 80)
             vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
             vomr_logger.info("=" * 80)
-            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).all()
+
+            start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
+            vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
+            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
+                AssessmentEnroll.start_time >= start_day).all()
             responses = []
             responses_text = []
 
@@ -495,7 +500,8 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                 subject = Codebook.get_subject_name(testset.id)
                 # Sync only ended or timed out test. Give extra 11min to be safe
                 end_time = pytz.utc.localize(enroll.end_time(margin=11))
-                vomr_logger.debug(f'[{sync_hash}] Sync [{assessment.name}] {assessment.GUID}, {testset.GUID}({testset.id}), {enroll.student.student_id}({enroll.student.user_id})')
+                vomr_logger.debug(
+                    f'[{sync_hash}] Sync [{assessment.name}] {assessment.GUID}, {testset.GUID}({testset.id}), {enroll.student.student_id}({enroll.student.user_id})')
                 if enroll.finish_time:
                     vomr_logger.info(f'[{sync_hash}] > Test finished at {enroll.finish_time}')
                     sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
@@ -504,7 +510,8 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                         continue
                 else:
                     if end_time:
-                        vomr_logger.debug(f'[{sync_hash}] > start time: {enroll.start_time} + duration {testset.test_duration} = end time {end_time}')
+                        vomr_logger.debug(
+                            f'[{sync_hash}] > start time: {enroll.start_time} + duration {testset.test_duration} = end time {end_time}')
                         if end_time >= datetime.now(pytz.utc):
                             vomr_logger.info(f'[{sync_hash}] > Not timed out yet. Skip')
                             continue
@@ -515,13 +522,16 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                         m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                         if m_writing is None:
                             if not m.candidate_r_value:
-                                vomr_logger.debug(f'[{sync_hash}] mw > candidate_r_value is null for marking_id({m.id})')
+                                vomr_logger.debug(
+                                    f'[{sync_hash}] mw > candidate_r_value is null for marking_id({m.id})')
                             vomr_logger.debug(f'[{sync_hash}] mw > No marking_for_writing found for marking_id({m.id})')
                             continue
-                        vomr_logger.debug(f'[{sync_hash}] mw > marking_id({m.id}), marking_for_writing_id({m_writing.id})')
+                        vomr_logger.debug(
+                            f'[{sync_hash}] mw > marking_id({m.id}), marking_for_writing_id({m_writing.id})')
                         # Check marker's marking detail is empty
                         if not m_writing.is_mark_done():
-                            vomr_logger.debug(f'[{sync_hash}] mw > Marker not finished marking: marking_for_writing_id({m_writing.id})')
+                            vomr_logger.debug(
+                                f'[{sync_hash}] mw > Marker not finished marking: marking_for_writing_id({m_writing.id})')
 
                             class fake_return(object):
                                 text = "Marking For Writing data not found."
@@ -570,7 +580,8 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                                 answers[str(m.question_no)] = m.candidate_r_value
 
                         except Exception as e:
-                            vomr_logger.error(f'[{sync_hash}] ({e}) interaction_type: item.interaction_type({item.interaction_type}) m.item_id({m.item_id})')
+                            vomr_logger.error(
+                                f'[{sync_hash}] ({e}) interaction_type: item.interaction_type({item.interaction_type}) m.item_id({m.item_id})')
                             pass
 
                 marking = {
@@ -655,7 +666,8 @@ def virtual_omr_sync(assessment_id=None, duration=2):
                     total += int(m.group(2))
                     added += int(m.group(3))
         current_time = time.time()
-        vomr_logger.info(f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
+        vomr_logger.info(
+            f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
         return jsonify(result), 200
     return "Invalid Request", 500
 
