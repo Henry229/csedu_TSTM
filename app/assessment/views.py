@@ -431,7 +431,7 @@ def virtual_omr_resync(assessment_id):
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=3):
+def virtual_omr_sync(assessment_id=None, duration=2):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
@@ -443,6 +443,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
     result = {}
 
     sync_hash = uuid.uuid4().hex
+    start_time = time.time()
     vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
 
     # Check security key for web request.
@@ -653,7 +654,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     synced += int(m.group(1))
                     total += int(m.group(2))
                     added += int(m.group(3))
-        vomr_logger.info(f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added')
+        current_time = time.time()
+        vomr_logger.info(f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
         return jsonify(result), 200
     return "Invalid Request", 500
 
