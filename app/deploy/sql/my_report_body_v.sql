@@ -5,7 +5,6 @@ AS SELECT m.assessment_enroll_id,
     e.student_user_id,
     e.grade,
     m.created_time,
-    m.read_time,
     m.candidate_r_value,
     m.is_correct,
     m.correct_r_value,
@@ -13,7 +12,8 @@ AS SELECT m.assessment_enroll_id,
     m.question_no,
     m.item_id,
     i.category,
-    i.subcategory
+    i.subcategory,
+    m.read_time
    FROM marking m,
     assessment_enroll e,
     item i

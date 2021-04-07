@@ -197,10 +197,10 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
             average_score = row.median
             percentile_20 = row.percentile_20
             percentile_80 = row.percentile_80
-            subject_name = Codebook.get_subject_name(testset_id)
+            subject_name = Codebook.get_subject_name(testset_id).strip()
             # Todo: need update if clause
             subject = ''
-            if subject_name == 'LC':
+            if subject_name == 'Language Convention':
                 column_names_sub = ['code_name',
                                     'percentile_score',
                                     'median',
@@ -239,12 +239,12 @@ def make_naplan_student_report(assessment_enrolls, assessment_id, student_user_i
                     "average": lc_other_average_score,
                     "sixty": (lc_other_percentile_20, lc_other_percentile_80)}
             else:
-                if subject_name == 'RC':
+                if subject_name == 'Reading Comprehension':
                     assessment_json["reading"] = {
                         "student": student_score,
                         "average": average_score,
                         "sixty": (percentile_20, percentile_80)}
-                elif subject_name == 'Math':
+                elif subject_name == 'Numeracy':
                     assessment_json["numeracy"] = {
                         "student": student_score,
                         "average": average_score,
