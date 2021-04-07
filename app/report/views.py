@@ -119,8 +119,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
-                                                 AssessmentEnroll.finish_time). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -133,8 +132,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     assessment_enroll_id = row.id
     is_2hours_after_finished = (pytz.utc.localize(row.finish_time) + timedelta(hours=2)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
-        id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
@@ -239,8 +237,7 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
-        id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
