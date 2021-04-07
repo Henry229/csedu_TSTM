@@ -1,6 +1,7 @@
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
+import pytz
 from flask import render_template, flash, request, current_app, redirect, url_for, jsonify, send_file
 from flask_jsontools import jsonapi
 from flask_login import login_required, current_user
@@ -118,7 +119,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -129,8 +131,10 @@ def my_report(assessment_id, ts_id, student_user_id):
         return redirect(url)
 
     assessment_enroll_id = row.id
+    is_2hours_after_finished = (pytz.utc.localize(row.finish_time) + timedelta(hours=2)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
+        id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
@@ -141,6 +145,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         url = request.referrer
         flash('Marking data not available')
         return redirect(url)
+
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
@@ -170,6 +175,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
+                                            is_2hours_after_finished=is_2hours_after_finished,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
@@ -233,7 +239,8 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
+        id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
