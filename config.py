@@ -116,7 +116,8 @@ class Config(metaclass=MetaFlaskEnv):
 
 class DevelopmentConfig(Config):
     # DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:P@ssword1@localhost/tailored'
+    # SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:P@ssword1@localhost/tailored'
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://tailored:JJCdq-AFu?4gU-Z_@172.32.2.147/tailored'
     # SQLALCHEMY_ECHO = True
     PREFERRED_URL_SCHEME = 'https'
 
