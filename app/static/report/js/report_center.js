@@ -34,3 +34,17 @@ function search_assessment(year, test_type, test_center) {
         }
     });
 }
+
+$(function(){
+    $('#year, #test_type, #test_center').change(function(event) {
+        event.preventDefault();
+        if($(this).val()==''){
+          $('select[name="assessment"]').empty();
+        }else {
+          var year = $('SELECT[name="year"] option:selected').val();
+          var test_type = $('SELECT[name="test_type"] option:selected').val();
+          var test_center = $('SELECT[name="test_center"] option:selected').val();
+          search_assessment(year, test_type, test_center);
+        }
+    });
+});
