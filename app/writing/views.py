@@ -4,6 +4,9 @@ import time
 import urllib
 from datetime import datetime
 
+import datetime
+from pytz import timezone, utc
+
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 from flask import render_template, flash, request, redirect, url_for, current_app, send_file, jsonify
@@ -48,12 +51,14 @@ def list_writing_marking():
         else:
             is_marked = 'N'
 
+        au_tz = pytz.timezone('Australia/Sydney')
+
         json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
                     "assessment_name": m.AssessmentEnroll.assessment.name,
                     "student_user_id": m.AssessmentEnroll.student_user_id,
                     "student_user_name": User.getUserName(m.AssessmentEnroll.student_user_id),
                     "testset_name": m.AssessmentEnroll.testset.name,
-                    "start_time": m.AssessmentEnroll.start_time,
+                    "start_time": utc.localize(m.AssessmentEnroll.start_time).astimezone(au_tz),
                     "marking_id": m.Marking.id,
                     "item_id": m.Marking.item_id,
                     "marking_writing_id": m.MarkingForWriting.id,
