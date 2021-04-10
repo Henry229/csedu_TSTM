@@ -128,7 +128,7 @@
 
                                             {% if enable_report: %}
                                                 {% if Codebook.get_code_name(test_type) == 'Naplan' or Codebook.get_code_name(test_type) == 'OnNAPLAN' %}
-                                                <a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=rl.assessment_id, student_user_id=rl.user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>
+                                                <!--<a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=rl.assessment_id, student_user_id=rl.user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>-->
                                                 {% endif %}
                                                 <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
                                                 {% else %}
