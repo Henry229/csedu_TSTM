@@ -112,7 +112,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         - Execute: Provide link to Subject Report
     '''
     # Todo: Check accessibility to get report
-    refresh_mviews()
+    # refresh_mviews()
 
     pdf = False
     pdf_url = "%s?type=pdf" % request.url
