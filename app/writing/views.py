@@ -29,8 +29,10 @@ from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll
 @login_required
 @permission_required(Permission.WRITING_READ)
 def list_writing_marking():
-    assessment_name = request.args.get("assessment_name")
-    grade = request.args.get("grade")
+    assessment_name = ''
+    if request.args.get("assessment_name") is not None: assessment_name = request.args.get("assessment_name")
+    grade = ''
+    if request.args.get("grade") is not None: grade = request.args.get("grade")
 
     search_form = MarkingListSearchForm()
     search_form.assessment_name.data = assessment_name
