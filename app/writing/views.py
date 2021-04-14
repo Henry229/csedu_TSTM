@@ -814,7 +814,11 @@ def getBranchIds(marker_id):
 
 
 def query_writing_report_score(marking_id):
-    total_score = 30
+    total_score = 0
+    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
+    for _o in criteria:
+        total_score += int(_o.additional_info.get('max_score'))
+
     score = 0
     percentile_score = 0
     marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
