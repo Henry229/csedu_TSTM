@@ -11,6 +11,15 @@
                     <h5 class="card-title">Test List</h5>
                 </div>
                 <div class="card-body">
+                    <div class="callout callout-info b-t-1 b-r-1 b-b-1">
+                        <form method="GET" class="form inline" role="form" style="padding:1rem">
+                            {{ form.assessment_name.label }}
+                            {{ form.assessment_name }}
+                            {{ form.grade.label }}
+                            {{ form.grade }}
+                            {{ form.submit(class="btn btn-info btn-sm text-white", id="btn_search") }}
+                        </form>
+                    </div>
                     <div class="div_writing_items">
                     <table id="w_table" class="display table table-hover" style="width:100%;">
                         <thead>
@@ -30,7 +39,7 @@
 
                         <tbody id="w_table_body">
                         {% for writing in marking_writing_list %}
-                        <tr>
+                        <tr{% if writing.is_marked=='N' %} class="table-danger"{% endif %}>
                             <td> {{ writing.assessment_name }} </td>
                             <td> {{ writing.student_user_name }} </td>
                             <td> {{ writing.assessment_enroll_id }} </td>

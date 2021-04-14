@@ -106,3 +106,20 @@ class MarkerAssignForm(FlaskForm):
             marker_ids = [sub.marker_id for sub in db.session.query(MarkerBranch.marker_id).filter(
                 MarkerBranch.branch_id == branch_id).filter(MarkerBranch.delete.isnot(True)).all()]
             self.markers.choices = [(id, User.getUserName(id)) for id in marker_ids]
+
+
+class MarkingListSearchForm(FlaskForm):
+    assessment_name = StringField('Assessment Name', id='i_name')
+    grade = SelectField('Grade')
+    submit = SubmitField('Search')
+
+    def __init__(self, *args, **kwargs):
+        super(MarkingListSearchForm, self).__init__(*args, **kwargs)
+        grades = [('', 'All')]
+        _grades = Codebook.query.filter_by(code_type='grade').all()
+        if _grades:
+            for _grade in _grades:
+                code = (_grade.id, _grade.code_name)
+                grades.append(code)
+        self.grade.choices = grades
+

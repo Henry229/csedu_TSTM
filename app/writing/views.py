@@ -16,7 +16,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from common.logger import log
 from . import writing
 from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
-    MarkerAssignForm
+    MarkerAssignForm, MarkingListSearchForm
 from .. import db
 from ..api.reports import query_my_report_header
 from ..api.response import success, bad_request
@@ -29,17 +29,39 @@ from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll
 @login_required
 @permission_required(Permission.WRITING_READ)
 def list_writing_marking():
+    assessment_name = request.args.get("assessment_name")
+    grade = request.args.get("grade")
+
+    search_form = MarkingListSearchForm()
+    search_form.assessment_name.data = assessment_name
+    search_form.grade.data = grade
+
     marker_id = current_user.id
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
+
+
+    query = db.session.query(AssessmentEnroll.id).join(Testset). \
+        filter(AssessmentEnroll.testset_id == Testset.id). \
+        filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
+
+    if grade != '':
+        query = query.filter(Testset.grade == grade)
+
+    assessment_enroll_ids = [row.id for row in query.all()]
+
+    """
     assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
         filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id).all()]
+    """
+
     marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
         order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
+
     marking_writing_list = []
     for m in marking_writings:
         if m.MarkingForWriting.candidate_file_link:
@@ -53,19 +75,24 @@ def list_writing_marking():
 
         au_tz = pytz.timezone('Australia/Sydney')
 
-        json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
-                    "assessment_name": m.AssessmentEnroll.assessment.name,
-                    "student_user_id": m.AssessmentEnroll.student_user_id,
-                    "student_user_name": User.getUserName(m.AssessmentEnroll.student_user_id),
-                    "testset_name": m.AssessmentEnroll.testset.name,
-                    "start_time": utc.localize(m.AssessmentEnroll.start_time).astimezone(au_tz),
-                    "marking_id": m.Marking.id,
-                    "item_id": m.Marking.item_id,
-                    "marking_writing_id": m.MarkingForWriting.id,
-                    "is_candidate_file": is_candidate_file,
-                    "is_marked": is_marked}
-        marking_writing_list.append(json_str)
-    return render_template('writing/list.html', marking_writing_list=marking_writing_list)
+        is_ppending = True
+        if assessment_name.strip() != '':
+            if m.AssessmentEnroll.assessment.name.find(assessment_name) == -1: is_ppending = False
+
+        if is_ppending:
+            json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
+                        "assessment_name": m.AssessmentEnroll.assessment.name,
+                        "student_user_id": m.AssessmentEnroll.student_user_id,
+                        "student_user_name": User.getUserName(m.AssessmentEnroll.student_user_id),
+                        "testset_name": m.AssessmentEnroll.testset.name,
+                        "start_time": utc.localize(m.AssessmentEnroll.start_time).astimezone(au_tz),
+                        "marking_id": m.Marking.id,
+                        "item_id": m.Marking.item_id,
+                        "marking_writing_id": m.MarkingForWriting.id,
+                        "is_candidate_file": is_candidate_file,
+                        "is_marked": is_marked}
+            marking_writing_list.append(json_str)
+    return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
 
 
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
