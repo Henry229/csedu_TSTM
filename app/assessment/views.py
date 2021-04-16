@@ -496,7 +496,12 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             responses = []
             responses_text = []
 
+            test_type_name = Codebook.get_code_name(assessment.test_type)
+
             for enroll in enrolls:
+                # pass to sync for homework
+                if test_type_name.lower().find('homework') >= 0:
+                    continue
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 subject = Codebook.get_subject_name(testset.id)
                 # Sync only ended or timed out test. Give extra 11min to be safe
@@ -581,8 +586,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                                 answers[str(m.question_no)] = m.candidate_r_value
 
                         except Exception as e:
-                            vomr_logger.error(
-                                f'[{sync_hash}] ({e}) interaction_type: item.interaction_type({item.interaction_type}) m.item_id({m.item_id})')
+                            # vomr_logger.error(
+                            #    f'[{sync_hash}] ({e}) interaction_type: item.interaction_type({item.interaction_type}) m.item_id({m.item_id})')
                             pass
 
                 marking = {
@@ -590,7 +595,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     'student_id': enroll.student.student_id,
                     'answers': answers,
                     'branch_state': assessment.branch_state,
-                    'test_type': Codebook.get_code_name(assessment.test_type)
+                    'test_type': test_type_name
                 }
                 if len(answers) < 1:
                     vomr_logger.debug(f'[{sync_hash}] No answer found: testset_id({testset.id}) enroll_id({enroll.id})')
@@ -601,7 +606,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
                     ret = fake_return()
                 else:
-                    if subject == 'Writing':
+                    if subject == 'Writing' and test_type_name.lower().find('naplan') < 0:
                         # CSEdu assign serial number(char) for each assessment in the name
                         # Extract the assigned number(char)
                         _names = assessment.name.rsplit(" ")
