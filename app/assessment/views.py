@@ -667,7 +667,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         for k, v in result.items():
             for i in v:
                 r = i['response']
-                m = re.match('^([0-9]+) \/ ([0-9]+).*([0-9]+).*', r)
+                m = r.match('^([0-9]+) \/ ([0-9]+).*([0-9]+).*', r)
                 if m:
                     synced += int(m.group(1))
                     total += int(m.group(2))
