@@ -500,7 +500,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
             for enroll in enrolls:
                 # pass to sync for homework
-                if test_type_name.lower().find('homework') >= 0:
+                # if test_type_name.lower().find('homework') print>= 0:
+                if test_type_name.lower() not in ['cbstt', 'cboctt', 'oncboctt', 'oncbstt']:
                     continue
                 testset = Testset.query.filter_by(id=enroll.testset_id).first()
                 subject = Codebook.get_subject_name(testset.id)
