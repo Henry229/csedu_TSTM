@@ -163,7 +163,7 @@ var ItemRunner = (function () {
             review_mode: _review_mode});
         if (data.jw_player)
             _addJWPlayer(data.jw_player.media_url);
-        if (_mode !== 'preview') {
+        if (_mode !== 'preview' && _mode !== 'peek') {
             _handler.processUI(_item_info.saved_answer);
         }
         if (MathJax)
