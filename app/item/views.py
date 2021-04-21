@@ -99,7 +99,7 @@ def peek(item_id):
         rendered_template = rendered_template.replace('Preview not available', rendered_item)
 
     if rendered_item:
-        rendered_template = rendered_template.replace('No.', correct_r_value)
+        rendered_template = rendered_template.replace('Answer', correct_r_value)
 
     response['html'] = rendered_template
     return success(response)
