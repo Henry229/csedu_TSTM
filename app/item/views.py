@@ -94,12 +94,10 @@ def peek(item_id):
         processed = json.loads(processed)
         correct_r_value = parse_correct_response(processed.get('correctResponses'))
 
+    qti_item_obj['correct_answer'] = correct_r_value
     rendered_template = render_template("item/item_peek.html", item=qti_item_obj)
     if rendered_item:
         rendered_template = rendered_template.replace('Preview not available', rendered_item)
-
-    if rendered_item:
-        rendered_template = rendered_template.replace('Answer', correct_r_value)
 
     response['html'] = rendered_template
     return success(response)
