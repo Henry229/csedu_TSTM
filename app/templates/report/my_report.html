@@ -156,7 +156,7 @@
                                 {% if loop.index<=20 %}
                                     <tr>
                                         <td>
-                                            {% if is_2hours_after_finished or not marking.is_correct %}
+                                            {% if is_2hours_after_finished or ((not marking.is_correct) and is_7days_after_finished) %}
                                                 <button class="btn btn-sm btn-outline-info" type="button"
                                                         name="previewButton"
                                                         data-toggle="modal" data-target="#dataModal"
@@ -167,7 +167,7 @@
                                                 {{ marking.question_no }}
 
                                             {% endif %}
-                                            {% if is_2hours_after_finished or not marking.is_correct %}
+                                            {% if is_2hours_after_finished or ((not marking.is_correct) and is_7days_after_finished) %}
                                             {% if enable_video and explanation_link.get(marking.question_no) %}
                                                 <span
                                                        id="view_explanation_window"
@@ -211,7 +211,7 @@
                                 {% if loop.index>20 %}
                                     <tr>
                                         <td>
-                                            {% if is_2hours_after_finished or not marking.is_correct %}
+                                            {% if is_2hours_after_finished or ((not marking.is_correct) and is_7days_after_finished) %}
                                                 <button class="btn btn-sm btn-outline-info" type="button"
                                                         name="previewButton"
                                                         data-toggle="modal" data-target="#dataModal"
@@ -221,7 +221,7 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            {% if is_2hours_after_finished or not marking.is_correct %}
+                                            {% if is_2hours_after_finished or ((not marking.is_correct) and is_7days_after_finished) %}
                                             {% if enable_video and explanation_link.get(marking.question_no) %}
                                                 <span
                                                        id="view_explanation_window"
