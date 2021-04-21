@@ -14,12 +14,60 @@
     <!-- Main styles for this application-->
     <link href="/static/ui/css/style.css" rel="stylesheet">
     <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <style type="text/css">
+        .container > div {
+            float: left;
+        }
+        .container > div:first-child{
+            padding-right: 15px;
+        }
+        #questions {
+            width: 80px;
+            height: 30px;
+        }
+        .font85p {font-size: 85%}
+    </style>
+    <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            let test_type = '{{ test_type }}';
+            let questions = $('#questions');
+            $(opener.document).find("#review_item_id option").each(function(){
+                questions.append('<option value="'+$(this).val()+'"' + (this.selected ? ' selected="selected"':'') + '>'+$(this).text()+'</option>');
+            });
+
+            questions.change(function(){
+                if($( this).val()==''){
+                    $('#rendered_preview').html('Preview not available');
+                    $('.container .badge').hide();
+                }else {
+                    $('.container .badge').show();
+                    $('.badge span').text('');
+                    $.post("/item/" + $(this).val() + "/review/"+test_type, {},
+                      function (data, status) {
+                        if(status=='success') {
+                            $('.badge span').text(data.item.correct_answer);
+                            if(data.rendered_preview==null || data.rendered_preview=='')
+                                $('#rendered_preview').html('Preview not available');
+                            else
+                                $('#rendered_preview').html(data.rendered_preview);
+                        }else{
+                            $('#rendered_preview').html('');
+                            alert('Internal Server Error');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="card card-accent-success">
+
     <div class="card-header" id="headingOne">
         <div class="container">
-            <h3><span class="badge badge-success"><i class="fas fa-sun"></i> Answer: {{ item.correct_answer }}</span></h3>
+            <div>Question No. <select id="questions"></select></div>
+            <h3><div class="badge badge-success font85p"><i class="fas fa-sun"></i> Answer: <span>{{ item.correct_answer }}</span></div></h3>
         </div>
     </div>
     <div class="card-body">
