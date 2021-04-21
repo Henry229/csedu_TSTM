@@ -38,7 +38,7 @@
 
             questions.change(function(){
                 if($( this).val()==''){
-                    $('#rendered_preview').html('Preview not available');
+                    $('#rendered_preview').html('Preview is not available');
                     $('.container .badge').hide();
                 }else {
                     $('.container .badge').show();
@@ -48,7 +48,7 @@
                         if(status=='success') {
                             $('.badge span').text(data.item.correct_answer);
                             if(data.rendered_preview==null || data.rendered_preview=='') {
-                                $('#rendered_preview').html('Preview not available');
+                                $('#rendered_preview').html('Preview is not available');
                             }else {
                                 //$('#rendered_preview').html(data.rendered_preview);
                             }
