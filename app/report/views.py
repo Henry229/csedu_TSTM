@@ -136,6 +136,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 
 
     is_2hours_after_finished = (pytz.utc.localize(finish_time) + timedelta(hours=2)) >= datetime.now(pytz.utc)
+    is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
@@ -179,6 +180,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
                                             is_2hours_after_finished=is_2hours_after_finished,
+                                            is_7days_after_finished=is_7days_after_finished,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
