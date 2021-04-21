@@ -52,6 +52,9 @@ def peek(item_id):
     }
     rendered_item = ''
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+
+    processed = None
+    correct_r_value = None
     if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
         try:
             item_service = ItemService(qti_item_obj.file_link)
@@ -60,6 +63,17 @@ def peek(item_id):
             response['type'] = qti_item.get_interaction_type()
             response['cardinality'] = qti_item.get_cardinality()
             response['object_variables'] = qti_item.get_interaction_object_variables()
+
+            response = {"RESPONSE": {"base": {"identifier": ""}}}
+            qti_xml = item_service.get_qti_xml_path()
+            processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+            parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+            result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+            processed = result.stdout.decode("utf-8")
+            processed = json.loads(processed)
+            correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
         except Exception as e:
             print(e)
     else:
@@ -69,9 +83,23 @@ def peek(item_id):
         response['type'] = qti_item.get_interaction_type()
         response['cardinality'] = qti_item.get_cardinality()
         response['object_variables'] = qti_item.get_interaction_object_variables()
+
+        response = {"RESPONSE": {"base": {"identifier": ""}}}
+        qti_xml = item_service.get_qti_xml_path()
+        processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+        parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+        result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+        processed = result.stdout.decode("utf-8")
+        processed = json.loads(processed)
+        correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
     rendered_template = render_template("item/item_peek.html", item=qti_item_obj)
     if rendered_item:
         rendered_template = rendered_template.replace('Preview not available', rendered_item)
+
+    if rendered_item:
+        rendered_template = rendered_template.replace('No.', correct_r_value)
 
     response['html'] = rendered_template
     return success(response)
