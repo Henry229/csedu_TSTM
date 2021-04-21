@@ -628,17 +628,42 @@ def review(item_id, test_type=None):
     rendered_preview = None
     from qti.itemservice.itemservice import ItemService
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+
+    processed = None
+    correct_r_value = None
     if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
         try:
             item_service = ItemService(qti_item_obj.file_link)
             qti_item = item_service.get_item()
             rendered_preview = qti_item.to_html()
+
+            response = {"RESPONSE": {"base": {"identifier": ""}}}
+            qti_xml = item_service.get_qti_xml_path()
+            processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+            parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+            result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+            processed = result.stdout.decode("utf-8")
+            processed = json.loads(processed)
+            correct_r_value = parse_correct_response(processed.get('correctResponses'))
         except Exception as e:
             print(e)
     else:
         item_service = ItemService(qti_item_obj.file_link)
         qti_item = item_service.get_item()
         rendered_preview = qti_item.to_html()
+
+        response = {"RESPONSE": {"base": {"identifier": ""}}}
+        qti_xml = item_service.get_qti_xml_path()
+        processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+        parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+        result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+        processed = result.stdout.decode("utf-8")
+        processed = json.loads(processed)
+        correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
+    qti_item_obj.correct_answer = correct_r_value
     rendered_template = render_template("item/item_peek.html", item=qti_item_obj, test_type=test_type)
 
     if Codebook.get_code_name(test_type) != 'CBOCTT' and Codebook.get_code_name(test_type) != 'CBSTT' \
@@ -655,11 +680,24 @@ def review_async(item_id, test_type=None):
     rendered_preview = None
     from qti.itemservice.itemservice import ItemService
     qti_item_obj = Item.query.filter_by(id=item_id).first()
+
+    processed = None
+    correct_r_value = None
     if os.environ.get("DEBUG_RENDERING", 'false') == 'false':
         try:
             item_service = ItemService(qti_item_obj.file_link)
             qti_item = item_service.get_item()
             rendered_preview = qti_item.to_html()
+
+            response = {"RESPONSE": {"base": {"identifier": ""}}}
+            qti_xml = item_service.get_qti_xml_path()
+            processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+            parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+            result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+            processed = result.stdout.decode("utf-8")
+            processed = json.loads(processed)
+            correct_r_value = parse_correct_response(processed.get('correctResponses'))
         except Exception as e:
             print(e)
     else:
@@ -667,6 +705,17 @@ def review_async(item_id, test_type=None):
         qti_item = item_service.get_item()
         rendered_preview = qti_item.to_html()
 
+        response = {"RESPONSE": {"base": {"identifier": ""}}}
+        qti_xml = item_service.get_qti_xml_path()
+        processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+        parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
+
+        result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
+        processed = result.stdout.decode("utf-8")
+        processed = json.loads(processed)
+        correct_r_value = parse_correct_response(processed.get('correctResponses'))
+
+    qti_item_obj.correct_answer = correct_r_value
     if Codebook.get_code_name(test_type) != 'CBOCTT' and Codebook.get_code_name(test_type) != 'CBSTT' \
             and Codebook.get_code_name(test_type) != 'Naplan':
         rendered_preview = None
