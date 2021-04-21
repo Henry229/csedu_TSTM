@@ -30,36 +30,39 @@
     <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
     <script type="text/javascript">
         $(function(){
-            debugger
-            let test_type = '{{ test_type }}';
-            let questions = $('#questions');
-            $(opener.document).find("#review_item_id option").each(function(){
-                questions.append('<option value="'+$(this).val()+'"' + (this.selected ? ' selected="selected"':'') + '>'+$(this).text()+'</option>');
-            });
+            if($(opener).length==0){
+                $('#ques-body').hide();
+            }else{
+                let test_type = '{{ test_type }}';
+                let questions = $('#questions');
+                $(opener.document).find("#review_item_id option").each(function () {
+                    questions.append('<option value="' + $(this).val() + '"' + (this.selected ? ' selected="selected"' : '') + '>' + $(this).text() + '</option>');
+                });
 
-            questions.change(function(){
-                if($( this).val()==''){
-                    $('#rendered_preview').html('Preview is not available');
-                    $('.container .badge').hide();
-                }else {
-                    $('.container .badge').show();
-                    $('.badge span').text('');
-                    $.post("/item/" + $(this).val() + "/review/"+test_type, {},
-                      function (data, status) {
-                        if(status=='success') {
-                            $('.badge span').text(data.item.correct_answer);
-                            if(data.rendered_preview==null || data.rendered_preview=='') {
-                                $('#rendered_preview').html('Preview is not available');
-                            }else {
-                                $('#rendered_preview').html(data.rendered_preview);
-                            }
-                        }else{
-                            $('#rendered_preview').html('');
-                            alert('Internal Server Error');
-                        }
-                    });
-                }
-            });
+                questions.change(function () {
+                    if ($(this).val() == '') {
+                        $('#rendered_preview').html('Preview is not available');
+                        $('.container .badge').hide();
+                    } else {
+                        $('.container .badge').show();
+                        $('.badge span').text('');
+                        $.post("/item/" + $(this).val() + "/review/" + test_type, {},
+                            function (data, status) {
+                                if (status == 'success') {
+                                    $('.badge span').text(data.item.correct_answer);
+                                    if (data.rendered_preview == null || data.rendered_preview == '') {
+                                        $('#rendered_preview').html('Preview is not available');
+                                    } else {
+                                        $('#rendered_preview').html(data.rendered_preview);
+                                    }
+                                } else {
+                                    $('#rendered_preview').html('');
+                                    alert('Internal Server Error');
+                                }
+                            });
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -68,7 +71,7 @@
 
     <div class="card-header" id="headingOne">
         <div class="container">
-            <div>Question No. <select id="questions"></select></div>
+            <div id="ques-body">Question No. <select id="questions"></select></div>
             <h3><div class="badge badge-success font85p"><i class="fas fa-sun"></i> Answer: <span>{{ item.correct_answer }}</span></div></h3>
         </div>
     </div>
