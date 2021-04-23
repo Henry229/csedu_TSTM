@@ -147,7 +147,9 @@ def my_report(assessment_id, ts_id, student_user_id):
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
     if ts_header is None:
         url = request.referrer
-        flash('Marking data not available')
+        # flash('Marking data not available')
+        # refresh materialized view takes 5 minutes
+        flash('Please wait. It will take about 5 minutes to get the test results.')
         return redirect(url)
 
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
