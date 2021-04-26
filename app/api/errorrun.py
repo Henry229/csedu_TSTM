@@ -566,3 +566,15 @@ def error_run_finish_test(run_session):
 
     return success(retry_result)
 
+
+@api.route('/errorrun/writing/text', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def error_run_writing_text():
+    marking_id = request.json.get('marking_id')
+    writing_text = json.dumps(request.json.get('writing_text'))
+
+    sql_stmt = 'UPDATE marking a set candidate_r_value =:candidate_r_value WHERE id =:marking_id and exists(select 1 from assessment_enroll aa where aa.id=a.assessment_enroll_id and aa.finish_time is null)'
+    db.session.execute(sql_stmt,  {'marking_id': marking_id, 'candidate_r_value': writing_text})
+    db.session.commit()
+
+    return success()
