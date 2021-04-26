@@ -1,5 +1,6 @@
 /*
 */
+var timerId = 0;
 var ItemRunner = (function () {
     var _$container;
     var _handler;
@@ -228,6 +229,30 @@ var ItemRunner = (function () {
                     drawRendered(data);
                     postProcessRendered(data);
                     _renderedCb(_question_no);
+
+                    if($('textarea').length==1) {
+                        if(timerId>0) clearInterval(timerId);
+                        timerId = setInterval(function () {
+                            var d = {
+                                'marking_id': _marking_id,
+                                'writing_text': {'writing_text': $('textarea').val()}
+                            };
+                            $.ajax({
+                                url: '/api/errorrun/writing/text',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(d),
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    debugger
+                                },
+                                success: function (response) {
+                                    debugger
+                                }
+                            });
+
+                        }, 20000);
+                    }
+
                 }
                 _disableSubmitResponse(false);
             }
