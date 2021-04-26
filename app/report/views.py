@@ -148,7 +148,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     enable_holiday = False
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
-    if test_type_additional_info is not None and test_type_additional_info['enable_holiday'] is not None:
+    if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
         if test_type_additional_info['enable_holiday'] == "true":
             enable_holiday = True
             # change review time for Holiday course's incorrect questions and videos
