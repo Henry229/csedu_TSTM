@@ -138,10 +138,24 @@ def my_report(assessment_id, ts_id, student_user_id):
     is_2hours_after_finished = (pytz.utc.localize(finish_time) + timedelta(hours=2)) >= datetime.now(pytz.utc)
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
+
+    # setting review period for Holiday course
+    enable_holiday = False
+    period_holiday_review = 0
+    test_type_additional_info = Codebook.get_additional_info(test_type)
+    if test_type_additional_info is not None and test_type_additional_info['enable_holiday']:
+        if test_type_additional_info['enable_holiday'] == "true":
+            enable_holiday = True
+            # change review time for Holiday course's incorrect questions and videos
+            if test_type_additional_info['period_holiday_review']:
+                period_holiday_review = test_type_additional_info['period_holiday_review']
+                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=period_holiday_review)) >= datetime.now(pytz.utc)
+
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
