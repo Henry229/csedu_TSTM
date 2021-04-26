@@ -444,7 +444,8 @@ def assessment_list():
                     filter(Marking.testset_id == tset.id).all()
                 for mw in mws:
                     # tset.enable_writing_report = True if mw.markers_comment else False
-                    if mw.markers_comment:
+                    # if mw.markers_comment:
+                    if mw.candidate_mark_detail:
                         tset.enable_writing_report = True
                         tset.my_writing_score = get_writing_report_score(mw.candidate_mark_detail)
                     else:
