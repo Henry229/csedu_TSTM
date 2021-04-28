@@ -1061,7 +1061,7 @@ def search_assessment():
     # If test_center 'All', query all
     # If test_center 'Administrator', query all
     if not current_user.is_administrator() and \
-            current_user.get_branch_id() != test_center:
+            (current_user.username != 'All' and current_user.get_branch_id() != test_center):
         return "Forbidden branch data!", 403
     else:
         if Codebook.get_code_name(test_center) != 'All':
