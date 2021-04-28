@@ -13,6 +13,8 @@ def get_test_center():
     sql = Codebook.query.filter_by(code_type='test_center')
     if (current_user.role.name == 'Moderator') or (current_user.role.name == 'Administrator'):
         sql = sql
+    elif current_user.role.name == 'Test_center' and current_user.username == 'All':
+        sql = sql
     elif current_user.role.name == 'Test_center':
         sql = sql.filter(Codebook.code_name == current_user.username)
 
