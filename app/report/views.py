@@ -606,7 +606,7 @@ def center():
         search_form.test_type.data = test_type
     # default setting value into test_center list
     branch_id = current_user.get_branch_id()
-    if branch_id:
+    if branch_id and current_user.username != 'All':
         search_form.test_center.data = branch_id
     else:
         search_form.test_center.data = test_center
