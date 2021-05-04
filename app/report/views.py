@@ -1,4 +1,5 @@
 import os
+from collections import namedtuple
 from datetime import datetime, date, timedelta
 
 import pytz
@@ -24,7 +25,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \
-    TestletHasItem
+    TestletHasItem, Choices
 from ..web.views import view_explanation
 
 ''' 
@@ -1265,3 +1266,37 @@ def marking_info(id):
         order_by(Marking.question_no).all()
 
     return render_template('report/marking_info.html', markings=markings, enroll=enroll)
+
+
+@report.route('/test_results', methods=['GET'])
+#@permission_required(Permission.ADMIN)
+def test_results():
+    return render_template('report/test_results.html', year=Choices.get_ty_choices())
+
+@report.route('/test_results_plans', methods=['POST'])
+#@permission_required(Permission.ADMIN)
+def test_results_plans():
+    year = request.json.get('year')
+    rows = [], []
+    plan = EducationPlan.query.filter_by(year=year).order_by(EducationPlan.id.desc()).all()
+    if plan is not None:
+        rows = [(p.id, p.name) for p in plan]
+    return jsonify(rows)
+
+@report.route('/test_results', methods=['POST'])
+#@permission_required(Permission.ADMIN)
+def test_results_post():
+    p_year = request.json.get('year')
+    p_plan_id = int(request.json.get('type'))
+    rows = [], []
+
+    sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id)'
+    cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id})
+    if cursor is not None:
+        rows = [(r.student_user_id, r.username, r.testset_name1, r.testset_name2,
+                 r.testset_name3, r.testset_name4, r.testset_name5, r.testset_name6,
+                 r.testset_name7, r.testset_name8, r.testset_name9, r.testset_name10,
+                 r.total, r.ranking, r.branchname
+                 ) for r in cursor.fetchall()]
+
+    return jsonify(rows)

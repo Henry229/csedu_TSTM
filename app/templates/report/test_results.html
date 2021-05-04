@@ -1,0 +1,154 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Test Results{% endblock %}
+{% block app_content %}
+    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Test Result </h3>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Test Result - List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        {# testset Search #}
+                        <p id="search_panel">
+                        <h5>Choose you search condition. Click on the Search button.</h5>
+                        <label for="year">Year</label>
+                        <select id="year" name="year">
+                            {% for y in year %}
+                            </option><option value="{{ y[0] }}">{{ y[1] }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="type">Test Type</label>
+                        <select id="type" name="type"></select>
+                        <input class="btn btn-success btn-sm align-baseline" id="search" name="search" type="button" value="Search">
+                        <p/>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 100%"
+                                     aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+
+                            <table id="results" class="display table table-hover" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Student No.</th>
+                                    <th>Name</th>
+                                    <th>Ranking</th>
+                                    <th>Branch Name</th>
+                                </tr>
+                                </thead>
+                                <tbody><tr class="border-bottom"><td colspan="5" class="text-center">No data found.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "_modal.html" %}
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script>
+      $(function(){
+        $('#year').change(function(){
+            $('#type').empty();
+            if($(this).val()==''){
+            }else{
+                $.post({
+                    url: '/report/test_results_plans',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({'year': $(this).val()}),
+                    success: function (response) {
+                        if(response.length>0){
+                            for (let i = 0; i < response.length; i++) {
+                              $('#type').append(new Option(response[i][1], response[i][0]));
+                            }
+                        }
+                    }
+                });
+           }
+        });
+        $('#search').click(function(){
+            if($('#year').val()=='' || $('#type').val()==null || $('#type').val()==''){
+                noData();
+                return;
+            }
+
+            $.post({
+                url: '/report/test_results',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({'year': $('#year').val(), 'type': $('#type').val()}),
+                success: function (response) {
+                   let htm = '';
+                   let cols = 0;
+                   if(response.length > 0){
+                     htm += '<th>No.</th>';
+                     htm += '<th>Student No.</th>';
+                     htm += '<th>Name</th>';
+                     for(var i=0; i<response[0].length; i++){
+                       if(response[0][i]!=null && response[0][i]!='') {
+                           htm += '<th>'+ response[0][i] +'</th>';
+                           cols++;
+                       }
+                     }
+                     htm += '<th>Total</th>';
+                     htm += '<th>Ranking</th>';
+                     htm += '<th>Branch Name</th>';
+                     $('#results thead tr').html(htm);
+
+                     htm = '';
+                     for(var i=1; i<response.length; i++){
+                       htm += '<tr class="border-bottom"><td>'+String(i)+'</td>';
+                       for(var j=0; j<response[i].length; j++) {
+                           if(j!=0 && j!=1 && j!=(response[i].length-3) && j!=(response[i].length-2) && j!=(response[i].length-1)) {
+                               if (response[0][j] != null && response[0][j] != '') {
+                                   htm += '<td>' + (response[i][j]==null ? '' : String(response[i][j])) + '</td>';
+                               }
+                           }else{
+                                htm += '<td>' + response[i][j] + '</td>';
+                           }
+                       }
+                       htm += '</tr>';
+                     }
+                     $('#results tbody').html(htm);
+                   }else{
+                    noData();
+                   }
+
+                }
+                ,error: function(XMLHttpRequest, textStatus, errorThrown) {}
+            });
+        });
+      });
+
+      function noData(){
+        let htm = '';
+        htm += '<th>No.</th>';
+        htm += '<th>Student No.</th>';
+        htm += '<th>Name</th>';
+        htm += '<th>Ranking</th>';
+        htm += '<th>Branch</th>';
+        $('#results thead tr').html(htm);
+
+        htm = '<tr class="border-bottom"><td colspan="5" class="text-center">No data found.</td></tr>';
+        $('#results tbody').html(htm);
+      }
+    </script>
+{% endblock scripts %}
