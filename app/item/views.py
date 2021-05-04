@@ -44,7 +44,8 @@ def info(id):
 
 @item.route('/<int:item_id>/peek', methods=['GET'])
 @login_required
-@permission_required(Permission.ITEM_EXEC)
+# @permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def peek(item_id):
     # TODO - Needs to procetect this with hashing
     response = {

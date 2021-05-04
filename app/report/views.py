@@ -607,7 +607,7 @@ def center():
         search_form.test_type.data = test_type
     # default setting value into test_center list
     branch_id = current_user.get_branch_id()
-    if branch_id:
+    if branch_id and current_user.username != 'All':
         search_form.test_center.data = branch_id
     else:
         search_form.test_center.data = test_center
@@ -625,9 +625,9 @@ def center():
     # If test_center 'All', query all
     # If test_center 'Administrator', query all
     if not current_user.is_administrator() and \
-            current_user.get_branch_id() != test_center:
+            (current_user.username != 'All' and current_user.get_branch_id() != test_center):
         query = query.filter(1 == 0)
-        new_query = query.filter(1 == 0)
+        # new_query = query.filter(1 == 0)
         flash("Forbidden branch data!")
     else:
         if Codebook.get_code_name(test_center) != 'All':
