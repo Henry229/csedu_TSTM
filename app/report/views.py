@@ -1293,9 +1293,9 @@ def test_results_post():
     sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id)'
     cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id})
     if cursor is not None:
-        rows = [(r.student_user_id, r.username, r.testset_name1, r.testset_name2,
-                 r.testset_name3, r.testset_name4, r.testset_name5, r.testset_name6,
-                 r.testset_name7, r.testset_name8, r.testset_name9, r.testset_name10,
+        rows = [(r.student_user_id, r.username, r.subject_name1, r.subject_name2,
+                 r.subject_name3, r.subject_name4, r.subject_name5, r.subject_name6,
+                 r.subject_name7, r.subject_name8, r.subject_name9, r.subject_name10,
                  r.total, r.ranking, r.branchname
                  ) for r in cursor.fetchall()]
 
