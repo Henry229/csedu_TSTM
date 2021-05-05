@@ -64,6 +64,9 @@ def insert():
                                 branch_id=form.test_center.data,
                                 test_type=form.test_type.data,
                                 year=form.year.data,
+                                term=form.term.data,
+                                unit=form.unit.data,
+                                test_detail=form.test_detail.data,
                                 review_period=form.review_period.data,
                                 modified_by=current_user.id,
                                 modified_time=datetime.now(pytz.utc),
@@ -136,6 +139,9 @@ def edit(id):
     form.assessment_id.data = id
     form.assessment_name.data = assessment.name
     form.year.data = assessment.year
+    form.term.data = assessment.term
+    form.unit.data = assessment.unit
+    form.test_detail.data = assessment.test_detail
     form.review_period.data = assessment.review_period
     form.session_date.data = assessment.session_date
     form.session_valid_until.data = assessment.session_valid_until
@@ -170,6 +176,9 @@ def update():
                 new_assessment.branch_id = form.test_center.data
                 new_assessment.test_type = form.test_type.data
                 new_assessment.year = form.year.data
+                new_assessment.term = form.term.data
+                new_assessment.unit = form.unit.data
+                new_assessment.test_detail = form.test_detail.data
                 new_assessment.review_period = form.review_period.data
                 new_assessment.session_date = form.session_date.data
                 new_assessment.session_valid_until = form.session_valid_until.data
@@ -191,6 +200,9 @@ def update():
             else:
                 assessment.name = form.assessment_name.data
                 assessment.year = form.year.data
+                assessment.term = form.term.data
+                assessment.unit = form.unit.data
+                assessment.test_detail = form.test_detail.data
                 assessment.review_period = form.review_period.data
                 assessment.session_date = form.session_date.data
                 assessment.session_valid_until = form.session_valid_until.data
@@ -223,6 +235,9 @@ def clone(id):
     form.assessment_id.data = id
     form.assessment_name.data = assessment.name + '_cloned'
     form.year.data = assessment.year
+    form.term.data = assessment.term
+    form.unit.data = assessment.unit
+    form.test_detail.data = assessment.test_detail
     form.review_period.data = assessment.review_period
     form.session_date.data = assessment.session_date
     # form.session_start_time.data = assessment.session_start_time
@@ -245,6 +260,9 @@ def clone_insert():
                                 branch_id=form.test_center.data,
                                 test_type=form.test_type.data,
                                 year=form.year.data,
+                                term=form.term.data,
+                                unit=form.unit.data,
+                                test_detail=form.test_detail.data,
                                 review_period=form.review_period.data,
                                 modified_by=current_user.id,
                                 modified_time=datetime.now(pytz.utc),

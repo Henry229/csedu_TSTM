@@ -3,7 +3,7 @@ import datetime
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import DateField, TimeField, SelectField, SubmitField, HiddenField, StringField, IntegerField
-from wtforms.validators import DataRequired, Optional
+from wtforms.validators import DataRequired, Optional, ValidationError
 from wtforms.widgets import html5
 
 from ..models import Choices, Codebook
@@ -43,10 +43,13 @@ class AssessmentSearchForm(FlaskForm):
 
 class AssessmentCreateForm(FlaskForm):
     assessment_id = HiddenField('Id', default='')
-    assessment_name = StringField('Name', default='')
+    assessment_name = StringField('Name', default='', validators=[DataRequired()])
     test_type = SelectField('Test Type', coerce=int, validators=[DataRequired()])
     test_center = SelectField('CSEdu Branch', coerce=int, validators=[DataRequired()])
     year = SelectField('Year', default=datetime.date.today().year)
+    term = SelectField('Term', default='', validators=[DataRequired()])
+    unit = SelectField('Unit', default='', validators=[DataRequired()])
+    test_detail = StringField('Test Detail', default='')
     review_period = IntegerField('Review Period', default=7, widget=html5.NumberInput(min=0, max=28, step=7))
     session_date = DateField('Test Date', validators=[Optional()])
     session_valid_until = DateField('Valid Until(Homework only)', validators=[Optional()])
@@ -54,12 +57,15 @@ class AssessmentCreateForm(FlaskForm):
     session_end_time = TimeField('Session Time')
     submit = SubmitField('Save')
 
+
+
     def __init__(self, *args, **kwargs):
         super(AssessmentCreateForm, self).__init__(*args, **kwargs)
         self.test_type.choices = Choices.get_codes('test_type')
         self.test_center.choices = get_test_center()
         self.year.choices = Choices.get_ty_choices()
-
+        self.term.choices = [('', ''), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4')]
+        self.unit.choices = [('', ''), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'), ('7', '7'), ('8', '8'), ('9', '9'), ('10', '10'), ('11', '11'), ('12', '12'), ('13', '13'), ('14', '14'), ('15', '15')]
 
 class AssessmentTestsetCreateForm(FlaskForm):
     ordered_ids = HiddenField('ordered_ids', id='ordered_ids', default='')

@@ -29,6 +29,8 @@
                         </select>
                         <label for="type">Test Type</label>
                         <select id="type" name="type"></select>
+                        <label for="type">Test Detail</label>
+                        <select id="detail" name="detail"></select>
                         <input class="btn btn-success btn-sm align-baseline" id="search" name="search" type="button" value="Search">
                         <p/>
                     </div>
@@ -66,7 +68,9 @@
     <script>
       $(function(){
         $('#year').change(function(){
+            $('#detail').empty();
             $('#type').empty();
+            $("#type").append(new Option("", ""));
             if($(this).val()==''){
             }else{
                 $.post({
@@ -84,8 +88,28 @@
                 });
            }
         });
+        $('#type').change(function(){
+            $('#detail').empty();
+            $("#detail").append(new Option("", ""));
+            if($(this).val()==''){
+            }else{
+                $.post({
+                    url: '/report/test_results_detail',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({'plan': $(this).val()}),
+                    success: function (response) {
+                        if(response.length>0){
+                            for (let i = 0; i < response.length; i++) {
+                              $('#detail').append(new Option(response[i], response[i]));
+                            }
+                        }
+                    }
+                });
+           }
+        });
         $('#search').click(function(){
-            if($('#year').val()=='' || $('#type').val()==null || $('#type').val()==''){
+            if($('#year').val()=='' || $('#type').val()==null || $('#type').val()=='' || $('#detail').val()==null || $('#detail').val()==''){
                 noData();
                 return;
             }
@@ -94,7 +118,7 @@
                 url: '/report/test_results',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({'year': $('#year').val(), 'type': $('#type').val()}),
+                data: JSON.stringify({'year': $('#year').val(), 'type': $('#type').val(), 'detail': $('#detail').val()}),
                 success: function (response) {
                    let htm = '';
                    let cols = 0;

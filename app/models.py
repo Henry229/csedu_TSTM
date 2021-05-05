@@ -647,6 +647,9 @@ class Assessment(db.Model):
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     active = db.Column(db.Boolean, default=True)
     delete = db.Column(db.Boolean)
+    term = db.Column(db.String(1))
+    unit = db.Column(db.String(2))
+    test_detail = db.Column(db.String(20))
 
     testsets = db.relationship('Testset', secondary='assessment_testsets',
                                order_by='AssessmentHasTestset.testset_id.asc()')

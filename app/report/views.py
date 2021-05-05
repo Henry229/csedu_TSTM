@@ -1269,12 +1269,12 @@ def marking_info(id):
 
 
 @report.route('/test_results', methods=['GET'])
-#@permission_required(Permission.ADMIN)
+@permission_required(Permission.ADMIN)
 def test_results():
     return render_template('report/test_results.html', year=Choices.get_ty_choices())
 
 @report.route('/test_results_plans', methods=['POST'])
-#@permission_required(Permission.ADMIN)
+@permission_required(Permission.ADMIN)
 def test_results_plans():
     year = request.json.get('year')
     rows = [], []
@@ -1284,19 +1284,35 @@ def test_results_plans():
     return jsonify(rows)
 
 @report.route('/test_results', methods=['POST'])
-#@permission_required(Permission.ADMIN)
+@permission_required(Permission.ADMIN)
 def test_results_post():
     p_year = request.json.get('year')
     p_plan_id = int(request.json.get('type'))
+    p_test_detail = request.json.get('detail')
     rows = [], []
 
-    sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id)'
-    cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id})
+    sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id, :p_test_detail)'
+    cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id, 'p_test_detail': p_test_detail})
     if cursor is not None:
         rows = [(r.student_user_id, r.username, r.subject_name1, r.subject_name2,
                  r.subject_name3, r.subject_name4, r.subject_name5, r.subject_name6,
                  r.subject_name7, r.subject_name8, r.subject_name9, r.subject_name10,
                  r.total, r.ranking, r.branchname
                  ) for r in cursor.fetchall()]
+
+    return jsonify(rows)
+
+@report.route('/test_results_detail', methods=['POST'])
+@permission_required(Permission.ADMIN)
+def test_results_detail():
+    plan = request.json.get('plan')
+    rows = [], []
+
+    sql_stmt_sub = 'SELECT test_detail FROM assessment a WHERE id in( ' \
+                   'SELECT assessment_id FROM education_plan_details aa WHERE plan_id = :plan_id) ' \
+                   'GROUP BY test_detail ORDER BY test_detail'
+    cursor = db.session.execute(sql_stmt_sub, {'plan_id': plan})
+    if cursor is not None:
+        rows = [(r.test_detail) for r in cursor.fetchall()]
 
     return jsonify(rows)
