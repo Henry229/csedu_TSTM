@@ -32,7 +32,8 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    CORS(app, supports_credentials=True)
+    #CORS(app, supports_credentials=True)
+    CORS(app, resources={r'*': {'origins': '*'}})
     db.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
