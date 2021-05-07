@@ -33,10 +33,11 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     #CORS(app, supports_credentials=True)
-    CORS(app, resources={
-        r"/v1/*": {"origin": "*"},
-        r"/api/*": {"origin": "*"},
-    })
+    CORS(app, resources={r'*': {'origins': '*'}})
+    #CORS(app, resources={
+    #    r"/v1/*": {"origin": "*"},
+    #    r"/api/*": {"origin": "*"},
+    #})
     db.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
