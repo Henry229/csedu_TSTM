@@ -167,7 +167,6 @@ def my_report(assessment_id, ts_id, student_user_id):
         flash('Please wait. It will take about 5 minutes to get the test results.')
         return redirect(url)
 
-
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
     rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
@@ -183,7 +182,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
     #       so it need to be discussed to branch out in "test analysed report"
     # ts_by_category = None
-    ts_by_category = query_my_report_footer(assessment_id, student_user_id)
+    ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
 
     if test_subject_string == 'Writing':
         marking_writing_id = 0
@@ -291,7 +290,7 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
     #       so it need to be discussed to branch out in "test analysed report"
     # ts_by_category = None
-    ts_by_category = query_my_report_footer(assessment_id, student_user_id)
+    ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
 
     if test_subject_string == 'Writing':
         marking_writing_id = 0

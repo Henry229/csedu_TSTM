@@ -342,7 +342,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
 '''Student UI: Query My Report (subject) Footer for each Student'''
 
 
-def query_my_report_footer(assessment_id, student_user_id):
+def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id):
     column_names_2 = ['code_name as category',
                       "to_char(score,'999.99') as score",
                       "to_char(total_score,'999.99') as total_score",
@@ -353,8 +353,9 @@ def query_my_report_footer(assessment_id, student_user_id):
                  'FROM test_summary_by_category_v ' \
                  'WHERE student_user_id = :student_user_id ' \
                  'AND assessment_id = :assessment_id ' \
+                 'AND assessment_enroll_id = :assessment_enroll_id ' \
                  'ORDER BY category'.format(columns=','.join(column_names_2))
-    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id})
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id, 'assessment_enroll_id': assessment_enroll_id})
     Record = namedtuple('Record', cursor_2.keys())
     rows = [Record(*r) for r in cursor_2.fetchall()]
     return rows
