@@ -304,7 +304,7 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                "from (select assessment_id from education_plan_details aaa where plan_id = test_summary_mview.plan_id) aaa " \
                "join(select * from assessment_enroll bbb where testset_id = test_summary_mview.testset_id) bbb on aaa.assessment_id = bbb.assessment_id " \
                "where exists(select 1 from marking where assessment_enroll_id = bbb.id and student_user_id = bbb.student_user_id) " \
-               ") AS total_students, " \
+               ") AS total_students1, " \
     "( " \
     "    select student_rank " \
     "    from ( " \
@@ -323,7 +323,7 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
     "        ) rnk " \
     "    ) tt " \
     "    where student_user_id = test_summary_mview.student_user_id " \
-    ") as student_rank " \
+    ") as student_rank1 " \
 "FROM test_summary_mview " \
                "WHERE assessment_enroll_id=:assessment_enroll_id " \
                "and assessment_id=:assessment_id and testset_id=:testset_id " \
