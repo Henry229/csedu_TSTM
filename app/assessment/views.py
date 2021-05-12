@@ -501,6 +501,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
         #
         # sync_enable_list = ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']
+        # temporary add selective test type 391
         sync_enable_list = [774, 1324, 1325, 1333, 1334, 391]
         if assessment_id:  # A specific assessement only. called from virtual_omr()
             assessments = Assessment.query.filter_by(id=assessment_id).filter(Assessment.test_type.in_(sync_enable_list)).all()
