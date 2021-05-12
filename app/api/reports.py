@@ -305,7 +305,7 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                "  select * from assessment where id in(select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
 	           "                 and test_detail = (select test_detail from assessment where id =:assessment_id)" \
                ") aaa " \
-               "join(select * from assessment_enroll bbb where testset_id = test_summary_mview.testset_id) bbb on aaa.id = bbb.assessment_id " \
+               "join assessment_enroll bbb on aaa.id = bbb.assessment_id " \
                "where exists(select 1 from marking where assessment_enroll_id = bbb.id and student_user_id = bbb.student_user_id) " \
                ") AS total_students1, " \
     "( " \
@@ -336,11 +336,6 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
     cursor = db.session.execute(sql_stmt,
                                 {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
                                  'testset_id': ts_id, 'student_user_id': student_user_id})
-    log.info(sql_stmt)
-    log.info(assessment_enroll_id)
-    log.info(assessment_id)
-    log.info(ts_id)
-    log.info(student_user_id)
     ts_header = cursor.fetchone()
     return ts_header
 
