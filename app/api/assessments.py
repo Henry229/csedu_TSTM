@@ -963,14 +963,15 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         marking_objects = []
         for item in items:
-            last_question_no += 1
-            marking = Marking(testset_id=testset_id,
-                              testlet_id=testlet_id,
-                              item_id=item.item_id, question_no=last_question_no,
-                              weight=item.weight,
-                              assessment_enroll_id=assessment_enroll_id)
-            marking_objects.append(marking)
-            db.session.expunge(item)
+            if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
+                last_question_no += 1
+                marking = Marking(testset_id=testset_id,
+                                  testlet_id=testlet_id,
+                                  item_id=item.item_id, question_no=last_question_no,
+                                  weight=item.weight,
+                                  assessment_enroll_id=assessment_enroll_id)
+                marking_objects.append(marking)
+                db.session.expunge(item)
         # higher performing “executemany” operations
         # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
         db.session.bulk_save_objects(marking_objects, return_defaults=False)
