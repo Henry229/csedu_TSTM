@@ -245,7 +245,7 @@
                                         <td>{% if not marking.is_correct and marking.correct_r_value %}
                                             {{ marking.correct_r_value }}{% endif %}</td>
                                         <td>{{ marking.item_percentile }}%</td>
-                                        <td>{{ Codebook.get_code_name(marking.category) }}</td>
+                                        <td>{{ Codebook.get_code_name(marking.subcategory) }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
