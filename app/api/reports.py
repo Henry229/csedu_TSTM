@@ -296,11 +296,43 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                     "to_char(total_score,'999.99') as total_score",
                     "to_char(percentile_score,'999.99') as percentile_score"
                     ]
-    sql_stmt = 'SELECT {columns} ' \
-               'FROM test_summary_mview ' \
-               'WHERE assessment_enroll_id=:assessment_enroll_id ' \
-               'and assessment_id=:assessment_id and testset_id=:testset_id ' \
-               'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
+    sql_stmt = "SELECT " \
+               "to_char(score,'999.99') as score, " \
+               "to_char(total_score,'999.99') as total_score, " \
+               "to_char(percentile_score,'999.99') as percentile_score, " \
+               "(select count(distinct bbb.student_user_id) " \
+               "from (" \
+               "  select * from assessment where id in(select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
+	           "                 and test_detail = (select test_detail from assessment where id =:assessment_id)" \
+               ") aaa " \
+               "join assessment_enroll bbb on aaa.id = bbb.assessment_id " \
+               "where exists(select 1 from marking where assessment_enroll_id = bbb.id and student_user_id = bbb.student_user_id) " \
+               ") AS total_students1, " \
+    "( " \
+    "    select student_rank " \
+    "    from ( " \
+    "        select student_user_id, rank() OVER(ORDER by score desc) as student_rank " \
+    "        from ( " \
+    "            select aaa.student_user_id, " \
+    "                case when sum(bbb.outcome_score * bbb.weight) = 0 then 0 else " \
+    "                    sum(bbb.candidate_mark * bbb.weight) * 100::double precision / sum(bbb.outcome_score * bbb.weight) end as score " \
+    "            from (select * from assessment_enroll " \
+    "                    where assessment_id in ( " \
+    "                        select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
+    "                            and test_detail = (select test_detail from assessment where id =:assessment_id) " \
+    "                           ) " \
+    "                ) aaa " \
+    "            join marking bbb " \
+    "                on aaa.id = bbb.assessment_enroll_id " \
+    "            group by aaa.student_user_id " \
+    "        ) rnk " \
+    "    ) tt " \
+    "    where student_user_id = test_summary_mview.student_user_id " \
+    ") as student_rank1 " \
+"FROM test_summary_mview " \
+               "WHERE assessment_enroll_id=:assessment_enroll_id " \
+               "and assessment_id=:assessment_id and testset_id=:testset_id " \
+               "and student_user_id=:student_user_id"
     cursor = db.session.execute(sql_stmt,
                                 {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
                                  'testset_id': ts_id, 'student_user_id': student_user_id})
@@ -342,7 +374,7 @@ def query_my_report_body(assessment_enroll_id, ts_id):
 '''Student UI: Query My Report (subject) Footer for each Student'''
 
 
-def query_my_report_footer(assessment_id, student_user_id):
+def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id):
     column_names_2 = ['code_name as category',
                       "to_char(score,'999.99') as score",
                       "to_char(total_score,'999.99') as total_score",
@@ -353,8 +385,9 @@ def query_my_report_footer(assessment_id, student_user_id):
                  'FROM test_summary_by_category_v ' \
                  'WHERE student_user_id = :student_user_id ' \
                  'AND assessment_id = :assessment_id ' \
+                 'AND assessment_enroll_id = :assessment_enroll_id ' \
                  'ORDER BY category'.format(columns=','.join(column_names_2))
-    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id})
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id, 'assessment_enroll_id': assessment_enroll_id})
     Record = namedtuple('Record', cursor_2.keys())
     rows = [Record(*r) for r in cursor_2.fetchall()]
     return rows
