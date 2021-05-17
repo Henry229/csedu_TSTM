@@ -126,6 +126,23 @@ var TestRunner = (function () {
             if (_duration_timer)
                 clearInterval(_duration_timer);
             _duration_timer = null;
+            if($('textarea').length==1) {
+                var d = {
+                    'marking_id': _getItemInfo(_question_no).marking_id,
+                    'writing_text': {'writing_text': $('textarea').val()}
+                };
+                $.ajax({
+                    url: '/api/errorrun/writing/text',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(d),
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    },
+                    success: function (response) {
+                        ItemRunner.processResponse(_finishTest, 'finish-button');
+                    }
+                });
+            }
             $('#timeoverModal').modal('show');
             return;
         } else if (minutes_remained <= 5) {
