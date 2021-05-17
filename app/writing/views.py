@@ -445,7 +445,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
                 return redirect(url)
             # score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
             score = '{} out of {} ({}%)'.format(my_score['score'], my_score['total_score'], my_score['percentile_score'])
-            rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
+            rank = '{} out of {}'.format(ts_header.student_rank1, ts_header.total_students1)
 
             template_file = 'writing/my_report_writing.html'
             if pdf:
