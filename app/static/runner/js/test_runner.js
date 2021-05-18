@@ -139,7 +139,7 @@ var TestRunner = (function () {
                     error: function (jqXHR, textStatus, errorThrown) {
                     },
                     success: function (response) {
-                        ItemRunner.processResponse(_finishTest, 'finish-button');
+                        ItemRunner.processResponseForWriting();
                     }
                 });
             }

@@ -278,6 +278,12 @@ var ItemRunner = (function () {
         }
     };
 
+    var processResponseForWriting = function (callbackFn, callbackData) {
+        var response = _handler.getResponse();
+        if (response === null) return;
+        processAssessmentFormResponse(response, callbackFn, callbackData, false);
+    };
+
     var processPreviewResponse = function (response) {
         var url = '/item/' + _item_id + '/response';
         var data = {'response': response};
@@ -363,7 +369,7 @@ var ItemRunner = (function () {
      *      2. 처리가 success 로 나오면 일반적인 데이터를 processAssessmentResponse 보낸다.
      * @param response
      */
-    var processAssessmentFormResponse = function (response, callbackFn, callbackData) {
+    var processAssessmentFormResponse = function (response, callbackFn, callbackData, nextStep) {
         var url = '/api/responses/file/' + _item_id;
         if (_mode === 'errornote') {
             url = '/api/errorrun/responses/file/' + _item_id;
@@ -402,7 +408,10 @@ var ItemRunner = (function () {
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    processAssessmentResponse(response_data, callbackFn, callbackData);
+                    if(typeof(nextStep) == 'undefined' || nextStep == null) nextStep = true;
+                    if(nextStep==true) {
+                        processAssessmentResponse(response_data, callbackFn, callbackData);
+                    }
                 }
                 //_disableSubmitResponse(false);
             }
@@ -449,6 +458,7 @@ var ItemRunner = (function () {
         setReviewMode: setReviewMode,
         getRendered: getRendered,
         processResponse: processResponse,
+        processResponseForWriting: processResponseForWriting,
         toggleFlag: toggleFlag
     }
 })();
