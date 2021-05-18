@@ -281,6 +281,7 @@ var ItemRunner = (function () {
     var processResponseForWriting = function (callbackFn, callbackData) {
         var response = _handler.getResponse();
         if (response === null) return;
+        if(response.writing_text == undefined) response.writing_text = $('textarea').val();
         processAssessmentFormResponse(response, callbackFn, callbackData, false);
     };
 
@@ -380,6 +381,7 @@ var ItemRunner = (function () {
             formData = response.formData;
     		delete response_data['formData'];
         }
+        debugger
         if (response.writing_text) {
             formData.append('writing_text', response.writing_text);
         }
