@@ -382,7 +382,7 @@ var ItemRunner = (function () {
     		delete response_data['formData'];
         }
         debugger
-        if (response.writing_text) {
+        if (response.writing_text!=undefined) {
             formData.append('writing_text', response.writing_text);
         }
         if (response.fileNames) {
