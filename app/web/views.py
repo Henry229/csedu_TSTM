@@ -334,7 +334,11 @@ def assessment_list():
     assessments_list = {}
     class_count, homework_count, trial_count = 0, 0, 0
 
-    assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)).order_by(Assessment.created_time.desc()).all()
+    #assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)). \
+    #    order_by(Assessment.created_time.desc()).all()
+    assessment_array = Assessment.query.filter(Assessment.GUID.in_(guid_list)).all()
+    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if x.is_last_version==True]
+    #assessment_all.sort(key=lambda x: x.all_enroll_finished(current_user.id), reverse=True)
 
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
@@ -344,7 +348,7 @@ def assessment_list():
             continue
             # return page_not_found(e="Invalid request - assessment enroll information")
         else:
-            assessment.sort(key=lambda x: x.version, reverse=True)
+        #    assessment.sort(key=lambda x: x.version, reverse=True)
             assessment = assessment[0]
 
         au_tz = pytz.timezone('Australia/Sydney')
@@ -510,12 +514,6 @@ def assessment_list():
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
 
-        # Split assessments and finished_assessments
-        # homework 는 기간 내에 무제한 시험 가능하다.
-        #if homework_type_assessment and homework_session_finished:
-        #    homeworks.append(assessment)
-        #elif not homework_type_assessment and flag_finish_assessment:
-        #    homeworks.append(assessment)
         if assesment_kind.value == 3:
             homeworks.append(assessment)
         elif assesment_kind.value == 1:
@@ -523,8 +521,42 @@ def assessment_list():
         elif assesment_kind.value == 2:
             trial_assessments.append(assessment)
 
-        assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks}
-        log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
+
+
+    if class_count > 0:
+        for x in class_assessments:
+            all_finished = 1
+            for y in x.enroll:
+                if y.finish_time is None:
+                    all_finished = 0
+                    break
+            x.finished = all_finished
+        #class_assessments.sort(key=lambda x: x.created_time, reverse=True)
+        class_assessments.sort(key=lambda x: x.finished)
+
+    if trial_count > 0:
+        for x in trial_assessments:
+            all_finished = 1
+            for y in x.enroll:
+                if y.finish_time is None:
+                    all_finished = 0
+                    break
+            x.finished = all_finished
+        trial_assessments.sort(key=lambda x: x.finished)
+
+    if homework_count > 0:
+        for x in homeworks:
+            all_finished = 1
+            for y in x.enroll:
+                if y.finish_time is None:
+                    all_finished = 0
+                    break
+            x.finished = all_finished
+        homeworks.sort(key=lambda x: x.finished)
+
+
+    assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks}
+    log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
     if homework_count == 0 and class_count == 0 and trial_count == 0:
         btn_group = ''

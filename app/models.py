@@ -662,6 +662,15 @@ class Assessment(db.Model):
         return Codebook.get_parent_name(self.test_type)
 
     @property
+    def is_last_version(self):
+        ver = db.session.query(func.max(Assessment.version)).filter(Assessment.GUID==self.GUID).\
+            group_by(Assessment.GUID).scalar()
+        if ver == self.version:
+            return True
+        else:
+            return False
+
+    @property
     def test_type_name(self):
         if self._test_type_name is None:
             self._test_type_name = Codebook.get_code_name(self.test_type)
