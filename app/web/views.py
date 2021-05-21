@@ -526,10 +526,18 @@ def assessment_list():
     if class_count > 0:
         for x in class_assessments:
             all_finished = 1
-            for y in x.enroll:
-                if y.finish_time is None:
+            for y in x.testsets:
+                if y.enrolled:
+                    if y.resumable:
+                        all_finished = 0
+                        break
+                    elif y.restartable:
+                        all_finished = 0
+                        break
+                else:
                     all_finished = 0
                     break
+
             x.finished = all_finished
         #class_assessments.sort(key=lambda x: x.created_time, reverse=True)
         class_assessments.sort(key=lambda x: x.finished)
@@ -537,20 +545,36 @@ def assessment_list():
     if trial_count > 0:
         for x in trial_assessments:
             all_finished = 1
-            for y in x.enroll:
-                if y.finish_time is None:
+            for y in x.testsets:
+                if y.enrolled:
+                    if y.resumable:
+                        all_finished = 0
+                        break
+                    elif y.restartable:
+                        all_finished = 0
+                        break
+                else:
                     all_finished = 0
                     break
+
             x.finished = all_finished
         trial_assessments.sort(key=lambda x: x.finished)
 
     if homework_count > 0:
         for x in homeworks:
             all_finished = 1
-            for y in x.enroll:
-                if y.finish_time is None:
+            for y in x.testsets:
+                if y.enrolled:
+                    if y.resumable:
+                        all_finished = 0
+                        break
+                    elif y.restartable:
+                        all_finished = 0
+                        break
+                else:
                     all_finished = 0
                     break
+
             x.finished = all_finished
         homeworks.sort(key=lambda x: x.finished)
 
