@@ -411,7 +411,8 @@ def assessment_list():
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
         flag_finish_assessment = True
-        if homework_type_assessment:
+        #if homework_type_assessment:
+        if assesment_kind.value == 3:
             homework_count += 1
             assessment.assessment_type_name = 'Homework'
             assessment.assessment_type_class = 'assessment-homework'
@@ -511,9 +512,11 @@ def assessment_list():
 
         # Split assessments and finished_assessments
         # homework 는 기간 내에 무제한 시험 가능하다.
-        if homework_type_assessment and homework_session_finished:
-            homeworks.append(assessment)
-        elif not homework_type_assessment and flag_finish_assessment:
+        #if homework_type_assessment and homework_session_finished:
+        #    homeworks.append(assessment)
+        #elif not homework_type_assessment and flag_finish_assessment:
+        #    homeworks.append(assessment)
+        if assesment_kind.value == 3:
             homeworks.append(assessment)
         elif assesment_kind.value == 1:
             class_assessments.append(assessment)
