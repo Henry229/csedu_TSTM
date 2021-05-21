@@ -658,6 +658,10 @@ class Assessment(db.Model):
     _test_type_name = None
 
     @property
+    def test_type_kind(self):
+        return Codebook.get_parent_name(self.test_type)
+
+    @property
     def test_type_name(self):
         if self._test_type_name is None:
             self._test_type_name = Codebook.get_code_name(self.test_type)
@@ -1269,9 +1273,13 @@ class Codebook(db.Model):
     # "centre_type": "", "contact_fax": "", "contact_tel": "", "campus_title": "",
     # "activate_flag": "", "campus_prefix": "", "email_address": ""}
 
-    def get_parent_name(self):
-        v_parent = Codebook.query.filter_by(id=self.parent_code).first()
-        return v_parent.code_name
+    def get_parent_name(code_id):
+        row = Codebook.query.filter_by(id=code_id).first()
+        if row:
+            parent_row = Codebook.query.filter_by(id=row.parent_code).first()
+            return parent_row.code_name
+        else:
+            return ''
 
     @staticmethod
     def get_code_name(code_id):

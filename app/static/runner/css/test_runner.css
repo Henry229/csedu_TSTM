@@ -39,8 +39,12 @@
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *  Assessment list view
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-.app-body.assessments.exam .assessment-homework,
-.app-body.assessments.homework .assessment-exam
+.app-body.assessments.trial .assessment-homework,
+.app-body.assessments.trial .assessment-class,
+.app-body.assessments.class .assessment-homework,
+.app-body.assessments.class .assessment-trial,
+.app-body.assessments.homework .assessment-class,
+.app-body.assessments.homework .assessment-trial
 {
     display: none;
 }

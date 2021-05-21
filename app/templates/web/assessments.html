@@ -14,8 +14,11 @@
       <label class="btn {{ btn_all.class }} all {{ btn_all.active }}" {{ btn_all.display|safe }}>
         <input type="radio" name="type-options" value="all" autocomplete="off" {{ btn_all.checked }}> All
       </label>
-      <label class="btn {{ btn_exam.class }} exam {{ btn_exam.active }}" {{ btn_exam.display|safe }}>
-        <input type="radio" name="type-options" value="exam" autocomplete="off" {{ btn_exam.checked }}> Exam
+      <label class="btn {{ btn_class.class }} class {{ btn_class.active }}" {{ btn_class.display|safe }}>
+        <input type="radio" name="type-options" value="class" autocomplete="off" {{ btn_class.checked }}> Class Test
+      </label>
+      <label class="btn {{ btn_trial.class }} trial {{ btn_trial.active }}" {{ btn_trial.display|safe }}>
+        <input type="radio" name="type-options" value="trial" autocomplete="off" {{ btn_trial.checked }}> Trial Test
       </label>
       <label class="btn {{ btn_homework.class }} homework {{ btn_homework.active }}" {{ btn_homework.display|safe }}>
         <input type="radio" name="type-options" value="homework" autocomplete="off" {{ btn_homework.checked }}> Homework
@@ -286,7 +289,8 @@
             $('input[type=radio][name=type-options]').on('change', function () {
               var app_body = $('.app-body.assessments');
               app_body.removeClass('homework');
-              app_body.removeClass('exam');
+              app_body.removeClass('class');
+              app_body.removeClass('trial');
               app_body.addClass(this.value);
               var btns = $('.assessment-list-header label');
               for (var i=0; i<btns.length; i++) {

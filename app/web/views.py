@@ -4,6 +4,7 @@ import os
 import random
 import string
 from datetime import datetime, timedelta
+from enum import Enum
 
 import pytz
 import requests
@@ -295,6 +296,11 @@ def assessment_list():
     from config import basedir
     from ..api.assessmentsession import AssessmentSession
 
+    class assesment_kinds(Enum):
+        Class = 1
+        Trial = 2
+        Homework = 3
+
     # Parameter check
     guid_list = request.args.get("guid_list")
     if guid_list is not None:
@@ -323,17 +329,26 @@ def assessment_list():
     if student is None:
         return page_not_found(e="Login user not registered as student")
 
-    assessments, finished_assessments = [], []
+
+    class_assessments, homeworks, trial_assessments = [], [], []
     assessments_list = {}
-    exam_count, homework_count = 0, 0
+    class_count, homework_count, trial_count = 0, 0, 0
+
+    assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)).order_by(Assessment.created_time.desc()).all()
+
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
-        assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
-        au_tz = pytz.timezone('Australia/Sydney')
-        if assessment is None:
+        assessment = [a for a in assessment_all if a.GUID == assessment_guid]
+
+        if len(assessment)==0:
             continue
             # return page_not_found(e="Invalid request - assessment enroll information")
-        elif assessment.session_date:
+        else:
+            assessment.sort(key=lambda x: x.version, reverse=True)
+            assessment = assessment[0]
+
+        au_tz = pytz.timezone('Australia/Sydney')
+        if assessment.session_date:
             # if assessment session_date is coming after today, skip to display on student's assessment list page
             session_date = datetime(assessment.session_date.year, assessment.session_date.month,
                                     assessment.session_date.day, tzinfo=au_tz)
@@ -342,6 +357,13 @@ def assessment_list():
 
         # assessment_type_name = assessment.test_type_name
         homework_type_assessment = assessment.is_homework
+
+        if assessment.test_type_kind=='Class Test':
+            assesment_kind = assesment_kinds(1)
+        elif assessment.test_type_kind=='Trial Test':
+            assesment_kind = assesment_kinds(2)
+        elif assessment.test_type_kind=='Homework':
+            assesment_kind = assesment_kinds(3)
 
         homework_session_finished = False
         if homework_type_assessment and assessment.session_valid_until:
@@ -393,10 +415,14 @@ def assessment_list():
             homework_count += 1
             assessment.assessment_type_name = 'Homework'
             assessment.assessment_type_class = 'assessment-homework'
-        else:
-            exam_count += 1
-            assessment.assessment_type_name = 'Exam'
-            assessment.assessment_type_class = 'assessment-exam'
+        elif assesment_kind.value == 1:
+            class_count += 1
+            assessment.assessment_type_name = 'Class Test'
+            assessment.assessment_type_class = 'assessment-class'
+        elif assesment_kind.value == 2:
+            trial_count += 1
+            assessment.assessment_type_name = 'Trial Test'
+            assessment.assessment_type_class = 'assessment-trial'
 
         for tset in student_testsets:
             # Compare GUID to check enrollment status
@@ -486,33 +512,46 @@ def assessment_list():
         # Split assessments and finished_assessments
         # homework 는 기간 내에 무제한 시험 가능하다.
         if homework_type_assessment and homework_session_finished:
-            finished_assessments.append(assessment)
+            homeworks.append(assessment)
         elif not homework_type_assessment and flag_finish_assessment:
-            finished_assessments.append(assessment)
-        else:
-            assessments.append(assessment)
-        assessments_list = {"Assessments": assessments, "Finished - Assessments": finished_assessments}
+            homeworks.append(assessment)
+        elif assesment_kind.value == 1:
+            class_assessments.append(assessment)
+        elif assesment_kind.value == 2:
+            trial_assessments.append(assessment)
+
+        assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks}
         log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
-    if homework_count == 0 and exam_count == 0:
+    if homework_count == 0 and class_count == 0 and trial_count == 0:
         btn_group = ''
         btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_class = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_trial = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
         btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-    elif homework_count == 0:
+    elif homework_count == 0 and class_count > 0 and trial_count == 0:
         btn_group = ''
         btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_class = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_trial = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
         btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-    elif exam_count == 0:
+    elif homework_count == 0 and class_count == 0 and trial_count > 0:
         btn_group = ''
         btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
-        btn_exam = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_class = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_trial = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
+        btn_homework = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+    elif homework_count > 0 and class_count == 0 and trial_count == 0:
+        btn_group = ''
+        btn_all = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_class = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
+        btn_trial = {'active': '', 'class': 'btn-light', 'display': 'style="display:none"', 'checked': ''}
         btn_homework = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
     else:
         btn_group = 'btn-group'
         btn_all = {'active': 'active', 'class': 'btn-primary', 'display': '', 'checked': 'checked'}
-        btn_exam = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
+        btn_class = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
+        btn_trial = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
         btn_homework = {'active': '', 'class': 'btn-light', 'display': '', 'checked': ''}
     # return render_template('web/assessments.html', student_user_id=current_user.id, assessments=assessments,
     # finished_assessments=finished_assessments)
@@ -522,7 +561,7 @@ def assessment_list():
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
-                           runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
+                           runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
                            btn_homework=btn_homework, btn_group=btn_group)
 
 
