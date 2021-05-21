@@ -72,8 +72,11 @@
 
     <div class="card-header" id="headingOne">
         <div class="container">
+            {% if hide_answer %}
+            {% else %}
             <div id="ques-body">Question No. <select id="questions"></select></div>
             <h3><div class="badge badge-success font85p"><i class="fas fa-sun"></i> Answer: <span>{{ item.correct_answer }}</span></div></h3>
+            {%  endif  %}
         </div>
     </div>
     <div class="card-body">
