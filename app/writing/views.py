@@ -423,7 +423,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
         # Query Assessment information
         ts_id = marking.testset_id
         row = AssessmentEnroll.query.with_entities(AssessmentEnroll.assessment_id, AssessmentEnroll.grade,
-                                                   AssessmentEnroll.start_time_client). \
+                                                   AssessmentEnroll.start_time_client, AssessmentEnroll.assessment_type). \
             filter_by(id=assessment_enroll_id). \
             filter_by(testset_id=ts_id). \
             filter_by(student_user_id=student_user_id).first()
@@ -434,10 +434,10 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
             item_name = (Item.query.with_entities(Item.name).filter_by(id=marking.item_id).first()).name
             grade = row.grade
             test_date = row.start_time_client
-
+            test_type = Codebook.get_code_id(row.assessment_type)
             ts_header = query_my_report_header(assessment_enroll_id, row.assessment_id, ts_id, student_user_id)
             # get writing score from marking_writing table
-            my_score = query_writing_report_score(marking.id)
+            my_score = query_writing_report_score(marking.id, test_type)
 
             if ts_header is None:
                 url = request.referrer
@@ -815,9 +815,14 @@ def getBranchIds(marker_id):
     return branch_ids
 
 
-def query_writing_report_score(marking_id):
+def query_writing_report_score(marking_id, test_type):
     total_score = 0
-    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
+    # criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
+    if test_type:
+        criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type).all()
+    else:
+        criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
+
     for _o in criteria:
         total_score += int(_o.additional_info.get('max_score'))
 
