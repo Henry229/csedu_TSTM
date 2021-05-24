@@ -16,6 +16,7 @@ class Config(metaclass=MetaFlaskEnv):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    AUTHORIZATION_KEY = '!x7!Hn66S0-p2U3zZm8?sKe4V4==XQCz'
 
     CSEDU_MAIL_SUBJECT_PREFIX = '[CSEDU]'
     CSEDU_MAIL_SENDER = 'CSEDU Admin <testsystem@cseducation.com.au>'

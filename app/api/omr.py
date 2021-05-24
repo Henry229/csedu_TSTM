@@ -9,7 +9,7 @@ from config import Config
 
 @api.route('/omr/marking', methods=['POST'])
 def omr_marking():
-    if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.SYNC_SECRET_KEY:
+    if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.AUTHORIZATION_KEY:
         return bad_request()
 
     retsult = json.dumps(request.json.get('result'))
@@ -18,7 +18,7 @@ def omr_marking():
 
 @api.route('/omr/writing', methods=['POST'])
 def omr_writing():
-    if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.SYNC_SECRET_KEY:
+    if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.AUTHORIZATION_KEY:
         return bad_request()
 
     retsult = json.dumps(request.json.get('result'))
