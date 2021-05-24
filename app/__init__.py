@@ -34,7 +34,7 @@ def create_app(config_name):
 
     #CORS(app, supports_credentials=True)
     #CORS(app)
-    CORS(app, resources={r"/omr/*": {"origins": "*"}})
+    CORS(app, resources={r"/api/omr/*": {"origins": "*"}})
     #CORS(app, resources={
     #    r"/v1/*": {"origin": "*"},
     #    r"/api/*": {"origin": "*"},
