@@ -381,12 +381,44 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
                       "to_char(avg_score,'999.99') as avg_score",
                       "to_char(percentile_score,'999.99') as percentile_score"
                       ]
-    sql_stmt_2 = 'SELECT {columns} ' \
-                 'FROM test_summary_by_category_v ' \
-                 'WHERE student_user_id = :student_user_id ' \
-                 'AND assessment_id = :assessment_id ' \
-                 'AND assessment_enroll_id = :assessment_enroll_id ' \
-                 'ORDER BY category'.format(columns=','.join(column_names_2))
+
+    sql_stmt_2 = "SELECT code_name as category, " \
+                 "to_char(score,'999.99') as score, " \
+                 "to_char(total_score,'999.99') as total_score, " \
+                 "to_char(avg_score,'999.99') as avg_score, " \
+                 "to_char(percentile_score,'999.99') as percentile_score, " \
+    "(" \
+    "    select avg(score) OVER(PARTITION BY code_name) AS avg_score" \
+    "    from (" \
+    "       select code_name," \
+    "               case when sum(outcome_score * weight) = 0 then 0 else " \
+    "                   sum(candidate_mark * weight) * 100::double precision / sum(outcome_score * weight) end as score" \
+    "       from (" \
+    "               select aaa.student_user_id, bbb.outcome_score, bbb.weight, bbb.candidate_mark," \
+    "               (" \
+    "                   SELECT c.code_name" \
+    "                   FROM codebook c," \
+    "                       item i" \
+    "                   WHERE c.id = i.category" \
+    "                     and i.id = bbb.item_id" \
+    "               ) as code_name" \
+    "               from (select * from assessment_enroll" \
+    "              where assessment_id in (" \
+    "                       select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id =" \
+    "                       (SELECT plan_id FROM education_plan_details WHERE assessment_id = test_summary_by_category_v.assessment_id)" \
+    "                       and test_detail = (select test_detail from assessment where id =test_summary_by_category_v.assessment_id)" \
+    "               ))" \
+    "    ) aaa" \
+    "   join marking bbb" \
+    "     on aaa.id = bbb.assessment_enroll_id" \
+    "   ) aa" \
+    "   group by code_name" \
+    "   ) t" \
+    ") as avg_score1 " \
+    "FROM test_summary_by_category_v " \
+                 "WHERE student_user_id = :student_user_id " \
+                 "AND assessment_id = :assessment_id " \
+                 "ORDER BY category"
     cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id, 'assessment_enroll_id': assessment_enroll_id})
     Record = namedtuple('Record', cursor_2.keys())
     rows = [Record(*r) for r in cursor_2.fetchall()]
