@@ -388,7 +388,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
                  "to_char(avg_score,'999.99') as avg_score, " \
                  "to_char(percentile_score,'999.99') as percentile_score, " \
     "(" \
-    "    select avg(score) OVER(PARTITION BY code_name) AS avg_score" \
+    "    select avg(score)" \
     "    from (" \
     "       select code_name," \
     "               case when sum(outcome_score * weight) = 0 then 0 else " \
@@ -414,6 +414,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "   ) aa" \
     "   group by code_name" \
     "   ) t" \
+    "   where code_name = test_summary_by_category_v.code_name" \
     ") as avg_score1 " \
     "FROM test_summary_by_category_v " \
                  "WHERE student_user_id = :student_user_id " \
