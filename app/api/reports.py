@@ -297,6 +297,8 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                     "to_char(percentile_score,'999.99') as percentile_score"
                     ]
     sql_stmt = "SELECT " \
+               "rank_v as student_rank, " \
+               "total_students, " \
                "to_char(score,'999.99') as score, " \
                "to_char(total_score,'999.99') as total_score, " \
                "to_char(percentile_score,'999.99') as percentile_score, " \
