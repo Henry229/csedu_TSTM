@@ -34,6 +34,7 @@ class AssessmentSearchForm(FlaskForm):
 
     test_type = SelectField('Test Type', coerce=int)
     test_center = SelectField('CSEdu Branch', coerce=int)
+    active = SelectField('Active', choices=[('', ''), ('1', 'True'), ('0', 'False')], default='1')
 
     def __init__(self, *args, **kwargs):
         super(AssessmentSearchForm, self).__init__(*args, **kwargs)

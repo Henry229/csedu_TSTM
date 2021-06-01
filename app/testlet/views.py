@@ -370,8 +370,9 @@ def manage():
     testlet_name = request.args.get("testlet_name")
     grade = request.args.get("grade")
     subject = request.args.get("subject")
+    active = request.args.get("active")
     completed = request.args.get("completed")
-    if testlet_name or grade or subject or completed:
+    if testlet_name or grade or subject or active or completed:
         flag = True
     else:
         flag = False
@@ -386,10 +387,13 @@ def manage():
     if subject:
         subject = int(subject)
     search_form.subject.data = subject
+    if active is not None:
+        search_form.active.data = active
     search_form.completed.data = completed
     rows = None
     item_form = None
-    query = Testlet.query.filter(Testlet.active.isnot(False))
+    #query = Testlet.query.filter(Testlet.active.isnot(False))
+    query = Testlet.query
     if flag:
         if testlet_name:
             query = query.filter(Testlet.name.ilike('%{}%'.format(testlet_name)))
@@ -397,6 +401,8 @@ def manage():
             query = query.filter_by(grade=grade)
         if subject:
             query = query.filter_by(subject=subject)
+        if active:
+            query = query.filter(Testlet.active.is_(bool(int(active))))
         if completed:
             query = query.filter_by(completed=completed)
         rows = query.order_by(Testlet.id.desc()).all()

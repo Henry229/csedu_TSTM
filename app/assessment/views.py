@@ -262,6 +262,7 @@ def clone_insert():
                                 year=form.year.data,
                                 term=form.term.data,
                                 unit=form.unit.data,
+                                test_duration=form.test_duration.data,
                                 test_detail=form.test_detail.data,
                                 review_period=form.review_period.data,
                                 modified_by=current_user.id,
@@ -347,7 +348,8 @@ def add_detail():
 def manage():
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
-    if test_type or test_center:
+    active = request.args.get("active")
+    if test_type or test_center or active:
         flag = True
     else:
         flag = False
@@ -363,15 +365,20 @@ def manage():
         search_form.test_type.data = Codebook.get_code_id('Naplan')
     if test_center:
         test_center = int(test_center)
+    if active is not None:
+        search_form.active.data = active
     search_form.test_center.data = test_center
     rows = None
     item_form = None
-    query = Assessment.query.filter_by(active=True)
+    #query = Assessment.query.filter_by(active=True)
+    query = Assessment.query
     if flag:
         if test_type:
             query = query.filter_by(test_type=test_type)
         if test_center:
             query = query.filter_by(branch_id=test_center)
+        if active:
+            query = query.filter(Assessment.active.is_(bool(int(active))))
         rows = query.order_by(Assessment.id.desc()).all()
         if rows:
             item_form = AssessmentTestsetCreateForm()

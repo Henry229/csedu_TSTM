@@ -7,11 +7,10 @@ function clone_testset() {
         'grade': $('#clone_form #grade').val(),
         'subject': $('#clone_form #subject').val(),
         'no_stages': $('#clone_form #no_stages').val(),
-        'test_duration': $('#update_form #test_duration').val(),
+        'test_duration': $('#clone_form #test_duration').val(),
         'total_score': $('#clone_form #total_score').val(),
         'link1': $('#clone_form #link1').val()
     };
-
     var url = $('#clone_form').attr("action");
     $.ajax({
         url: url,

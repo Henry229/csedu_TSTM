@@ -540,6 +540,7 @@ def assessment_list():
 
             x.finished = all_finished
         #class_assessments.sort(key=lambda x: x.created_time, reverse=True)
+        class_assessments.sort(key=lambda x: x.active, reverse=True)
         class_assessments.sort(key=lambda x: x.finished)
 
     if trial_count > 0:
@@ -558,6 +559,7 @@ def assessment_list():
                     break
 
             x.finished = all_finished
+        trial_assessments.sort(key=lambda x: x.active, reverse=True)
         trial_assessments.sort(key=lambda x: x.finished)
 
     if homework_count > 0:
@@ -576,6 +578,7 @@ def assessment_list():
                     break
 
             x.finished = all_finished
+        homeworks.sort(key=lambda x: x.active, reverse=True)
         homeworks.sort(key=lambda x: x.finished)
 
 

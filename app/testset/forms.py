@@ -15,7 +15,7 @@ class TestsetSearchForm(FlaskForm):
     grade = SelectField('Grade', id='search_grade', coerce=int)
     subject = SelectField('Subject', id='select_subject', coerce=int)
     test_type = SelectField('Test Type', coerce=int)
-
+    active = SelectField('Active', choices=[('', ''), ('1', 'True'), ('0', 'False')], default='1')
     completed = BooleanField('Completed?', default=False)
     submit = SubmitField('Search')
 

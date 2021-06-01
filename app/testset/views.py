@@ -395,8 +395,9 @@ def manage():
     grade = request.args.get("grade")
     subject = request.args.get("subject")
     test_type = request.args.get("test_type")
+    active = request.args.get("active")
     completed = request.args.get("completed")
-    if testset_name or grade or subject or test_type or completed:
+    if testset_name or grade or subject or test_type or active or completed:
         flag = True
     else:
         flag = False
@@ -416,10 +417,13 @@ def manage():
         search_form.test_type.data = test_type
     else:
         search_form.test_type.data = Codebook.get_code_id('Naplan')
+    if active is not None:
+        search_form.active.data = active
     search_form.completed.data = completed
     stageData = None
     rows = None
-    query = Testset.query.filter(Testset.active.isnot(False))
+    #query = Testset.query.filter(Testset.active.isnot(False))
+    query = Testset.query
     if flag:
         if testset_name:
             query = query.filter(Testset.name.ilike('%{}%'.format(testset_name)))
@@ -429,6 +433,8 @@ def manage():
             query = query.filter_by(subject=subject)
         if test_type:
             query = query.filter_by(test_type=test_type)
+        if active:
+            query = query.filter(Testset.active.is_(bool(int(active))))
         if completed:
             query = query.filter_by(active=completed)
         rows = query.order_by(Testset.id.desc()).all()
