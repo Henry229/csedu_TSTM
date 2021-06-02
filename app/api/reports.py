@@ -405,7 +405,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "                   WHERE c.id = i.category" \
     "                     and i.id = bbb.item_id" \
     "               ) as code_name" \
-    "               from (select * from assessment_enroll" \
+    "               from (select student_user_id, assessment_id, testset_id, max(id) as id from assessment_enroll" \
     "              where assessment_id in (" \
     "                       select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id =" \
     "                       (SELECT plan_id FROM education_plan_details WHERE assessment_id = test_summary_by_category_v.assessment_id)" \
@@ -413,6 +413,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "               ))" \
     "        and testset_id = test_summary_by_category_v.testset_id" \
     "        and student_user_id =:student_user_id" \
+    "        group by student_user_id, assessment_id, testset_id" \
     "    ) aaa" \
     "   join marking bbb" \
     "     on aaa.id = bbb.assessment_enroll_id" \
@@ -439,7 +440,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "                   sum(candidate_mark * weight) * 100::double precision / sum(outcome_score * weight) end as score" \
     "       from (" \
     "               select aaa.student_user_id, bbb.outcome_score, bbb.weight, bbb.candidate_mark" \
-    "               from (select * from assessment_enroll" \
+    "               from (select student_user_id, assessment_id, testset_id, max(id) as id from assessment_enroll" \
     "              where assessment_id in (" \
     "                       select :assessment_id as id " \
     "                       union all " \
@@ -449,6 +450,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "               ))" \
     "        and testset_id = (select testset_id from assessment_enroll where id = :assessment_enroll_id) " \
     "        and student_user_id =:student_user_id" \
+    "        group by student_user_id, assessment_id, testset_id" \
     "    ) aaa" \
     "   join marking bbb" \
     "     on aaa.id = bbb.assessment_enroll_id" \
