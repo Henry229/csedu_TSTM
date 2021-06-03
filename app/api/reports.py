@@ -428,6 +428,7 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "   ) t" \
     "   where code_name = test_summary_by_category_v.code_name" \
     ") as avg_score1 " \
+    ", '' as total_avg " \
     "FROM test_summary_by_category_v " \
                  "WHERE student_user_id = :student_user_id " \
                  "AND assessment_enroll_id = :assessment_enroll_id " \
@@ -439,10 +440,14 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "       '' as total_score, " \
     "       '' as avg_score, " \
     "       '' as percentile_score, " \
-    "(" \
-    "    select to_char(avg(score),'999.99')" \
+    "       student_avg as avg_score1, " \
+    "       total_avg " \
+    "from (" \
+    "    select to_char(avg(student_score),'999.99') as student_avg, to_char(avg(score),'999.99') as total_avg" \
     "    from (" \
-    "       select case when sum(outcome_score * weight) = 0 then 0 else " \
+    "       select case when sum(case when student_user_id = :student_user_id then outcome_score * weight else 0 end) = 0 then 0 else " \
+    "                   sum(case when student_user_id = :student_user_id then candidate_mark * weight else 0 end) * 100::double precision / sum(case when student_user_id = :student_user_id then outcome_score * weight else 0 end) end as student_score, " \
+                 "case when sum(outcome_score * weight) = 0 then 0 else " \
     "                   sum(candidate_mark * weight) * 100::double precision / sum(outcome_score * weight) end as score" \
     "       from (" \
     "               select aaa.student_user_id, bbb.outcome_score, bbb.weight, bbb.candidate_mark" \
@@ -455,14 +460,13 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
     "                       and test_detail = (select test_detail from assessment where id = :assessment_id)" \
     "               ))" \
     "        and testset_id = (select testset_id from assessment_enroll where id = :assessment_enroll_id) " \
-    "        and student_user_id =:student_user_id" \
     "        group by student_user_id, assessment_id, testset_id" \
     "    ) aaa" \
     "   join marking bbb" \
     "     on aaa.id = bbb.assessment_enroll_id" \
     "   ) aa" \
-    "   ) t" \
-    ") as avg_score1 " \
+    "   ) a" \
+    ") t " \
     "ORDER BY part desc, category"
     cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id, 'assessment_enroll_id': assessment_enroll_id})
     Record = namedtuple('Record', cursor_2.keys())
