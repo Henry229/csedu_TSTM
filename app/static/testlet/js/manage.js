@@ -58,6 +58,23 @@ $(document).ready(function () {
 
     // <Save Items> button click
     $('#save_items').click(function () {
+        let spans = $('#sortable li span');
+        if(spans.length > 0){
+            for(let i=0;i<spans.length;i++){
+                let _item_id = $(spans.get(i)).attr('id').replace('item', '');
+                let _cnt = 0;
+                for(let j=0;j<spans.length;j++){
+                    if(_item_id == $(spans.get(j)).attr('id').replace('item', '')){
+                        _cnt++;
+                    }
+                }
+                if(_cnt > 1) {
+                    alert("testlset can not have same items\r\n\r\nitem id : " + _item_id);
+                    return false;
+                }
+            }
+        }
+
         var flag = true;
         var items = '';
         var no_items = $checked_radio.parent().siblings()[5].innerText;
