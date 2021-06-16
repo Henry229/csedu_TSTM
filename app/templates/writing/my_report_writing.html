@@ -127,7 +127,7 @@
                             <td colspan="4">
                                 <div class="bxslider">
                                     {% for image in marking_writing.marked_images %}
-                                        <div><img src="{{ image }}"></div>
+                                        <div><img src="{{ image }}{{ '?' ~ now  | replace(" ", "") }}"></div>
                                     {% endfor %}
                                 </div>
                             </td>

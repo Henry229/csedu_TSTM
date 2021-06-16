@@ -340,6 +340,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     combined_images = []
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
+            v = v.replace('.jpg', '_merging.jpg')
             c_image = Image.open(
                 os.path.join(current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id), "writing", v))
@@ -423,7 +424,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
         # Query Assessment information
         ts_id = marking.testset_id
         row = AssessmentEnroll.query.with_entities(AssessmentEnroll.assessment_id, AssessmentEnroll.grade,
-                                                   AssessmentEnroll.start_time_client, AssessmentEnroll.assessment_type). \
+                                                   AssessmentEnroll.start_time_client). \
             filter_by(id=assessment_enroll_id). \
             filter_by(testset_id=ts_id). \
             filter_by(student_user_id=student_user_id).first()
@@ -434,10 +435,10 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
             item_name = (Item.query.with_entities(Item.name).filter_by(id=marking.item_id).first()).name
             grade = row.grade
             test_date = row.start_time_client
-            test_type = Codebook.get_code_id(row.assessment_type)
+
             ts_header = query_my_report_header(assessment_enroll_id, row.assessment_id, ts_id, student_user_id)
             # get writing score from marking_writing table
-            my_score = query_writing_report_score(marking.id, test_type)
+            my_score = query_writing_report_score(marking.id)
 
             if ts_header is None:
                 url = request.referrer
@@ -752,8 +753,11 @@ def marking_onscreen_save():
         writing_path = request.json["writing_path"]
         marking_path = request.json["marking_path"]
         marking_image = request.json["marking_image"]
+
         if writing_path:
             marking_file_name = None
+            marking_file_name_merging = None
+
             if marking_path:
                 marking_file_name = os.path.basename(marking_path)
             if not marking_file_name:
@@ -762,10 +766,30 @@ def marking_onscreen_save():
             marking_file_save_path = os.path.join(current_app.config['USER_DATA_FOLDER'], student_user_id, "writing",
                                                   marking_file_name).replace('\\', '/')
 
+
             # Save image
             r = urllib.request.urlopen(marking_image)
             with open(marking_file_save_path, 'wb') as f:
                 f.write(r.file.read())
+
+
+
+
+            writing_file_save_path = os.path.join(current_app.config['USER_DATA_FOLDER'], student_user_id, "writing",
+                                                  os.path.basename(writing_path)).replace('\\', '/')
+
+            im = Image.open(writing_file_save_path)
+
+            img = Image.open(r)
+            width, height = img.size
+            img.close()
+
+            im1 = im.crop()
+            newsize = (width, height)
+            im1 = im1.resize(newsize)
+            #im1.save(writing_file_name + "_merging" + os.path.splitext(os.path.basename(writing_path))[1])
+            #im1.save(os.path.join(current_app.config['USER_DATA_FOLDER'], student_user_id, "writing").replace('\\', '/'), 'JPG')
+            im1.save(os.path.join(current_app.config['USER_DATA_FOLDER'], student_user_id, "writing", writing_file_name + "_merging" + os.path.splitext(os.path.basename(writing_path))[1]).replace('\\', '/'))
 
             # Update DB if required
             marking_writing = MarkingForWriting.query.filter_by(id=writing_id).first()
@@ -815,14 +839,9 @@ def getBranchIds(marker_id):
     return branch_ids
 
 
-def query_writing_report_score(marking_id, test_type):
+def query_writing_report_score(marking_id):
     total_score = 0
-    # criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
-    if test_type:
-        criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=test_type).all()
-    else:
-        criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
-
+    criteria = Codebook.query.filter_by(code_type='criteria').filter_by(parent_code=76).all()
     for _o in criteria:
         total_score += int(_o.additional_info.get('max_score'))
 

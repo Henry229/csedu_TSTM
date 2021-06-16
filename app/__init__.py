@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import Flask, g
 from flask.sessions import SecureCookieSessionInterface
@@ -90,6 +91,10 @@ def create_app(config_name):
     # json encoding
     from app.json_encoder import AlchemyEncoder
     app.json_encoder = AlchemyEncoder
+
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.today()}
 
     return app
 
