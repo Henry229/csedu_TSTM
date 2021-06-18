@@ -303,14 +303,13 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                "to_char(total_score,'999.99') as total_score, " \
                "to_char(percentile_score,'999.99') as percentile_score, " \
                "(select count(distinct bbb.student_user_id) " \
-               "from (select student_user_id, assessment_id, testset_id, max(id) as id " \
+               "from (select student_user_id, assessment_id, max(id) as id " \
                "from assessment_enroll " \
                "where assessment_id in (" \
                "  select id from assessment where id in(select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
                "                 and test_detail = (select test_detail from assessment where id =:assessment_id) " \
                ") " \
-               "and testset_id = :testset_id " \
-               "group by student_user_id, assessment_id, testset_id " \
+               "group by student_user_id, assessment_id " \
                ") bbb " \
                "where exists(select 1 from marking where assessment_enroll_id = bbb.id and student_user_id = bbb.student_user_id) " \
                ") AS total_students1, " \
@@ -322,13 +321,12 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
     "            select aaa.student_user_id, " \
     "                case when sum(bbb.outcome_score * bbb.weight) = 0 then 0 else " \
     "                    sum(bbb.candidate_mark * bbb.weight) * 100::double precision / sum(bbb.outcome_score * bbb.weight) end as score " \
-    "            from (select student_user_id, assessment_id, testset_id, max(id) as id from assessment_enroll " \
+    "            from (select student_user_id, assessment_id, max(id) as id from assessment_enroll " \
     "                    where assessment_id in ( " \
     "                        select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
     "                            and test_detail = (select test_detail from assessment where id =:assessment_id) " \
     "                           ) " \
-    "                     and testset_id =:testset_id " \
-    "                   group by student_user_id, assessment_id, testset_id " \
+    "                   group by student_user_id, assessment_id " \
     "                ) aaa " \
     "            join marking bbb " \
     "                on aaa.id = bbb.assessment_enroll_id " \
