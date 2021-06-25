@@ -1,12 +1,16 @@
 {% extends "ui/assessments_base.html" %}
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {% block app_content %}
- <style>
+ <style type="text/css">
     .score-summary {
          margin: 10px 0 10px 0;
     }
     .score-summary th, .score-summary td {
         padding:10px;
+    }
+    div.assessment-homework #testsets thead > tr > th.testset:not(:nth-child(2)),
+    div.assessment-homework #testsets tbody > tr > td.testset:not(:nth-child(2)){
+        padding-left: 40px !important;
     }
 </style>
   <div class="assessment-list-header">
@@ -93,7 +97,7 @@
                                               {% for sub_list in sub['list'] %}
                                               {% for assessment in sub_list.assessments %}
                                               {% for ts in assessment.testsets %}
-                                              <th>Test Set</th>
+                                              <th class="testset">Test Set</th>
                                               <th>Status</th>
                                               {% if ts.enable_report %}
                                                   <th>Report</th>
@@ -117,7 +121,7 @@
                                                   {% for sub_list in sub['list'] %}
                                                   {% for assessment in sub_list.assessments %}
                                                   {% for ts in assessment.testsets %}
-                                                  <td>
+                                                  <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
                                                                  data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
