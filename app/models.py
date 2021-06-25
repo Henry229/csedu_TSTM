@@ -1313,6 +1313,14 @@ class Codebook(db.Model):
             return 0
 
     @staticmethod
+    def get_code_id_by_code_type(code_type):
+        code = Codebook.query.options(load_only("id")).filter_by(code_type=code_type).first()
+        if code:
+            return code.id
+        else:
+            return 0
+
+    @staticmethod
     def get_testcenter_by_ip(ip):
         return Codebook.query.filter(Codebook.code_type == 'test_center',
                                      Codebook.additional_info.contains({"ip": [ip]})).first()

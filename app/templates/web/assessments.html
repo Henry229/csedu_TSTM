@@ -46,186 +46,388 @@
                       </a>
                   </div>
               </div>
-              <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                  {% for assessment in assessments %}
-                      <div class="card-body {{ assessment.assessment_type_class }}">
-                          <div>
-                          <h5 class="card-title">{{ assessment.name }}<small class="text-uppercase text-muted"> -{{ assessment.assessment_type_name }}</small></h5>
-
-                              {% if assessment.testsets and Codebook.get_code_name(assessment.testsets[0].test_type)=='Online Selective' %}
+              <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion" style="overflow-x: auto">
+                  {% if key == 'Homework' %}
+                      {% if unit != None %}
+                      <h5 class="card-title card-body">UNIT {{ unit }} </h5>
+                      {% endif %}
+                      {% for assessment in assessments %}
+                          <div class="card-body {{ assessment.first_assessment.assessment_type_class }}">
                               <div>
-                                  <table class="table-bordered score-summary">
-                                      <thead><tr bgcolor="#f5f5dc">
-                                      <th>Subject</th>
-                                      {% for tset in assessment.testsets %}
-                                      <th>{{ Codebook.get_code_name(tset.subject) }}</th>
-                                      {% endfor %}
-                                      <th>Total</th></tr></thead>
-                                      <tr>
-                                      <td>Score(%)</td>
-                                      {% set vars = {'total_amount': 0}  %}
-                                      {% for tset in assessment.testsets %}
-                                         {% if vars.update({'total_amount': vars.total_amount + tset.score}) %}{% endif %}
-                                      <td>{{ tset.score|round(1, 'floor') }} &nbsp;</td>
-                                      {% endfor %}
-                                       <td>{{ vars.total_amount|round(1, 'floor') }}</td>
-                                      </tr>
-                                  </table>
-                              </div>
-                          {% endif %}
-                          </div>
-                          <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
-                          <div class="row">
-                              <div class="col">
-                                  <input type="hidden" name="assessment_guid"
-                                         value="{{ assessment.GUID }}">
-                                  <table id="testsets" class="display table table-hover" style="width:100%">
-                                      <thead>
-                                      <tr>
-                                          <th></th>
-                                          <th>Test Set</th>
-                                          <th>Status</th>
-                                          {% if assessment.testsets and assessment.testsets[0].enable_report %}
-                                              <th>Report</th>
-                                          {% endif %}
-                                          {% if assessment.testsets and assessment.testsets[0].enable_video %}
-                                              <th align="center"><span class="btn btn-default"><i
-                                                      class="fa fa-microphone"></i></span></th>
-                                          {% endif %}
-                                      </tr>
-                                      </thead>
-                                      <tbody>
-                                      {% for ts in assessment.testsets %}
+                              <h5 class="card-title">{{ assessment.name }}<small class="text-uppercase text-muted"> -{{ assessment.first_assessment.assessment_type_name }}</small></h5>
+
+                                  {% if assessment['subjects'] and Codebook.get_code_name(assessment['first_assessment'].test_type)=='Online Selective' %}
+                                  <div>
+                                      <table class="table-bordered score-summary">
+                                          <thead><tr bgcolor="#f5f5dc">
+                                          <th>Subject</th>
+                                          {% for tset in assessment['subjects'] %}
+                                          <th>{{ Codebook.get_code_name(tset['name']) }}</th>
+                                          {% endfor %}
+                                          <th>Total</th></tr></thead>
                                           <tr>
-                                              <td>
-                                                  {{ loop.index }}
-                                              </td>
-                                              <td>
-                                                  {% if ts.enrolled and not ts.resumable %}
-                                                      <input type="button" class="btn btn-light btn-block"
-                                                             data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
-                                                             disabled>
-                                                  {% else %}
-                                                      <input type="button" class="btn btn-success btn-block"
-                                                             data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
-                                                             disabled>
-                                                  {% endif %}
-                                              </td>
-                                              <td>
-                                                  {% if ts.enrolled %}
-                                                      {% if ts.resumable %}
-                                                          <input type="button"
-                                                                 class="btn btn-primary btn-block resume"
-                                                                 data-student-user-id="{{ student_user_id }}"
-                                                                 data-assessment-guid="{{ assessment.GUID }}"
-                                                                 data-testset-id="{{ ts.id }}"
-                                                                 data-session-key="{{ ts.session_key }}"
-                                                                 value="Resume">
-                                                      {% elif ts.restartable %}
-                                                        <input type="button" class="btn btn-primary btn-block start"
-                                                             data-student-user-id="{{ student_user_id }}"
-                                                             data-assessment-guid="{{ assessment.GUID }}"
-                                                             data-testset-id="{{ ts.id }}" value="Retry">
-                                                      {% else %}
-                                                          <input type="button" class="btn btn-secondary btn-block"
-                                                                 value="Finished" disabled>
-                                                      {% endif %}
-                                                  {% else %}
-                                                      {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
-                                                          <button class="btn btn-warning btn-block btn-instruction"
-                                                                  onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
-                                                              Exam Instructions
-                                                          </button>
-                                                      {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
-                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' %}
-                                                              <button class="btn btn-warning btn-block btn-instruction"
-                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
-                                                                  Exam Instructions
-                                                              </button>
-                                                          {% else %}
-                                                              <button class="btn btn-warning btn-block btn-instruction"
-                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
-                                                                  Exam Instructions
-                                                              </button>
-                                                          {% endif %}
-                                                      {% elif Codebook.get_code_name(ts.test_type)=='Selective' %}
-                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' %}
-                                                              <button class="btn btn-warning btn-block btn-instruction"
-                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
-                                                                  Exam Instructions
-                                                              </button>
-                                                          {% else %}
-                                                              <button class="btn btn-warning btn-block btn-instruction"
-                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/STT%20Mul_submission%20guide.pdf','_blank')">
-                                                                  Exam Instructions
-                                                              </button>
-                                                          {% endif %}
-                                                      {% elif Codebook.get_code_name(ts.test_type)=='OC' or Codebook.get_code_name(ts.test_type)=='Extra OC'  %}
-                                                          <button class="btn btn-warning btn-block btn-instruction"
-                                                                  onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/OC%20submission%20guide.pdf','_blank')">
-                                                                  Exam Instructions
-                                                          </button>
-                                                      {% endif %}
-                                                      <input type="button" class="btn btn-primary btn-block start"
-                                                             data-student-user-id="{{ student_user_id }}"
-                                                             data-assessment-guid="{{ assessment.GUID }}"
-                                                             data-testset-id="{{ ts.id }}" value="Start">
-                                                  {% endif %}
-                                              </td>
+                                          <td>Score(%)</td>
+                                          {% set vars = {'total_amount': 0}  %}
+                                          {% for tset in assessment['subjects'] %}
+                                              {% for tlist in tset['list'] %}
+                                                {% if vars.update({'total_amount': vars.total_amount + tlist.score}) %}{% endif %}
+                                                <td>{{ tlist.score|round(1, 'floor') }} &nbsp;</td>
+                                              {% endfor %}
+                                          {% endfor %}
+                                           <td>{{ vars.total_amount|round(1, 'floor') }}</td>
+                                          </tr>
+                                      </table>
+                                  </div>
+                              {% endif %}
+                              </div>
+                              <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
+                              <div class="row">
+                                  <div class="col">
+                                      <input type="hidden" name="assessment_guid"
+                                             value="{{ assessment.first_assessment.GUID }}">
+                                      <table id="testsets" class="display table table-hover" style="width:100%">
+                                          <thead>
+                                          {% for sub in assessment.subjects %}
+                                          <tr>
+                                              <th></th>
+                                              {% for sub_list in sub['list'] %}
+                                              {% for assessment in sub_list.assessments %}
+                                              {% for ts in assessment.testsets %}
+                                              <th>Test Set</th>
+                                              <th>Status</th>
                                               {% if ts.enable_report %}
-                                                  <td>
-                                                      {% if ts.enrolled and not ts.resumable %}
-                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
-                                                              <input type="button" class="btn btn-secondary btn-block"
-                                                                     value="Not Available" disabled>
-                                                          {% else %}
-                                                            {% if ts.report_type == 'report' %}
-                                                              <input type="button" class="btn btn-primary report"
-                                                                     data-student-user-id="{{ student_user_id }}"
-                                                                     data-assessment-id="{{ assessment.id }}"
-                                                                     data-assessment-guid="{{ assessment.GUID }}"
-                                                                     data-testset-id="{{ ts.id }}"
-                                                                     value="View Report">
-                                                            {% else %}
-                                                              <input type="button" class="btn btn-primary error-note"
-                                                                     data-assessment-enrol-id="{{ ts.enroll_id }}"
-                                                                     value="View Report">
-                                                            {% endif %}
-                                                          {% endif %}
-                                                      {% else %}
-                                                          <input type="button" class="btn btn-secondary btn-block"
-                                                                 value="Not Available" disabled>
-                                                      {% endif %}
-                                                  </td>
+                                                  <th>Report</th>
                                               {% endif %}
                                               {% if ts.enable_video %}
+                                                  <th align="center"><span class="btn btn-default"><i
+                                                          class="fa fa-microphone"></i></span></th>
+                                              {% endif %}
+                                              {% endfor %}
+                                              {% endfor %}
+                                              {% endfor %}
+                                          </tr>
+                                          {% endfor %}
+                                          </thead>
+                                          <tbody>
+                                          {% for sub in assessment.subjects %}
+                                              <tr>
                                                   <td>
-                                                      {% if ts.enrolled and not ts.resumable  and ts.explanation_link %}
-                                                          <button class="btn btn-outline-danger" type="button"
-                                                                 id="view_explanation_window"
-                                                                 name="view_explanation_window"
-                                                                 data-toggle="modal" data-target="#csmovieModal"
-                                                                 data-testset-id="{{ ts.id }}"
-                                                                 data-link="{{ ts.explanation_link }}">
-                                                          <i class="fa fa-play" style="color: #FF7F6E"></i>
-                                                          </button>
+                                                      {{ Codebook.get_code_name(sub['name']) }}
+                                                  </td>
+                                                  {% for sub_list in sub['list'] %}
+                                                  {% for assessment in sub_list.assessments %}
+                                                  {% for ts in assessment.testsets %}
+                                                  <td>
+                                                      {% if ts.enrolled and not ts.resumable %}
+                                                          <input type="button" class="btn btn-light btn-block"
+                                                                 data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                                 disabled>
                                                       {% else %}
-                                                          <button class="btn btn-outline-secondary btn-block"
-                                                                  disabled><i
-                                                                  class="fa fa-stop"></i></button>
+                                                          <input type="button" class="btn btn-success btn-block"
+                                                                 data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                                 disabled>
                                                       {% endif %}
                                                   </td>
+                                                  <td>
+                                                      {% if ts.enrolled %}
+                                                          {% if ts.resumable %}
+                                                              <input type="button"
+                                                                     class="btn btn-primary btn-block resume"
+                                                                     data-student-user-id="{{ student_user_id }}"
+                                                                     data-assessment-guid="{{ assessment.GUID }}"
+                                                                     data-testset-id="{{ ts.id }}"
+                                                                     data-session-key="{{ ts.session_key }}"
+                                                                     value="Resume">
+                                                          {% elif ts.restartable %}
+                                                            <input type="button" class="btn btn-primary btn-block start"
+                                                                 data-student-user-id="{{ student_user_id }}"
+                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-testset-id="{{ ts.id }}" value="Retry">
+                                                          {% else %}
+                                                              <input type="button" class="btn btn-secondary btn-block"
+                                                                     value="Finished" disabled>
+                                                          {% endif %}
+                                                      {% else %}
+                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
+                                                                  Exam Instructions
+                                                              </button>
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% else %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% endif %}
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% else %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/STT%20Mul_submission%20guide.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% endif %}
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='OC' or Codebook.get_code_name(ts.test_type)=='Extra OC'  %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/OC%20submission%20guide.pdf','_blank')">
+                                                                      Exam Instructions
+                                                              </button>
+                                                          {% endif %}
+                                                          <input type="button" class="btn btn-primary btn-block start"
+                                                                 data-student-user-id="{{ student_user_id }}"
+                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-testset-id="{{ ts.id }}" value="Start">
+                                                      {% endif %}
+                                                  </td>
+                                                  {% if ts.enable_report %}
+                                                      <td>
+                                                          {% if ts.enrolled and not ts.resumable %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
+                                                                  <input type="button" class="btn btn-secondary btn-block"
+                                                                         value="Not Available" disabled>
+                                                              {% else %}
+                                                                {% if ts.report_type == 'report' %}
+                                                                  <input type="button" class="btn btn-primary report"
+                                                                         data-student-user-id="{{ student_user_id }}"
+                                                                         data-assessment-id="{{ assessment.id }}"
+                                                                         data-assessment-guid="{{ assessment.GUID }}"
+                                                                         data-testset-id="{{ ts.id }}"
+                                                                         value="View Report">
+                                                                {% else %}
+                                                                  <input type="button" class="btn btn-primary error-note"
+                                                                         data-assessment-enrol-id="{{ ts.enroll_id }}"
+                                                                         value="View Report">
+                                                                {% endif %}
+                                                              {% endif %}
+                                                          {% else %}
+                                                              <input type="button" class="btn btn-secondary btn-block"
+                                                                     value="Not Available" disabled>
+                                                          {% endif %}
+                                                      </td>
+                                                  {% endif %}
+                                                  {% if ts.enable_video %}
+                                                      <td>
+                                                          {% if ts.enrolled and not ts.resumable  and ts.explanation_link %}
+                                                              <button class="btn btn-outline-danger" type="button"
+                                                                     id="view_explanation_window"
+                                                                     name="view_explanation_window"
+                                                                     data-toggle="modal" data-target="#csmovieModal"
+                                                                     data-testset-id="{{ ts.id }}"
+                                                                     data-link="{{ ts.explanation_link }}">
+                                                              <i class="fa fa-play" style="color: #FF7F6E"></i>
+                                                              </button>
+                                                          {% else %}
+                                                              <button class="btn btn-outline-secondary btn-block"
+                                                                      disabled><i
+                                                                      class="fa fa-stop"></i></button>
+                                                          {% endif %}
+                                                      </td>
+                                                  {% endif %}
+                                                  {% endfor %}
+                                                  {% endfor %}
+                                                  {% endfor %}
+                                              </tr>
+                                          {% endfor %}
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div class="col"></div>
+                                  <div class="col"></div>
+                              </div>
+                          </div>
+                      {% endfor %}
+
+                  {% else %}
+                      {% for assessment in assessments %}
+                          <div class="card-body {{ assessment.assessment_type_class }}">
+                              <div>
+                              <h5 class="card-title">{{ assessment.name }}<small class="text-uppercase text-muted"> -{{ assessment.assessment_type_name }}</small></h5>
+
+                                  {% if assessment.testsets and Codebook.get_code_name(assessment.testsets[0].test_type)=='Online Selective' %}
+                                  <div>
+                                      <table class="table-bordered score-summary">
+                                          <thead><tr bgcolor="#f5f5dc">
+                                          <th>Subject</th>
+                                          {% for tset in assessment.testsets %}
+                                          <th>{{ Codebook.get_code_name(tset.subject) }}</th>
+                                          {% endfor %}
+                                          <th>Total</th></tr></thead>
+                                          <tr>
+                                          <td>Score(%)</td>
+                                          {% set vars = {'total_amount': 0}  %}
+                                          {% for tset in assessment.testsets %}
+                                             {% if vars.update({'total_amount': vars.total_amount + tset.score}) %}{% endif %}
+                                          <td>{{ tset.score|round(1, 'floor') }} &nbsp;</td>
+                                          {% endfor %}
+                                           <td>{{ vars.total_amount|round(1, 'floor') }}</td>
+                                          </tr>
+                                      </table>
+                                  </div>
+                              {% endif %}
+                              </div>
+                              <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
+                              <div class="row">
+                                  <div class="col">
+                                      <input type="hidden" name="assessment_guid"
+                                             value="{{ assessment.GUID }}">
+                                      <table id="testsets" class="display table table-hover" style="width:100%">
+                                          <thead>
+                                          <tr>
+                                              <th></th>
+                                              <th>Test Set</th>
+                                              <th>Status</th>
+                                              {% if assessment.testsets and assessment.testsets[0].enable_report %}
+                                                  <th>Report</th>
+                                              {% endif %}
+                                              {% if assessment.testsets and assessment.testsets[0].enable_video %}
+                                                  <th align="center"><span class="btn btn-default"><i
+                                                          class="fa fa-microphone"></i></span></th>
                                               {% endif %}
                                           </tr>
-                                      {% endfor %}
-                                      </tbody>
-                                  </table>
+                                          </thead>
+                                          <tbody>
+                                          {% for ts in assessment.testsets %}
+                                              <tr>
+                                                  <td>
+                                                      {{ loop.index }}
+                                                  </td>
+                                                  <td>
+                                                      {% if ts.enrolled and not ts.resumable %}
+                                                          <input type="button" class="btn btn-light btn-block"
+                                                                 data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                                 disabled>
+                                                      {% else %}
+                                                          <input type="button" class="btn btn-success btn-block"
+                                                                 data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
+                                                                 disabled>
+                                                      {% endif %}
+                                                  </td>
+                                                  <td>
+                                                      {% if ts.enrolled %}
+                                                          {% if ts.resumable %}
+                                                              <input type="button"
+                                                                     class="btn btn-primary btn-block resume"
+                                                                     data-student-user-id="{{ student_user_id }}"
+                                                                     data-assessment-guid="{{ assessment.GUID }}"
+                                                                     data-testset-id="{{ ts.id }}"
+                                                                     data-session-key="{{ ts.session_key }}"
+                                                                     value="Resume">
+                                                          {% elif ts.restartable %}
+                                                            <input type="button" class="btn btn-primary btn-block start"
+                                                                 data-student-user-id="{{ student_user_id }}"
+                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-testset-id="{{ ts.id }}" value="Retry">
+                                                          {% else %}
+                                                              <input type="button" class="btn btn-secondary btn-block"
+                                                                     value="Finished" disabled>
+                                                          {% endif %}
+                                                      {% else %}
+                                                          {% if Codebook.get_code_name(ts.subject)=='Writing' and Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Writing%20submission%20guidelines.pdf','_blank')">
+                                                                  Exam Instructions
+                                                              </button>
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='Summative test' %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% else %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Multiple%20Choice.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% endif %}
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='Selective' %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/Class%20Test_Writing.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% else %}
+                                                                  <button class="btn btn-warning btn-block btn-instruction"
+                                                                          onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/STT%20Mul_submission%20guide.pdf','_blank')">
+                                                                      Exam Instructions
+                                                                  </button>
+                                                              {% endif %}
+                                                          {% elif Codebook.get_code_name(ts.test_type)=='OC' or Codebook.get_code_name(ts.test_type)=='Extra OC'  %}
+                                                              <button class="btn btn-warning btn-block btn-instruction"
+                                                                      onclick="window.open('https://tstm.cbtest.com.au/static/common/instructions/OC%20submission%20guide.pdf','_blank')">
+                                                                      Exam Instructions
+                                                              </button>
+                                                          {% endif %}
+                                                          <input type="button" class="btn btn-primary btn-block start"
+                                                                 data-student-user-id="{{ student_user_id }}"
+                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-testset-id="{{ ts.id }}" value="Start">
+                                                      {% endif %}
+                                                  </td>
+                                                  {% if ts.enable_report %}
+                                                      <td>
+                                                          {% if ts.enrolled and not ts.resumable %}
+                                                              {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
+                                                                  <input type="button" class="btn btn-secondary btn-block"
+                                                                         value="Not Available" disabled>
+                                                              {% else %}
+                                                                {% if ts.report_type == 'report' %}
+                                                                  <input type="button" class="btn btn-primary report"
+                                                                         data-student-user-id="{{ student_user_id }}"
+                                                                         data-assessment-id="{{ assessment.id }}"
+                                                                         data-assessment-guid="{{ assessment.GUID }}"
+                                                                         data-testset-id="{{ ts.id }}"
+                                                                         value="View Report">
+                                                                {% else %}
+                                                                  <input type="button" class="btn btn-primary error-note"
+                                                                         data-assessment-enrol-id="{{ ts.enroll_id }}"
+                                                                         value="View Report">
+                                                                {% endif %}
+                                                              {% endif %}
+                                                          {% else %}
+                                                              <input type="button" class="btn btn-secondary btn-block"
+                                                                     value="Not Available" disabled>
+                                                          {% endif %}
+                                                      </td>
+                                                  {% endif %}
+                                                  {% if ts.enable_video %}
+                                                      <td>
+                                                          {% if ts.enrolled and not ts.resumable  and ts.explanation_link %}
+                                                              <button class="btn btn-outline-danger" type="button"
+                                                                     id="view_explanation_window"
+                                                                     name="view_explanation_window"
+                                                                     data-toggle="modal" data-target="#csmovieModal"
+                                                                     data-testset-id="{{ ts.id }}"
+                                                                     data-link="{{ ts.explanation_link }}">
+                                                              <i class="fa fa-play" style="color: #FF7F6E"></i>
+                                                              </button>
+                                                          {% else %}
+                                                              <button class="btn btn-outline-secondary btn-block"
+                                                                      disabled><i
+                                                                      class="fa fa-stop"></i></button>
+                                                          {% endif %}
+                                                      </td>
+                                                  {% endif %}
+                                              </tr>
+                                          {% endfor %}
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div class="col"></div>
+                                  <div class="col"></div>
                               </div>
-                              <div class="col"></div>
-                              <div class="col"></div>
                           </div>
-                      </div>
-                  {% endfor %}
+                      {% endfor %}
+                  {% endif %}
               </div>
           </div>
       </div>

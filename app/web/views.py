@@ -5,6 +5,8 @@ import random
 import string
 from datetime import datetime, timedelta
 from enum import Enum
+from itertools import groupby
+from operator import itemgetter
 
 import pytz
 import requests
@@ -336,9 +338,21 @@ def assessment_list():
 
     #assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)). \
     #    order_by(Assessment.created_time.desc()).all()
-    assessment_array = Assessment.query.filter(Assessment.GUID.in_(guid_list)).all()
+    #assessment_array = Assessment.query.filter(Assessment.GUID.in_(guid_list)).all()
+
     assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if x.is_last_version==True]
     #assessment_all.sort(key=lambda x: x.all_enroll_finished(current_user.id), reverse=True)
+
+    code_id = Codebook.get_code_id_by_code_type('homework_active')
+    additional_info = Codebook.get_additional_info(code_id)
+    homework_year = None
+    homework_term = None
+    homework_unit = None
+    if additional_info is not None:
+        homework_year = additional_info['year']
+        homework_term = additional_info['term']
+        homework_unit = additional_info['unit']
+
 
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
@@ -350,6 +364,17 @@ def assessment_list():
         else:
         #    assessment.sort(key=lambda x: x.version, reverse=True)
             assessment = assessment[0]
+
+        if assessment.test_type_kind == 'Homework':
+            if homework_year is not None:
+                if assessment.year != homework_year:
+                    continue
+            if homework_term is not None:
+                if assessment.term != homework_term:
+                    continue
+            if homework_unit is not None:
+                if assessment.unit != homework_unit:
+                    continue
 
         au_tz = pytz.timezone('Australia/Sydney')
         if assessment.session_date:
@@ -430,6 +455,14 @@ def assessment_list():
             assessment.assessment_type_class = 'assessment-trial'
 
         for tset in student_testsets:
+            tset.finish_time = None
+            if len(enrolled) > 0:
+                result = list(filter(lambda x: (x.testset_id == tset.id), enrolled))
+                if len(result) > 0:
+                    result.sort(reverse=True)
+                    result.sort(key=lambda x: x.id, reverse=True)
+                    tset.finish_time = result[0].finish_time
+
             # Compare GUID to check enrollment status
             is_enrolled = tset.GUID in enrolled_guid_assessment_types
             # 시험을 보지 않았는데, active 가 아니라는 말은 testset 이 그동안 버전이 변경되었다는 것이다.
@@ -456,7 +489,14 @@ def assessment_list():
 
             if test_type_additional_info is not None and test_type_additional_info['enable_video']:
                 if test_type_additional_info['enable_video'] == 'true':
-                    tset.enable_video = True
+                    if tset.finish_time is not None:
+                        finish_time = tset.finish_time
+                        is_2hours_after_finished = (pytz.utc.localize(finish_time) + timedelta(hours=2)) >= datetime.now(
+                            pytz.utc)
+                        if is_2hours_after_finished:
+                            tset.enable_video = True
+                    else:
+                        tset.enable_video = True
 
             # If subject is 'Writing', report enabled:
             #   - True when Marker's comment existing for 'ALL' items in Testset
@@ -582,7 +622,29 @@ def assessment_list():
         homeworks.sort(key=lambda x: x.finished)
 
 
-    assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks}
+
+    homeworks_grouped = []
+    sorted_grouped = sorted(homeworks, key=lambda x: x.name)
+    for key, group in groupby(sorted_grouped, lambda x: x.name):
+        assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
+        testsets = []
+
+        for thing in group:
+            testsets.extend(thing.testsets)
+            if assessment_grouped['first_assessment'] is None:
+                assessment_grouped['first_assessment'] = thing
+
+        testsets_grouped = sorted(testsets, key=lambda x: x.subject)
+        for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
+            grouped1 = {'name': key1, 'list':[]}
+            for thing1 in group1:
+                grouped1['list'].append(thing1)
+
+            assessment_grouped['subjects'].append(grouped1)
+
+        homeworks_grouped.append(assessment_grouped)
+
+    assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks_grouped}
     log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
 
     if homework_count == 0 and class_count == 0 and trial_count == 0:
@@ -624,7 +686,7 @@ def assessment_list():
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
-                           btn_homework=btn_homework, btn_group=btn_group)
+                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_unit)
 
 
 @web.route('/tests/assessments_sampletest', methods=['GET'])
