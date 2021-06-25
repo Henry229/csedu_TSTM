@@ -491,9 +491,8 @@ def assessment_list():
                 if test_type_additional_info['enable_video'] == 'true':
                     if tset.finish_time is not None:
                         finish_time = tset.finish_time
-                        is_2hours_after_finished = (pytz.utc.localize(finish_time) + timedelta(hours=2)) >= datetime.now(
-                            pytz.utc)
-                        if is_2hours_after_finished:
+                        is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
+                        if is_7days_after_finished is True:
                             tset.enable_video = True
                     else:
                         tset.enable_video = True
