@@ -25,6 +25,7 @@ from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
     User, Role, EducationPlan, EducationPlanDetail, ItemExplanation, MarkingForWriting, Marking
+import math
 
 """sample usage for decorator
     @web.route('/admin')
@@ -347,12 +348,26 @@ def assessment_list():
     additional_info = Codebook.get_additional_info(code_id)
     homework_year = None
     homework_term = None
-    homework_unit = None
+    homework_days = None
     if additional_info is not None:
-        homework_year = additional_info['year']
-        homework_term = additional_info['term']
-        homework_unit = additional_info['unit']
-
+        if additional_info.get('year') is not None:
+            homework_year = additional_info['year']
+        if additional_info.get('term') is not None:
+            homework_term = additional_info['term']
+        if additional_info.get('term_start_date') is not None:
+            term_start_date = additional_info['term_start_date']
+            if term_start_date is not None:
+                if term_start_date != '':
+                    term_start_dt = datetime.strptime(term_start_date, "%Y-%m-%d")
+                    now_dt = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
+                    days = (now_dt - term_start_dt).days
+                    if days >= 0:
+                        if days == 0:
+                            homework_days = 1
+                        else:
+                            homework_days = math.ceil(days / 7)
+                    else:
+                        homework_days = -1
 
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
@@ -367,14 +382,25 @@ def assessment_list():
 
         if assessment.test_type_kind == 'Homework':
             if homework_year is not None:
-                if assessment.year != homework_year:
+                if assessment.year is None:
                     continue
+                else:
+                    if assessment.year != homework_year:
+                        continue
+
             if homework_term is not None:
-                if assessment.term != homework_term:
+                if assessment.term is None:
                     continue
-            if homework_unit is not None:
-                if assessment.unit != homework_unit:
+                else:
+                    if assessment.term != homework_term:
+                        continue
+
+            if homework_days is not None:
+                if assessment.unit is None:
                     continue
+                else:
+                    if int(assessment.unit) > homework_days:
+                        continue
 
         au_tz = pytz.timezone('Australia/Sydney')
         if assessment.session_date:
@@ -685,7 +711,7 @@ def assessment_list():
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
-                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_unit)
+                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days)
 
 
 @web.route('/tests/assessments_sampletest', methods=['GET'])

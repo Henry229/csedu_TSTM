@@ -53,7 +53,9 @@
               <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion" style="overflow-x: auto">
                   {% if key == 'Homework' %}
                       {% if unit != None %}
+                      {% if unit > 0 %}
                       <h5 class="card-title card-body">UNIT {{ unit }} </h5>
+                      {% endif %}
                       {% endif %}
                       {% for assessment in assessments %}
                           <div class="card-body {{ assessment.first_assessment.assessment_type_class }}">
