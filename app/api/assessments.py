@@ -939,7 +939,7 @@ def get_previous_item(assessment_session: AssessmentSession, current_question_no
     if current_question_no == 0:
         index = 0
     else:
-        index = current_question_no - 1
+        index = current_question_no - 2
 
     return test_items[index]
 
