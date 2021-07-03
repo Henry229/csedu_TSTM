@@ -79,7 +79,11 @@ var TestRunner = (function () {
         btn.on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            _goToQuestionNo(_question_no - 1);
+            if (_$container.find('.item-rendered-empty').length > 0) {
+                _goToQuestionNo(_question_no - 1);
+            } else {
+                ItemRunner.processResponse();
+            }
         });
         btn = $('.footer-flag-btn');
         btn.on('click', function () {
