@@ -471,6 +471,9 @@ def response_process(item_id, assessment_session=None):
     marking_id = request.json.get('marking_id')
     response = request.json.get('response')
     file_names = request.json.get('file_names')
+    direction = request.json.get('direction')
+    if direction is None:
+        direction = ''
 
     # assessment_session = AssessmentSession(key=session_key)
 
@@ -565,8 +568,16 @@ def response_process(item_id, assessment_session=None):
     assessment_session.set_saved_answer(marking_id, candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
-    next_item = get_next_item(assessment_session, question_no)
-    data = {'is_read': False, 'is_flagged': False}
+    next_item = None
+    if direction == 'back':
+        next_item = get_previous_item(assessment_session, question_no)
+    else:
+        next_item = get_next_item(assessment_session, question_no)
+    data = None
+    if direction == 'back':
+        data = {'is_read': True, 'is_flagged': False}
+    else:
+        data = {'is_read': False, 'is_flagged': False}
     if next_item is None:
         # There is 2 cases where next_item is None
         #   1. It consumed all of the current testlet items. ==> Ask to proceed to a next testlet.
@@ -591,7 +602,11 @@ def response_process(item_id, assessment_session=None):
             data['html'] = render_template("runner/test_finished.html", test_type=test_type)
     else:
         next_item_id = next_item.get('item_id')
-        next_question_no = question_no + 1
+        next_question_no = None
+        if direction == 'back':
+            next_question_no = question_no - 1
+        else:
+            next_question_no = question_no + 1
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
         data['is_flagged'] = marking.is_flagged
@@ -911,6 +926,22 @@ def get_next_item(assessment_session: AssessmentSession, current_question_no=0):
 
     return test_items[index]
 
+def get_previous_item(assessment_session: AssessmentSession, current_question_no=0):
+    """
+    :param assessment_session:
+    :param current_question_no: 학생이 보는 문제 번호. 1부터 시작.
+    :return:
+    """
+    test_items = assessment_session.get_value('test_items')
+    if len(test_items) == 0:
+        return None
+    # If current_question_no == 0, it means it's the first time requesting a test item.
+    if current_question_no == 0:
+        index = 0
+    else:
+        index = current_question_no - 1
+
+    return test_items[index]
 
 def can_load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     """
