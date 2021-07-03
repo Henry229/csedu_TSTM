@@ -82,7 +82,7 @@ var TestRunner = (function () {
             if (_$container.find('.item-rendered-empty').length > 0) {
                 _goToQuestionNo(_question_no - 1);
             } else {
-                ItemRunner.processResponse();
+                ItemRunner.processBackResponse();
             }
         });
         btn = $('.footer-flag-btn');

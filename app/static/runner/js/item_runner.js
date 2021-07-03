@@ -278,6 +278,25 @@ var ItemRunner = (function () {
         }
     };
 
+    /**
+     * Test runner 에서 Back 를 누를 때 입력한 답을 서버에 전달한다.
+     *  - File upload 가 있는 때는 response.formData 에 데이터가 있다.
+     *    이 경우 우선 processAssessmentFormResponse 로 파일을 업로드 하고, 성공하면 success 에서 processAssessmentResponse 를
+     *    실행한다.
+     */
+    var processBackResponse = function (callbackFn, callbackData) {
+        var response = _handler.getResponse();
+        if (response === null) return;
+        if (_mode === 'assessment' || _mode === 'errornote') {
+            if (response.formData || response.writing_text)
+                processAssessmentFormResponse(response, callbackFn, callbackData);
+            else
+                processAssessmentBackResponse(response, callbackFn, callbackData);
+        } else {
+            processPreviewResponse(response);
+        }
+    };
+
     var processResponseForWriting = function (callbackFn, callbackData) {
         var response = _handler.getResponse();
         if (response === null) return;
@@ -327,6 +346,62 @@ var ItemRunner = (function () {
             delete response.fileNames;
         }
         data['response'] = response;
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                _disableSubmitResponse(true, true);
+                if (_responseProcessingCb) {
+                    _responseProcessingCb(_question_no, response);
+                }
+            },
+            complete: function () {
+
+            },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                _sessionErrorCb(jqXHR);
+            },
+            success: function (response) {
+                // _disableSubmitResponse(false);
+                if (response.result === 'success') {
+                    if (callbackFn) {
+                        _responseProcessedSimpleCb(response.data);
+                        callbackFn(callbackData);
+                    } else if (_responseProcessedCb) {
+                        _responseProcessedCb(response.data);
+                    }
+                } else {
+                    if (response.message) {
+                        $('#errorModal .modal-body').html(response.message);
+                        $('#errorModal').modal('show');
+                    }
+                }
+            }
+        });
+    };
+
+    var processAssessmentBackResponse = function (response, callbackFn, callbackData) {
+        var url = '/api/responses/' + _item_id;
+        if (_mode === 'errornote') {
+            url = '/api/errorrun/responses/' + _item_id;
+        }
+        var data = {
+            'session': _session,
+            'question_no': _question_no,
+            'marking_id': _marking_id
+        };
+        if (response.writing_text) {
+            data['writing_text'] = response.writing_text;
+            delete response.writing_text;
+        }
+        if (response.fileNames) {
+            data['file_names'] = response.fileNames;
+            delete response.fileNames;
+        }
+        data['response'] = response;
+        data['direction'] = 'back';
         $.ajax({
             url: url,
             type: 'POST',
@@ -460,6 +535,7 @@ var ItemRunner = (function () {
         setReviewMode: setReviewMode,
         getRendered: getRendered,
         processResponse: processResponse,
+        processBackResponse: processBackResponse,
         processResponseForWriting: processResponseForWriting,
         toggleFlag: toggleFlag
     }
