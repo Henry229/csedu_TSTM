@@ -91,7 +91,7 @@ foreach ($jsonPayload['response'] as $id => $response) {
 
     try {
         $var  = $filler->fill($id, $response);
-        $variables[] = trim($var);
+        $variables[] = $var;
         $response_ids[] = $id;
     }
     catch (OutOfRangeException $e) {
