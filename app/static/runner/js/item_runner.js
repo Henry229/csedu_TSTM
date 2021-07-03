@@ -289,7 +289,7 @@ var ItemRunner = (function () {
         if (response === null) return;
         if (_mode === 'assessment' || _mode === 'errornote') {
             if (response.formData || response.writing_text)
-                processAssessmentFormResponse(response, callbackFn, callbackData);
+                processAssessmentFormResponse(response, callbackFn, callbackData, false, true);
             else
                 processAssessmentBackResponse(response, callbackFn, callbackData);
         } else {
@@ -445,7 +445,7 @@ var ItemRunner = (function () {
      *      2. 처리가 success 로 나오면 일반적인 데이터를 processAssessmentResponse 보낸다.
      * @param response
      */
-    var processAssessmentFormResponse = function (response, callbackFn, callbackData, nextStep) {
+    var processAssessmentFormResponse = function (response, callbackFn, callbackData, nextStep, backStep) {
         var url = '/api/responses/file/' + _item_id;
         if (_mode === 'errornote') {
             url = '/api/errorrun/responses/file/' + _item_id;
@@ -485,9 +485,13 @@ var ItemRunner = (function () {
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    if(typeof(nextStep) == 'undefined' || nextStep == null) nextStep = true;
-                    if(nextStep==true) {
-                        processAssessmentResponse(response_data, callbackFn, callbackData);
+                    if(typeof(backStep) != 'undefined' && backStep != null && backStep == true){
+                        processAssessmentBackResponse(response_data, callbackFn, callbackData);
+                    }else{
+                        if(typeof(nextStep) == 'undefined' || nextStep == null) nextStep = true;
+                        if(nextStep==true) {
+                            processAssessmentResponse(response_data, callbackFn, callbackData);
+                        }
                     }
                 }
                 //_disableSubmitResponse(false);
