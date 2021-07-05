@@ -593,15 +593,13 @@ def response_process(item_id, assessment_session=None):
             data['html'] = render_template("runner/stage_finished.html", start=start, end=end)
             data['testlet_id'] = marking_testlet_id
             data['question_no'] = question_no
-            if direction != 'back':
-                assessment_session.set_status(AssessmentSession.STATUS_STAGE_FINISHED)
+            assessment_session.set_status(AssessmentSession.STATUS_STAGE_FINISHED)
         else:
             testset_id = assessment_session.get_value('testset_id')
             testset = Testset.query.with_entities(Testset.test_type).filter_by(id=testset_id).first()
             test_type = testset.test_type
             assessment_session.set_status(AssessmentSession.STATUS_TEST_FINISHED)
-            if direction != 'back':
-                data['html'] = render_template("runner/test_finished.html", test_type=test_type)
+            data['html'] = render_template("runner/test_finished.html", test_type=test_type)
     else:
         next_item_id = next_item.get('item_id')
         next_question_no = None
@@ -618,6 +616,9 @@ def response_process(item_id, assessment_session=None):
         # marking.is_read = True
         # marking.read_time = datetime.utcnow()
         # db.session.commit()
+
+    if direction == 'back':
+        assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
 
     data.update({
         'status': assessment_session.get_status(),
