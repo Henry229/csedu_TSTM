@@ -1270,7 +1270,7 @@ button.footer-finish-btn {
   padding: 1em;
 }
 
-.bx-controls-direction .bx-pager-link {
+.bx-wrapper .bx-pager.bx-default-pager a {
     width: 20px !important;
     height: 20px !important;
     border-radius: 10px !important;
