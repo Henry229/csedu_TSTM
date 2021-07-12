@@ -12,7 +12,7 @@
     .app-header,
     .app-footer
     {
-        display: none;
+        /*display: none;*/
     }
 
     .app-body.test-runner {
@@ -1268,4 +1268,10 @@ button.footer-finish-btn {
   border-width: medium;
   border-radius: 50%;
   padding: 1em;
+}
+
+.table .bx-controls-direction .bx-pager-link {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 10px !important;
 }
