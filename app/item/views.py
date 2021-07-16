@@ -6,7 +6,6 @@ import random
 import re
 import shutil
 import subprocess
-import time
 import uuid
 from datetime import datetime
 from time import time
@@ -29,9 +28,11 @@ from .forms import ItemSearchForm, ItemLoadForm, ItemListForm, FileLoadForm, Ite
 from .. import db
 from ..api.response import success
 from ..decorators import permission_required, permission_required_or_multiple
-from ..models import Codebook, Item, Permission, Choices, ItemExplanation
+from ..models import Codebook, Item, Permission, Choices, ItemExplanation, Testset, TestletHasItem
 from app.api.jwplayer import get_signed_player, jwt_signed_url
-
+from ..report.forms import ReportSearchForm
+from app.api.errors import bad_request
+import re
 
 @item.route('/<int:id>', methods=['GET'])
 @login_required
@@ -316,6 +317,81 @@ def item_list():
         items = query.order_by(Item.id.desc()).all()
         flash('Found {} item(s)'.format(len(items)))
     return render_template('item/item_list.html', form=search_form, items=items)
+
+
+@item.route('/assessment/list', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_MANAGE)
+def item_assessment_list():
+    items = []
+    search_form = ReportSearchForm()
+    search_form.test_type.data = Codebook.get_code_id('Naplan')
+    # default setting value into test_center list
+    branch_id = current_user.get_branch_id()
+    if branch_id and current_user.username != 'All':
+        search_form.test_center.data = branch_id
+    else:
+        search_form.test_center.data = None
+    search_form.year.data = None
+
+    query = Item.query
+    if search_form.validate_on_submit():
+        if search_form.grade.data:
+            query = query.filter_by(grade=search_form.grade.data)
+        if search_form.subject.data:
+            query = query.filter_by(subject=search_form.subject.data)
+        if search_form.level.data:
+            query = query.filter_by(level=search_form.level.data)
+        if search_form.category.data:
+            query = query.filter_by(category=search_form.category.data)
+        if search_form.subcategory.data:
+            query = query.filter_by(subcategory=search_form.subcategory.data)
+        if search_form.byme.data:
+            query = query.filter_by(modified_by=current_user.id)
+        if search_form.active.data:
+            query = query.filter_by(active=search_form.active.data)
+        items = query.order_by(Item.id.desc()).all()
+        flash('Found {} item(s)'.format(len(items)))
+    return render_template('item/item_assessment_list.html', form=search_form, items=items)
+
+@item.route('/assessment/list', methods=['POST'])
+@login_required
+@permission_required(Permission.ITEM_MANAGE)
+def item_assessment_search_list():
+    result = []
+    testset_id = request.form.get('testset_id')
+    if testset_id is None:
+        return bad_request()
+
+    testset = Testset.query.filter_by(id=testset_id).first()
+    if testset is None:
+        return bad_request()
+
+    branching = json.dumps(testset.branching)
+    ends = [m.end() for m in re.finditer('"id":', branching)]
+    for end in ends:
+        comma = branching.find(',', end)
+        testlet_id = int(branching[end:comma])
+
+        items = Item.query.join(TestletHasItem, Item.id == TestletHasItem.item_id) \
+            .filter(TestletHasItem.testlet_id == testlet_id) \
+            .order_by(TestletHasItem.order).all()
+
+
+        for item in items:
+            i = {'id':item.id,
+                 'name':item.name,
+                 'correct_answer':item.correct_answer,
+                 'grade':Codebook.get_code_name(item.grade),
+                 'subject':Codebook.get_code_name(item.subject),
+                 'level':Codebook.get_code_name(item.level),
+                 'category':Codebook.get_code_name(item.category),
+                 'subcategory':Codebook.get_code_name(item.subcategory),
+                 'active':item.active
+                 }
+            result.append(i)
+
+    return success(result)
 
 
 @item.route('/edit/edit', methods=['POST'])
@@ -674,6 +750,7 @@ def review(item_id, test_type=None):
         rendered_template = rendered_template.replace('Preview not available', rendered_preview)
     return rendered_template
 
+
 @item.route('/<int:item_id>/review/<int:test_type>', methods=['POST'])
 @login_required
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
@@ -721,7 +798,7 @@ def review_async(item_id, test_type=None):
             and Codebook.get_code_name(test_type) != 'Naplan':
         rendered_preview = None
 
-    result = {'item':qti_item_obj, 'test_type':test_type, 'rendered_preview':rendered_preview}
+    result = {'item': qti_item_obj, 'test_type': test_type, 'rendered_preview': rendered_preview}
     return result
 
 
@@ -964,7 +1041,7 @@ def parse_correct_response(correct_response):
 
 def get_identifier():
     random.seed()
-    return 'c%s%s' % (str(int(time.time())), ''.join(str(random.randrange(0, 9)) for i in range(9)))
+    return 'c%s%s' % (str(int(time())), ''.join(str(random.randrange(0, 9)) for i in range(9)))
 
 
 def generate_qti_package(items):
