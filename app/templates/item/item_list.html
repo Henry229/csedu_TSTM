@@ -141,6 +141,8 @@
                                     <td> {{ item.active }} </td>
                                 </tr>
                             {% endfor %}
+                        {% else %}
+                            <tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>
                         {% endif %}
                         </tbody>
                     </table>
