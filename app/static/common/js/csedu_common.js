@@ -5,7 +5,7 @@ $('button[name="modalButton"]').click(function () {
     });
     $('#dataModal .modal-content').html("Loading... Try again if data not shown");
 });
-$('button[name="previewButton"]').click(function () {
+$('body').on('click','button[name="previewButton"]', function () {
     var item_id = $(this).data('item-id');
     ItemRunner.getRendered(item_id);
 });

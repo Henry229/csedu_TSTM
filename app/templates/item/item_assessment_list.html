@@ -19,7 +19,7 @@
     .tab label:hover {
         color: #2e9cdf;}
 
-    .tab #tab2 + label:hover {
+    .tab #tab1 + label:hover {
         cursor: pointer;}
     /*input 클릭시, label 스타일*/
     .tab input:checked + label {
@@ -55,9 +55,9 @@
                 </div>
             </div>
             <div class="tab">
-                <input id="tab1" type="radio" name="tabs" checked> <!--디폴트 메뉴-->
+                <input id="tab1" type="radio" name="tabs"> <!--디폴트 메뉴-->
                 <label for="tab1">the Search by Item Info.</label>
-                <input id="tab2" type="radio" name="tabs">
+                <input id="tab2" type="radio" name="tabs" checked>
                 <label for="tab2">the Search by Assessment</label>
                 <section></section>
             </div>
@@ -69,39 +69,24 @@
                         <h5>Choose you search condition. Click on the Search button.</h5>
                         <small class="text-muted">Item Search</small>
                         <br>
-                        <form action="list" method="POST" class="form inline" role="form">
-                            {{ form.hidden_tag() }}
-                            {{ form.csrf_token }}
-                            {{ form.grade.label }}
-                            {{ form.grade }}
-                            {% for error in form.grade.errors %}
-                                <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                            {{ form.subject.label }}
-                            {{ form.subject(id="select_subject") }}
-                            {% for error in form.subject.errors %}
-                                <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                            {{ form.level.label }}
-                            {{ form.level }}
-                            {{ form.category.label }}
-                            {{ form.category(id="select_category") }}
-                            {{ form.subcategory.label }}
-                            {{ form.subcategory(id="select_subcategory") }}
-                            {{ form.byme }}
-                            {{ form.byme.label }}
-                            {{ form.active }}
-                            {{ form.active.label }}
-                            {{ form.submit(class="btn btn-success btn-sm", id="search") }}
+                        <form method="GET" class="form inline" role="form">
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                            {% if current_user.is_administrator() %}{{ form.test_center }}{% else %}{{ form.test_center(read_only=True) }}{% endif %}
+                            <hr>
+                            {{ form.assessment.label }}
+                            {{ form.assessment }}
+                            <button type="button" class="btn btn-success btn-sm" id="btn_search">Search Items</button>
                         </form>
                         <p/>
                     </div>
                     <br><br>
                     {% if current_user.can(Permission.ITEM_MANAGE) %}
-                        {% if items %}
-                            <input class="btn btn-success btn-sm" id="export" type="button"
-                                   style="float: right;margin-bottom: 2px" value="Export">
-                        {% endif %}
+                        <input class="btn btn-success btn-sm" id="export" type="button"
+                           style="float: right;margin-bottom: 2px" value="Export">
                     {% endif %}
                     <table id="items" class="display table table-hover" style="width:100%">
                         <thead>
@@ -119,29 +104,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% if items %}
-                            {% for item in items %}
-                                <tr>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-info" type="button" name="previewButton"
-                                                value="{{ url_for('item.preview', item_id=item.id) }}"
-                                                data-item-id="{{ item.id }}"
-                                                data-toggle="modal" data-target="#dataModal">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                    <td> {{ item.id }}</td>
-                                    <td> {{ item.name }}</td>
-                                    <td> {{ item.correct_answer }}</td>
-                                    <td> {{ Codebook.get_code_name(item.grade) }}</td>
-                                    <td> {{ Codebook.get_code_name(item.subject) }}</td>
-                                    <td> {{ Codebook.get_code_name(item.level) }}</td>
-                                    <td> {{ Codebook.get_code_name(item.category) }}</td>
-                                    <td> {{ Codebook.get_code_name(item.subcategory) }}</td>
-                                    <td> {{ item.active }} </td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
+                            <tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>
                         </tbody>
                     </table>
                     <br><br>
@@ -177,8 +140,7 @@
     <script src="/static/runner/js/item_runner.js"></script>
     <script src="/static/runner/js/item_handlers.js"></script>
     <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
-{#    <script src="{{ config.JWPLAYER_LIBRARY_URL }}"></script>#}
-
+    <script src="/static/report/js/report_center.js"></script>
     <script>
         $(document).ready(function () {
             ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
@@ -204,11 +166,48 @@
                 window.location = url;
             });
             $(".tab > input").change(function() {
-                if(this.id=='tab1') return false;
+                if(this.id=='tab2') return false;
                 if(this.checked) {
-                    window.location = '/item/assessment/list';
+                    window.location = '/item/list';
                 }
             });
+            $('#export').hide();
+            $('#btn_search').click(function(){
+                if($('#assessment').val()==null || $('#assessment').val()=='' || $('#assessment').val()=='0') return false;
+                let setid= $('#assessment').val().split('_')[1];
+                $.post('/item/assessment/list', {'testset_id':setid},function(d){
+                    let htm = '';
+                    if(d.data.length > 0) {
+                        $('#export').show();
+                        for (let i = 0; i < d.data.length; i++) {
+                            htm += '<tr>';
+                            htm += '<td>';
+                            htm += '<button class="btn btn-sm btn-outline-info" type="button" name="previewButton"';
+                            htm += ' value="/item/' + d.data[i].id + '/preview"';
+                            htm += ' data-item-id="' + d.data[i].id + '"';
+                            htm += ' data-toggle="modal" data-target="#dataModal">';
+                            htm += '<i class="fas fa-eye"></i>';
+                            htm += '</button>';
+                            htm += '</td>';
+                            htm += '<td> ' + d.data[i].id + '</td>';
+                            htm += '<td> ' + d.data[i].name + '</td>';
+                            htm += '<td> ' + d.data[i].correct_answer + '</td>';
+                            htm += '<td> ' + d.data[i].grade + '</td>';
+                            htm += '<td> ' + d.data[i].subject + '</td>';
+                            htm += '<td> ' + d.data[i].level + '</td>';
+                            htm += '<td> ' + d.data[i].category + '</td>';
+                            htm += '<td> ' + d.data[i].subcategory + '</td>';
+                            htm += '<td> ' + d.data[i].active + '</td>';
+                            htm += '</tr>';
+                        }
+                    }else{
+                        $('#export').hide();
+                        htm = '<tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>';
+                    }
+                    $('#items tbody').html(htm);
+                });
+            });
+
         });
     </script>
 {% endblock scripts %}
