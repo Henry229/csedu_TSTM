@@ -592,6 +592,64 @@ def item_export():
         )
     return rsp
 
+@item.route('/assessment/export', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_MANAGE)
+def item_assessment_export():
+    from shutil import copyfile
+
+    items = []
+    testset_id = request.args.get('testset_id', '0')
+    testset = Testset.query.filter_by(id=testset_id).first()
+    branching = json.dumps(testset.branching)
+    ends = [m.end() for m in re.finditer('"id":', branching)]
+    for end in ends:
+        comma = branching.find(',', end)
+        testlet_id = int(branching[end:comma])
+
+        item = Item.query.join(TestletHasItem, Item.id == TestletHasItem.item_id) \
+            .filter(TestletHasItem.testlet_id == testlet_id) \
+            .order_by(TestletHasItem.order).all()
+        items.extend(item)
+
+    resources = []
+    manifest_id = get_identifier()
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    manifest_dir = os.path.join(Config.IMPORT_TEMP_DIR, timestamp, manifest_id)
+    os.makedirs(manifest_dir)
+    duplication_counter = 0
+    for a_item in items:
+        file_dir = os.path.join(current_app.config['STORAGE_DIR'], a_item.file_link)
+        file_dir = os.path.join(file_dir, 'itemContent/en-US')
+        resource_dir = os.path.join(manifest_dir, a_item.file_link)
+        # Handle duplicated ID
+        if os.path.exists(resource_dir):
+            duplication_counter += 1
+            resource_dir = "%s_dupilacted_%d" % (resource_dir, duplication_counter)
+        os.mkdir(resource_dir)
+        a_resource = {'identifier': a_item.file_link, 'files': []}
+        for a_file in os.listdir(file_dir):
+            file_path = os.path.join(file_dir, a_file)
+            if os.path.isfile(file_path):
+                copyfile(file_path, os.path.join(resource_dir, a_file))
+                a_resource['files'].append(a_file)
+        resources.append(a_resource)
+    log.warn("%d duplicated items found" % duplication_counter)
+    manifest_xml = render_template('import/imsmanifest_export.xml', identifier=manifest_id, resources=resources)
+
+    with open(os.path.join(manifest_dir, 'imsmanifest.xml'), 'w+', encoding='utf-8') as f:
+        f.write(manifest_xml)
+
+    zip_path = os.path.normpath('%s/%s.zip' % (Config.IMPORT_TEMP_DIR, manifest_id))
+    shutil.make_archive(zip_path.replace('.zip', ''), 'zip', manifest_dir)
+    with open(zip_path, 'rb') as bites:
+        rsp = send_file(
+            io.BytesIO(bites.read()), as_attachment=True,
+            attachment_filename='%s.zip' % manifest_id,
+            mimetype='application/zip'
+        )
+    return rsp
+
 
 def populate_item_edit_form(form, items=None):
     default_choices = Choices()

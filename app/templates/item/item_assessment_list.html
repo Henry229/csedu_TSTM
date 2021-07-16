@@ -148,21 +148,8 @@
                 $('#dataModal .modal-content').empty();
             });
             $('#export').on('click', function () {
-                var url = '/item/export?export=1';
-                if ($('#grade').val() !== '0')
-                    url = url + '&grade=' + $('#grade').val();
-                if ($('#select_subject').val() !== '0')
-                    url = url + '&subject=' + $('#select_subject').val();
-                if ($('#level').val() !== '0')
-                    url = url + '&subject=' + $('#level').val();
-                if ($('#select_category').val() !== '0')
-                    url = url + '&level=' + $('#select_category').val();
-                if ($('#select_subcategory').val() !== '0')
-                    url = url + '&subcategory=' + $('#select_subcategory').val();
-                if ($('#byme').is(':checked'))
-                    url = url + '&byme=1';
-                if ($('#active').is(':checked'))
-                    url = url + '&active=1';
+                let setid= $('#assessment').val().split('_')[1];
+                var url = '/item/assessment/export?export=1' + '&testset_id=' + setid;
                 window.location = url;
             });
             $(".tab > input").change(function() {
