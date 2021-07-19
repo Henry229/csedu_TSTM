@@ -12,13 +12,11 @@
     .app-header,
     .app-footer
     {
-        /*display: none;*/
+        display: none;
     }
-    /*
     .app-body.test-runner {
         margin-top: 0 !important;
     }
-    */
 }
 .app-body.test-runner .container {
     overflow: hidden;
