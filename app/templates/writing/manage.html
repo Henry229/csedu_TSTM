@@ -43,7 +43,7 @@
                         <p/>
                         <div id="status" class="alert alert-success" role="alert"></div>
                     </div>
-                    <table class="display table table-hover" style="width:100%">
+                    <table id="marking_list" class="display table table-hover" style="width:100%">
                         <thead>
                         <tr>
                             <th></th>
@@ -62,7 +62,11 @@
                         <tbody>
                         {% if assessments %}
                             {% for w in assessments %}
-                            <tr>
+                                {% if w.marked_none_exists %}
+                                <tr style="background-color:aliceblue">
+                                {% else %}
+                                <tr>
+                                {% endif %}
                                 <td>{{ loop.index }}</td>
                                 <td class="a_year" id="{{ w.year }}"> {{ w.year }}</td>
                                 <td class="a_type"
@@ -84,12 +88,16 @@
                                     <td>
                                         <select id="select_student_{{ loop.index }}">
                                         {% for student in w.students %}
+                                            {% if w.marked[loop.index-1] %}
                                             <option value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                            {% else %}
+                                            <option style="background-color: aliceblue" value="{{ student }}">{{ Student.getCSStudentName(student)}}</option>
+                                            {% endif %}
                                         {% endfor %}
                                         </select>
                                         {% if w.students %}
                                             <a class="badge badge-warning" href="" name="search_item" id="search_item"
-                                                                           onclick="event.preventDefault();searchWritings('{{ w.assessment_guid }}',{{ loop.index }},{{ w.testset_id }})"> Search Writings </a>
+                                                                           onclick="event.preventDefault();searchWritings(this, '{{ w.assessment_guid }}',{{ loop.index }},{{ w.testset_id }})"> Search Writings </a>
                                         {% else %}
                                             <span class="badge badge-secondary" disabled> Search Writings </span>
                                         {% endif %}
@@ -104,42 +112,6 @@
                         {% endif %}
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="accordion" id="accordion">
-        <div class="card card-accent-info">
-            <div class="card-header" id="headingTwo">
-                <i class="icons cui-list"></i> Writing Item List
-                <div class="card-header-actions">
-                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
-                       aria-expanded="false" aria-controls="collapseTwo">
-                        <i class="icon-arrow-up"></i>
-                    </a>
-                </div>
-            </div>
-            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
-                <div class="card-body">
-                    <div class="div_writing_items">
-                    <table id="w_table" class="display table table-hover" style="width:100%;">
-                        <thead>
-                        <tr>
-                            <th>Enroll Id</th>
-                            <th>Assessment Name</th>
-                            <th>Test_time</th>
-                            <th>Item</th>
-                            <th>marking_id</th>
-                            <th>WritingFile?</th>
-                            <th>Marked?</th>
-                            <th>Links</th>
-                        </tr>
-                        </thead>
-
-                        <tbody id="w_table_body">
-                        </tbody>
-                    </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -176,4 +148,18 @@
     <script src="/static/runner/js/item_handlers.js"></script>
     <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
 {#    <script src="{{ config.JWPLAYER_LIBRARY_URL }}"></script>#}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let selects = $('#marking_list select');
+            if(selects.length > 0) {
+                for (let i = 0; i < selects.length; i++) {
+                    if(selects[i].options.length > 0){
+                        if(selects[i].options[0].style.backgroundColor=="aliceblue"){
+                            selects[i].style.backgroundColor="aliceblue";
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 {% endblock scripts %}

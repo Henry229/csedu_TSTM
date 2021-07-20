@@ -243,12 +243,19 @@ def manage():
                     query = query.filter(AssessmentEnroll.test_center == test_center)
             enrolls = query.distinct().order_by(AssessmentEnroll.student_user_id.asc()).all()
             student_user_ids = []
+            marked = []
+            marked_none_exists = False
             # Check if marking_writing record existing
             for enroll in enrolls:
                 for marking in enroll.marking:
-                    mw = db.session.query(MarkingForWriting.id).filter_by(marking_id=marking.id).first()
+                    mw = db.session.query(MarkingForWriting.id, MarkingForWriting.candidate_mark_detail).filter_by(marking_id=marking.id).first()
                     if mw:
                         student_user_ids.append(enroll.student_user_id)
+                        if mw.candidate_mark_detail:
+                            marked.append(True)
+                        else:
+                            marked.append(False)
+                            marked_none_exists = True
                         break
 
             assessment_json_str = {"assessment_guid": r.GUID,
@@ -259,7 +266,9 @@ def manage():
                                    "testset_id": r.testset_id,
                                    "test_center": r.branch_id,
                                    "markers": marker_ids,
-                                   "students": student_user_ids
+                                   "students": student_user_ids,
+                                   "marked": marked,
+                                   "marked_none_exists": marked_none_exists
                                    }
             assessments.append(assessment_json_str)
     return render_template('writing/manage.html', is_rows=flag, form=search_form, assessments=assessments)

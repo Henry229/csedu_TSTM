@@ -23,7 +23,7 @@ $(document).ready(function () {
  * Function searchWritings(): search item list of writings
  * @returns {boolean}
  */
-function searchWritings(assessment_guid,id,testset_id) {
+function searchWritings(obj, assessment_guid,id,testset_id) {
     var $btn = $('#search_item');
     var data = {
         assessment_guid: assessment_guid,
@@ -31,6 +31,9 @@ function searchWritings(assessment_guid,id,testset_id) {
         student_user_id: $("#select_student"+"_"+id+" option:selected").val()
     };
     if (data.assessment_guid == null) return false;
+
+    let tr = $(obj).closest('tr');
+
     $.ajax({
         method: 'GET',
         url: '/api/writing_item_list/',
@@ -42,6 +45,37 @@ function searchWritings(assessment_guid,id,testset_id) {
             $btn.attr('disabled', false);
         },
         success: function (result) {
+            let th_count = $('#marking_list > thead > tr > th').length;
+            let htm = '';
+            htm += '<tr>';
+            htm += '<td colspan="'+th_count+'" style="border-top:none">';
+            htm += '<div id="dv_item_list" className="card-body">';
+            htm += '    <div className="div_writing_items">';
+            htm += '        <table id="w_table" className="display table table-hover" style="width:100%;">';
+            htm += '            <thead>';
+            htm += '            <tr>';
+            htm += '                <th>Enroll Id</th>';
+            htm += '                <th>Assessment Name</th>';
+            htm += '                <th>Test_time</th>';
+            htm += '                <th>Item</th>';
+            htm += '                <th>marking_id</th>';
+            htm += '                <th>WritingFile?</th>';
+            htm += '                <th>Marked?</th>';
+            htm += '                <th>Links</th>';
+            htm += '            </tr>';
+            htm += '            </thead>';
+            htm += '            <tbody id="w_table_body">';
+            htm += '            </tbody>';
+            htm += '        </table>';
+            htm += '    </div>';
+            htm += '</div>';
+            htm += '</td>';
+            htm += '</tr>';
+
+            if($('#dv_item_list').length > 0) $('#dv_item_list').parent().parent().remove();
+
+            tr.after(htm);
+
             i = 0;
             removeItemList();
             result.forEach(function (item) {
