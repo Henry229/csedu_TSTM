@@ -89,8 +89,8 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
-                //downloadURI(data['file1'].writing, data['file1'].writing.substring(data['file1'].writing.lastIndexOf('/')+1));
-                  downloadURI(data['file1'].writing, 'aaa');
+                window.open(data['file1'].writing, '_self');
+                //downloadURI(data['file1'].writing, data['file1'].writing.substring(data['file1'].writing.lastIndexOf('/')+1));//downloadURI(data['file1'].writing, 'aaa');
                 //$('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
               }
             });
