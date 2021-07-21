@@ -42,10 +42,12 @@ def list_writing_marking():
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
 
-
+    #hongseok
     query = db.session.query(AssessmentEnroll.id).join(Testset). \
-        filter(AssessmentEnroll.testset_id == Testset.id). \
-        filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
+        filter(AssessmentEnroll.testset_id == Testset.id)
+    #query = db.session.query(AssessmentEnroll.id).join(Testset). \
+    #    filter(AssessmentEnroll.testset_id == Testset.id). \
+    #    filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
 
     if grade != '':
         query = query.filter(Testset.grade == grade)
@@ -92,7 +94,9 @@ def list_writing_marking():
                         "item_id": m.Marking.item_id,
                         "marking_writing_id": m.MarkingForWriting.id,
                         "is_candidate_file": is_candidate_file,
-                        "is_marked": is_marked}
+                        "is_marked": is_marked,
+                        "marking_writing_id": m.MarkingForWriting.id
+                        }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
 

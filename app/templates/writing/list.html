@@ -54,7 +54,7 @@
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
                                       title="file download">
-                                    <a href="/api/userdata/writing/210/2846/file_2846_numa2ctur3gszft5h9jk14sx_aaa.jpg?1626834369035" download><i class="fas fa-file-download" style="color: red;"></i></a>
+                                    <a onclick="javascript:candatefileDownload(this, {{ writing.marking_writing_id }},{{ writing.student_user_id }})"><i class="fas fa-file-download" style="color: red;"></i></a>
                                 </span>
                             </td>
                             <td>
@@ -73,5 +73,25 @@
             </div>
         </div>
     </div>
+    <div id="filedownload" class="print-notice-hidden">
+        <a href="" download></a>
+    </div>
 {% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        function candatefileDownload(obj, marking_writing_id, student_user_id){
+            $.get("/writing/marking_onscreen/"+marking_writing_id+"/"+student_user_id, function(data) {
+              for(let i=0; i<10; i++){
+                if(data['file'+i] == undefined) break;
+                //$(obj).removeAttr("onclick");
+                  debugger
+                let a = $('#filedownload > a');
+                a.attr("href", data['file1'].writing);
+                a.click();
+              }
+            });
+        }
 
+    </script>
+{% endblock scripts %}
