@@ -89,13 +89,23 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
+                //downloadURI(data['file1'].writing, data['file1'].writing.substring(data['file1'].writing.lastIndexOf('/')+1));
+                  downloadURI(data['file1'].writing, 'aaa');
                 //$('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
-                  $.fileDownload(data['file1'].writing)
-                    .done(function () { alert('File download a success!'); })
-                    .fail(function () { alert('File download failed!'); });
               }
             });
         }
 
+        function downloadURI(uri, name)
+        {
+            var link = document.createElement("a");
+            // If you don't know the name or want to use
+            // the webserver default set name = ''
+            link.setAttribute('download', name);
+            link.href = uri;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
     </script>
 {% endblock scripts %}
