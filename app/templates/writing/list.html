@@ -55,7 +55,7 @@
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
                                       title="file download">
-                                    <a href="{{ lnk }}" download="writing_{{ writing.marking_writing_id }}__{{ writing.student_id }}{{ lnk[lnk.rfind('.'):] }}"><i class="fas fa-file-download" style="color: #ff0000;"></i></a>
+                                    <a href="{{ lnk }}" download="writing_{{ writing.marking_writing_id }}_{{ writing.student_id }}_{{ loop.index }}{{ lnk[lnk.rfind('.'):] }}"><i class="fas fa-file-download" style="color: #ff0000;"></i></a>
                                 </span>
                                 {% endfor %}
                             </td>
