@@ -83,13 +83,16 @@ def list_writing_marking():
         if assessment_name.strip() != '':
             if m.AssessmentEnroll.assessment.name.find(assessment_name) == -1: is_ppending = False
 
-        writing_file = None;
+        writing_files = [];
         if is_candidate_file:
-            web_img_links = marking_onscreen_load(m.MarkingForWriting.id, m.AssessmentEnroll.student_user_id)
 
-            for key, image in web_img_links.items():
-                writing_file = image['writing']
-
+            for key, file_name in m.MarkingForWriting.candidate_file_link.items():
+                if file_name:
+                    file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(m.AssessmentEnroll.student_user_id), "writing",
+                                             file_name)
+                    if os.path.exists(file_path):
+                         writing_files.append(url_for('api.get_writing', marking_writing_id=m.MarkingForWriting.id,
+                                               student_user_id=m.AssessmentEnroll.student_user_id, file=file_name))
 
         if is_ppending:
             json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
@@ -104,7 +107,7 @@ def list_writing_marking():
                         "is_candidate_file": is_candidate_file,
                         "is_marked": is_marked,
                         "marking_writing_id": m.MarkingForWriting.id,
-                        "web_img_links_writing": writing_file
+                        "web_img_links_writing": writing_files
                         }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)

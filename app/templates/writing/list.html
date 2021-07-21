@@ -51,11 +51,13 @@
                             <td> {{ writing.is_candidate_file }} </td>
                             <td> {{ writing.is_marked }} </td>
                             <td>
+                                {% for lnk in writing.web_img_links_writing %}
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
                                       title="file download">
-                                    <a href="{{ writing.web_img_links_writing }}" download><i class="fas fa-file-download" style="color: red;"></i></a>
+                                    <a href="{{ lnk }}" download><i class="fas fa-file-download" style="color: red;"></i></a>
                                 </span>
+                                {% endfor %}
                             </td>
                             <td>
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
