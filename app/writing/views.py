@@ -106,7 +106,6 @@ def list_writing_marking():
                         "marking_writing_id": m.MarkingForWriting.id,
                         "is_candidate_file": is_candidate_file,
                         "is_marked": is_marked,
-                        "marking_writing_id": m.MarkingForWriting.id,
                         "web_img_links_writing": writing_files
                         }
             marking_writing_list.append(json_str)

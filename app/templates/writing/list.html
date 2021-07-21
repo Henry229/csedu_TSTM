@@ -75,38 +75,4 @@
             </div>
         </div>
     </div>
-    <div id="filedownload" class="print-notice-hidden">
-        <a href="" download>download</a>
-    </div>
 {% endblock app_content %}
-{% block scripts %}
-    {{ super() }}
-    <script type="text/javascript">
-        function candatefileDownload(obj, marking_writing_id, student_user_id){
-            $.get("/writing/marking_onscreen/"+marking_writing_id+"/"+student_user_id, function(data) {
-              for(let i=1; i<10; i++){
-                if(data['file'+i] == undefined) break;
-                //$(obj).removeAttr("onclick");
-                  debugger
-                let a = $('#filedownload > a');
-                a.attr("href", data['file1'].writing);
-                a.click();
-                //downloadURI(data['file1'].writing, data['file1'].writing.substring(data['file1'].writing.lastIndexOf('/')+1));//downloadURI(data['file1'].writing, 'aaa');
-                //$('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
-              }
-            });
-        }
-
-        function downloadURI(uri, name)
-        {
-            var link = document.createElement("a");
-            // If you don't know the name or want to use
-            // the webserver default set name = ''
-            link.setAttribute('download', name);
-            link.href = uri;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        }
-    </script>
-{% endblock scripts %}`
