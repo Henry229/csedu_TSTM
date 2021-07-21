@@ -1,4 +1,4 @@
-{% extends "ui/testsets_base.html" %}
+`{% extends "ui/testsets_base.html" %}
 
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {% block app_content %}
@@ -54,7 +54,7 @@
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
                                       title="file download">
-                                    <a onclick="javascript:candatefileDownload(this, {{ writing.marking_writing_id }},{{ writing.student_user_id }})"><i class="fas fa-file-download" style="color: red;"></i></a>
+                                    <a href="{{ writing.web_img_links_writing }}" download><i class="fas fa-file-download" style="color: red;"></i></a>
                                 </span>
                             </td>
                             <td>
@@ -89,7 +89,6 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
-                window.open(data['file1'].writing, '_self');
                 //downloadURI(data['file1'].writing, data['file1'].writing.substring(data['file1'].writing.lastIndexOf('/')+1));//downloadURI(data['file1'].writing, 'aaa');
                 //$('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
               }
@@ -108,4 +107,4 @@
             link.remove();
         }
     </script>
-{% endblock scripts %}
+{% endblock scripts %}`

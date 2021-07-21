@@ -83,6 +83,14 @@ def list_writing_marking():
         if assessment_name.strip() != '':
             if m.AssessmentEnroll.assessment.name.find(assessment_name) == -1: is_ppending = False
 
+        writing_file = None;
+        if is_candidate_file:
+            web_img_links = marking_onscreen_load(m.MarkingForWriting.id, m.AssessmentEnroll.student_user_id)
+
+            for key, image in web_img_links.items():
+                writing_file = image['writing']
+
+
         if is_ppending:
             json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
                         "assessment_name": m.AssessmentEnroll.assessment.name,
@@ -95,7 +103,8 @@ def list_writing_marking():
                         "marking_writing_id": m.MarkingForWriting.id,
                         "is_candidate_file": is_candidate_file,
                         "is_marked": is_marked,
-                        "marking_writing_id": m.MarkingForWriting.id
+                        "marking_writing_id": m.MarkingForWriting.id,
+                        "web_img_links_writing": writing_file
                         }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
