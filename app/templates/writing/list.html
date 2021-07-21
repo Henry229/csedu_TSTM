@@ -74,7 +74,7 @@
         </div>
     </div>
     <div id="filedownload" class="print-notice-hidden">
-        <a href="" download>download</a>
+        <iframe id="my_iframe" style="display:none;"></iframe>
     </div>
 {% endblock app_content %}
 {% block scripts %}
@@ -89,7 +89,7 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
-                window.open(data['file1'].writing);
+                document.getElementById('my_iframe').src = data['file1'].writing;
               }
             });
         }
