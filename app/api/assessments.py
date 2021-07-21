@@ -671,8 +671,7 @@ def save_writing_data(student_user_id, marking_id, writing_files=None, writing_t
     for writing_file in writing_files:
         file_name = writing_file.filename if writing_file is not None else 'writing.txt'
         random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
-        #new_file_name = 'file_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
-        new_file_name = 'file_' + Student.getCSStudentId(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        new_file_name = 'file_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
         writing_upload_dir = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing")
         item_file = os.path.join(writing_upload_dir, new_file_name)
         if not os.path.exists(writing_upload_dir):
@@ -692,8 +691,7 @@ def save_writing_data(student_user_id, marking_id, writing_files=None, writing_t
     if writing_text is not None:
         file_name = 'writing.txt'
         random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
-        #new_file_name = 'writing_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
-        new_file_name = 'writing_' + Student.getCSStudentId(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        new_file_name = 'writing_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
         writing_upload_dir = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing")
         item_file = os.path.join(writing_upload_dir, new_file_name)
         if not os.path.exists(writing_upload_dir):
@@ -1193,3 +1191,4 @@ def get_stage_items():
     # print(rows)
     return jsonify(rows)
 '''
+
