@@ -82,7 +82,7 @@
     <script type="text/javascript">
         function candatefileDownload(obj, marking_writing_id, student_user_id){
             $.get("/writing/marking_onscreen/"+marking_writing_id+"/"+student_user_id, function(data) {
-              for(let i=0; i<10; i++){
+              for(let i=1; i<10; i++){
                 if(data['file'+i] == undefined) break;
                 //$(obj).removeAttr("onclick");
                   debugger
