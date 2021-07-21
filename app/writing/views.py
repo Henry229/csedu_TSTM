@@ -103,7 +103,8 @@ def list_writing_marking():
                         "marking_writing_id": m.MarkingForWriting.id,
                         "is_candidate_file": is_candidate_file,
                         "is_marked": is_marked,
-                        "web_img_links_writing": writing_files
+                        "web_img_links_writing": writing_files,
+                        "student_id": Student.getCSStudentId(m.AssessmentEnroll.student_user_id)
                         }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
