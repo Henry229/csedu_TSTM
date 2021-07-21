@@ -74,7 +74,7 @@
         </div>
     </div>
     <div id="filedownload" class="print-notice-hidden">
-        <a href="" download></a>
+        <a href="" download>download</a>
     </div>
 {% endblock app_content %}
 {% block scripts %}
@@ -89,6 +89,7 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
+                window.open(data['file1'].writing);
               }
             });
         }
