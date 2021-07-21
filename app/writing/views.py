@@ -89,7 +89,7 @@ def list_writing_marking():
                                              file_name)
                     if os.path.exists(file_path):
                          writing_files.append(url_for('api.get_writing', marking_writing_id=m.MarkingForWriting.id,
-                                               student_user_id=m.AssessmentEnroll.student_user_id, file=file_name))
+                                               student_user_id=Student.getCSStudentId(m.AssessmentEnroll.student_user_id), file=file_name))
 
         if is_ppending:
             json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
