@@ -89,7 +89,10 @@
                 let a = $('#filedownload > a');
                 a.attr("href", data['file1'].writing);
                 a.click();
-                $('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
+                //$('#filedownload > a').attr({target: '_blank', href  : data['file1'].writing});
+                  $.fileDownload(data['file1'].writing)
+                    .done(function () { alert('File download a success!'); })
+                    .fail(function () { alert('File download failed!'); });
               }
             });
         }
