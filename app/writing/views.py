@@ -42,12 +42,9 @@ def list_writing_marking():
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
 
-    #hongseok
     query = db.session.query(AssessmentEnroll.id).join(Testset). \
-        filter(AssessmentEnroll.testset_id == Testset.id)
-    #query = db.session.query(AssessmentEnroll.id).join(Testset). \
-    #    filter(AssessmentEnroll.testset_id == Testset.id). \
-    #    filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
+        filter(AssessmentEnroll.testset_id == Testset.id). \
+        filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
 
     if grade != '':
         query = query.filter(Testset.grade == grade)
