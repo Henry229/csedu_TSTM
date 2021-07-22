@@ -125,7 +125,7 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
 
 
 
-        zfile = '%s/%s/%s/%s.zip' % (current_app.config['USER_DATA_FOLDER'],str(student_user_id),"writing",zip_name)
+        zfile = '%s/%s/%s.zip' % (current_app.config['USER_DATA_FOLDER'],str(student_user_id),zip_name)
 
         with ZipFile('%s.zip' % zip_name, 'w') as zip:
             for key, file_name in marking_writing.candidate_file_link.items():
