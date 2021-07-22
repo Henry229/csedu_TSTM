@@ -110,10 +110,49 @@ def list_writing_marking():
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
 
 
+@writing.route('/writing_marking_list/download/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.WRITING_READ)
+def list_writing_marking_download(marking_writing_id, student_user_id):
+    from zipfile import ZipFile
+    from flask import send_file
+
+    marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
+    if marking_writing is not None:
+        zip_name = "writing_" + str(marking_writing_id) + "_" + Student.getCSStudentId(student_user_id)
+
+        #zip_path = url_for('api.get_writing', marking_writing_id=marking_writing_id,
+        #        student_user_id=student_user_id, file=zip_name)
+
+        zfile = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                             str(student_user_id),
+                             "writing",
+                             "%s.zip" % (zip_name))
+
+        with ZipFile('%s' % zfile, 'w') as zip:
+        #with ZipFile('{}'.format(zfile), 'w') as zip:
+            for key, file_name in marking_writing.candidate_file_link.items():
+                if file_name:
+                    file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
+                                             file_name)
+                    if os.path.exists(file_path):
+                        zip.write(file_path)
+
+
+        rsp = send_file(
+            zfile,
+            mimetype='application/zip',
+            as_attachment=True,
+            attachment_filename='%s.zip' % zip_name)
+        return rsp
+    return None
+
+
 @writing.route('/assign/<string:assessment_guid>', methods=['GET'])
 @login_required
 @permission_required(Permission.WRITING_MANAGE)
 def assign(assessment_guid):
+
     """
     Menu Writing > Assign main page
     :return:

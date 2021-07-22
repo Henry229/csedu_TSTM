@@ -51,6 +51,9 @@
                             <td> {{ writing.is_candidate_file }} </td>
                             <td> {{ writing.is_marked }} </td>
                             <td>
+
+                                <a class="badge badge-primary" href="/writing/writing_marking_list/download/{{ writing.marking_writing_id }}/{{ writing.student_user_id }}">download</a>
+
                                 {% for lnk in writing.web_img_links_writing %}
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
