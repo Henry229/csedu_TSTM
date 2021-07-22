@@ -119,9 +119,9 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
 
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing is not None:
+        os.chdir(current_app.config['USER_DATA_FOLDER'])
         zip_name = "writing_" + str(marking_writing_id) + "_" + Student.getCSStudentId(student_user_id)
-        zfile = os.path.join(current_app.config['USER_DATA_FOLDER'],
-                             str(student_user_id),
+        zfile = os.path.join(str(student_user_id),
                              "writing",
                              "%s.zip" % (zip_name))
 
@@ -129,7 +129,7 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
         #with ZipFile('{}'.format(zfile), 'w') as zip:
             for key, file_name in marking_writing.candidate_file_link.items():
                 if file_name:
-                    file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
+                    file_path = os.path.join(str(student_user_id), "writing",
                                              file_name)
                     if os.path.exists(file_path):
                         zip.write(file_path)
