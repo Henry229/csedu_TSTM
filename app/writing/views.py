@@ -135,7 +135,7 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
 
 
         rsp = send_file(
-            '%s.zip' % zip_name,
+            zfile,
             mimetype='application/zip',
             as_attachment=True,
             attachment_filename='%s.zip' % zip_name)
