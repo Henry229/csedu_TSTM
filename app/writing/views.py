@@ -119,20 +119,23 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
 
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing is not None:
-        os.chdir(current_app.config['USER_DATA_FOLDER'])
-        os.chdir(str(student_user_id))
-        os.chdir("writing")
-
         zip_name = "writing_" + str(marking_writing_id) + "_" + Student.getCSStudentId(student_user_id)
+        zfile = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                             str(student_user_id),
+                             "writing",
+                             "%s.zip" % (zip_name))
 
         with ZipFile('%s.zip' % zip_name, 'w') as zip:
             for key, file_name in marking_writing.candidate_file_link.items():
                 if file_name:
-                    zip.write(file_name)
+                    file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
+                                             file_name)
+                    if os.path.exists(file_path):
+                        zip.write(os.path.join(str(student_user_id), file_name))
 
 
         rsp = send_file(
-            '%s.zip' % zip_name,
+            zfile,
             mimetype='application/zip',
             as_attachment=True,
             attachment_filename='%s.zip' % zip_name)
