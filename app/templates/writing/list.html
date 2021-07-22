@@ -51,9 +51,9 @@
                             <td> {{ writing.is_candidate_file }} </td>
                             <td> {{ writing.is_marked }} </td>
                             <td>
-
+                                {% if writing.web_img_links_writing|length > 1 %}
                                 <a class="badge badge-primary" href="/writing/writing_marking_list/download/{{ writing.marking_writing_id }}/{{ writing.student_user_id }}">download</a>
-
+                                {% else %}
                                 {% for lnk in writing.web_img_links_writing %}
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
@@ -61,6 +61,7 @@
                                     <a href="{{ lnk }}" download="writing_{{ writing.marking_writing_id }}_{{ writing.student_id }}_{{ loop.index }}{{ lnk[lnk.rfind('.'):] }}"><i class="fas fa-file-download" style="color: #ff0000;"></i></a>
                                 </span>
                                 {% endfor %}
+                                {% endif %}
                             </td>
                             <td>
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
