@@ -124,7 +124,6 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
         zip_name = "writing_" + str(marking_writing_id) + "_" + Student.getCSStudentId(student_user_id)
 
         with ZipFile('%s.zip' % zip_name, 'w') as zip:
-        #with ZipFile('{}'.format(zfile), 'w') as zip:
             for key, file_name in marking_writing.candidate_file_link.items():
                 if file_name:
                     zip.write(file_name)
