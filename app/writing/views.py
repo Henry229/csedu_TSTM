@@ -123,23 +123,8 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
         os.chdir(str(student_user_id))
         os.chdir("writing")
 
-        zip_name = "writing_" + str(marking_writing_id) + "_" + Student.getCSStudentId(student_user_id)
 
-        with ZipFile('%s.zip' % zip_name, 'w') as zip:
-            for key, file_name in marking_writing.candidate_file_link.items():
-                if file_name:
-                    file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
-                                             file_name)
-                    if os.path.exists(file_path):
-                        zip.write(file_name)
-
-
-        rsp = send_file(
-            ('%s.zip' % zip_name),
-            mimetype='application/zip',
-            as_attachment=True,
-            attachment_filename='%s.zip' % zip_name)
-        return rsp
+        return None
     return None
 
 
