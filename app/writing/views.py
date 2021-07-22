@@ -130,7 +130,7 @@ def list_writing_marking_download(marking_writing_id, student_user_id):
                     file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing",
                                              file_name)
                     if os.path.exists(file_path):
-                        zip.write(os.path.join(str(student_user_id), file_name))
+                        zip.write(file_name)
 
 
         rsp = send_file(
