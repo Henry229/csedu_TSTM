@@ -111,6 +111,7 @@ class MarkerAssignForm(FlaskForm):
 class MarkingListSearchForm(FlaskForm):
     assessment_name = StringField('Assessment Name', id='i_name')
     grade = SelectField('Grade')
+    marked = SelectField('Marked', choices=[('', ''), ('1', 'True'), ('0', 'False')], default='')
     submit = SubmitField('Search')
 
     def __init__(self, *args, **kwargs):
@@ -122,4 +123,5 @@ class MarkingListSearchForm(FlaskForm):
                 code = (_grade.id, _grade.code_name)
                 grades.append(code)
         self.grade.choices = grades
+
 

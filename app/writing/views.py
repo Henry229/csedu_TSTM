@@ -33,10 +33,13 @@ def list_writing_marking():
     if request.args.get("assessment_name") is not None: assessment_name = request.args.get("assessment_name")
     grade = ''
     if request.args.get("grade") is not None: grade = request.args.get("grade")
+    marked = ''
+    if request.args.get("marked") is not None: marked = request.args.get("marked")
 
     search_form = MarkingListSearchForm()
     search_form.assessment_name.data = assessment_name
     search_form.grade.data = grade
+    search_form.marked.data = marked
 
     marker_id = current_user.id
     branch_ids = getBranchIds(marker_id)
@@ -57,11 +60,15 @@ def list_writing_marking():
         filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id).all()]
     """
 
-    marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
+    query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
-        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
-        order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
+        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
+    if marked == '1':
+        query = query.filter(MarkingForWriting.candidate_mark_detail != None)
+    elif marked == '0':
+        query = query.filter(MarkingForWriting.candidate_mark_detail == None)
+    marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
     for m in marking_writings:
