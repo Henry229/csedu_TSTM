@@ -771,12 +771,15 @@ textarea:focus.qti-item.qti-interaction.solid {
 }
 
 .watermark {
-    position: fixed;
+    position: absolute;
     opacity: 0.1;
     font-size: 2.0em;
-    margin-top: 60px;
-    margin-left: 10px;
+    margin-right: 10px;
     white-space: nowrap;
+    bottom: 10px;
+    margin-bottom: 60px;
+    text-align: right;
+    right: 0;
 }
 
 .item-card .summary-container {
