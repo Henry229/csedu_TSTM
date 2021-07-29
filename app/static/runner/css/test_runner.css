@@ -758,6 +758,27 @@ textarea:focus.qti-item.qti-interaction.solid {
     font-size: large;
 }
 
+.item-card .item-container::after {
+  content: "";
+ background:url('/static/runner/img/test_watermark.png');
+  opacity: 0.2;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.watermark {
+    position: fixed;
+    opacity: 0.1;
+    font-size: 2.0em;
+    margin-top: 60px;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
 .item-card .summary-container {
     position: absolute;
     overflow: auto;
