@@ -20,6 +20,7 @@ from .forms import AssessmentSearchForm, WritingMarkingForm, WritingMMForm, \
 from .. import db
 from ..api.reports import query_my_report_header
 from ..api.response import success, bad_request
+from ..api.writings import common_writing_search_assessment
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
     AssessmentHasTestset, Testset, MarkerAssigned, Item, MarkerBranch, User
@@ -35,39 +36,74 @@ def list_writing_marking():
     if request.args.get("grade") is not None: grade = request.args.get("grade")
     marked = ''
     if request.args.get("marked") is not None: marked = request.args.get("marked")
+    #marker = 0
+    #if request.args.get("marker") is not None: marker = request.args.get("marker")
 
+    assessment = request.args.get("assessment")
+    year = request.args.get("year", 0, type=int)
+    test_type = request.args.get("test_type")
+    marker_name = request.args.get("marker_name")
+
+    tabs = '1'
+    if request.args.get("tabs") is not None: tabs = request.args.get("tabs")
     search_form = MarkingListSearchForm()
     search_form.assessment_name.data = assessment_name
     search_form.grade.data = grade
     search_form.marked.data = marked
 
-    marker_id = current_user.id
+    search_form.year.data = str(year)
+    if test_type is not None:
+        search_form.test_type.data = int(test_type)
+    if current_user.is_administrator():
+        if marker_name is None:
+            search_form.marker_name.data = search_form.marker_name.choices[0][0]
+        else:
+            search_form.marker_name.data = marker_name
+
+    marker_id = None
+    if current_user.is_administrator():
+        if tabs == '1':
+            #marker_id = current_user.id
+            marker_id = int(search_form.marker_name.data) if marker_name is None else int(marker_name)
+        else:
+            marker_id = int(search_form.marker_name.data) if marker_name is None else int(marker_name)
+    else:
+        marker_id = current_user.id
+
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
+
+
+
+    if assessment is not None and assessment != '0':
+        search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
+                                   row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in common_writing_search_assessment(year, branch_ids, writing_code_id, test_type)]
+        search_form.assessment.data = assessment
 
     query = db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
         filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id)
 
-    if grade != '':
-        query = query.filter(Testset.grade == grade)
+    if tabs == '1':
+        if grade != '':
+            query = query.filter(Testset.grade == grade)
+    else:
+        if assessment is not None and assessment != '0':
+            assessments = assessment.split('_')
+            query = query.filter(AssessmentEnroll.assessment_id == int(assessments[0])). \
+                filter(AssessmentEnroll.testset_id == int(assessments[1]))
 
     assessment_enroll_ids = [row.id for row in query.all()]
-
-    """
-    assessment_enroll_ids = [row.id for row in db.session.query(AssessmentEnroll.id).join(Testset). \
-        filter(AssessmentEnroll.testset_id == Testset.id). \
-        filter(AssessmentEnroll.test_center.in_(branch_ids)).filter(Testset.subject == writing_code_id).all()]
-    """
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
-    if marked == '1':
-        query = query.filter(MarkingForWriting.candidate_mark_detail != None)
-    elif marked == '0':
-        query = query.filter(MarkingForWriting.candidate_mark_detail == None)
+    if tabs == '1':
+        if marked == '1':
+            query = query.filter(MarkingForWriting.candidate_mark_detail != None)
+        elif marked == '0':
+            query = query.filter(MarkingForWriting.candidate_mark_detail == None)
     marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
@@ -84,8 +120,9 @@ def list_writing_marking():
         au_tz = pytz.timezone('Australia/Sydney')
 
         is_ppending = True
-        if assessment_name.strip() != '':
-            if m.AssessmentEnroll.assessment.name.find(assessment_name) == -1: is_ppending = False
+        if tabs == '1':
+            if assessment_name.strip() != '':
+                if m.AssessmentEnroll.assessment.name.find(assessment_name) == -1: is_ppending = False
 
         writing_files = [];
         if is_candidate_file:
@@ -114,7 +151,7 @@ def list_writing_marking():
                         "student_id": Student.getCSStudentId(m.AssessmentEnroll.student_user_id)
                         }
             marking_writing_list.append(json_str)
-    return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list)
+    return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list, tabs=tabs)
 
 
 @writing.route('/writing_marking_list/download/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])

@@ -1,8 +1,26 @@
 `{% extends "ui/testsets_base.html" %}
 
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{%- block styles %}
+    {{ super() }}
+    <link href="/static/ui/css/tab.css" rel="stylesheet">
+{%- endblock styles %}
+{%- block scripts %}
+    {{ super() }}
+    <script src="/static/ui/js/tab.js"></script>
+    <script src="/static/writing/js/marking_list.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            let marker_name = $('#marker_name');
+            if(marker_name != undefined && marker_name != null){
+                for(let i=0; i<marker_name.find('option[value="0"]').length; i++){
+                    $(marker_name.find('option[value="0"]').get(i)).attr('disabled', true);
+                }
+            }
+        });
+    </script>
+{%- endblock scripts %}
 {% block app_content %}
-
     <h3><i class="icons cui-laptop" style="color: #339af0;"></i> CS Education - Writing Marking </h3>
     <div class="row">
         <div class="col">
@@ -10,9 +28,17 @@
                 <div class="card-header">
                     <h5 class="card-title">Test List</h5>
                 </div>
+                <form method="GET" class="form inline" role="form" style="padding:1rem">
+                <div class="tab">
+                    <input id="tab1" type="radio" name="tabs" value="1"{% if tabs=='1' %} checked{% endif %}> <!--디폴트 메뉴-->
+                    <label for="tab1">the Search by Assessment Info.</label>
+                    <input id="tab2" type="radio" name="tabs" value="2"{% if tabs=='2' %} checked{% endif %}>
+                    <label for="tab2">the Search by Assessment</label>
+                    <section></section>
+                </div>
+                {% if current_user.is_administrator() %}<div class="marker-area">{{ form.marker_name.label }}{{ form.marker_name }}</div>{% endif %}
                 <div class="card-body">
-                    <div class="callout callout-info b-t-1 b-r-1 b-b-1">
-                        <form method="GET" class="form inline" role="form" style="padding:1rem">
+                    <div id="tab1-contents" class="callout callout-info b-t-1 b-r-1 b-b-1"{% if tabs=='2' %} hidden="hidden"{% endif %}>
                             {{ form.assessment_name.label }}
                             {{ form.assessment_name }}
                             {{ form.grade.label }}
@@ -20,7 +46,16 @@
                             {{ form.marked.label }}
                             {{ form.marked }}
                             {{ form.submit(class="btn btn-info btn-sm text-white", id="btn_search") }}
-                        </form>
+                    </div>
+                    <div id="tab2-contents" class="callout callout-info b-t-1 b-r-1 b-b-1"{% if tabs=='1' %} hidden="hidden"{% endif %}>
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            <hr>
+                            {{ form.assessment.label }}
+                            {{ form.assessment }}
+                            {{ form.submit(class="btn btn-info btn-sm text-white", id="btn_search1") }}
                     </div>
                     <div class="div_writing_items">
                     <table id="w_table" class="display table table-hover" style="width:100%;">
@@ -78,6 +113,7 @@
                     </table>
                     </div>
                 </div>
+                </form>
             </div>
         </div>
     </div>

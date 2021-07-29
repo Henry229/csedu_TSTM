@@ -24,13 +24,12 @@ from qti.itemservice.itemservice import ItemService
 from qti.loader.itemloader import ItemLoader
 from . import item
 from .forms import ItemSearchForm, ItemLoadForm, ItemListForm, FileLoadForm, ItemEditForm, \
-    ItemEditSubForm, ItemEditExplanationForm
+    ItemEditSubForm, ItemEditExplanationForm, ItemAssessmentSearchForm
 from .. import db
 from ..api.response import success
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Item, Permission, Choices, ItemExplanation, Testset, TestletHasItem
 from app.api.jwplayer import get_signed_player, jwt_signed_url
-from ..report.forms import ReportSearchForm
 from app.api.errors import bad_request
 import re
 
@@ -324,7 +323,7 @@ def item_list():
 @permission_required(Permission.ITEM_MANAGE)
 def item_assessment_list():
     items = []
-    search_form = ReportSearchForm()
+    search_form = ItemAssessmentSearchForm()
     search_form.test_type.data = Codebook.get_code_id('Naplan')
     # default setting value into test_center list
     branch_id = current_user.get_branch_id()

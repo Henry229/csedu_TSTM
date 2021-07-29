@@ -1,44 +1,9 @@
-<style type="text/css">
-    .tab {
-        padding: 20px 20px 0 20px;
-        width: 100%}
-
-    /*라디오버튼 숨김*/
-    .tab input {
-          display: none;}
-
-    .tab label {
-        display: inline-block;
-        margin: 0 0 -1px;
-        padding: 15px 25px;
-        font-weight: 600;
-        text-align: center;
-        color: #bbb;
-        border: 1px solid transparent;}
-
-    .tab label:hover {
-        color: #2e9cdf;}
-
-    .tab #tab1 + label:hover {
-        cursor: pointer;}
-    /*input 클릭시, label 스타일*/
-    .tab input:checked + label {
-          color: #555;
-          border: 1px solid #ddd;
-          border-top: 2px solid #4dbd74;
-          border-bottom: 1px solid #ffffff;}
-
-    .tab section {
-        padding: 10px 0 0;
-        border-top: 1px solid #ddd;}
-
-    .card-body {padding:0.5rem 1.25rem 1.25rem 1.25rem !important;}
-</style>
 {% extends "ui/ui_base.html" %}
 
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {%- block styles %}
     {{ super() }}
+    <link href="/static/ui/css/tab.css" rel="stylesheet">
 {%- endblock styles %}
 {% block app_content %}
     <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Item Search </h3>
@@ -54,14 +19,14 @@
                     </a>
                 </div>
             </div>
-            <div class="tab">
-                <input id="tab1" type="radio" name="tabs"> <!--디폴트 메뉴-->
-                <label for="tab1">the Search by Item Info.</label>
-                <input id="tab2" type="radio" name="tabs" checked>
-                <label for="tab2">the Search by Assessment</label>
-                <section></section>
-            </div>
             <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="tab">
+                    <input id="tab1" type="radio" name="tabs"> <!--디폴트 메뉴-->
+                    <label for="tab1">the Search by Item Info.</label>
+                    <input id="tab2" type="radio" name="tabs" checked>
+                    <label for="tab2">the Search by Assessment</label>
+                    <section></section>
+                </div>
                 <div class="card-body">
                     <div class="callout callout-success b-t-1 b-r-1 b-b-1">
                         {# Item Search #}

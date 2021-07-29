@@ -2,12 +2,13 @@ import re
 
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from sqlalchemy import case
 from wtforms import SelectField, SubmitField, HiddenField, StringField, MultipleFileField, \
     TextAreaField, FieldList, FormField, SelectMultipleField, DecimalField
 from wtforms.validators import DataRequired
 
 from .. import db
-from ..models import Choices, EducationPlan, Codebook, User, MarkerBranch, Role
+from ..models import Choices, EducationPlan, Codebook, User, MarkerBranch, Role, Assessment
 
 
 class StartOnlineTestForm(FlaskForm):
@@ -111,8 +112,12 @@ class MarkerAssignForm(FlaskForm):
 class MarkingListSearchForm(FlaskForm):
     assessment_name = StringField('Assessment Name', id='i_name')
     grade = SelectField('Grade')
-    marked = SelectField('Marked', choices=[('', ''), ('1', 'True'), ('0', 'False')], default='')
+    marked = SelectField('Marked', choices=[('', ''), ('1', ' Y '), ('0', ' N ')], default='')
     submit = SubmitField('Search')
+    year = SelectField('Year')
+    test_type = SelectField('Test Type')
+    marker_name = SelectField('Marker')
+    assessment = SelectField('Assessment')
 
     def __init__(self, *args, **kwargs):
         super(MarkingListSearchForm, self).__init__(*args, **kwargs)
@@ -123,5 +128,22 @@ class MarkingListSearchForm(FlaskForm):
                 code = (_grade.id, _grade.code_name)
                 grades.append(code)
         self.grade.choices = grades
+        self.year.choices = [(ts.year, ts.year)
+                             for ts in
+                             db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
+        self.test_type.choices = Choices.get_codes('test_type')
+        self.assessment.choices = [(0, '')]
 
+        if current_user.is_administrator():
+            xpr_marker_name = case([(User.username != None, User.username), ],
+                                   else_=User.email).label("marker_name")
 
+            self.marker_name.choices = [(mk.marker_id, mk.marker_name)
+                    for mk in
+                    db.session.query(MarkerBranch.marker_id, xpr_marker_name).
+                    join(User, MarkerBranch.marker_id == User.id).
+                    filter(MarkerBranch.delete.isnot(True)).
+                    filter(User.active.isnot(False)).
+                    filter(User.delete.isnot(True)).
+                    distinct().
+                    order_by(User.username).all()]

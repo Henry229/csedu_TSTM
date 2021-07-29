@@ -1,0 +1,42 @@
+.tab {
+    padding: 20px 20px 0 20px;
+    width: 100%}
+
+/*라디오버튼 숨김*/
+.tab input {
+      display: none;}
+
+.tab label {
+    display: inline-block;
+    margin: 0 0 -1px;
+    padding: 15px 25px;
+    font-weight: 600;
+    text-align: center;
+    color: #bbb;
+    border: 1px solid transparent;}
+
+.tab label:hover {
+    color: #2e9cdf;}
+
+.tab #tab2 + label:hover {
+    cursor: pointer;}
+/*input 클릭시, label 스타일*/
+.tab input:checked + label {
+      color: #555;
+      border: 1px solid #ddd;
+      border-top: 2px solid var(--gray);
+      border-bottom: 2px solid #ffffff;}
+
+.tab section {
+    padding: 10px 0 0;
+    border-top: 1px solid #ddd;}
+
+.tab + .card-body {padding:0.5rem 1.25rem 1.25rem 1.25rem !important;}
+
+.tab + .card-body .callout + .callout {margin-top:1rem !important;}
+
+#tab1-contents, #tab2-contents {padding: 10px 10px}
+
+.marker-area {padding-top:5px}
+
+.marker-area + div > div {margin-top:-0.25rem}
