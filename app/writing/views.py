@@ -513,13 +513,12 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
 
     if marking_writings:
         for marking_writing in marking_writings:
-
             marking = Marking.query.filter_by(id=marking_writing.marking_id). \
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
 
             # Create merged writing markings
-            #marking_writing.marked_images, single_image, single_pdf = get_merged_images(student_user_id, marking_writing,
-            #                                                                local_file=pdf)
+            marking_writing.marked_images, single_image, single_pdf = get_merged_images(student_user_id, marking_writing,
+                                                                            local_file=pdf)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
@@ -591,8 +590,11 @@ def w_report(assessment_enroll_id, student_user_id, marking_writing_id=None):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    rendered_template_pdf = get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf,
-                                                  pdf_url)
+    try:
+        rendered_template_pdf = get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url)
+    except Exception as e:
+        rendered_template_pdf = 'fail-marking'
+
     if rendered_template_pdf == 'fail-enrollment':
         return redirect(url_for(redirect_url_for_name, error='Not found assessment enroll - writing data'))
     elif rendered_template_pdf == 'fail-enrollment':
