@@ -518,8 +518,8 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
 
             # Create merged writing markings
-            marking_writing.marked_images, single_image, single_pdf = get_merged_images(student_user_id, marking_writing,
-                                                                            local_file=pdf)
+            #marking_writing.marked_images, single_image, single_pdf = get_merged_images(student_user_id, marking_writing,
+            #                                                                local_file=pdf)
             if marking.item_id:
                 item = Item.query.filter_by(id=marking.item_id).first()
                 marking_writing.item_name = item.name
