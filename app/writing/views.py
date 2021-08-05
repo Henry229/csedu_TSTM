@@ -503,6 +503,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
 
 
 def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing_id, pdf, pdf_url=None):
+    marking_writings = []
     if marking_writing_id == 0:
         marking_writings = MarkingForWriting.query \
             .join(Marking, Marking.id == MarkingForWriting.marking_id) \
@@ -511,7 +512,7 @@ def get_w_report_template(assessment_enroll_id, student_user_id, marking_writing
     else:
         marking_writings = MarkingForWriting.query.filter_by(id=marking_writing_id).all()
 
-    if marking_writings:
+    if len(marking_writings) > 0:
         for marking_writing in marking_writings:
             marking = Marking.query.filter_by(id=marking_writing.marking_id). \
                 filter_by(assessment_enroll_id=assessment_enroll_id).first()
