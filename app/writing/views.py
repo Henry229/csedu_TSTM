@@ -443,6 +443,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
             v = v.replace('.jpg', '_merging.jpg')
+            v = v.replace('.tif', '_merging.tif')
             c_image = Image.open(
                 os.path.join(current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id), "writing", v))
@@ -458,6 +459,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                                  "writing", marking_writing.marked_file_link[k]))
                 c_image.paste(m_image, (0, 0), m_image)
         saved_file_name = v.replace('.jpg', '_merged.png')
+        saved_file_name = v.replace('.tif', '_merged.tif')
         c_image.save(
             os.path.join(current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id),
