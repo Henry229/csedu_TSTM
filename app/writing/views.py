@@ -969,8 +969,9 @@ def query_writing_report_score(marking_id):
     marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
         .order_by(MarkingForWriting.id.desc()).first()
     if marking_writing is not None:
-        for f_n in marking_writing.candidate_mark_detail.values():
-            score += int(f_n)
+        if marking_writing.candidate_mark_detail:
+            for f_n in marking_writing.candidate_mark_detail.values():
+                score += int(f_n)
     percentile_score = round(score / total_score * 100, 1)
     return_value = {"score": score, "total_score": total_score, "percentile_score": percentile_score}
     return return_value
