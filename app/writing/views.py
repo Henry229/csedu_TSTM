@@ -473,6 +473,12 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
         elif v[-4:] == '.tif':
             saved_file_name = v.replace('.tif', '_merged.tif')
 
+        if v.index('file_422_fcd9jc7tn2cu6vcg2kfjt19o_stt_16_w_Oprah.tif') > -1:
+            c_image.save(
+                os.path.join(current_app.config['USER_DATA_FOLDER'],
+                             str(student_user_id),
+                             "writing", v.replace('.tif', '.jpg')), "JPEG")
+
         c_image.save(
             os.path.join(current_app.config['USER_DATA_FOLDER'],
                          str(student_user_id),
