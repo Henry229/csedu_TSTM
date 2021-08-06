@@ -113,7 +113,7 @@ def list_writing_marking():
                         'writing_text') is not None:
                     if m.AssessmentEnroll.id == 57883:
                         save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
-                                          writing_text=m.Marking.candidate_r_value.get('file_names')[0])
+                                          writing_text=m.Marking.candidate_r_value.get('writing_text')[0])
                 else:
                     continue
 
