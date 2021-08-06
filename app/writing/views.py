@@ -443,7 +443,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     combined_images = []
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
-            #v = v.replace('.jpg', '_merging.jpg')
+            v = v.replace('.jpg', '_merging.jpg')
 
 
             c_image = Image.open(
