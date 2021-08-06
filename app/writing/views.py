@@ -450,11 +450,11 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                 os.path.join(current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id), "writing", v))
 
-            if v[-4:] == '.tif':
-                c_image.save(
-                    os.path.join(current_app.config['USER_DATA_FOLDER'],
-                                 str(student_user_id),
-                                 "writing", v.replace('.tif', '.jpg')), "PNG")
+            #if v[-4:] == '.tif':
+            #    c_image.save(
+            #        os.path.join(current_app.config['USER_DATA_FOLDER'],
+            #                     str(student_user_id),
+            #                     "writing", v.replace('.tif', '.jpg')), "PNG")
         except FileNotFoundError:
             log.error('File not found. Check the student writing file existing')
 
@@ -467,14 +467,13 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                                  "writing", marking_writing.marked_file_link[k]))
                 c_image.paste(m_image, (0, 0), m_image)
 
-        if v[-4:] == '.jpg':
-            saved_file_name = v.replace('.jpg', '_merged.png')
-        elif v[-4:] == 'jpeg':
-            saved_file_name = v.replace('.jpeg', '_merged.jpg')
-        elif v[-4:] == '.tif':
-            saved_file_name = v.replace('.tif', '_merged.tif')
-
-
+        saved_file_name = v.replace('.jpg', '_merged.png')
+        #if v[-4:] == '.jpg':
+        #    saved_file_name = v.replace('.jpg', '_merged.png')
+        #elif v[-4:] == 'jpeg':
+        #    saved_file_name = v.replace('.jpeg', '_merged.jpg')
+        #elif v[-4:] == '.tif':
+        #    saved_file_name = v.replace('.tif', '_merged.tif')
 
         c_image.save(
             os.path.join(current_app.config['USER_DATA_FOLDER'],
