@@ -443,16 +443,17 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
             #v = v.replace('.jpg', '_merging.jpg')
-            if v[-4:]=='.jpg':
-                v = v.replace('.jpg', '_merging.jpg')
-            elif v[-4:] == 'jpeg':
-                v = v.replace('.jpeg', '_merging.jpg')
-            elif v[-4:] == '.tif':
-                v = v.replace('.tif', '_merging.tif')
+
 
             c_image = Image.open(
                 os.path.join(current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id), "writing", v))
+
+            if v[-4:] == '.tif':
+                c_image.save(
+                    os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "writing", v.replace('.tif', '.jpg')))
         except FileNotFoundError:
             log.error('File not found. Check the student writing file existing')
 
@@ -464,12 +465,6 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                                  str(student_user_id),
                                  "writing", marking_writing.marked_file_link[k]))
                 c_image.paste(m_image, (0, 0), m_image)
-
-        if v[-4:] == '.tif':
-            c_image.save(
-                os.path.join(current_app.config['USER_DATA_FOLDER'],
-                             str(student_user_id),
-                             "writing", v.replace('.tif', '.jpg')))
 
         if v[-4:] == '.jpg':
             saved_file_name = v.replace('.jpg', '_merged.png')
