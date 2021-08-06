@@ -469,7 +469,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
             c_image.save(
                 os.path.join(current_app.config['USER_DATA_FOLDER'],
                              str(student_user_id),
-                             "writing", v.replace('.tif', '.jpg')), "JPEG")
+                             "writing", v.replace('.tif', '.jpg')))
 
         if v[-4:] == '.jpg':
             saved_file_name = v.replace('.jpg', '_merged.png')
