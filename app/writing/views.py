@@ -98,7 +98,7 @@ def list_writing_marking():
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
-        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
+        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
     if tabs == '1':
         if marked == '1':
@@ -453,7 +453,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                     os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id), "writing", v))
 
-            #tif file change to jpg.. after this code..needs to change file name in db
+            #testing : tif file change to jpg.. after this code..needs to change file name in db
             #if v[-4:] == '.tif':
             #    c_image.save(
             #        os.path.join(current_app.config['USER_DATA_FOLDER'],
