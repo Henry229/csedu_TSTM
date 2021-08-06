@@ -98,7 +98,7 @@ def list_writing_marking():
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
-        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
+        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
     if tabs == '1':
         if marked == '1':
