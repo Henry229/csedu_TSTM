@@ -1,5 +1,7 @@
 import json
 import os
+import random
+import string
 import time
 import urllib
 from datetime import datetime
@@ -9,6 +11,7 @@ from pytz import timezone, utc
 
 import pytz
 from PIL import ImageFile, Image, ImageDraw, ImageFont
+from werkzeug.utils import secure_filename
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from flask import render_template, flash, request, redirect, url_for, current_app, send_file, jsonify
@@ -26,6 +29,7 @@ from ..api.writings import common_writing_search_assessment
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
     AssessmentHasTestset, Testset, MarkerAssigned, Item, MarkerBranch, User
+
 
 
 @writing.route('/writing_marking_list', methods=['GET'])
