@@ -8,7 +8,8 @@ import datetime
 from pytz import timezone, utc
 
 import pytz
-from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageFile, Image, ImageDraw, ImageFont
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 from flask import render_template, flash, request, redirect, url_for, current_app, send_file, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy.orm.attributes import flag_modified
