@@ -228,7 +228,7 @@ def save_writing_data(student_user_id, marking_id, writing_files=None, writing_t
     if marking_writing is None:
         marking_writing = MarkingForWriting(marking_id=marking_id, marker_id=current_user.id)
     marking_writing.candidate_file_link = candidate_file_link_json
-    marking_writing.modified_time = datetime.utcnow()
+    marking_writing.modified_time = datetime.datetime.utcnow()
     db.session.add(marking_writing)
     db.session.commit()
 
