@@ -453,7 +453,7 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
                 c_image.save(
                     os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
-                                 "writing", v.replace('.tif', '.jpg')))
+                                 "writing", v.replace('.tif', '.jpg')), "PNG")
         except FileNotFoundError:
             log.error('File not found. Check the student writing file existing')
 
