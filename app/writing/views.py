@@ -101,25 +101,24 @@ def list_writing_marking():
 
     assessment_enroll_ids = [row.id for row in query.all()]
 
-    #############
-    #if current_user.is_administrator() is False:
-    marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
-        join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
-        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
-        filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
-        filter(MarkingForWriting.id.is_(None)). \
-        all()
+    ############# no marking_writing creating
+    if current_user.is_administrator() is False:
+        marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
+            join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
+            join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
+            filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
+            filter(MarkingForWriting.id.is_(None)). \
+            all()
 
-    for m in marking_writings:
-        if m.AssessmentEnroll.is_finished:
-            if m.MarkingForWriting is None:
-                if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
-                        'writing_text') is not None:
-                    if m.AssessmentEnroll.id == 57883:
+        for m in marking_writings:
+            if m.AssessmentEnroll.is_finished:
+                if m.MarkingForWriting is None:
+                    if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
+                            'writing_text') is not None:
                         save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
                                           writing_text=m.Marking.candidate_r_value.get('writing_text'))
-                else:
-                    continue
+                    else:
+                        continue
 
     #############
 
