@@ -9,6 +9,7 @@ from pytz import timezone, utc
 
 import pytz
 from PIL import ImageFile, Image, ImageDraw, ImageFont
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from flask import render_template, flash, request, redirect, url_for, current_app, send_file, jsonify
 from flask_login import login_required, current_user
@@ -96,6 +97,28 @@ def list_writing_marking():
 
     assessment_enroll_ids = [row.id for row in query.all()]
 
+    #############
+    if current_user.is_administrator() is False:
+        marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
+            join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
+            join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
+            filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
+            where(MarkingForWriting.id.is_(None)). \
+            all()
+
+        for m in marking_writings:
+            if m.AssessmentEnroll.is_finished:
+                if m.MarkingForWriting is None:
+                    if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
+                            'writing_text') is not None:
+                        if m.AssessmentEnroll.id == 57883:
+                            save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
+                                              writing_text=m.Marking.candidate_r_value.get('file_names')[0])
+                    else:
+                        continue
+
+    #############
+
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
@@ -108,6 +131,7 @@ def list_writing_marking():
     marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
+
     for m in marking_writings:
         if m.MarkingForWriting.candidate_file_link:
             is_candidate_file = 'Y'
@@ -154,6 +178,55 @@ def list_writing_marking():
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list, tabs=tabs)
 
+def save_writing_data(student_user_id, marking_id, writing_files=None, writing_text=None, has_files=False):
+    if writing_files is None:
+        writing_files = []
+    file_names = []
+    # 1.1 Save the file to the path at config['USER_DATA_FOLDER']
+    for writing_file in writing_files:
+        file_name = writing_file.filename if writing_file is not None else 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = 'file_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing")
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
+        writing_file.save(item_file)
+        file_names.append(new_file_name)
+
+    marking_writing = MarkingForWriting.query.filter_by(marking_id=marking_id) \
+        .order_by(MarkingForWriting.id.desc()).first()
+    if len(writing_files) == 0 and has_files and marking_writing is not None:
+        candidate_file_link = json.loads(marking_writing.candidate_file_link)
+        for f_n in candidate_file_link.values():
+            if not f_n.startswith('writing'):
+                file_names.append(f_n)
+
+    # 1.2 Save the text to the path at config['USER_DATA_FOLDER']
+    if writing_text is not None:
+        file_name = 'writing.txt'
+        random_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=24))
+        new_file_name = 'writing_' + str(student_user_id) + '_' + random_name + '_' + secure_filename(file_name)
+        writing_upload_dir = os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing")
+        item_file = os.path.join(writing_upload_dir, new_file_name)
+        if not os.path.exists(writing_upload_dir):
+            os.makedirs(writing_upload_dir)
+        with open(item_file, "w") as f:
+            f.write(writing_text)
+        file_names += text_to_images(student_user_id, item_file)
+
+    # 2. Create a record in MarkingForWriting
+    index = 1
+    candidate_file_link_json = {}
+    for file_name in file_names:
+        candidate_file_link_json["file%s" % index] = file_name
+        index += 1
+    if marking_writing is None:
+        marking_writing = MarkingForWriting(marking_id=marking_id, marker_id=current_user.id)
+    marking_writing.candidate_file_link = candidate_file_link_json
+    marking_writing.modified_time = datetime.utcnow()
+    db.session.add(marking_writing)
+    db.session.commit()
 
 @writing.route('/writing_marking_list/download/<int:marking_writing_id>/<int:student_user_id>', methods=['GET'])
 @login_required
