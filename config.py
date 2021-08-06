@@ -25,12 +25,14 @@ class Config(metaclass=MetaFlaskEnv):
     CSEDU_IMG_DIR = os.environ.get('CSEDU_IMG_DIR') or 'app/static/ui/img'
     NAPLAN_BASE_IMG_DIR = os.environ.get('NAPLAN_BASE_IMG_DIR') or 'app/static/report/img'
 
+    CSEDU_COMMON_MAIL_SUBJECT_PREFIX = '[CSEDU TEST REPORT]'
+
     # ToDo: Need to update Upload_folder, allowed_extensions
     UPLOAD_FOLDER = os.environ.get('TEMP') or os.path.join(basedir, 'tmp/upload')
     ALLOWED_EXTENSIONS = {'xml', 'xls', 'xlsx', 'zip'}
 
     USER_DATA_FOLDER = os.environ.get('USER_DATA_FOLDER') or os.path.join(basedir, 'userdata')
-    WRITING_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'gif', 'txt', 'tiff', 'tif'}
+    WRITING_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'gif', 'txt'}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
