@@ -443,13 +443,12 @@ def get_merged_images(student_user_id, marking_writing, local_file=False, vertic
     combined_images = []
     for idx, (k, v) in enumerate(marking_writing.candidate_file_link.items()):
         try:
-            v = v.replace('.jpg', '_merging.jpg')
-            c_image = Image.open(
-                os.path.join(current_app.config['USER_DATA_FOLDER'],
-                             str(student_user_id), "writing", v))
-
-            if c_image is None:
-                v = v.replace('_merging.jpg', '.jpg')
+            if os.path.isfile(os.path.join(current_app.config['USER_DATA_FOLDER'], str(student_user_id), "writing", v.replace('.jpg', '_merging.jpg'))):
+                v = v.replace('.jpg', '_merging.jpg')
+                c_image = Image.open(
+                    os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id), "writing", v))
+            else:
                 c_image = Image.open(
                     os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id), "writing", v))
