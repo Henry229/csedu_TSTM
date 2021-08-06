@@ -103,7 +103,7 @@ def list_writing_marking():
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
-        where(MarkingForWriting.id.is_(None)). \
+        filter(MarkingForWriting.id.is_(None)). \
         all()
 
     for m in marking_writings:
