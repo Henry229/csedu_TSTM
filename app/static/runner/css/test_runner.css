@@ -1298,3 +1298,44 @@ button.footer-finish-btn {
     height: 20px !important;
     border-radius: 10px !important;
 }
+
+.modal-header-primary {
+    background-color: #337AB7;
+    padding: 16px 16px;
+    color: #FFF;
+    border-bottom: 2px dashed #337AB7;
+    display: block;
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+#groupings .notActive{
+    color: #3276b1;
+    background-color: #fff;
+}
+
+.select-height {height: 35px; font-size: 1.01rem}
+
+.pd-t15 {padding-top: 15px}
+
+.modal-error-report {max-width: 610px !important;}

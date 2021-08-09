@@ -10,7 +10,7 @@ from operator import itemgetter
 
 import pytz
 import requests
-from flask import render_template, request, redirect, flash, url_for
+from flask import render_template, request, redirect, flash, url_for, jsonify
 from flask_login import login_required, login_user, current_user, logout_user
 from sqlalchemy import asc, func
 
@@ -21,6 +21,7 @@ from common.logger import log
 from config import Config
 from . import web
 from .forms import StartOnlineTestForm
+from ..api.response import bad_request, success
 from ..auth.views import get_student_info, get_campuses
 from ..decorators import permission_required
 from ..models import Codebook, Testset, Permission, Assessment, AssessmentEnroll, Student, \
@@ -712,6 +713,114 @@ def assessment_list():
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
                            btn_homework=btn_homework, btn_group=btn_group, unit=homework_days)
+
+
+@web.route('/tests/assessments/report', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def assessment_list_for_report():
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if student is None:
+        return bad_request()
+
+    enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
+    guid_list = list({e.assessment_guid for e in enrols})
+
+
+    class_assessments, homeworks, trial_assessments = [], [], []
+
+    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if x.is_last_version==True]
+
+    for assessment_guid in guid_list:
+        # Check if there is an assessment with the guid
+        assessment = [a for a in assessment_all if a.GUID == assessment_guid]
+
+        if len(assessment)==0:
+            continue
+        else:
+            assessment = assessment[0]
+
+        au_tz = pytz.timezone('Australia/Sydney')
+        if assessment.session_date:
+            # if assessment session_date is coming after today, skip to display on student's assessment list page
+            session_date = datetime(assessment.session_date.year, assessment.session_date.month,
+                                    assessment.session_date.day, tzinfo=au_tz)
+            if session_date > datetime.now(tz=au_tz):
+                continue
+
+        # assessment_type_name = assessment.test_type_name
+
+
+        # Get all assessment enroll to get testsets the student enrolled in already.
+        # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
+        enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
+            .filter(AssessmentEnroll.assessment_guid == assessment_guid,
+                    AssessmentEnroll.student_user_id == current_user.id) \
+            .order_by(asc(AssessmentEnroll.attempt_count)).all()
+        enrolled = {e.testset.GUID: e for e in enrolled_q}
+        # list 로 변경.
+        enrolled = list(enrolled.values())
+        enrolled_testsets = {en.id: en.testset for en in enrolled}
+
+        student_testsets = []
+        # 이미 시험을 본 것을 모은다.
+        for enroll_id in enrolled_testsets:
+            enrolled_testsets[enroll_id].enroll_id = enroll_id
+            student_testsets.append(enrolled_testsets[enroll_id])
+
+        new_test_sets = []
+        for tset in student_testsets:
+            new_test_sets.append(tset)
+            #test_type = Codebook.get_code_name(tset.test_type)
+            #subject = Codebook.get_code_name(tset.subject)
+            additional_info = Codebook.get_additional_info(tset.subject)
+            tset.sort_key = additional_info['subject_order'] if additional_info else 1
+
+        sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
+        assessment.testsets = sorted_testsets
+
+        if assessment.test_type_kind=='Homework':
+            homeworks.append(assessment)
+        elif assessment.test_type_kind=='Class Test':
+            class_assessments.append(assessment)
+        elif assessment.test_type_kind=='Trial Test':
+            trial_assessments.append(assessment)
+
+
+    if len(class_assessments) > 0:
+        class_assessments.sort(key=lambda x: x.active, reverse=True)
+        class_assessments.sort(key=lambda x: x.created_time, reverse=True)
+
+    if len(trial_assessments) > 0:
+        trial_assessments.sort(key=lambda x: x.active, reverse=True)
+        trial_assessments.sort(key=lambda x: x.created_time)
+
+    if len(homeworks) > 0:
+        homeworks.sort(key=lambda x: x.active, reverse=True)
+        homeworks.sort(key=lambda x: x.created_time)
+
+    class_result = []
+    for el in class_assessments:
+        te = []
+        for set in el.testsets:
+            te.append({"testset_name": set.name, "id": set.enroll_id})
+        class_result.append({"assessment_name": el.name, "testset": te})
+    trial_result = []
+    for el in trial_assessments:
+        te = []
+        for set in el.testsets:
+            te.append({"testset_name": set.name, "id": set.enroll_id})
+        trial_result.append({"assessment_name": el.name, "testset": te})
+    homeworks_result = []
+    for el in homeworks:
+        te = []
+        for set in el.testsets:
+            te.append({"testset_name": set.name, "id": set.enroll_id})
+        homeworks_result.append({"assessment_name": el.name, "testset": te})
+
+    assessments_list = {"Class": class_result, "Trial": trial_result, "Homework": homeworks_result}
+
+    return jsonify(assessments_list)
 
 
 @web.route('/tests/assessments_sampletest', methods=['GET'])

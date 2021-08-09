@@ -28,6 +28,9 @@
         <input type="radio" name="type-options" value="homework" autocomplete="off" {{ btn_homework.checked }}> Homework
       </label>
     </div>
+    <div class="float-right">
+        <button type="button" id="report_error" class="btn btn-info text-white">Send Error Report</button>
+    </div>
   </div>
   {% if assessments_list|length==0 %}
     <div class="card">
@@ -438,6 +441,40 @@
           </div>
       </div>
   {% endfor %}
+    <div class="modal fade" id="reportingErrorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-error-report" role="document">
+            <div class="modal-content bg-transparent">
+                <div class="modal-header modal-header-primary figure">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Assessment Error Report</h4>
+                </div>
+                <div class="modal-body bg-white">
+                    <h5>Please tell us about problems that happened during the assessment.</h5>
+                    <div class="input-group pd-t3">
+                        <div id="groupings" class="btn-group">
+                            <a class="btn btn-primary active" data-toggle="grouping" data-title="class">Class Test</a>
+                            <a class="btn btn-primary notActive" data-toggle="grouping" data-title="trial">Trial Test</a>
+                            <a class="btn btn-primary notActive" data-toggle="grouping" data-title="homework">Homework</a>
+                        </div>
+                        <input type="hidden" name="grouping" id="grouping">
+                    </div>
+                    <div class="pd-t15">
+                    <select id="reportAssessments" class="select-height form-control selectpicker"></select>
+                    </div>
+                    <div class="pd-t15">
+                    <textarea class="form-control pd-t3" rows="13" id="error-description" placeholder="Description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <form method="POST" action="/auth/manage/delete">
+                        <input type="hidden" name="user_id">
+                        <button type="button" class="btn-secondary" data-dismiss="modal">Cancel</button>
+                        <input type="button" class="btn btn-success" id="reporting" value="Send Report"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
   {% include "_modal.html" %}
 {% endblock app_content %}
 {% block scripts %}
@@ -511,6 +548,82 @@
                 }
               }
             });
+
+            let reportAssessments;
+            $('#report_error').click(function(){
+                if(reportAssessments == undefined){
+                    $.get({
+                        url: '/tests/assessments/report',
+                        method: 'GET',
+                        contentType: 'application/json',
+                        success: function (response) {
+                            reportAssessments = response;
+                            setReportAssessments('class');
+                        }
+                        ,error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        }
+                    });
+                }
+                $('#reportingErrorModal').modal('show');
+            });
+
+            function setReportAssessments(tab){
+                let reporttesting = $('#reportAssessments');
+                reporttesting.empty();
+
+                let optons = '';
+                if(tab=='class'){
+                    for(let i=0; i<reportAssessments.Class.length; i++){
+                        optons += '<optgroup label="'+reportAssessments.Class[i].assessment_name+'">';
+                        for(let j=0; j<reportAssessments.Class[i].testset.length; j++) {
+                            optons += '<option value="'+reportAssessments.Class[i].testset[j].id+'">' + reportAssessments.Class[i].testset[j].testset_name + '</option>';
+                        }
+                    }
+                }else if(tab=='trial'){
+                    for(let i=0; i<reportAssessments.Trial.length; i++){
+                        optons += '<optgroup label="'+reportAssessments.Trial[i].assessment_name+'">';
+                        for(let j=0; j<reportAssessments.Trial[i].testset.length; j++) {
+                            optons += '<option value="'+reportAssessments.Class[i].testset[j].id+'">' + reportAssessments.Trial[i].testset[j].testset_name + '</option>';
+                        }
+                    }
+                }else{
+                    for(let i=0; i<reportAssessments.Homework.length; i++){
+                        optons += '<optgroup label="'+reportAssessments.Homework[i].assessment_name+'">';
+                        for(let j=0; j<reportAssessments.Homework[i].testset.length; j++) {
+                            optons += '<option value="'+reportAssessments.Class[i].testset[j].id+'">' + reportAssessments.Homework[i].testset[j].testset_name + '</option>';
+                        }
+                    }
+                }
+                reporttesting.html(optons);
+            }
+
+            $('#reporting').on('click', function(){
+                if($('#reportAssessments').val()==null) return false;
+                if($.trim($('#error-description').val())==''){
+                    alert("Please fill in the description of the form");
+                    return false;
+                }
+                $.post('/api/report/error',
+                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()) },
+                    function(data, status, xhr) {
+                        alert('s');
+                    }).fail(function(jqxhr, settings, ex) {
+                        alert('failed, ' + ex);
+                    }
+                );
+            });
+
+            $('#groupings a').on('click', function(){
+                var sel = $(this).data('title');
+                var tog = $(this).data('toggle');
+                $('#'+tog).prop('value', sel);
+
+                $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('notActive');
+                $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('notActive').addClass('active');
+
+                setReportAssessments($('#grouping').val());
+            });
+
         });
     </script>
 {% endblock %}

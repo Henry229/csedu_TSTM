@@ -23,9 +23,11 @@ from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
     Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
+from common.logger import log
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
 from .. import db
+from ..email import common_send_email
 from ..models import Item, Codebook
 from ..writing.views import text_to_images
 
@@ -907,6 +909,23 @@ def finish_test(assessment_session):
 
     data = {'redirect_url': '/tests/assessments'}
     return success(data)
+
+@api.route('/report/error', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+@validate_session
+def report_error(assessment_session):
+    enroll_id = request.form["id"]
+    desc = request.form["desc"]
+
+    try:
+        common_send_email(current_user.email, "chsverity@daum.net", "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
+                          , "Test Error Report","auth/email/assessment_report"
+                          , user=current_user, date="2021-01-02", assessment_name="test", testset_name="set", contents=desc)
+    except Exception as e:
+        log.debug("Inward: %s" % e)
+        return bad_request(message="Processing response error")
+
+    return success({"result": "success"})
 
 
 def get_next_item(assessment_session: AssessmentSession, current_question_no=0):

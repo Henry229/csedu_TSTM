@@ -1,0 +1,76 @@
+<style type="text/css">
+.pd-t {padding-top:20px}
+.mg-b {margin-bottom:40px}
+hr {width: 800px;}
+table {
+	border-collapse: collapse;
+    font-family: Tahoma, Geneva, sans-serif;
+    min-width: 800px;
+}
+table td {
+	padding: 15px;
+}
+table tbody td {
+	color: #636363;
+	border: 1px solid #dddfe1;
+}
+table tbody tr {
+	background-color: #f9fafb;
+}
+table tbody tr:nth-child(odd) {
+	background-color: #ffffff;
+}
+table tbody tr td:first-child {
+	background-color: #54585d;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 13px;
+	border: 1px solid #54585d;
+    width: 20%;
+}
+.container-bottom {
+    padding-top: 10px;
+    padding-bottom: 40px;
+    width: 800px;
+}
+.container-bottom span{
+    display: inline-block;
+    float: right;
+}
+</style>
+<h3 class="pd-t">Assessment Error Report</h3>
+<hr align="left" />
+<h4>- Reporter</h4>
+<table>
+	<tbody>
+		<tr>
+			<td>Student</td>
+			<td>{{ user.username }}</td>
+		</tr>
+		<tr>
+			<td>Report Date</td>
+			<td>{{ date }}</td>
+		</tr>
+	</tbody>
+</table>
+<h4>- Report Contents</h4>
+<table class="mg-b">
+	<tbody>
+		<tr>
+			<td>Assessment</td>
+			<td>{{ assessment_name }}</td>
+		</tr>
+		<tr>
+			<td>Testset</td>
+			<td>{{ testset_name }}</td>
+		</tr>
+		<tr>
+			<td>Contents</td>
+			<td><textarea readonly="readonly" cols="81" rows="20">{{ contents }}</textarea></td>
+		</tr>
+	</tbody>
+</table>
+<div class="container-bottom">
+    <img src="https://tstm.cbtest.com.au/static/ui/img/CSEducation.png">
+    <span>Copyright ©2020 CS Education. All Rights Reserved</span>
+</div>

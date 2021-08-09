@@ -1,0 +1,13 @@
+Assessment Error Report
+
+- Reporter
+Student : {{ user.username }}
+Report Date : {{ date }}
+
+- Report Contents
+Assessment : {{ assessment_name }}
+Testset : {{ testset_name }}
+Contents :
+{{ contents }}
+
+Copyright ©2020 CS Education. All Rights Reserved

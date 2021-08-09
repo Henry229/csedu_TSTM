@@ -32,6 +32,17 @@ def send_password_reset_email(user):
                )
 
 
+def common_send_email(sender, to, prefix, subject, path, **kwargs):
+    app = current_app._get_current_object()
+    msg = Message(app.config[prefix] + ' ' + subject,
+                  sender=sender, recipients=[to])
+    msg.body = render_template(path + '.txt', **kwargs)
+    msg.html = render_template(path + '.html', **kwargs)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr
+
+
 """
 Sample for email:
 app/auth/templates/auth/email/confirm.html
