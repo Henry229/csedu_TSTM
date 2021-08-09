@@ -583,14 +583,14 @@
                     for(let i=0; i<reportAssessments.Trial.length; i++){
                         optons += '<optgroup label="'+reportAssessments.Trial[i].assessment_name+'">';
                         for(let j=0; j<reportAssessments.Trial[i].testset.length; j++) {
-                            optons += '<option value="'+reportAssessments.Class[i].testset[j].id+'">' + reportAssessments.Trial[i].testset[j].testset_name + '</option>';
+                            optons += '<option value="'+reportAssessments.Trial[i].testset[j].id+'">' + reportAssessments.Trial[i].testset[j].testset_name + '</option>';
                         }
                     }
                 }else{
                     for(let i=0; i<reportAssessments.Homework.length; i++){
                         optons += '<optgroup label="'+reportAssessments.Homework[i].assessment_name+'">';
                         for(let j=0; j<reportAssessments.Homework[i].testset.length; j++) {
-                            optons += '<option value="'+reportAssessments.Class[i].testset[j].id+'">' + reportAssessments.Homework[i].testset[j].testset_name + '</option>';
+                            optons += '<option value="'+reportAssessments.Homework[i].testset[j].id+'">' + reportAssessments.Homework[i].testset[j].testset_name + '</option>';
                         }
                     }
                 }
