@@ -5,6 +5,9 @@ from flask_mail import Message
 
 from . import mail
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def send_async_email(app, msg):
     with app.app_context():
@@ -38,6 +41,7 @@ def common_send_email(sender, to, prefix, subject, path, **kwargs):
                   sender=sender, recipients=[to])
     msg.body = render_template(path + '.txt', **kwargs)
     msg.html = render_template(path + '.html', **kwargs)
+    #mail.send(msg)
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return thr

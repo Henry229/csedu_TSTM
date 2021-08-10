@@ -26,11 +26,11 @@ from app.models import Testset, Permission, Assessment, TestletHasItem, \
 from common.logger import log
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
-from .. import db
+from .. import db, mail
 from ..email import common_send_email, send_email
 from ..models import Item, Codebook
 from ..writing.views import text_to_images
-
+from flask_mail import Message
 
 def validate_session(func):
     @wraps(func)
@@ -918,12 +918,23 @@ def report_error(assessment_session):
     desc = request.form["desc"]
 
     try:
-        send_email("chsverity@daum.net", 'Confirm Your Account',
+        app = current_app._get_current_object()
+        msg = Message("Hello",
+                      sender="brian.sim@cseducation.com.au",
+                      recipients=["hverityg@gmail.com"])
+        msg.body = "testing"
+        msg.html = "<b>testing</b>"
+        #mail.send(msg)
+        #with app.app_context():
+        #    mail.send(msg)
+
+
+        send_email("hverityg@gmail.com", 'Confirm Your Account',
                    'auth/email/confirm', user=current_user, token="aaa")
 
-        common_send_email(current_user.email, "chsverity@daum.net", "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
+        common_send_email(current_user.email, "hverityg@gmail.com", "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
                           , "Test Error Report","auth/email/assessment_report"
-                          , user=current_user, date="2021-01-02", assessment_name="test", testset_name="set", contents=desc)
+                          , user_name=current_user.username, date="2021-01-02", assessment_name="test", testset_name="set", contents=desc)
     except Exception as e:
         log.debug("Inward: %s" % e)
         return bad_request(message="Processing response error")

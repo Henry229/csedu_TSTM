@@ -1,7 +1,7 @@
 Assessment Error Report
 
 - Reporter
-Student : {{ user.username }}
+Student : {{ user_name }}
 Report Date : {{ date }}
 
 - Report Contents
