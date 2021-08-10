@@ -1,3 +1,5 @@
+<html>
+  <head>
 <style type="text/css">
 .pd-t {padding-top:20px}
 .mg-b {margin-bottom:40px}
@@ -38,6 +40,8 @@ table tbody tr td:first-child {
     float: right;
 }
 </style>
+       </head>
+  <body>
 <h3 class="pd-t">Assessment Error Report</h3>
 <hr align="left" />
 <h4>- Reporter</h4>
@@ -45,7 +49,7 @@ table tbody tr td:first-child {
 	<tbody>
 		<tr>
 			<td>Student</td>
-			<td>{{ user.username }}</td>
+			<td>{{ user_name }}</td>
 		</tr>
 		<tr>
 			<td>Report Date</td>
@@ -74,3 +78,5 @@ table tbody tr td:first-child {
     <img src="https://tstm.cbtest.com.au/static/ui/img/CSEducation.png">
     <span>Copyright ©2020 CS Education. All Rights Reserved</span>
 </div>
+  </body>
+</html>
