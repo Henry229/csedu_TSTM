@@ -34,9 +34,26 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     db.init_app(app)
-    mail.init_app(app)
+    #mail.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
+
+    app.config.update(
+        MAIL_SERVER='smtp.gmail.com',
+        MAIL_PORT=465,
+        MAIL_USE_SSL=True,
+        MAIL_USERNAME='hverityg@gmail.com',
+        MAIL_PASSWORD='dgqnkybpdmfsuesh'
+    )
+
+    mail = Mail(app)
+
+    msg = mail.send_message(
+        'Send Mail tutorial!',
+        sender='hverityg@gmail.com',
+        recipients=['chsverity@daum.net'],
+        body="Congratulations you've succeeded!"
+    )
 
     # cache.init_app(app, {
     #     'CACHE_TYPE': app.config['CACHE_TYPE'],
