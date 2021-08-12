@@ -39,10 +39,10 @@ def common_send_email(sender, to, cc, prefix, subject, path, **kwargs):
                   sender=sender, recipients=[to])
     msg.body = render_template(path + '.txt', **kwargs)
     msg.html = render_template(path + '.html', **kwargs)
-    mail.send(msg)
-    #thr = Thread(target=send_async_email, args=[app, msg])
-    #thr.start()
-    #return thr
+    #mail.send(msg)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr
 
 
 """

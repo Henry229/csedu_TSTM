@@ -974,7 +974,7 @@ def online_help_report(assessment_session):
         itsupport = 'chsverity@cseducation.com.au'
         cc = ['hverityg@gmail.com']
 
-        sender = itsupport
+        sender = 'chsverity@daum.net'
 
         common_send_email(sender, itsupport, cc, "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
                           , "From " + current_user.username + " in " + test_center_name, "auth/email/assessment_report"
