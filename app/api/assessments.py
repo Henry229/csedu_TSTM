@@ -994,7 +994,7 @@ def online_help_report(assessment_session):
                           , contents=desc)
     except Exception as e:
         log.debug("Inward: %s" % e)
-        return bad_request(message="Processing response error")
+        return bad_request(message=e)
 
     return success({"result": "success"})
 
