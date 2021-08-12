@@ -1,12 +1,17 @@
-Assessment Error Report
+Online help Request
 
-- Reporter
-Student : {{ user_name }}
-Report Date : {{ date }}
+- Requester
+Student ID : {{ user_id }}
+Student Name : {{ user_name }}
+Branch : {{ test_center }}
+Request Date : {{ date }}
 
-- Report Contents
+- Request Contents
+Test Type : {{ test_type }}
 Assessment : {{ assessment_name }}
 Testset : {{ testset_name }}
+Grade : {{ grade }}
+Assessment Time : {{ start_time }} - {{ finish_time }} ({{ hours }}:{{ minutes }}:{{ seconds }})
 Contents :
 {{ contents }}
 

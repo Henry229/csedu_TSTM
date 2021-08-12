@@ -43,24 +43,36 @@ table tbody td {
 </style>
        </head>
   <body>
-<h3 class="pd-t">Assessment Error Report</h3>
+<h3 class="pd-t">Online help Request</h3>
 <hr align="left" />
-<h4>- Reporter</h4>
+<h4>- Requester</h4>
 <table>
 	<tbody>
 		<tr>
-			<td class="td-label label-bottom-line">Student</td>
+			<td class="td-label label-bottom-line">Student ID</td>
+			<td class="td-white">{{ user_id }}</td>
+		</tr>
+        <tr>
+			<td class="td-label label-bottom-line">Student Name</td>
 			<td class="td-white">{{ user_name }}</td>
 		</tr>
+        <tr>
+			<td class="td-label label-bottom-line">Branch</td>
+			<td class="td-white">{{ test_center }}</td>
+		</tr>
 		<tr>
-			<td class="td-label">Report Date</td>
+			<td class="td-label">Request Date</td>
 			<td class="td-white">{{ date }}</td>
 		</tr>
 	</tbody>
 </table>
-<h4>- Report Contents</h4>
+<h4>- Request Contents</h4>
 <table class="mg-b">
 	<tbody>
+        <tr>
+			<td class="td-label label-bottom-line">Test Type</td>
+			<td class="td-white">{{ test_type }}</td>
+		</tr>
 		<tr>
 			<td class="td-label label-bottom-line">Assessment</td>
 			<td class="td-white">{{ assessment_name }}</td>
@@ -69,9 +81,17 @@ table tbody td {
 			<td class="td-label label-bottom-line">Testset</td>
 			<td class="td-white">{{ testset_name }}</td>
 		</tr>
+        <tr>
+			<td class="td-label label-bottom-line">Grade</td>
+			<td class="td-white">{{ grade }}</td>
+		</tr>
+        <tr>
+			<td class="td-label label-bottom-line">Assessment Time</td>
+			<td class="td-white">{{ start_time }} - {{ finish_time }} ({{ hours }}:{{ minutes }}:{{ seconds }})</td>
+		</tr>
 		<tr>
 			<td class="td-label">Contents</td>
-			<td class="td-white"><textarea readonly="readonly" cols="81" rows="20">{{ contents }}</textarea></td>
+			<td class="td-white"><textarea readonly="readonly" cols="91" rows="20">{{ contents }}</textarea></td>
 		</tr>
 	</tbody>
 </table>

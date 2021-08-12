@@ -16,6 +16,10 @@ class Config(metaclass=MetaFlaskEnv):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    #MAIL_USERNAME = 'testsystem@cseducation.com.au'
+    #MAIL_PASSWORD = 'tSm4$ewojas'
+    #MAIL_USERNAME = 'hverityg@gmail.com'
+    #MAIL_PASSWORD = 'dgqnkybpdmfsuesh'
     AUTHORIZATION_KEY = '!x7!Hn66S0-p2U3zZm8?sKe4V4==XQCz'
 
     CSEDU_MAIL_SUBJECT_PREFIX = '[CSEDU]'
@@ -25,7 +29,7 @@ class Config(metaclass=MetaFlaskEnv):
     CSEDU_IMG_DIR = os.environ.get('CSEDU_IMG_DIR') or 'app/static/ui/img'
     NAPLAN_BASE_IMG_DIR = os.environ.get('NAPLAN_BASE_IMG_DIR') or 'app/static/report/img'
 
-    CSEDU_COMMON_MAIL_SUBJECT_PREFIX = '[CSEDU TEST REPORT]'
+    CSEDU_COMMON_MAIL_SUBJECT_PREFIX = '[CSEDU ONLINE HELP]'
 
     # ToDo: Need to update Upload_folder, allowed_extensions
     UPLOAD_FOLDER = os.environ.get('TEMP') or os.path.join(basedir, 'tmp/upload')

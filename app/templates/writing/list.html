@@ -4,6 +4,11 @@
 {%- block styles %}
     {{ super() }}
     <link href="/static/ui/css/tab.css" rel="stylesheet">
+    <style type="text/css">
+        .app-header, .app-footer {
+            display: inherit !important;
+        }
+    </style>
 {%- endblock styles %}
 {%- block scripts %}
     {{ super() }}

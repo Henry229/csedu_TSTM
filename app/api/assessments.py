@@ -12,7 +12,7 @@ from time import time
 import pytz
 from flask import jsonify, request, current_app, render_template
 from flask_login import current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import load_only
 from werkzeug.utils import secure_filename
 
@@ -22,7 +22,7 @@ from app.api.apicache import ApiCache
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting
+    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting, User
 from common.logger import log
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
@@ -74,6 +74,7 @@ def _search_testsets():
     if search_test_type != 0:
         query = query.filter_by(test_type=search_test_type)
     query = query.filter_by(active=True)
+    query = query.filter(or_(Testset.delete.is_(False), Testset.delete.is_(None)))
     testsets = query.order_by(Testset.modified_time.desc()).all()
     rows = [(row.id, row.name, row.version, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
             row in testsets]
@@ -910,31 +911,87 @@ def finish_test(assessment_session):
     data = {'redirect_url': '/tests/assessments'}
     return success(data)
 
-@api.route('/report/error', methods=['POST'])
+@api.route('/online/help/report', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
 @validate_session
-def report_error(assessment_session):
-    enroll_id = request.form["id"]
-    desc = request.form["desc"]
+def online_help_report(assessment_session):
+    enroll_id = request.form.get('id', 0, type=int)
+    desc = request.form.get('desc', '', type=str)
+    test_type = request.form.get('type', '', type=str)
 
     try:
-        app = current_app._get_current_object()
-        msg = Message("Hello",
-                      sender="brian.sim@cseducation.com.au",
-                      recipients=["hverityg@gmail.com"])
-        msg.body = "testing"
-        msg.html = "<b>testing</b>"
-        #mail.send(msg)
-        #with app.app_context():
-        #    mail.send(msg)
+        assessment_enroll = db.session.query(Assessment.id, Assessment.name,
+                AssessmentEnroll.finish_time, AssessmentEnroll.start_time,
+                Testset.name.label('testset_name'), Testset.grade). \
+            join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
+            join(Testset, Testset.id == AssessmentEnroll.testset_id). \
+            filter(AssessmentEnroll.id == enroll_id).first()
 
+        if assessment_enroll is None:
+            return bad_request()
 
-        send_email("hverityg@gmail.com", 'Confirm Your Account',
-                   'auth/email/confirm', user=current_user, token="aaa")
+        au_tz = pytz.timezone('Australia/Sydney')
+        now = datetime.now(tz=au_tz)
 
-        common_send_email(current_user.email, "hverityg@gmail.com", "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
-                          , "Test Error Report","auth/email/assessment_report"
-                          , user_name=current_user.username, date="2021-01-02", assessment_name="test", testset_name="set", contents=desc)
+        test_center_name = ''
+        cc = []
+        student = Student.query.filter_by(user_id=current_user.id).first()
+        if student:
+            test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
+                                         Codebook.additional_info.contains({"campus_prefix": student.branch})).first()
+            if test_center:
+                test_center_name = test_center.code_name
+
+            online_help = Codebook.query.filter(Codebook.code_type == 'online_help').filter(Codebook.code_name == student.branch).first()
+            if online_help:
+                for user_id in online_help.additional_info["user_id"]:
+                    userinfo = User.query.filter_by(id=user_id).first()
+                    cc.append(userinfo.email)
+
+        start_time = ''
+        if assessment_enroll.start_time:
+            start_time = assessment_enroll.start_time.strftime("%d/%m/%Y, %H:%M:%S")
+        finish_time = ''
+        if assessment_enroll.finish_time:
+            finish_time = assessment_enroll.finish_time.strftime("%d/%m/%Y, %H:%M:%S")
+
+        hours = 0
+        minutes = 0
+        seconds = 0
+        if start_time != '' and finish_time != '':
+            cal_time = assessment_enroll.finish_time - assessment_enroll.start_time
+            seconds = cal_time.total_seconds()
+            hours = int((seconds // 3600) % 24)
+            minutes = int((seconds // 60) % 60)
+            seconds = int(seconds % 60)
+
+        itsupport = "itsupport@cseducation.com.au"
+        #sender = current_user.email
+        #if not sender:
+        #    sender = itsupport
+
+        #test
+        itsupport = 'chsverity@cseducation.com.au'
+        cc = ['hverityg@gmail.com']
+
+        sender = itsupport
+
+        common_send_email(sender, itsupport, cc, "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
+                          , "From " + current_user.username + " in " + test_center_name, "auth/email/assessment_report"
+                          , user_id = current_user.id
+                          , user_name=current_user.username
+                          , date=now.strftime("%d/%m/%Y, %H:%M:%S")
+                          , assessment_name=assessment_enroll.name
+                          , testset_name=assessment_enroll.testset_name
+                          , test_type=test_type
+                          , grade=Codebook.get_code_name(assessment_enroll.grade)
+                          , test_center=test_center_name
+                          , start_time=start_time
+                          , finish_time=finish_time
+                          , hours=hours
+                          , minutes=minutes
+                          , seconds=seconds
+                          , contents=desc)
     except Exception as e:
         log.debug("Inward: %s" % e)
         return bad_request(message="Processing response error")

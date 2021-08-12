@@ -29,7 +29,7 @@
       </label>
     </div>
     <div class="float-right">
-        <button type="button" id="report_error" class="btn btn-info text-white">Send Error Report</button>
+        <button type="button" id="report_error" class="btn btn-info text-white">Online Help</button>
     </div>
   </div>
   {% if assessments_list|length==0 %}
@@ -446,10 +446,10 @@
             <div class="modal-content bg-transparent">
                 <div class="modal-header modal-header-primary figure">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Assessment Error Report</h4>
+                    <h4 class="modal-title" id="myModalLabel">Online Help</h4>
                 </div>
                 <div class="modal-body bg-white">
-                    <h5>Please tell us about problems that happened during the assessment.</h5>
+                    <h5>What is the need in your assessment?</h5>
                     <div class="input-group pd-t3">
                         <div id="groupings" class="btn-group">
                             <a class="btn btn-primary active" data-toggle="grouping" data-title="class">Class Test</a>
@@ -468,7 +468,7 @@
                 <div class="modal-footer bg-white">
                     <form method="POST" action="/auth/manage/delete">
                         <input type="hidden" name="user_id">
-                        <button type="button" class="btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn-secondary" id="reporting-cancel" data-dismiss="modal">Cancel</button>
                         <input type="button" class="btn btn-success" id="reporting" value="Send Report"/>
                     </form>
                 </div>
@@ -603,10 +603,11 @@
                     alert("Please fill in the description of the form");
                     return false;
                 }
-                $.post('/api/report/error',
-                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()) },
+                $.post('/api/online/help/report',
+                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()), type: $('#groupings > a.active').text() },
                     function(data, status, xhr) {
-                        alert('s');
+                        alert('Thank you for contacting us.\r\nIt may take up to 1-2 days.\r\nWe’ll get in touch with you as soon as possible.\r\nThank you.');
+                        $('#reporting-cancel').click();
                     }).fail(function(jqxhr, settings, ex) {
                         alert('failed, ' + ex);
                     }
