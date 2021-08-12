@@ -19,7 +19,8 @@ class Config(metaclass=MetaFlaskEnv):
     #MAIL_USERNAME = 'testsystem@cseducation.com.au'
     #MAIL_PASSWORD = 'tSm4$ewojas'
     MAIL_USERNAME = 'hverityg@gmail.com'
-    MAIL_PASSWORD = 'dgqnkybpdmfsuesh'
+    #MAIL_PASSWORD = 'dgqnkybpdmfsuesh'
+    MAIL_PASSWORD = 'ylzrjvkjgacycgcf'
     AUTHORIZATION_KEY = '!x7!Hn66S0-p2U3zZm8?sKe4V4==XQCz'
 
     CSEDU_MAIL_SUBJECT_PREFIX = '[CSEDU]'
