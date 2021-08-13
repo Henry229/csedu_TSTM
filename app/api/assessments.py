@@ -971,6 +971,12 @@ def online_help_report(assessment_session):
         #if not sender:
         #    sender = itsupport
 
+
+        itsupport = 'chsverity@cseducation.com.au'
+        cc = ['hverityg@gmail.com']
+        sender = itsupport
+
+
         #OnlineHelp insert
         onlinehelp = OnlineHelp(student_user_id=current_user.id,
                                 assessment_enroll_id=enroll_id,
