@@ -966,16 +966,10 @@ def online_help_report(assessment_session):
             seconds = int(seconds % 60)
 
         itsupport = "itsupport@cseducation.com.au"
+        sender = itsupport
         #sender = current_user.email
         #if not sender:
         #    sender = itsupport
-
-        #test
-        itsupport = 'chsverity@cseducation.com.au'
-        #cc = ['hverityg@gmail.com']
-        cc = []
-        sender = itsupport
-
 
         #OnlineHelp insert
         onlinehelp = OnlineHelp(student_user_id=current_user.id,
