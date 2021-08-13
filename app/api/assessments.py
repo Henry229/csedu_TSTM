@@ -22,7 +22,7 @@ from app.api.apicache import ApiCache
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.decorators import permission_required
 from app.models import Testset, Permission, Assessment, TestletHasItem, \
-    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting, User
+    Marking, AssessmentEnroll, MarkingBySimulater, Student, MarkingForWriting, User, OnlineHelp
 from common.logger import log
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
@@ -973,9 +973,20 @@ def online_help_report(assessment_session):
         #test
         itsupport = 'chsverity@cseducation.com.au'
         cc = ['hverityg@gmail.com']
+        sender = itsupport
 
-        sender = 'chsverity@daum.net'
 
+        #OnlineHelp insert
+        onlinehelp = OnlineHelp(student_user_id=current_user.id,
+                                assessment_enroll_id=enroll_id,
+                                test_type=test_type,
+                                test_center_name=test_center_name,
+                                cc=','.join(cc),
+                                description=desc)
+        db.session.add(onlinehelp)
+        db.session.commit()
+
+        #sending email
         common_send_email(sender, itsupport, cc, "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
                           , "From " + current_user.username + " in " + test_center_name, "auth/email/assessment_report"
                           , user_id = current_user.id

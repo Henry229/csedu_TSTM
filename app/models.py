@@ -1267,6 +1267,20 @@ class RetryMarking(db.Model):
         return '<RetryMarking {}>'.format(self.id)
 
 
+class OnlineHelp(db.Model):
+    __tablename__ = 'online_help'
+
+    id = db.Column(db.Integer, primary_key=True)
+    student_user_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))  # user table - id
+    assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('assessment_enroll.id'))
+    test_type = db.Column(db.String(10))
+    test_center_name = db.Column(db.String(255))
+    cc = db.Column(db.String(255))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    description = db.Column(db.String(1000))
+
+
+
 class Codebook(db.Model):
     '''Codebook: to be used in various cases mainly in templates '''
 
