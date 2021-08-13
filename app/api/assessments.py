@@ -972,7 +972,8 @@ def online_help_report(assessment_session):
 
         #test
         itsupport = 'chsverity@cseducation.com.au'
-        cc = ['hverityg@gmail.com']
+        #cc = ['hverityg@gmail.com']
+        cc = []
         sender = itsupport
 
 
