@@ -971,8 +971,6 @@ def online_help_report(assessment_session):
         #if not sender:
         #    sender = itsupport
 
-        cc = []
-
         #OnlineHelp insert
         onlinehelp = OnlineHelp(student_user_id=current_user.id,
                                 assessment_enroll_id=enroll_id,
