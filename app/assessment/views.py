@@ -637,6 +637,10 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                     ret = fake_return()
                 else:
                     if subject == 'Writing' and test_type_name.lower().find('naplan') < 0:
+                        # Do not Send files to CSonlineschool using FTP. It makes the sync slow and time out.
+                        # need to find other way later for sync file to csonlineschool
+                        continue
+
                         # CSEdu assign serial number(char) for each assessment in the name
                         # Extract the assigned number(char)
                         _names = assessment.name.rsplit(" ")
