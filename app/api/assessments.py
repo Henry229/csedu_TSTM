@@ -918,7 +918,10 @@ def online_help_report(assessment_session):
     enroll_id = request.form.get('id', 0, type=int)
     desc = request.form.get('desc', '', type=str)
     test_type = request.form.get('type', '', type=str)
+    requester_email = request.form.get('email', '', type=str)
 
+
+    return bad_request()
     try:
         assessment_enroll = db.session.query(Assessment.id, Assessment.name,
                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time,
@@ -934,9 +937,15 @@ def online_help_report(assessment_session):
         now = datetime.now(tz=au_tz)
 
         test_center_name = ''
+        student_id = ''
         cc = []
+        if requester_email != '':
+            cc.append(requester_email)
+
         student = Student.query.filter_by(user_id=current_user.id).first()
         if student:
+            student_id = student.student_id
+
             test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
                                          Codebook.additional_info.contains({"campus_prefix": student.branch})).first()
             if test_center:
@@ -971,6 +980,11 @@ def online_help_report(assessment_session):
         #if not sender:
         #    sender = itsupport
 
+
+        #test
+        cc = ['hverityg@gmail.com', 'chsverity@cseducation.com.au']
+        #sender = 'chsverity@cseducation.com.au'
+
         #OnlineHelp insert
         onlinehelp = OnlineHelp(student_user_id=current_user.id,
                                 assessment_enroll_id=enroll_id,
@@ -984,7 +998,7 @@ def online_help_report(assessment_session):
         #sending email
         common_send_email(sender, itsupport, cc, "CSEDU_COMMON_MAIL_SUBJECT_PREFIX"
                           , "From " + current_user.username + " in " + test_center_name, "auth/email/assessment_report"
-                          , user_id = current_user.id
+                          , user_id=student_id
                           , user_name=current_user.username
                           , date=now.strftime("%d/%m/%Y, %H:%M:%S")
                           , assessment_name=assessment_enroll.name
