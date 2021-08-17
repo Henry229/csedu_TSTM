@@ -29,7 +29,7 @@
       </label>
     </div>
     <div class="float-right">
-        <button type="button" id="report_error" class="btn btn-info text-white">Online Help</button>
+        <button type="button" id="report_error" class="btn btn-danger text-white">Online Help</button>
     </div>
   </div>
   {% if assessments_list|length==0 %}
@@ -449,7 +449,7 @@
                     <h4 class="modal-title" id="myModalLabel">Online Help</h4>
                 </div>
                 <div class="modal-body bg-white">
-                    <h5>What is the need in your assessment?</h5>
+                    <h5>Please provide as much details as possible about what happened.</h5>
                     <div class="input-group pd-t3">
                         <div id="groupings" class="btn-group">
                             <a class="btn btn-primary active" data-toggle="grouping" data-title="class">Class Test</a>
@@ -459,10 +459,18 @@
                         <input type="hidden" name="grouping" id="grouping">
                     </div>
                     <div class="pd-t15">
-                    <select id="reportAssessments" class="select-height form-control selectpicker"></select>
+                        <select id="reportAssessments" class="select-height form-control selectpicker"></select>
                     </div>
                     <div class="pd-t15">
-                    <textarea class="form-control pd-t3" rows="13" id="error-description" placeholder="Description"></textarea>
+                        <textarea class="form-control pd-t3" rows="10" id="error-description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="pd-t15">
+                        <input type="email" class="form-control" id="error-email" placeholder="Email">
+                    </div>
+                    <div class="pd-t15">
+                    <label>
+                        Your request may take up to 1-2 days. We will get in touch with you as soon as possible.
+                    </label>
                     </div>
                 </div>
                 <div class="modal-footer bg-white">
@@ -564,6 +572,11 @@
                         }
                     });
                 }
+                if(reportAssessments!=undefined){
+                    $('#groupings a:first').click();
+                    $('#error-description').val('');
+                    $('#error-email').val('');
+                }
                 $('#reportingErrorModal').modal('show');
             });
 
@@ -601,10 +614,22 @@
                 if($('#reportAssessments').val()==null) return false;
                 if($.trim($('#error-description').val())==''){
                     alert("Please fill in the description of the form");
+                    $('#error-description').focus();
                     return false;
                 }
+                if($.trim($('#error-email').val())==''){
+                    alert("Please fill in the email of the form");
+                    $('#error-email').focus();
+                    return false;
+                }
+                if(!isEmail($.trim($('#error-email').val()))){
+                    alert("Please check the email address");
+                    $('#error-email').focus();
+                    return false;
+                }
+
                 $.post('/api/online/help/report',
-                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()), type: $('#groupings > a.active').text() },
+                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()), type: $('#groupings > a.active').text(), email: $.trim($('#error-email').val()) },
                     function(data, status, xhr) {
                         alert('Thank you for contacting us.\r\nIt may take up to 1-2 days.\r\nWe’ll get in touch with you as soon as possible.\r\nThank you.');
                         $('#reporting-cancel').click();
@@ -626,5 +651,10 @@
             });
 
         });
+
+        function isEmail(email) {
+          var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+          return regex.test(email);
+        }
     </script>
 {% endblock %}
