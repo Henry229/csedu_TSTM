@@ -920,8 +920,6 @@ def online_help_report(assessment_session):
     test_type = request.form.get('type', '', type=str)
     requester_email = request.form.get('email', '', type=str)
 
-
-    return bad_request()
     try:
         assessment_enroll = db.session.query(Assessment.id, Assessment.name,
                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time,

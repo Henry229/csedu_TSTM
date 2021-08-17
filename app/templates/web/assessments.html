@@ -629,9 +629,9 @@
                 }
 
                 $.post('/api/online/help/report',
-                    { id: $('#reportAssessments').val(), desc: $.trim($('#error-description').val()), type: $('#groupings > a.active').text(), email: $.trim($('#error-email').val()) },
+                    { 'id': $('#reportAssessments').val(), 'desc': $.trim($('#error-description').val()), 'type': $('#groupings > a.active').text(), 'email': $.trim($('#error-email').val()) },
                     function(data, status, xhr) {
-                        alert('Thank you for contacting us.\r\nIt may take up to 1-2 days.\r\nWe’ll get in touch with you as soon as possible.\r\nThank you.');
+                        alert('Your message has been sent');
                         $('#reporting-cancel').click();
                     }).fail(function(jqxhr, settings, ex) {
                         alert('failed, ' + ex);
