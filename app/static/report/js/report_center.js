@@ -44,6 +44,10 @@ $(function(){
           var year = $('SELECT[name="year"] option:selected').val();
           var test_type = $('SELECT[name="test_type"] option:selected').val();
           var test_center = $('SELECT[name="test_center"] option:selected').val();
+          if(year==''){
+            $('SELECT[name="year"]').focus();
+            return false;
+          }
           search_assessment(year, test_type, test_center);
         }
     });

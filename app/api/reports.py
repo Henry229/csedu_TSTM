@@ -1180,7 +1180,9 @@ def search_assessment():
             query = query.filter(AssessmentEnroll.test_center == test_center)
 
     assessment_list = []
-    assessments = query.distinct().order_by(Assessment.id.asc()).all()
+    #assessments = query.distinct().order_by(Assessment.id.asc()).all()
+    assessments = query.distinct().order_by(AssessmentEnroll.start_time_client.desc(), Testset.name.asc(), Testset.version.asc()).all()
+
     for assessment in assessments:
         data = {}
         data['assessment_id'] = assessment.id
