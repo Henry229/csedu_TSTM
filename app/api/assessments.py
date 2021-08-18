@@ -953,7 +953,7 @@ def online_help_report(assessment_session):
             if online_help:
                 for user_id in online_help.additional_info["user_id"]:
                     userinfo = User.query.filter_by(id=user_id).first()
-                    #cc.append(userinfo.email)
+                    cc.append(userinfo.email)
 
         start_time = ''
         if assessment_enroll.start_time:
@@ -977,7 +977,6 @@ def online_help_report(assessment_session):
         #sender = current_user.email
         #if not sender:
         #    sender = itsupport
-
 
         #OnlineHelp insert
         onlinehelp = OnlineHelp(student_user_id=current_user.id,
