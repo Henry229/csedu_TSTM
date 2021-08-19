@@ -21,7 +21,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     query_individual_progress_summary_by_subject_v, query_individual_progress_summary_by_plan_v, \
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
-    draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer
+    draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer, search_assessment
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \
@@ -616,8 +616,17 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
+
     if assessment_id == 0:
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
+
+    assessments = search_assessment()
+    assessments_codesets = []
+    for d in assessments.json['data']:
+        code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
+        assessments_codesets.append(code)
+    search_form.assessment.choices = assessments_codesets
+    search_form.assessment.data = assessment
 
     # query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
     #    filter_by(testset_id=testset_id)
