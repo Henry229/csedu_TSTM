@@ -115,3 +115,42 @@ def common_writing_search_assessment(year, branch_ids, writing_code_id, test_typ
         query = query.filter(Assessment.test_type == test_type)
 
     return query.distinct().order_by(Assessment.id.desc()).all()
+
+
+@api.route('/writing_marking_list/downloaded', methods=['POST'])
+def writing_marking_downloaded():
+    marking_writing_id = request.form.get('id', 0, type=int)
+
+    marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
+    if marking_writing:
+        if marking_writing.additional_info:
+            if 'downloaded' in marking_writing.additional_info:
+                additional_info = {}
+                changed = False
+                for x, y in marking_writing.additional_info.items():
+                    if x == 'downloaded':
+                        if not y:
+                            changed = True
+                            additional_info[x] = True
+                        else:
+                            break
+                    else:
+                        additional_info[x] = y
+                if changed:
+                    marking_writing.additional_info = additional_info
+                    db.session.commit()
+
+                return success()
+            else:
+                info = marking_writing.additional_info.copy()
+                info['downloaded'] = True
+                marking_writing.additional_info = info
+                db.session.commit()
+                return success()
+        else:
+            additional_info = {
+                'downloaded': True
+            }
+            marking_writing.additional_info = additional_info
+            db.session.commit()
+            return success()

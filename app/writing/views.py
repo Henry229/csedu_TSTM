@@ -131,7 +131,8 @@ def list_writing_marking():
             query = query.filter(MarkingForWriting.candidate_mark_detail != None)
         elif marked == '0':
             query = query.filter(MarkingForWriting.candidate_mark_detail == None)
-    marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
+    marking_writings = query.all()
+    #marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
 
@@ -154,7 +155,6 @@ def list_writing_marking():
 
         writing_files = [];
         if is_candidate_file:
-
             for key, file_name in m.MarkingForWriting.candidate_file_link.items():
                 if file_name:
                     file_path = os.path.join(current_app.config['USER_DATA_FOLDER'], str(m.AssessmentEnroll.student_user_id), "writing",
@@ -162,6 +162,13 @@ def list_writing_marking():
                     if os.path.exists(file_path):
                          writing_files.append(url_for('api.get_writing', marking_writing_id=m.MarkingForWriting.id,
                                                student_user_id=m.AssessmentEnroll.student_user_id, file=file_name))
+
+        downloaded = False
+        if m.MarkingForWriting.additional_info:
+            for key, value in m.MarkingForWriting.additional_info.items():
+                if key=='downloaded':
+                    downloaded = value
+
 
         if is_ppending:
             json_str = {"assessment_enroll_id": m.AssessmentEnroll.id,
@@ -176,7 +183,8 @@ def list_writing_marking():
                         "is_candidate_file": is_candidate_file,
                         "is_marked": is_marked,
                         "web_img_links_writing": writing_files,
-                        "student_id": Student.getCSStudentId(m.AssessmentEnroll.student_user_id)
+                        "student_id": Student.getCSStudentId(m.AssessmentEnroll.student_user_id),
+                        "downloaded": downloaded
                         }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list, tabs=tabs)

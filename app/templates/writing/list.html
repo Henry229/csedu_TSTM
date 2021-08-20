@@ -41,7 +41,7 @@
                     <label for="tab2">the Search by Assessment</label>
                     <section></section>
                 </div>
-                {% if current_user.is_administrator() %}<div class="marker-area">{{ form.marker_name.label }}{{ form.marker_name }}</div>{% endif %}
+                {% if current_user.is_administrator() %}<div class="marker-area form-check">{{ form.marker_name.label }} {{ form.marker_name }}</div>{% endif %}
                 <div class="card-body">
                     <div id="tab1-contents" class="callout callout-info b-t-1 b-r-1 b-b-1"{% if tabs=='2' %} hidden="hidden"{% endif %}>
                             {{ form.assessment_name.label }}
@@ -63,7 +63,16 @@
                             {{ form.submit(class="btn btn-info btn-sm text-white", id="btn_search1") }}
                     </div>
                     <div class="div_writing_items">
-                    <table id="w_table" class="display table table-hover" style="width:100%;">
+
+                    <div class="form-group">
+                        <div class="form-check float-right">
+                          <input class="form-check-input" type="checkbox" id="apply_download">
+                          <label class="form-check-label" for="apply_download">
+                            The Application for the Download
+                          </label>
+                        </div>
+                    </div>
+                    <table id="w_table" class="display table table-hover" style="padding-top:10px;width:100%;">
                         <thead>
                         <tr>
                             <th>Assessment Name</th>
@@ -73,8 +82,8 @@
                             <th>Test_time</th>
 {#                            <th>Item Id</th>#}
                             <th>marking_id</th>
-                            <th>WritingFile?</th>
-                            <th>Marked?</th>
+                            <th>WritingFile</th>
+                            <th>Marked</th>
                             <th>download</th>
                             <th>Links</th>
                         </tr>
@@ -94,15 +103,20 @@
                             <td> {{ writing.is_marked }} </td>
                             <td>
                                 {% if writing.web_img_links_writing|length > 1 %}
-                                <a class="badge badge-primary" href="/writing/writing_marking_list/download/{{ writing.marking_writing_id }}/{{ writing.student_user_id }}">zip</a>
+                                <a name="download1" class="badge badge-primary" data-marking_writing_id="{{ writing.marking_writing_id }}" href="/writing/writing_marking_list/download/{{ writing.marking_writing_id }}/{{ writing.student_user_id }}">zip</a>
                                 {% else %}
                                 {% for lnk in writing.web_img_links_writing %}
                                 <span class="btn btn-light btn-square btn-sm" data-toggle="tooltip"
                                       data-placement="top" data-original-title="file download"
                                       title="file download">
-                                    <a href="{{ lnk }}" download="writing_{{ writing.marking_writing_id }}_{{ writing.student_id }}{{ lnk[lnk.rfind('.'):] }}"><i class="fas fa-file-download" style="color: #ff0000;"></i></a>
+                                    <a name="download2" href="{{ lnk }}" data-marking_writing_id="{{ writing.marking_writing_id }}" download="writing_{{ writing.marking_writing_id }}_{{ writing.student_id }}{{ lnk[lnk.rfind('.'):] }}"><i class="fas fa-file-download" style="color: #ff0000;"></i></a>
                                 </span>
                                 {% endfor %}
+                                {% endif %}
+                                {% if writing.downloaded %}
+                                    <div name="download_mark" class="d-inline-block">
+                                    <i class="fas fa-check"></i>
+                                    </div>
                                 {% endif %}
                             </td>
                             <td>
