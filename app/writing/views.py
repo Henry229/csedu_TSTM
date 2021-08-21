@@ -165,7 +165,8 @@ def list_writing_marking():
 
         downloaded = False
         if m.MarkingForWriting.additional_info:
-            for key, value in m.MarkingForWriting.additional_info.items():
+            additional_info = json.loads(m.MarkingForWriting.additional_info)
+            for key, value in additional_info.items():
                 if key=='downloaded':
                     downloaded = value
 

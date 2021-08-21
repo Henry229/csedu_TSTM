@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import jsonify
@@ -124,10 +125,11 @@ def writing_marking_downloaded():
     marking_writing = MarkingForWriting.query.filter_by(id=marking_writing_id).first()
     if marking_writing:
         if marking_writing.additional_info:
-            if 'downloaded' in marking_writing.additional_info:
+            infos = json.loads(marking_writing.additional_info)
+            if 'downloaded' in infos:
                 additional_info = {}
                 changed = False
-                for x, y in marking_writing.additional_info.items():
+                for x, y in infos.items():
                     if x == 'downloaded':
                         if not y:
                             changed = True
@@ -137,20 +139,20 @@ def writing_marking_downloaded():
                     else:
                         additional_info[x] = y
                 if changed:
-                    marking_writing.additional_info = additional_info
+                    marking_writing.additional_info = json.dumps(additional_info)
                     db.session.commit()
 
                 return success()
             else:
-                info = marking_writing.additional_info.copy()
+                info = infos.copy()
                 info['downloaded'] = True
-                marking_writing.additional_info = info
+                marking_writing.additional_info = json.dumps(info)
                 db.session.commit()
                 return success()
         else:
             additional_info = {
                 'downloaded': True
             }
-            marking_writing.additional_info = additional_info
+            marking_writing.additional_info = json.dumps(additional_info)
             db.session.commit()
             return success()
