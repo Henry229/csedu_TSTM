@@ -483,12 +483,27 @@ def assessment_list():
 
         for tset in student_testsets:
             tset.finish_time = None
+            tset.start_time = None
+            tset.test_duration = None
+
+            tset.finish_time_after_minutes = False
             if len(enrolled) > 0:
                 result = list(filter(lambda x: (x.testset_id == tset.id), enrolled))
                 if len(result) > 0:
                     result.sort(reverse=True)
                     result.sort(key=lambda x: x.id, reverse=True)
                     tset.finish_time = result[0].finish_time
+                    tset.start_time = result[0].start_time
+                    tset.test_duration = result[0].test_duration
+                    if tset.finish_time is not None:
+                        is_after_minutes = (pytz.utc.localize(tset.finish_time) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
+                        if is_after_minutes is True:
+                            tset.finish_time_after_minutes = True
+                    else:
+                        if tset.test_duration is not None:
+                            is_after_minutes = (pytz.utc.localize(tset.start_time) + timedelta(minutes=tset.test_duration) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
+                            if is_after_minutes is True:
+                                tset.finish_time_after_minutes = True
 
             # Compare GUID to check enrollment status
             is_enrolled = tset.GUID in enrolled_guid_assessment_types

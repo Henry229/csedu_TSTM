@@ -389,17 +389,22 @@
                                                                   <input type="button" class="btn btn-secondary btn-block"
                                                                          value="Not Available" disabled>
                                                               {% else %}
-                                                                {% if ts.report_type == 'report' %}
-                                                                  <input type="button" class="btn btn-primary report"
-                                                                         data-student-user-id="{{ student_user_id }}"
-                                                                         data-assessment-id="{{ assessment.id }}"
-                                                                         data-assessment-guid="{{ assessment.GUID }}"
-                                                                         data-testset-id="{{ ts.id }}"
-                                                                         value="View Report">
+                                                                {% if ts.finish_time_after_minutes %}
+                                                                    {% if ts.report_type == 'report' %}
+                                                                      <input type="button" class="btn btn-primary report"
+                                                                             data-student-user-id="{{ student_user_id }}"
+                                                                             data-assessment-id="{{ assessment.id }}"
+                                                                             data-assessment-guid="{{ assessment.GUID }}"
+                                                                             data-testset-id="{{ ts.id }}"
+                                                                             value="View Report">
+                                                                    {% else %}
+                                                                      <input type="button" class="btn btn-primary error-note"
+                                                                             data-assessment-enrol-id="{{ ts.enroll_id }}"
+                                                                             value="View Report">
+                                                                    {% endif %}
                                                                 {% else %}
-                                                                  <input type="button" class="btn btn-primary error-note"
-                                                                         data-assessment-enrol-id="{{ ts.enroll_id }}"
-                                                                         value="View Report">
+                                                                  <input type="button" class="btn btn-secondary btn-block"
+                                                                         value="Not Available" disabled>
                                                                 {% endif %}
                                                               {% endif %}
                                                           {% else %}
