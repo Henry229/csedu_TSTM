@@ -495,15 +495,15 @@ def assessment_list():
                     tset.finish_time = result[0].finish_time
                     tset.start_time = result[0].start_time
                     tset.test_duration = result[0].test_duration
-                    if tset.finish_time is not None:
-                        is_after_minutes = (pytz.utc.localize(tset.finish_time) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
-                        if is_after_minutes is True:
-                            tset.finish_time_after_minutes = True
-                    else:
-                        if tset.test_duration is not None:
-                            is_after_minutes = (pytz.utc.localize(tset.start_time) + timedelta(minutes=tset.test_duration) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
-                            if is_after_minutes is True:
-                                tset.finish_time_after_minutes = True
+                    #if tset.finish_time is not None:
+                    #    is_after_minutes = (pytz.utc.localize(tset.finish_time) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
+                    #    if is_after_minutes is True:
+                    #        tset.finish_time_after_minutes = True
+                    #else:
+                    #    if tset.test_duration is not None:
+                    #        is_after_minutes = (pytz.utc.localize(tset.start_time) + timedelta(minutes=tset.test_duration) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
+                    #        if is_after_minutes is True:
+                    #            tset.finish_time_after_minutes = True
 
             # Compare GUID to check enrollment status
             is_enrolled = tset.GUID in enrolled_guid_assessment_types

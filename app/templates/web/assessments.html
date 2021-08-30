@@ -389,7 +389,6 @@
                                                                   <input type="button" class="btn btn-secondary btn-block"
                                                                          value="Not Available" disabled>
                                                               {% else %}
-                                                                {% if ts.finish_time_after_minutes %}
                                                                     {% if ts.report_type == 'report' %}
                                                                       <input type="button" class="btn btn-primary report"
                                                                              data-student-user-id="{{ student_user_id }}"
@@ -402,10 +401,6 @@
                                                                              data-assessment-enrol-id="{{ ts.enroll_id }}"
                                                                              value="View Report">
                                                                     {% endif %}
-                                                                {% else %}
-                                                                  <input type="button" class="btn btn-secondary btn-block"
-                                                                         value="Not Available" disabled>
-                                                                {% endif %}
                                                               {% endif %}
                                                           {% else %}
                                                               <input type="button" class="btn btn-secondary btn-block"
