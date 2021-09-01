@@ -1047,7 +1047,7 @@ def query_item_score_summary_data(item_id):
 @api.route('/gen_report/', methods=['POST'])
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def gen_report():
-    refresh_mviews()
+    #refresh_mviews()
     print('Finish refresh mviews')
     return 'True'
 
