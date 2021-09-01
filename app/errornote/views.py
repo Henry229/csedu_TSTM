@@ -14,7 +14,7 @@ from ..web.views import view_explanation
 @permission_required(Permission.ITEM_EXEC)
 def error_note(assessment_enroll_id):
     # Todo: Check accessibility to get report
-    refresh_mviews()
+    #refresh_mviews()
 
     assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
     if assessment_enroll is None:
