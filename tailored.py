@@ -528,7 +528,7 @@ def fillout_default_score():
         print("Successfully update marking <id:{}> - candidate_mark {}, outcome_score {}".format(marking.id,
                                                                                                  marking.candidate_mark,
                                                                                                  marking.outcome_score))
-    refresh_mviews()
+    #refresh_mviews()
 
 
 @app.cli.command()
