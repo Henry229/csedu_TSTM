@@ -82,3 +82,10 @@
     font-size: 31px;
     font-weight: 700;
 }
+
+.pt-20 {
+    padding-top: 20px;
+}
+.txt-red {
+    color:var(--red);
+}
