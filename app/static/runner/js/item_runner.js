@@ -61,6 +61,10 @@ var ItemRunner = (function () {
         _review_mode = review_mode;
     }
 
+    var getItemId = function () {
+        return _testset_id;
+    };
+
     var _calculateSize = function() {
       // reading with a long description
       //Up and Down
@@ -538,6 +542,7 @@ var ItemRunner = (function () {
         setMarkingId: setMarkingId,
         setReviewMode: setReviewMode,
         getRendered: getRendered,
+        getItemId: getItemId,
         processResponse: processResponse,
         processBackResponse: processBackResponse,
         processResponseForWriting: processResponseForWriting,
