@@ -54,13 +54,13 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry (Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry All(Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry All</button>
             {% endif %}
           </div>
           <div id="answer-info" class="col text-right pt-20 txt-red">
-            The correct answer can be checked after the second attempt.
+            The correct answers can be checked after the second attempt.
           </div>
         </div>
         <br>
@@ -112,9 +112,9 @@
                       {%- endif -%}
                     </td>
                     <td>
-                      {%- if not marking.last_is_correct -%}
+                      {% if not marking.is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
-                      {%- endif -%}
+                      {% endif %}
                     </td>
                     <td>
                       {% if marking.view_answer_enable %}
