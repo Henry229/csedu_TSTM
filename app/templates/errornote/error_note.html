@@ -112,7 +112,7 @@
                       {%- endif -%}
                     </td>
                     <td>
-                      {% if not marking.is_correct %}
+                      {% if not marking.last_is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
                       {% endif %}
                     </td>
@@ -353,12 +353,12 @@
 <script type="text/javascript">
   $(document).ready(function () {
 
-  var info_txt = true;
-   for(var i=0; i<$('#t_mark_info > tbody tr').length; i++) {
-       if($.trim($($('#t_mark_info > tbody tr').get(i)).find('td:last').text())!='') {
-            info_txt = false;
-       }
-   }
+   var info_txt = false;
+   {% for marking in markings %}
+    {% if not marking.last_is_correct %}
+        info_txt = true;
+    {% endif %}
+   {% endfor %}
    if(!info_txt){
         $('#answer-info').hide();
    }
