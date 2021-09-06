@@ -72,8 +72,8 @@
               <tr>
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
-                <th colspan="2">Homework</th>
-                <th colspan="2">Last try</th>
+                <th colspan="2">Current Result</th>
+                <th colspan="2">Previous Result</th>
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
@@ -102,17 +102,21 @@
                       {%- endif -%}
                     </td>
                     <td>
+                    {% if marking.last_r_value is not none %}
                         {{- marking.last_r_value -}}
+                    {% endif %}
                     </td>
                     <td>
+                    {% if marking.last_is_correct is not none %}
                       {%- if marking.last_is_correct -%}
                       <i class="fa fa-check" style="color: #4dbd74"></i>
                       {%- else -%}
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
+                    {% endif %}
                     </td>
                     <td>
-                      {% if not marking.last_is_correct %}
+                      {% if not marking.is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
                       {% endif %}
                     </td>
