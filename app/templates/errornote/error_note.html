@@ -65,13 +65,6 @@
         </div>
         <br>
         {% endif %}
-
-        {% set thePrevious = false %}
-        {% for marking in markings %}
-        {% if  marking.last_r_value is not none %}
-            {% set thePrevious = true %}
-        {% endif %}
-        {% endfor %}
         <div class="row">
           <div class="col">
             <table class="table table-bordered table-hover" style="width:100%" id="t_mark_info">
@@ -80,19 +73,15 @@
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
                 <th colspan="2">Current Result</th>
-                {% if thePrevious %}
-                <th colspan="2">Previous Result</th>
-                {% endif %}
+                <th class="previous" colspan="2">Previous Result</th>
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
               <tr>
                 <th>My Answer</th>
                 <th>Mark</th>
-                {% if thePrevious %}
-                <th>My Answer</th>
-                <th>Mark</th>
-                {% endif %}
+                <th class="previous">My Answer</th>
+                <th class="previous">Mark</th>
               </tr>
               </thead>
               <tbody>
@@ -112,13 +101,12 @@
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
                     </td>
-                    {% if thePrevious %}
-                    <td>
+                    <td class="previous">
                     {% if marking.last_r_value is not none %}
                         {{- marking.last_r_value -}}
                     {% endif %}
                     </td>
-                    <td>
+                    <td class="previous">
                     {% if marking.last_is_correct is not none %}
                       {%- if marking.last_is_correct -%}
                       <i class="fa fa-check" style="color: #4dbd74"></i>
@@ -127,7 +115,6 @@
                       {%- endif -%}
                     {% endif %}
                     </td>
-                    {% endif %}
                     <td>
                       {% if not marking.is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
@@ -369,6 +356,17 @@
 
 <script type="text/javascript">
   $(document).ready(function () {
+    let thePrevious = false;
+    {% for marking in markings %}
+    {% if  marking.last_r_value is not none %}
+    {% if  marking.last_r_value %}
+        thePrevious = true;
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+    if(thePrevious==false){
+        $('.previous').hide();
+    }
 
    var info_txt = false;
    {% for marking in markings %}
