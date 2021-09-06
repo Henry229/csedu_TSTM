@@ -355,14 +355,15 @@
 
    var info_txt = false;
    {% for marking in markings %}
-    {% if not marking.last_is_correct %}
+    {% if marking.view_answer_enable %}
+        {% if marking.correct_r_value %}
         info_txt = true;
+        {% endif %}
     {% endif %}
    {% endfor %}
-   if(!info_txt){
+   if(info_txt==true){
         $('#answer-info').hide();
    }
-
 
     $('#retry-errors-button').on('click', function () {
       $.magnificPopup.open({
