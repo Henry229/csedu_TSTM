@@ -129,7 +129,9 @@ def creation(sample_assessment_id):
     index = 1
     for result in results:
         correct_r_value = None
-        if len(result.get('correct_r_value'))==1:
+        if result.get('correct_r_value') is None:
+            correct_r_value = "''"
+        elif len(result.get('correct_r_value'))==1:
             correct_r_value = result.get('correct_r_value').replace("'", "\"")
         else:
             correct_r_value = []
