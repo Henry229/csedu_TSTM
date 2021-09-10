@@ -86,6 +86,9 @@ def create_app(config_name):
     from .writing import writing as writing_blueprint
     app.register_blueprint(writing_blueprint, url_prefix='/writing')
 
+    from .sample import sample as sample_blueprint
+    app.register_blueprint(sample_blueprint, url_prefix='/sample')
+
     app.session_interface = CustomSessionInterface()
 
     # json encoding

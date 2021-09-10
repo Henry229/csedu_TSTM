@@ -1280,6 +1280,51 @@ class OnlineHelp(db.Model):
     description = db.Column(db.String(1000))
 
 
+class SampleUsers(db.Model):
+    __tablename__ = 'sample_users'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(64))
+    username = db.Column(db.String(64))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+class SampleAssessment(db.Model):
+    __tablename__ = 'sample_assessment'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    sample_type = db.Column(db.String(50))
+    testset_id = db.Column(db.Integer, db.ForeignKey('testset.id'))
+    test_duration = db.Column(db.Integer, default=50)
+    order_number = db.Column(db.String(4))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    delete = db.Column(db.Boolean)
+
+class SampleAssessmentEnroll(db.Model):
+    __tablename__ = 'sample_assessment_enroll'
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_key = db.Column(db.String(120))
+    sample_assessment_id = db.Column(db.Integer, db.ForeignKey('sample_assessment.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('sample_users.id'))
+    start_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    finish_time = db.Column(db.DateTime)
+    start_ip = db.Column(db.String(32))
+
+
+class SampleAssessmentItems(db.Model):
+    __tablename__ = 'sample_assessment_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    sample_assessment_id = db.Column(db.Integer, db.ForeignKey('sample_assessment.id'))
+    question_no = db.Column(db.Integer)
+    testlet_id = db.Column(db.Integer)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+    weight = db.Column(db.Float)
+    correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
+    outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
 
 class Codebook(db.Model):
     '''Codebook: to be used in various cases mainly in templates '''
