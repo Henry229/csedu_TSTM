@@ -76,7 +76,10 @@ def error_note(assessment_enroll_id):
 
     test_datetime = assessment_enroll.start_time.strftime("%d/%m/%Y %H:%M:%S")
 
-
+    is_all_correct = True
+    for _marking in markings:
+        if marking.is_correct is None or not marking.is_correct:
+            is_all_correct = False
 
     template_file = 'errornote/error_note.html'
     rendered_template = render_template(template_file, assessment_name=assessment_name,
@@ -85,7 +88,7 @@ def error_note(assessment_enroll_id):
                                         score=score, markings=markings, retry_session_key=retry_session_key,
                                         last_error_count=last_error_count, test_datetime=test_datetime,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                        grade=grade)
+                                        grade=grade, is_all_correct=is_all_correct)
     return rendered_template
 
 
