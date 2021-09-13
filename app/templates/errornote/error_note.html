@@ -59,7 +59,7 @@
               <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry Incorrect All</button>
             {% endif %}
           </div>
-          {% if not is_all_correct %}
+          {% if is_all_correct is sameas false %}
           <div class="col text-right pt-20 txt-red">
             The correct answers can be checked after the second attempt.
           </div>
@@ -74,8 +74,10 @@
               <tr>
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
-                <th colspan="2">First Result</th>
-                {% if not is_all_correct %}
+                {% if is_all_correct is sameas false %}
+                <th colspan="2">Result</th>
+                {% endif %}
+                {% if is_all_correct is sameas false %}
                 <th colspan="2">Last Result</th>
                 {% endif %}
                 <th rowspan="2">Retry</th>
@@ -84,7 +86,7 @@
               <tr>
                 <th>My Answer</th>
                 <th>Mark</th>
-                {% if not is_all_correct %}
+                {% if is_all_correct is sameas false %}
                 <th>My Answer</th>
                 <th>Mark</th>
                 {% endif %}
@@ -107,7 +109,7 @@
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
                     </td>
-                    {% if not is_all_correct %}
+                    {% if is_all_correct is sameas false %}
                     <td>
                     {% if marking.last_r_value is not none %}
                         {{- marking.last_r_value -}}
