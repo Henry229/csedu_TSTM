@@ -54,9 +54,9 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry Incorrect All(Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry All Incorrect Questions(Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry Incorrect All</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry All Incorrect Questions</button>
             {% endif %}
           </div>
           {% if is_all_correct is sameas false %}
