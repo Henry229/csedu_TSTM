@@ -241,10 +241,13 @@
                 },
                 success: function(data){
                     debugger
-                    var rendered_html = data.html;
-                    _$container.empty();
-                    var div = $(rendered_html);
-                    _$container.append(div);
+                    if (response.result === 'success') {
+                        var data = response.data;
+                        var rendered_html = data.html;
+                        _$container.empty();
+                        var div = $(rendered_html);
+                        _$container.append(div);
+                    }
                 },
                 error: function(xhr) {
                     alert( "error" );
