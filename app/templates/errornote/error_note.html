@@ -54,16 +54,11 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry Incorrect All(Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry (Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry Incorrect All</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry</button>
             {% endif %}
           </div>
-          {% if not is_all_correct %}
-          <div class="col text-right pt-20 txt-red">
-            The correct answers can be checked after the second attempt.
-          </div>
-          {% endif %}
         </div>
         <br>
         {% endif %}
@@ -74,20 +69,17 @@
               <tr>
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
-                <th colspan="2">First Result</th>
-                {% if not is_all_correct %}
-                <th colspan="2">Last Result</th>
-                {% endif %}
+                <th colspan="2">Homework</th>
+                <th colspan="2">Last try</th>
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
+                <th rowspan="2">Explanation</th>
               </tr>
               <tr>
                 <th>My Answer</th>
                 <th>Mark</th>
-                {% if not is_all_correct %}
                 <th>My Answer</th>
                 <th>Mark</th>
-                {% endif %}
               </tr>
               </thead>
               <tbody>
@@ -107,31 +99,37 @@
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
                     </td>
-                    {% if not is_all_correct %}
                     <td>
-                    {% if marking.last_r_value is not none %}
                         {{- marking.last_r_value -}}
-                    {% endif %}
                     </td>
                     <td>
-                    {% if marking.last_is_correct is not none %}
                       {%- if marking.last_is_correct -%}
                       <i class="fa fa-check" style="color: #4dbd74"></i>
                       {%- else -%}
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
-                    {% endif %}
                     </td>
-                    {% endif %}
                     <td>
-                      {% if not marking.is_correct and not marking.last_is_correct %}
-                      <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
-                      {% endif %}
+                      {%- if not marking.last_is_correct -%}
+                      <i class="fa fa-play-circle retry-question-btn" data-question-no="{{ marking.question_no }}" style="color: #c0a16b"></i>
+                      {%- endif -%}
                     </td>
                     <td>
                       {% if marking.view_answer_enable %}
                         {% if marking.correct_r_value %}
                          {{- marking.correct_r_value -}}
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if marking.explanation_link %}
+                        {% if marking.explanation_link_enable %}
+                          <a id="view_explanation_window"
+                             onclick="window.open('{{ marking.explanation_link }}','_video', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1100,height=600');">
+                            <i class="fa fa-headphones" style="color: #c0a16b"></i>
+                          </a>
+                        {% else %}
+                          <i class="fa fa-headphones" title="Retry the question to enable" style="color: lightgrey"></i>
                         {% endif %}
                       {% endif %}
                     </td>
