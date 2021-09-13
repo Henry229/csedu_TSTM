@@ -54,14 +54,16 @@
         <div class="row">
           <div class="col">
           {% if retry_session_key %}
-              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry All(Resume)</button>
+              <button id="retry-errors-button" data-session-key="{{ retry_session_key }}" class="btn btn-outline-danger btn-lg">Retry Incorrect All(Resume)</button>
             {% else %}
-              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry All</button>
+              <button id="retry-errors-button" class="btn btn-outline-danger btn-lg">Retry Incorrect All</button>
             {% endif %}
           </div>
-          <div id="answer-info" class="col text-right pt-20 txt-red">
+          {% if not is_all_correct %}
+          <div class="col text-right pt-20 txt-red">
             The correct answers can be checked after the second attempt.
           </div>
+          {% endif %}
         </div>
         <br>
         {% endif %}
@@ -72,16 +74,20 @@
               <tr>
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
-                <th colspan="2">Current Result</th>
-                <th class="previous" colspan="2">Previous Result</th>
+                <th colspan="2">First Result</th>
+                {% if not is_all_correct %}
+                <th colspan="2">Last Result</th>
+                {% endif %}
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
               <tr>
                 <th>My Answer</th>
                 <th>Mark</th>
-                <th class="previous">My Answer</th>
-                <th class="previous">Mark</th>
+                {% if not is_all_correct %}
+                <th>My Answer</th>
+                <th>Mark</th>
+                {% endif %}
               </tr>
               </thead>
               <tbody>
@@ -101,12 +107,13 @@
                       <i class="fa fa-times" style="color: #f86c6b"></i>
                       {%- endif -%}
                     </td>
-                    <td class="previous">
+                    {% if not is_all_correct %}
+                    <td>
                     {% if marking.last_r_value is not none %}
                         {{- marking.last_r_value -}}
                     {% endif %}
                     </td>
-                    <td class="previous">
+                    <td>
                     {% if marking.last_is_correct is not none %}
                       {%- if marking.last_is_correct -%}
                       <i class="fa fa-check" style="color: #4dbd74"></i>
@@ -115,8 +122,9 @@
                       {%- endif -%}
                     {% endif %}
                     </td>
+                    {% endif %}
                     <td>
-                      {% if not marking.is_correct %}
+                      {% if not marking.is_correct and not marking.last_is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
                       {% endif %}
                     </td>
@@ -356,30 +364,6 @@
 
 <script type="text/javascript">
   $(document).ready(function () {
-    let thePrevious = false;
-    {% for marking in markings %}
-    {% if  marking.last_r_value is not none %}
-    {% if  marking.last_r_value %}
-        thePrevious = true;
-    {% endif %}
-    {% endif %}
-    {% endfor %}
-    if(thePrevious==false){
-        $('.previous').hide();
-    }
-
-   var info_txt = false;
-   {% for marking in markings %}
-    {% if marking.view_answer_enable %}
-        {% if marking.correct_r_value %}
-        info_txt = true;
-        {% endif %}
-    {% endif %}
-   {% endfor %}
-   if(info_txt==true){
-        $('#answer-info').hide();
-   }
-
     $('#retry-errors-button').on('click', function () {
       $.magnificPopup.open({
         items: {
