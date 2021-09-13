@@ -220,17 +220,39 @@
   <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
   <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
   <script type="text/javascript">
+    let _$container;
     $(function(){
+        _$container = $('.item-container');
         getRendered();
     });
 
     function getRendered(){
-        $.get('/api/sample/rendered/{{- sample_assessment_id -}}/{{- question_no -}}', function (data) {
-            debugger
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            debugger
-          //Error logic
-        });
+
+
+
+        $.ajax({ url: '/api/sample/rendered/{{- sample_assessment_id -}}/{{- question_no -}}',
+                type: 'get',
+                beforeSend: function(){
+                    let loading = '<div class="fa-3x item-rendered-empty" style="margin: auto">\n' +
+                    '  <i class="fas fa-spinner fa-spin"></i> <span> Getting Test Item....</span>\n' +
+                    '</div>';
+                    $('.item-container').empty();
+                    $('.item-container').append(loading);
+                },
+                success: function(data){
+                    debugger
+                    var rendered_html = data.html;
+                    _$container.empty();
+                    var div = $(rendered_html);
+                    _$container.append(div);
+                },
+                error: function(xhr) {
+                    alert( "error" );
+                },
+                complete:function(data){
+                    alert( "complete" );
+                }
+            });
     }
   </script>
 {% endblock %}
