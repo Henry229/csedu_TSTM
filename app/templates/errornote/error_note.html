@@ -75,6 +75,8 @@
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
                 {% if is_all_correct is sameas false %}
+                <th colspan="2">First Result</th>
+                {% else %}
                 <th colspan="2">Result</th>
                 {% endif %}
                 {% if is_all_correct is sameas false %}
