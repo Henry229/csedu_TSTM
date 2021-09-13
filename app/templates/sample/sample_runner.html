@@ -224,12 +224,13 @@
     $(function(){
         _$container = $('.item-container');
         getRendered();
+
+        $('#errorModal .error-confirm').on('click', function () {
+            $('#errorModal').modal('hide');
+        });
     });
 
     function getRendered(){
-
-
-
         $.ajax({ url: '/api/sample/rendered/{{- sample_assessment_id -}}/{{- question_no -}}',
                 type: 'get',
                 beforeSend: function(){
@@ -240,7 +241,6 @@
                     $('.item-container').append(loading);
                 },
                 success: function(response){
-                    debugger
                     if (response.result === 'success') {
                         var data = response.data;
                         var rendered_html = data.html;
@@ -250,10 +250,11 @@
                     }
                 },
                 error: function(xhr) {
-                    alert( "error" );
+                    $('#errorModal').modal('show');
                 },
                 complete:function(data){
-                    alert( "complete" );
+                    $('.tools-ruler').hide();
+                    $('.tools-protractor').hide();
                 }
             });
     }
