@@ -78,7 +78,7 @@ def error_note(assessment_enroll_id):
 
     is_all_correct = True
     for _marking in markings:
-        if marking.is_correct is None or not marking.is_correct:
+        if _marking.is_correct is None or not _marking.is_correct:
             is_all_correct = False
 
     template_file = 'errornote/error_note.html'
