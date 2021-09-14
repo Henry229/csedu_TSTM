@@ -221,6 +221,8 @@
   <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
   <script type="text/javascript">
     let _$container;
+    let count, counter;
+
     $(function(){
         _$container = $('.item-container');
         getRendered();
@@ -247,6 +249,10 @@
                         _$container.empty();
                         var div = $(rendered_html);
                         _$container.append(div);
+
+                        count = data.test_duration;
+                        counter = setInterval(timer(), 1000);
+
                     }
                 },
                 error: function(xhr) {
@@ -258,5 +264,26 @@
                 }
             });
     }
+
+    function formatTime(seconds) {
+        var h = Math.floor(seconds / 3600),
+            m = Math.floor(seconds / 60) % 60,
+            s = seconds % 60;
+        if (h < 10) h = "0" + h;
+        if (m < 10) m = "0" + m;
+        if (s < 10) s = "0" + s;
+        return [h, m, s];
+    }
+
+    function timer() {
+        count--;
+        if (count < 0) return clearInterval(counter);
+        let _hhmmss = formatTime(count);
+
+        $('.timer-display .hours .number').html(_hhmmss[0]);
+        $('.timer-display .minutes .number').html(_hhmmss[1]);
+        $('.timer-display .seconds .number').html(_hhmmss[2]);
+    }
+
   </script>
 {% endblock %}

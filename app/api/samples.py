@@ -3,7 +3,7 @@ import os
 import re
 import uuid
 from datetime import datetime, timedelta
-from time import time
+from time import time, strftime, gmtime
 
 from flask import jsonify, request, current_app, render_template, session
 
@@ -107,4 +107,7 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None):
         response['jw_player'] = {
             'player_url': signed_player_url, 'media_url': media_url
         }
+
+    response['test_duration'] = assessment.test_duration
+
     return success(response)
