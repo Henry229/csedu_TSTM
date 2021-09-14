@@ -255,8 +255,14 @@
                         _$container.append(div);
 
                         count = data.test_duration;
-                        counter = setInterval(timer, 1000);
-
+                        if(data.test_duration>0){
+                            counter = setInterval(timer, 1000);
+                        }else{
+                            let timer_display = $('.timer-display');
+                            timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
+                            $('.number').css('visibility','visible');
+                        }
+                        _disableButtons(false, false);
                     }
                 },
                 error: function(xhr) {
@@ -289,6 +295,25 @@
         $('.timer-display .seconds .number').html(_hhmmss[2]);
         $('.number').css('visibility','visible');
         document.cookie = "hhmmss=" + _hhmmss[0] + ':' + _hhmmss[1] + ':' + _hhmmss[2] + ";path=/";
+    }
+
+    _disableButtons = function(disable, is_next) {
+        var next_btn = $('.footer-next-btn');
+        var back_btn = $('.footer-back-btn');
+        var flag_btn = $('.footer-flag-btn');
+        if (disable) {
+            next_btn.prop('disabled', true);
+            back_btn.prop('disabled', true);
+            flag_btn.prop('disabled', true);
+        } else {
+            next_btn.prop('disabled', false);
+            back_btn.prop('disabled', false);
+            flag_btn.prop('disabled', false);
+            //$('.footer-next-btn .next-caret').show();
+            //$('.footer-next-btn .next-loading').hide();
+            //$('.footer-back-btn .back-caret').show();
+            //$('.footer-back-btn .back-loading').hide();
+        }
     }
   </script>
 {% endblock %}
