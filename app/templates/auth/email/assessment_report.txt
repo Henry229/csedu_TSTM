@@ -1,4 +1,4 @@
-Online help Request
+Online Help Request
 
 - Requester
 Student ID : {{ user_id }}
