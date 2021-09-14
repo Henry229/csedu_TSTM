@@ -108,6 +108,13 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None):
             'player_url': signed_player_url, 'media_url': media_url
         }
 
-    response['test_duration'] = assessment.test_duration * 60
+    if request.cookies.get('hhmmss'):
+        response['test_duration'] = get_sec(request.cookies.get('hhmmss'))
+    else:
+        response['test_duration'] = assessment.test_duration * 60
 
     return success(response)
+
+def get_sec(time_str):
+    h, m, s = time_str.split(':')
+    return int(h) * 3600 + int(m) * 60 + int(s)

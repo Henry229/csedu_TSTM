@@ -1,6 +1,10 @@
 {% extends "ui/test_runner_base.html" %}
 
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link href="/static/sample/css/runner.css" rel="stylesheet">
+{% endblock %}
 {% block app_content %}
 
     <div class="item-card">
@@ -283,7 +287,8 @@
         $('.timer-display .hours .number').html(_hhmmss[0]);
         $('.timer-display .minutes .number').html(_hhmmss[1]);
         $('.timer-display .seconds .number').html(_hhmmss[2]);
+        $('.number').css('visibility','visible');
+        document.cookie = "hhmmss=" + _hhmmss[0] + ':' + _hhmmss[1] + ':' + _hhmmss[2] + ";path=/";
     }
-
   </script>
 {% endblock %}
