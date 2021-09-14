@@ -108,6 +108,6 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None):
             'player_url': signed_player_url, 'media_url': media_url
         }
 
-    response['test_duration'] = assessment.test_duration
+    response['test_duration'] = assessment.test_duration * 60
 
     return success(response)
