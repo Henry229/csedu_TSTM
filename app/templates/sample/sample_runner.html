@@ -223,9 +223,12 @@
   <script src="/static/ui/vendors/jquery-ui-rotatable/jquery.ui.rotatable.min.js"></script>
   <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
   <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+  <script src="/static/sample/js/item_handlers.js"></script>
   <script type="text/javascript">
     let _$container;
     let count, counter;
+    let _handler;
+    let _interaction_type;
 
     $(function(){
         _$container = $('.item-container');
@@ -249,20 +252,9 @@
                 success: function(response){
                     if (response.result === 'success') {
                         var data = response.data;
-                        var rendered_html = data.html;
-                        _$container.empty();
-                        var div = $(rendered_html);
-                        _$container.append(div);
+                        drawRendered(data);
+                        postProcessRendered(data);
 
-                        count = data.test_duration;
-                        if(data.test_duration>0){
-                            counter = setInterval(timer, 1000);
-                        }else{
-                            let timer_display = $('.timer-display');
-                            timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
-                            $('.number').css('visibility','visible');
-                        }
-                        _disableButtons(false, false);
                     }
                 },
                 error: function(xhr) {
@@ -273,6 +265,23 @@
                     $('.tools-protractor').hide();
                 }
             });
+    }
+
+    drawRendered = function(data) {
+        var rendered_html = data.html;
+        _$container.empty();
+        var div = $(rendered_html);
+        _$container.append(div);
+
+        count = data.test_duration;
+        if(data.test_duration>0){
+            counter = setInterval(timer, 1000);
+        }else{
+            let timer_display = $('.timer-display');
+            timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
+            $('.number').css('visibility','visible');
+        }
+        _disableButtons(false, false);
     }
 
     function formatTime(seconds) {
@@ -315,5 +324,46 @@
             //$('.footer-back-btn .back-loading').hide();
         }
     }
+
+    var _calculateSize = function() {
+      // reading with a long description
+      //Up and Down
+      var col_12s = $('.item-body .grid-row .col-12');
+      if (col_12s.length > 1 ) {
+          // var item_body_height = $('.item-body')[0].clientHeight;
+          // var first_row_height = col_12s[0].clientHeight;
+          // If the description occupies more than 80%
+          // if (first_row_height / item_body_height > 0.8) {
+          //     $(col_12s[0]).addClass('with-scroll');
+          // }
+          // image 가 있는 경우 dom 의 크기가 이미지를 다 불러온 후에 변경이 되어 크기를 계산할 수 없다
+          // if there is a question and answers in this div, skip addClass
+         if($(col_12s[0]).children("div").attr("data-serial") === undefined){
+              $(col_12s[0]).addClass('with-scroll');
+          }
+      }
+      var col_6s = $('.item-body .grid-row .col-6');
+      if (col_6s.length > 1 ) {
+          if($(col_6s[0]).children("div").attr("data-serial") === undefined) {
+              $(col_6s[0]).addClass('with-scroll');
+          }
+      }
+    };
+
+    // Left and Right
+    let postProcessRendered = function (data) {
+        _interaction_type = data.type;
+        _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data, review_mode: false});
+
+        //_handler.processUI(_item_info.saved_answer);
+
+
+        if (MathJax)
+            MathJax.typeset();
+        _calculateSize();
+    };
+
+
+
   </script>
 {% endblock %}
