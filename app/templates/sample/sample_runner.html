@@ -237,6 +237,17 @@
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
         });
+
+        $('.footer-next-btn').on('click', function () {
+            $('.tools-ruler').hide();
+            $('.tools-protractor').hide();
+            if (_$container.find('.item-rendered-empty').length > 0) {
+                //_goToQuestionNo(_question_no);
+            } else {
+                var response = _handler.getResponse();
+                //processAssessmentResponse(response, callbackFn, callbackData);
+            }
+        });
     });
 
     function getRendered(){
@@ -318,10 +329,10 @@
             next_btn.prop('disabled', false);
             back_btn.prop('disabled', false);
             flag_btn.prop('disabled', false);
-            //$('.footer-next-btn .next-caret').show();
-            //$('.footer-next-btn .next-loading').hide();
-            //$('.footer-back-btn .back-caret').show();
-            //$('.footer-back-btn .back-loading').hide();
+            $('.footer-next-btn .next-caret').show();
+            $('.footer-next-btn .next-loading').hide();
+            $('.footer-back-btn .back-caret').show();
+            $('.footer-back-btn .back-loading').hide();
         }
     }
 
