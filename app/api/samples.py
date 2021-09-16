@@ -141,7 +141,7 @@ def sample_responses():
     if assessmentItems is None:
         return bad_request()
 
-    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).label("max_question_no").filter_by(sample_assessment_id=assessmentEnroll.sample_assessment_id).scalar()
+    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==assessmentEnroll.sample_assessment_id).scalar()
     if question_no > max_question_no or question_no < 1:
         return bad_request()
 
