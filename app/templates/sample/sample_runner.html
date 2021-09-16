@@ -232,7 +232,7 @@
 
     $(function(){
         _$container = $('.item-container');
-        getRendered({{- sample_assessment_id -}}/{{- question_no -}});
+        getRendered({{- sample_assessment_id -}},{{- question_no -}});
 
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
