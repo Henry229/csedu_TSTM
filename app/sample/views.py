@@ -141,8 +141,7 @@ def creation(sample_assessment_id):
                                                 testlet_id=result.get('testlet_id'),
                                                 item_id=result.get('item_id'),
                                                 weight=result.get('weight'),
-                                                correct_r_value=correct_r_value,
-                                                outcome_score=result.get('outcome_score'))
+                                                correct_r_value=correct_r_value)
         db.session.add(assessment_item)
         index += 1
     db.session.commit()

@@ -1322,7 +1322,6 @@ class SampleAssessmentItems(db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
     weight = db.Column(db.Float)
     correct_r_value = db.Column(JSONB)  # Correct Response Value. Copy when row inserted
-    outcome_score = db.Column(db.Float, default=1)  # SetOutcome Score
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
 
