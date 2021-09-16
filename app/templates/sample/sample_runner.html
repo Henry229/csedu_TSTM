@@ -403,7 +403,7 @@
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    $('#question_no').val(response.data.next_question_no);
+                    $('#question_no').val(response.data.question_no);
                     getRendered({{ sample_assessment_id }});
 
                 } else {
