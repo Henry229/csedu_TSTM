@@ -219,7 +219,7 @@ def sample_responses():
     if max_question_no == question_no:
         data = {
             'last': 1,
-        }
+            }
     else:
         data = sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1, run_session=None)
 
