@@ -63,7 +63,7 @@ def sample_create_session():
 
 @api.route('/sample/rendered/<int:sample_assessment_id>/<int:question_no>', methods=['GET'])
 @check_sample_login_api()
-def sample_rendered(sample_assessment_id, question_no, run_session=None, next_question_no=None):
+def sample_rendered(sample_assessment_id, question_no, run_session=None):
 
     assessment = SampleAssessment.query.filter_by(id=sample_assessment_id).first()
     if assessment is None:
@@ -117,9 +117,9 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None, next_qu
     else:
         response['test_duration'] = assessment.test_duration * 60
 
-    if next_question_no is not None:
-        response['next_question_no'] = next_question_no
-        response['last'] = 0
+
+    response['question_no'] = question_no
+    response['last'] = 0
 
     return success(response)
 
@@ -224,7 +224,7 @@ def sample_responses():
         data = {'last': 1}
         return success(data)
     else:
-        return sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1, None, question_no+1)
+        return sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1)
 
 
 
