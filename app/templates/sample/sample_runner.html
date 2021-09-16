@@ -215,7 +215,7 @@
       </div>
     </div>
   </div>
-
+  <input type="hidden" id="question_no" value="{{- question_no -}}">
 {% endblock app_content %}
 {% block scripts %}
   {{ super() }}
@@ -232,7 +232,7 @@
 
     $(function(){
         _$container = $('.item-container');
-        getRendered({{- sample_assessment_id -}},{{- question_no -}});
+        getRendered({{- sample_assessment_id -}});
 
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
@@ -250,7 +250,8 @@
         });
     });
 
-    function getRendered(assessment_id, question_no){
+    function getRendered(assessment_id){
+        let question_no = $('#question_no').val();
         $.ajax({ url: '/api/sample/rendered/' + assessment_id + '/' + question_no,
                 type: 'get',
                 beforeSend: function(){
@@ -402,7 +403,8 @@
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    getRendered({{ sample_assessment_id }}, response.data.next_question_no);
+                    $('#question_no').val(response.data.next_question_no);
+                    getRendered({{ sample_assessment_id }});
 
                 } else {
                     if (response.message) {
