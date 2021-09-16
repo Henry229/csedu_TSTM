@@ -210,13 +210,10 @@ def sample_responses():
         db.session.add(marking_inserted)
         db.session.commit()
     else:
-        marking_updated = {
-            "candidate_r_value": candidate_r_value,
-            "candidate_mark": candidate_mark,
-            "outcome_score": outcome_score,
-            "is_correct": is_correct
-        }
-        marking.update(marking_updated)
+        marking.candidate_r_value = candidate_r_value
+        marking.candidate_mark = candidate_mark
+        marking.outcome_score = outcome_score
+        marking.is_correct = is_correct
         db.session.commit()
 
     if max_question_no == question_no:
