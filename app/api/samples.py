@@ -220,10 +220,11 @@ def sample_responses():
         data = {
             'last': 1,
             }
+        return success(data)
     else:
-        data = sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1, run_session=None)
+        return sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1, run_session=None)
 
-    return success(data)
+
 
 
 def get_sec(time_str):
