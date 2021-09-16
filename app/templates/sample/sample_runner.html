@@ -232,7 +232,7 @@
 
     $(function(){
         _$container = $('.item-container');
-        getRendered();
+        getRendered({{- sample_assessment_id -}}/{{- question_no -}});
 
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
@@ -250,8 +250,8 @@
         });
     });
 
-    function getRendered(){
-        $.ajax({ url: '/api/sample/rendered/{{- sample_assessment_id -}}/{{- question_no -}}',
+    function getRendered(assessment_id, question_no){
+        $.ajax({ url: '/api/sample/rendered/' + assessment_id + '/' + question_no,
                 type: 'get',
                 beforeSend: function(){
                     let loading = '<div class="fa-3x item-rendered-empty" style="margin: auto">\n' +
@@ -353,7 +353,7 @@
               $(col_12s[0]).addClass('with-scroll');
           }
       }
-      var col_6s = $('.item-body .grid-row .col-6');
+      let col_6s = $('.item-body .grid-row .col-6');
       if (col_6s.length > 1 ) {
           if($(col_6s[0]).children("div").attr("data-serial") === undefined) {
               $(col_6s[0]).addClass('with-scroll');
@@ -401,16 +401,9 @@
                 $('#errorModal').modal('show');
             },
             success: function (response) {
-                // _disableSubmitResponse(false);
                 if (response.result === 'success') {
-                    /*
-                    if (callbackFn) {
-                        _responseProcessedSimpleCb(response.data);
-                        callbackFn(callbackData);
-                    } else if (_responseProcessedCb) {
-                        _responseProcessedCb(response.data);
-                    }
-                     */
+                    getRendered({{ sample_assessment_id }}, response.data.next_question_no);
+
                 } else {
                     if (response.message) {
                         $('#errorModal .modal-body').html(response.message);
