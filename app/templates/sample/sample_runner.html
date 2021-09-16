@@ -245,7 +245,7 @@
                 //_goToQuestionNo(_question_no);
             } else {
                 var response = _handler.getResponse();
-                //processAssessmentResponse(response, callbackFn, callbackData);
+                processAssessmentResponse(response);
             }
         });
     });
@@ -374,7 +374,51 @@
         _calculateSize();
     };
 
-
+    let processAssessmentResponse = function (response) {
+        var url = '/api/sample/responses';
+        var data = {
+            'session': '{{- session_key -}}',
+            'question_no': {{- question_no -}}
+        };
+        if (response.writing_text) {
+            data['writing_text'] = response.writing_text;
+            delete response.writing_text;
+        }
+        data['response'] = response;
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function () {
+                _disableButtons(true, true);
+            },
+            complete: function () {
+            },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                $('#errorModal .modal-body').html('Error occurred in the main process');
+                $('#errorModal').modal('show');
+            },
+            success: function (response) {
+                // _disableSubmitResponse(false);
+                if (response.result === 'success') {
+                    /*
+                    if (callbackFn) {
+                        _responseProcessedSimpleCb(response.data);
+                        callbackFn(callbackData);
+                    } else if (_responseProcessedCb) {
+                        _responseProcessedCb(response.data);
+                    }
+                     */
+                } else {
+                    if (response.message) {
+                        $('#errorModal .modal-body').html(response.message);
+                        $('#errorModal').modal('show');
+                    }
+                }
+            }
+        });
+    };
 
   </script>
 {% endblock %}

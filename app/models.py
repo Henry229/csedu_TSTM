@@ -1326,6 +1326,18 @@ class SampleAssessmentItems(db.Model):
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
 
 
+class SampleMarking(db.Model):
+    __tablename__ = 'sample_marking'
+
+    id = db.Column(db.Integer, primary_key=True)
+    question_no = db.Column(db.Integer)
+    candidate_r_value = db.Column(JSONB)
+    is_correct = db.Column(db.Boolean)
+    candidate_mark = db.Column(db.Float, default=0)
+    sample_assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('sample_assessment_enroll.id'))
+    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+
+
 class Codebook(db.Model):
     '''Codebook: to be used in various cases mainly in templates '''
 
