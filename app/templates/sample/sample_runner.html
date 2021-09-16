@@ -394,6 +394,7 @@
                 _disableButtons(true, true);
             },
             complete: function () {
+                _disableButtons(false, false);
             },
             error: function (jqXHR, textStatus, errorThrown ) {
                 $('#errorModal .modal-body').html('Error occurred in the main process');
