@@ -338,6 +338,13 @@
             next_btn.prop('disabled', true);
             back_btn.prop('disabled', true);
             flag_btn.prop('disabled', true);
+            if (is_next) {
+                $('.footer-next-btn .next-caret').hide();
+                $('.footer-next-btn .next-loading').show();
+            } else {
+                $('.footer-back-btn .back-caret').hide();
+                $('.footer-back-btn .back-loading').show();
+            }
         } else {
             next_btn.prop('disabled', false);
             back_btn.prop('disabled', false);
@@ -346,13 +353,6 @@
             $('.footer-next-btn .next-loading').hide();
             $('.footer-back-btn .back-caret').show();
             $('.footer-back-btn .back-loading').hide();
-        }
-        if (is_next) {
-            $('.footer-next-btn .next-caret').hide();
-            $('.footer-next-btn .next-loading').show();
-        } else {
-            $('.footer-back-btn .back-caret').hide();
-            $('.footer-back-btn .back-loading').show();
         }
     }
 
@@ -412,10 +412,10 @@
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function () {
-                _disableButtons(true, true);
+                _disableButtons(true, is_next);
             },
             complete: function () {
-                _disableButtons(false, false);
+                _disableButtons(false, is_next);
             },
             error: function (jqXHR, textStatus, errorThrown ) {
                 $('#errorModal .modal-body').html('Error occurred in the main process');
