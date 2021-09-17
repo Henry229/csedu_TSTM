@@ -6,6 +6,7 @@ from datetime import datetime
 import pytz
 from flask import render_template, flash, request, redirect, url_for, session, jsonify, render_template_string
 from flask_login import login_required, current_user
+from sqlalchemy import func
 
 from . import sample
 from .. import db
@@ -63,7 +64,7 @@ def agreement():
     if assessment is None:
         return redirect(url_for('sample.sample_index'))
 
-    return render_template('sample/agreement.html', name=user.username, assessment=assessment)
+    return render_template('sample/agreement.html', name='Sample Tester - ' + user.username, assessment=assessment)
 
 @sample.route('/testing', methods=['GET', 'POST'])
 @check_sample_login()
@@ -72,11 +73,27 @@ def testing():
     if session_key is None:
         return redirect(url_for('sample.sample_index'))
 
+    user = SampleUsers.query.filter_by(id=session["sample"]).first()
+    if user is None:
+        return redirect(url_for('sample.sample_index'))
+
     sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
 
-    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id)
+    question_no = 1
+    last = False
+    first = True
+    if request.cookies.get('question_no'):
+        question_no = request.cookies.get('question_no')
+
+    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==sample_assessment_enroll.sample_assessment_id).scalar()
+    if question_no == max_question_no:
+        last = True
+    if question_no > 1:
+        first = False
+
+    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, first=first, last=last, name='Sample Tester - ' + user.username)
 
 
 @sample.route('/creation/items/<int:sample_assessment_id>', methods=['GET'])

@@ -100,7 +100,7 @@
         <div class="item-footer">
           <div class="footer-center"></div>
           <div class="navigator">
-            <button class="footer-back-btn" style="display: none"><i class="fas fa-spinner fa-spin back-loading" style="display: none"></i><i class="fas fa-caret-left back-caret"></i>Back</button>
+            <button class="footer-back-btn"{% if first %} style="display: none"{% endif %}><i class="fas fa-spinner fa-spin back-loading" style="display: none"></i><i class="fas fa-caret-left back-caret"></i>Back</button>
             <div class="footer-right-buttons">
               <button class="footer-flag-btn" disabled><span>Flag</span><i class="far fa-flag"></i></button>
               <button class="footer-next-btn" disabled>Next<i class="fas fa-spinner fa-spin next-loading" style="display: none"></i><i class="fas fa-caret-right next-caret"></i></button>
@@ -406,7 +406,11 @@
                 if (response.result === 'success') {
                     setCookie('question_no', response.data.question_no);
                     getRendered({{ sample_assessment_id }});
-
+                    if(response.data.question_no>1){
+                        $('.footer-back-btn').show();
+                    }else{
+                        $('.footer-back-btn').hide();
+                    }
                 } else {
                     if (response.message) {
                         $('#errorModal .modal-body').html(response.message);
