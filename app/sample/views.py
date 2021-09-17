@@ -94,7 +94,7 @@ def testing():
     if question_no > 1:
         first = False
 
-    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, first=first, last=last, name='Sample Tester - ' + user.username)
+    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, sample_assessment_enroll_id=sample_assessment_enroll.id, first=first, last=last, name='Sample Tester - ' + user.username)
 
 
 @sample.route('/creation/items/<int:sample_assessment_id>', methods=['GET'])

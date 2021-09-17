@@ -232,7 +232,7 @@
 
     $(function(){
         _$container = $('.item-container');
-        getRendered({{- sample_assessment_id -}});
+        getRendered();
 
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
@@ -261,10 +261,10 @@
         });
     });
 
-    function getRendered(assessment_id){
+    function getRendered(){
         let question_no = getCookie('question_no');
         if(question_no == undefined) question_no = 1;
-        $.ajax({ url: '/api/sample/rendered/' + assessment_id + '/' + question_no,
+        $.ajax({ url: '/api/sample/rendered/{{ sample_assessment_id }}/{{ sample_assessment_enroll_id }}/' + question_no,
                 type: 'get',
                 beforeSend: function(){
                     let loading = '<div class="fa-3x item-rendered-empty" style="margin: auto">\n' +
@@ -385,9 +385,8 @@
     let postProcessRendered = function (data) {
         _interaction_type = data.type;
         _handler = ItemHandlers.init(_interaction_type, {container: _$container, data: data, review_mode: false});
-
-        //_handler.processUI(_item_info.saved_answer);
-        _handler.processUI("B");
+        if(data.saved_answer != null)
+            _handler.processUI(data.saved_answer);
 
         if (MathJax)
             MathJax.typeset();
@@ -424,7 +423,7 @@
             success: function (response) {
                 if (response.result === 'success') {
                     setCookie('question_no', response.data.question_no);
-                    getRendered({{ sample_assessment_id }});
+                    getRendered();
                     if(response.data.question_no>1){
                         $('.footer-back-btn').show();
                     }else{

@@ -61,9 +61,9 @@ def sample_create_session():
     return success(data)
 
 
-@api.route('/sample/rendered/<int:sample_assessment_id>/<int:question_no>', methods=['GET'])
+@api.route('/sample/rendered/<int:sample_assessment_id>/<int:sample_assessment_enroll_id>/<int:question_no>', methods=['GET'])
 @check_sample_login_api()
-def sample_rendered(sample_assessment_id, question_no, run_session=None):
+def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_no, run_session=None):
 
     assessment = SampleAssessment.query.filter_by(id=sample_assessment_id).first()
     if assessment is None:
@@ -72,6 +72,7 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None):
     assessment_item = SampleAssessmentItems.query.filter_by(sample_assessment_id=sample_assessment_id).filter_by(question_no=question_no).first()
     if assessment_item is None:
         return bad_request()
+
 
     response = {}
     rendered_item = ''
@@ -117,6 +118,11 @@ def sample_rendered(sample_assessment_id, question_no, run_session=None):
     else:
         response['test_duration'] = assessment.test_duration * 60
 
+    saved_answer = None
+    sample_marking = SampleMarking.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id, question_no=question_no).first()
+    if sample_marking is not None:
+        saved_answer = sample_marking.candidate_r_value
+    response['saved_answer'] = saved_answer
 
     response['question_no'] = question_no
     response['last'] = 0
