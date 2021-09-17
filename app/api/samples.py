@@ -131,6 +131,7 @@ def sample_responses():
     session_key = request.json.get('session')
     question_no = request.json.get('question_no')
     response = request.json.get('response')
+    is_next = bool(request.json.get('is_next'))
 
     if session_key is None:
         return bad_request()
@@ -224,7 +225,12 @@ def sample_responses():
         data = {'last': 1}
         return success(data)
     else:
-        return sample_rendered(assessmentEnroll.sample_assessment_id, question_no + 1)
+
+        if is_next:
+            param_question_no = question_no + 1
+        else:
+            param_question_no = question_no - 1
+        return sample_rendered(assessmentEnroll.sample_assessment_id, param_question_no)
 
 
 
