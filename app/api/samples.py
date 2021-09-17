@@ -236,7 +236,7 @@ def sample_responses():
             param_question_no = question_no + 1
         else:
             param_question_no = question_no - 1
-        return sample_rendered(assessmentEnroll.sample_assessment_id, param_question_no)
+        return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
 
 
 
