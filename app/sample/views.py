@@ -85,6 +85,7 @@ def testing():
     last = False
     first = True
     if request.cookies.get('question_no'):
+        print(request.cookies.get('question_no'))
         question_no = int(request.cookies.get('question_no'))
 
     max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==sample_assessment_enroll.sample_assessment_id).scalar()
