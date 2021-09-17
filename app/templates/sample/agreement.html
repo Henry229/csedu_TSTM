@@ -95,6 +95,7 @@
   <script src="/static/runner/js/test_runner.js?v={{ runner_version }}"></script>
   <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
   <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+  <script src="/static/sample/js/cookie_helper.js"></script>
   <script type="text/javascript">
       $(document).ready(function () {
           let user_ip = '';
@@ -115,7 +116,8 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if(response.result=='success'){
-                            window.location.href = '/sample/testing?session=' + response.data.session + '&q=1';
+                            setCookie('question_no', 1);
+                            window.location.href = '/sample/testing?session=' + response.data.session;
                         }
                     }
                     ,error: function(XMLHttpRequest, textStatus, errorThrown) {

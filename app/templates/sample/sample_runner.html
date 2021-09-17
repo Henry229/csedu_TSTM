@@ -215,7 +215,6 @@
       </div>
     </div>
   </div>
-  <input type="hidden" id="question_no" value="{{- question_no -}}">
 {% endblock app_content %}
 {% block scripts %}
   {{ super() }}
@@ -223,6 +222,7 @@
   <script src="/static/ui/vendors/jquery-ui-rotatable/jquery.ui.rotatable.min.js"></script>
   <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
   <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+  <script src="/static/sample/js/cookie_helper.js"></script>
   <script src="/static/sample/js/item_handlers.js"></script>
   <script type="text/javascript">
     let _$container;
@@ -251,7 +251,8 @@
     });
 
     function getRendered(assessment_id){
-        let question_no = $('#question_no').val();
+        let question_no = getCookie('question_no');
+        if(question_no == undefined) question_no = 1;
         $.ajax({ url: '/api/sample/rendered/' + assessment_id + '/' + question_no,
                 type: 'get',
                 beforeSend: function(){
@@ -315,7 +316,7 @@
         $('.timer-display .minutes .number').html(_hhmmss[1]);
         $('.timer-display .seconds .number').html(_hhmmss[2]);
         $('.number').css('visibility','visible');
-        document.cookie = "hhmmss=" + _hhmmss[0] + ':' + _hhmmss[1] + ':' + _hhmmss[2] + ";path=/";
+        setCookie('hhmmss', _hhmmss[0] + ':' + _hhmmss[1] + ':' + _hhmmss[2]);
     }
 
     _disableButtons = function(disable, is_next) {
@@ -403,7 +404,7 @@
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    $('#question_no').val(response.data.question_no);
+                    setCookie('question_no', response.data.question_no);
                     getRendered({{ sample_assessment_id }});
 
                 } else {

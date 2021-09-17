@@ -65,22 +65,18 @@ def agreement():
 
     return render_template('sample/agreement.html', name=user.username, assessment=assessment)
 
-@sample.route('/testing', methods=['GET'])
+@sample.route('/testing', methods=['GET', 'POST'])
 @check_sample_login()
 def testing():
     session_key = request.args.get('session')
-    question_no = request.args.get('q')
-
     if session_key is None:
-        return redirect(url_for('sample.sample_index'))
-    if question_no is None:
         return redirect(url_for('sample.sample_index'))
 
     sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
 
-    return render_template('sample/sample_runner.html', session_key=session_key, question_no=question_no, sample_assessment_id=sample_assessment_enroll.sample_assessment_id)
+    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id)
 
 
 @sample.route('/creation/items/<int:sample_assessment_id>', methods=['GET'])
