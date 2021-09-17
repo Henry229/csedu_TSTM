@@ -422,12 +422,17 @@
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    setCookie('question_no', response.data.question_no);
-                    getRendered();
-                    if(response.data.question_no>1){
-                        $('.footer-back-btn').show();
+                    if(response.data.last!=undefined){
+                        alert('the testing is finished.');
+                        window.location.href = '/sample/index';
                     }else{
-                        $('.footer-back-btn').hide();
+                        setCookie('question_no', response.data.question_no);
+                        getRendered();
+                        if(response.data.question_no>1){
+                            $('.footer-back-btn').show();
+                        }else{
+                            $('.footer-back-btn').hide();
+                        }
                     }
                 } else {
                     if (response.message) {
