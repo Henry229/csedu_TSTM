@@ -255,6 +255,7 @@
             if (_$container.find('.item-rendered-empty').length > 0) {
                 //_goToQuestionNo(_question_no - 1);
             } else {
+                var response = _handler.getResponse();
                 processAssessmentResponse(response, false);
             }
         });
