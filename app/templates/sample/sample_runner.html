@@ -298,10 +298,8 @@
                 },
                 success: function(response){
                     if (response.result === 'success') {
-                        var data = response.data;
-                        drawRendered(data);
-                        postProcessRendered(data);
-                        flagRendered(data);
+                        let data = response.data;
+                        drawingForm(data);
                     }
                 },
                 error: function(xhr) {
@@ -451,9 +449,8 @@
                         window.location.href = '/sample/index';
                     }else{
                         setCookie('question_no', response.data.question_no);
-                        //getRendered();
-
-
+                        let data = response.data;
+                        drawingForm(data);
                         if(response.data.question_no>1){
                             $('.footer-back-btn').show();
                         }else{
@@ -470,9 +467,17 @@
         });
     };
 
+    let drawingForm = function (data) {
+        drawRendered(data);
+        postProcessRendered(data);
+        flagRendered(data);
+    };
+
     let flagRendered = function (data) {
         _flagged = data.flagged;
 
     };
+
+
   </script>
 {% endblock %}
