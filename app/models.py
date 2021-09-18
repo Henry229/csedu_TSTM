@@ -1338,7 +1338,6 @@ class SampleMarking(db.Model):
     is_flagged = db.Column(db.Boolean, default=False)
     sample_assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('sample_assessment_enroll.id'))
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
-    answered_time = db.Column(db.DateTime)
 
 
 class Codebook(db.Model):
