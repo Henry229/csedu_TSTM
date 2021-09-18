@@ -128,7 +128,7 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
 
     sample_marking_read = SampleMarkingRead.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id,
                                                    question_no=question_no).first()
-    if sample_marking_read is not None:
+    if sample_marking_read is None:
         marking_read = SampleMarkingRead(question_no=question_no, sample_assessment_enroll_id=sample_assessment_enroll_id)
         db.session.add(marking_read)
         db.session.commit()
