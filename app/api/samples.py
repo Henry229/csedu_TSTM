@@ -13,7 +13,7 @@ from sqlalchemy import func
 
 from app.api import api
 from app.models import Testset, SampleAssessment, SampleAssessmentEnroll, SampleAssessmentItems, Item, Codebook, \
-    SampleMarking, SampleMarkingRead
+    SampleMarking
 from qti.itemservice.itemservice import ItemService
 from .assessments import parse_processed_response, parse_correct_response
 from .jwplayer import get_signed_player, jwt_signed_url
