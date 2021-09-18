@@ -13,7 +13,7 @@ from sqlalchemy import func
 
 from app.api import api
 from app.models import Testset, SampleAssessment, SampleAssessmentEnroll, SampleAssessmentItems, Item, Codebook, \
-    SampleMarking
+    SampleMarking, SampleMarkingRead
 from qti.itemservice.itemservice import ItemService
 from .assessments import parse_processed_response, parse_correct_response
 from .jwplayer import get_signed_player, jwt_signed_url
@@ -125,6 +125,13 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
     if sample_marking is not None:
         saved_answer = sample_marking.candidate_r_value
     response['saved_answer'] = saved_answer
+
+    sample_marking_read = SampleMarkingRead.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id,
+                                                   question_no=question_no).first()
+    if sample_marking_read is not None:
+        marking_read = SampleMarkingRead(question_no=question_no, sample_assessment_enroll_id=sample_assessment_enroll_id)
+        db.session.add(marking_read)
+        db.session.commit()
 
     response['question_no'] = question_no
     response['last'] = 0
