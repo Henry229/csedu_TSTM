@@ -6,6 +6,7 @@ import subprocess
 import uuid
 from datetime import datetime, timedelta
 from time import time, strftime, gmtime
+import urllib.parse
 
 from flask import jsonify, request, current_app, render_template, session
 from sqlalchemy import func
@@ -113,8 +114,9 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
             'player_url': signed_player_url, 'media_url': media_url
         }
 
-    if request.cookies.get('hhmmss') and request.cookies.get('hhmmss') != '00:00:00':
-        response['test_duration'] = get_sec(request.cookies.get('hhmmss'))
+    if request.cookies.get('hhmmss'):
+        hhmmss = urllib.parse.unquote_plus(request.cookies.get('hhmmss'))
+        response['test_duration'] = get_sec(hhmmss)
     else:
         response['test_duration'] = assessment.test_duration * 60
 
