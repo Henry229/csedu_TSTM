@@ -238,6 +238,19 @@ def sample_responses():
 
 
 
+@api.route('/sample/flag/<int:sample_assessment_enroll_id>/<int:question_no>', methods=['GET'])
+@check_sample_login_api()
+def sample_flag(sample_assessment_enroll_id, question_no, run_session=None):
+    sample_marking = SampleMarking.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id, question_no=question_no).first()
+    if sample_marking is None:
+        return bad_request()
+
+    sample_marking.is_flagged = True
+    db.session.commit()
+
+    return success()
+
+
 
 def get_sec(time_str):
     h, m, s = time_str.split(':')

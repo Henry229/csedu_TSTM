@@ -241,23 +241,39 @@
         $('.footer-next-btn').on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            if (_$container.find('.item-rendered-empty').length > 0) {
-                //_goToQuestionNo(_question_no);
-            } else {
-                var response = _handler.getResponse();
-                processAssessmentResponse(response, true);
-            }
+            let response = _handler.getResponse();
+            processAssessmentResponse(response, 'next');
         });
 
         $('.footer-back-btn').on('click', function () {
             $('.tools-ruler').hide();
             $('.tools-protractor').hide();
-            if (_$container.find('.item-rendered-empty').length > 0) {
-                //_goToQuestionNo(_question_no - 1);
-            } else {
-                var response = _handler.getResponse();
-                processAssessmentResponse(response, false);
-            }
+            let response = _handler.getResponse();
+            processAssessmentResponse(response, 'back');
+        });
+
+        $('.footer-flag-btn').on('click', function () {
+            $('.tools-ruler').hide();
+            $('.tools-protractor').hide();
+            let question_no = getCookie('question_no');
+            if(question_no == undefined) question_no = 1;
+            $.ajax({ url: '/api/sample/flag/{{ sample_assessment_enroll_id }}/' + question_no,
+                type: 'get',
+                beforeSend: function () {
+                    _disableButtons(true);
+                },
+                complete: function () {
+                    _disableButtons(false);
+                },
+                success: function(response){
+                    if (response.result === 'success') {
+                       
+                    }
+                },
+                error: function(xhr) {
+                    $('#errorModal').modal('show');
+                }
+            });
         });
     });
 
@@ -278,7 +294,6 @@
                         var data = response.data;
                         drawRendered(data);
                         postProcessRendered(data);
-
                     }
                 },
                 error: function(xhr) {
@@ -305,7 +320,7 @@
             timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
             $('.number').css('visibility','visible');
         }
-        _disableButtons(false, false);
+        _disableButtons(false);
     }
 
     function formatTime(seconds) {
@@ -330,7 +345,7 @@
         setCookie('hhmmss', _hhmmss[0] + ':' + _hhmmss[1] + ':' + _hhmmss[2]);
     }
 
-    _disableButtons = function(disable, is_next) {
+    _disableButtons = function(disable, type) {
         var next_btn = $('.footer-next-btn');
         var back_btn = $('.footer-back-btn');
         var flag_btn = $('.footer-flag-btn');
@@ -338,10 +353,10 @@
             next_btn.prop('disabled', true);
             back_btn.prop('disabled', true);
             flag_btn.prop('disabled', true);
-            if (is_next) {
+            if (type=='next') {
                 $('.footer-next-btn .next-caret').hide();
                 $('.footer-next-btn .next-loading').show();
-            } else {
+            else if (type=='back') {
                 $('.footer-back-btn .back-caret').hide();
                 $('.footer-back-btn .back-loading').show();
             }
@@ -393,7 +408,7 @@
         _calculateSize();
     };
 
-    let processAssessmentResponse = function (response, is_next) {
+    let processAssessmentResponse = function (response, button_type) {
         var url = '/api/sample/responses';
         var data = {
             'session': '{{- session_key -}}',
@@ -411,10 +426,10 @@
             contentType: 'application/json',
             data: JSON.stringify(data),
             beforeSend: function () {
-                _disableButtons(true, is_next);
+                _disableButtons(true, button_type);
             },
             complete: function () {
-                _disableButtons(false, is_next);
+                _disableButtons(false, button_type);
             },
             error: function (jqXHR, textStatus, errorThrown ) {
                 $('#errorModal .modal-body').html('Error occurred in the main process');
