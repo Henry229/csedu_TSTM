@@ -267,14 +267,7 @@
                 },
                 success: function(response){
                     if (response.result === 'success') {
-                        let flag_btn = $('.footer-flag-btn');
-                        if(response.data.flag==1) {
-                            flag_btn.find('span').text('Unflag');
-                            flag_btn.find('i').addClass('active-flag');
-                        }else{
-                            flag_btn.find('span').text('Flag');
-                            flag_btn.find('i').removeClass('active-flag');
-                        }
+                        flagRendered(response.data.flag==1?true:false);
                     }
                 },
                 error: function(xhr) {
@@ -470,14 +463,19 @@
     let drawingForm = function (data) {
         drawRendered(data);
         postProcessRendered(data);
-        flagRendered(data);
+        flagRendered(data.flagged);
     };
 
-    let flagRendered = function (data) {
-        _flagged = data.flagged;
+    let flagRendered = function (flagged) {
+        let flag_btn = $('.footer-flag-btn');
+        if(flagged){
+            flag_btn.find('span').text('Unflag');
+            flag_btn.find('i').addClass('active-flag');
+        }else{
+            flag_btn.find('span').text('Flag');
+            flag_btn.find('i').removeClass('active-flag');
+        }
 
     };
-
-
   </script>
 {% endblock %}
