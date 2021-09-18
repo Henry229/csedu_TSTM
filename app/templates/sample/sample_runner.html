@@ -301,6 +301,7 @@
                         var data = response.data;
                         drawRendered(data);
                         postProcessRendered(data);
+                        flagRendered(data);
                     }
                 },
                 error: function(xhr) {
@@ -421,7 +422,7 @@
         var data = {
             'session': '{{- session_key -}}',
             'question_no': parseInt(getCookie('question_no')),
-            'is_next': is_next
+            'is_next': button_type=='next' ? true: false
         };
         if (response.writing_text) {
             data['writing_text'] = response.writing_text;
@@ -450,7 +451,9 @@
                         window.location.href = '/sample/index';
                     }else{
                         setCookie('question_no', response.data.question_no);
-                        getRendered();
+                        //getRendered();
+
+
                         if(response.data.question_no>1){
                             $('.footer-back-btn').show();
                         }else{
@@ -467,5 +470,9 @@
         });
     };
 
+    let flagRendered = function (data) {
+        _flagged = data.flagged;
+
+    };
   </script>
 {% endblock %}

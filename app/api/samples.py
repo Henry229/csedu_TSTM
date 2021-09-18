@@ -121,16 +121,20 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
         response['test_duration'] = assessment.test_duration * 60
 
     saved_answer = None
+    flagged = False
     sample_marking = SampleMarking.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id, question_no=question_no).first()
     if sample_marking is not None:
         if sample_marking.candidate_r_value is not None:
             saved_answer = sample_marking.candidate_r_value
+        if sample_marking.is_flagged:
+            flagged = True
     else:
         marking_inserted = SampleMarking(question_no=question_no,
                                         sample_assessment_enroll_id=sample_assessment_enroll_id)
         db.session.add(marking_inserted)
         db.session.commit()
 
+    response['flagged'] = flagged
     response['saved_answer'] = saved_answer
     response['question_no'] = question_no
     response['last'] = 0
