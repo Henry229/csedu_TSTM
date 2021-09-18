@@ -1335,18 +1335,10 @@ class SampleMarking(db.Model):
     is_correct = db.Column(db.Boolean)
     outcome_score = db.Column(db.Float, default=1)
     candidate_mark = db.Column(db.Float, default=0)
-    sample_assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('sample_assessment_enroll.id'))
-    created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
-
-
-class SampleMarkingRead(db.Model):
-    __tablename__ = 'sample_marking_read'
-
-    id = db.Column(db.Integer, primary_key=True)
-    question_no = db.Column(db.Integer)
     is_flagged = db.Column(db.Boolean, default=False)
     sample_assessment_enroll_id = db.Column(db.Integer, db.ForeignKey('sample_assessment_enroll.id'))
     created_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    answered_time = db.Column(db.DateTime)
 
 
 class Codebook(db.Model):

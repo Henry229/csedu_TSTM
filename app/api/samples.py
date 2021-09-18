@@ -123,21 +123,19 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
     saved_answer = None
     sample_marking = SampleMarking.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id, question_no=question_no).first()
     if sample_marking is not None:
-        saved_answer = sample_marking.candidate_r_value
-    response['saved_answer'] = saved_answer
-
-    sample_marking_read = SampleMarkingRead.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id,
-                                                   question_no=question_no).first()
-    if sample_marking_read is None:
-        marking_read = SampleMarkingRead(question_no=question_no, sample_assessment_enroll_id=sample_assessment_enroll_id)
-        db.session.add(marking_read)
+        if sample_marking.candidate_r_value is not None:
+            saved_answer = sample_marking.candidate_r_value
+    else:
+        marking_inserted = SampleMarking(question_no=question_no,
+                                        sample_assessment_enroll_id=sample_assessment_enroll_id)
+        db.session.add(marking_inserted)
         db.session.commit()
 
+    response['saved_answer'] = saved_answer
     response['question_no'] = question_no
     response['last'] = 0
 
     return success(response)
-
 
 
 @api.route('/sample/responses', methods=['POST'])
@@ -221,20 +219,11 @@ def sample_responses():
 
 
     marking = SampleMarking.query.filter_by(sample_assessment_enroll_id=assessmentEnroll.id, question_no=question_no).first()
-    if marking is None:
-        marking_inserted = SampleMarking(question_no=question_no,
-                                        candidate_r_value=candidate_r_value,
-                                        is_correct=is_correct,
-                                        candidate_mark=candidate_mark,
-                                        sample_assessment_enroll_id=assessmentEnroll.id)
-        db.session.add(marking_inserted)
-        db.session.commit()
-    else:
-        marking.candidate_r_value = candidate_r_value
-        marking.candidate_mark = candidate_mark
-        marking.outcome_score = outcome_score
-        marking.is_correct = is_correct
-        db.session.commit()
+    marking.candidate_r_value = candidate_r_value
+    marking.candidate_mark = candidate_mark
+    marking.outcome_score = outcome_score
+    marking.is_correct = is_correct
+    db.session.commit()
 
     if max_question_no == question_no:
         data = {'last': 1}
