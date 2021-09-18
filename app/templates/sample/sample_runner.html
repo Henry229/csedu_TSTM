@@ -267,7 +267,11 @@
                 },
                 success: function(response){
                     if (response.result === 'success') {
-                        $('.footer-flag-btn > i').addClass('active-flag');
+                        if(response.data.flag==1) {
+                            $('.footer-flag-btn > i').addClass('active-flag');
+                        }else{
+                            $('.footer-flag-btn > i').removeClass('active-flag');
+                        }
                     }
                 },
                 error: function(xhr) {

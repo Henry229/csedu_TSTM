@@ -245,10 +245,20 @@ def sample_flag(sample_assessment_enroll_id, question_no, run_session=None):
     if sample_marking is None:
         return bad_request()
 
-    sample_marking.is_flagged = True
+    current_flag = None
+    if sample_marking.is_flagged:
+        current_flag = 0
+        sample_marking.is_flagged = False
+    else:
+        current_flag = 1
+        sample_marking.is_flagged = True
     db.session.commit()
 
-    return success()
+    data = {
+        'flag': current_flag
+    }
+
+    return success(data)
 
 
 
