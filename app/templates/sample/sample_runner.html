@@ -264,11 +264,10 @@
                 },
                 complete: function () {
                     _disableButtons(false);
-                    $('.footer-flag-btn').addClass('active-flag');
                 },
                 success: function(response){
                     if (response.result === 'success') {
-
+                        $('.footer-flag-btn > i').addClass('active-flag');
                     }
                 },
                 error: function(xhr) {
