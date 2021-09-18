@@ -422,7 +422,7 @@
             },
             success: function (response) {
                 if (response.result === 'success') {
-                    if(response.data.last!=undefined){
+                    if(response.data.last!=undefined && response.data.last==1){
                         alert('the testing is finished.');
                         window.location.href = '/sample/index';
                     }else{
