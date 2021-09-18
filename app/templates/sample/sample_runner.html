@@ -264,6 +264,7 @@
                 },
                 complete: function () {
                     _disableButtons(false);
+                    $('.footer-flag-btn').addClass('active-flag');
                 },
                 success: function(response){
                     if (response.result === 'success') {
