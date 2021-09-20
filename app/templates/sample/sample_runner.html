@@ -292,7 +292,7 @@
                 success: function(response){
                     if (response.result === 'success') {
                         let data = response.data;
-                        drawingForm(data);
+                        drawingForm(data, true);
                     }
                 },
                 error: function(xhr) {
@@ -305,19 +305,21 @@
             });
     }
 
-    drawRendered = function(data) {
-        var rendered_html = data.html;
+    drawRendered = function(data, is_first) {
+        let rendered_html = data.html;
         _$container.empty();
-        var div = $(rendered_html);
+        let div = $(rendered_html);
         _$container.append(div);
 
-        count = data.test_duration;
-        if(data.test_duration>0){
-            counter = setInterval(timer, 1000);
-        }else{
-            let timer_display = $('.timer-display');
-            timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
-            $('.number').css('visibility','visible');
+        if(is_first){
+            count = data.test_duration;
+            if(data.test_duration>0){
+                counter = setInterval(timer, 1000);
+            }else{
+                let timer_display = $('.timer-display');
+                timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
+                $('.number').css('visibility','visible');
+            }
         }
         _disableButtons(false);
     }
@@ -443,7 +445,7 @@
                     }else{
                         setCookie('question_no', response.data.question_no);
                         let data = response.data;
-                        drawingForm(data);
+                        drawingForm(data, false);
                         if(response.data.question_no>1){
                             $('.footer-back-btn').show();
                         }else{
@@ -460,8 +462,8 @@
         });
     };
 
-    let drawingForm = function (data) {
-        drawRendered(data);
+    let drawingForm = function (data, is_first) {
+        drawRendered(data, is_first);
         postProcessRendered(data);
         flagRendered(data.flagged);
     };
