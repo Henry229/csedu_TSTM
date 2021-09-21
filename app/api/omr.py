@@ -19,7 +19,7 @@ def omr_marking():
     if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.AUTHORIZATION_KEY:
         return bad_request()
 
-    retsult = request.json.get('result')
+    #retsult = request.json.get('result')
 
     return success({"result": "success"})
 
