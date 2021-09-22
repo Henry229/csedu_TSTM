@@ -16,8 +16,8 @@ from .. import db
 
 @api.route('/omr/marking', methods=['POST', 'GET'])
 def omr_marking():
-    #if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.AUTHORIZATION_KEY:
-    #    return bad_request()
+    if request.headers['Authorization'] == None or request.headers['Authorization'] != Config.AUTHORIZATION_KEY:
+        return bad_request()
 
     #retsult = request.json.get('result')
 
