@@ -119,9 +119,15 @@ def omr_marking():
                 item_service = ItemService(qti_item_obj.file_link)
                 qti_xml = item_service.get_qti_xml_path()
                 processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
+                identifier = None
+                answers = marking_to_value(score)
+                if len(answers) == 1:
+                    identifier = answers[0]
+                else:
+                    identifier = answers
                 response = {"RESPONSE": {
                     "base": {
-                        "identifier": marking_to_value(score)
+                        "identifier": identifier
                     }
                 }}
                 parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
