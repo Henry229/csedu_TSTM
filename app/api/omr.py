@@ -49,10 +49,6 @@ def omr_marking():
     for _info in info:
         scores = list(filter(lambda x: (x["Subject"] == _info["subject"]), scores_list))
 
-        #testset = Testset.query.filter_by(GUID=_info.get('testset_guid'), active=True).first()
-        #if testset is None:
-        #    return bad_request(message="The testset does not exist.")
-
         #_info['testset_guid'] = '3b1a9db6-3be2-4e67-b566-2a44f3675539'
         _info['testset_guid'] = '8b5b575c-7219-48ea-98d4-8fead8ef55bf'
 
@@ -65,27 +61,37 @@ def omr_marking():
         if assessment is None:
             return bad_request(message="The assessment does not exist.")
 
+        testset_id = assessment.testset_id
         '''
         AssessmentEnroll
         '''
-        assessment_guid = assessment.assessment_guid
-        student_user_id = student.user_id
-        attempt_count = 1
-        test_type_name = Codebook.get_code_name(assessment.test_type)
-        dt = datetime.utcnow()
-        start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
-        testset_id = assessment.testset_id
+        assessment_enroll_id = None
+        assessment_enroll = AssessmentEnroll.query.filter_by(assessment_id=assessment.assessment_id, student_user_id=student.user_id,
+                                                    testset_id=testset_id, start_ip=None).first()
+        if assessment_enroll is None:
+            assessment_guid = assessment.assessment_guid
+            student_user_id = student.user_id
+            attempt_count = 1
+            test_type_name = Codebook.get_code_name(assessment.test_type)
+            dt = datetime.utcnow()
+            start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
 
-        enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.assessment_id, testset_id=testset_id,
-                                    student_user_id=student_user_id, attempt_count=attempt_count,
-                                    start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id)
-        db.session.add(enrolled)
-        db.session.commit()
-        assessment_enroll_id = enrolled.id
+            enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.assessment_id, testset_id=testset_id,
+                                        student_user_id=student_user_id, attempt_count=attempt_count,
+                                        start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id)
+            db.session.add(enrolled)
+            db.session.commit()
+            assessment_enroll_id = enrolled.id
+        else:
+            assessment_enroll_id = assessment_enroll.id
 
         '''
         Marking
         '''
+        if assessment_enroll is not None:
+            Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id).delete()
+            db.session.commit()
+
         item_list = []
         branching = json.dumps(assessment.branching)
         ends = [m.end() for m in re.finditer('"id":', branching)]
