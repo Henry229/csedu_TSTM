@@ -128,7 +128,7 @@ def omr_marking():
                 identifier = None
                 answers = marking_to_value(score)
                 if len(answers) == 1:
-                    identifier = answers[0]
+                    identifier = answers[0].replace("'", "\"")
                 else:
                     identifier = answers
                 response = {"RESPONSE": {
