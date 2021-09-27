@@ -232,5 +232,4 @@ def marking_to_value(score):
         if val:
             candidate_r_value.append(alfa[idx])
 
-    return ['A','C']
-    #return candidate_r_value
+    return candidate_r_value
