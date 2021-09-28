@@ -4,6 +4,8 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 import re
 
+from sqlalchemy import desc
+
 from app.api import api
 from flask import jsonify, request, current_app
 
@@ -50,14 +52,14 @@ def omr_marking():
         scores = list(filter(lambda x: (x["Subject"] == _info["subject"]), scores_list))
 
         #_info['testset_guid'] = '3b1a9db6-3be2-4e67-b566-2a44f3675539'
-        _info['testset_guid'] = '8b5b575c-7219-48ea-98d4-8fead8ef55bf'
+        #_info['testset_guid'] = '8b5b575c-7219-48ea-98d4-8fead8ef55bf'
 
         assessment = Assessment.query.with_entities(Assessment.id.label('assessment_id'), Assessment.test_type, Testset.test_duration,
                           Assessment.GUID.label('assessment_guid'), Testset.id.label('testset_id'),
                         Testset.branching).\
                     join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id).\
                         join(Testset, AssessmentHasTestset.testset_id == Testset.id).\
-                        filter(Testset.GUID == _info.get('testset_guid'), Testset.active == True).first()
+                        filter(Testset.GUID == _info.get('testset_guid'), Testset.active == True).order_by(desc(Assessment.id)).first()
         if assessment is None:
             return bad_request(message="The assessment does not exist.")
 
