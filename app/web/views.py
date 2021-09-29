@@ -692,10 +692,19 @@ def assessment_list():
                     for a in sub_list.assessments:
                         for ts in a.testsets:
                             if ts.id in temp_testsets:
-                                test.append(ts.id)
                                 testsets.remove(ts)
                             else:
                                 temp_testsets.append(ts.id)
+
+        for homework in homeworks_grouped:
+            for _subjects in homework['subjects']:
+                for sub_list in _subjects['list']:
+                    for a in sub_list.assessments:
+                        for ts in a.testsets:
+                            test.append(ts.id)
+
+
+
 
         #my_set = set(homeworks_grouped)
         #homeworks_grouped = list(homeworks_grouped)
