@@ -98,9 +98,10 @@
                                           <thead>
                                           {% for sub in assessment.subjects %}
                                           <tr>
-                                              <th>{{ sub['list']|length }}</th>
+                                              <th></th>
                                               {% for sub_list in sub['list'] %}
                                               {% for assessment in sub_list.assessments %}
+                                              {{ sub_list }}
                                               {% for ts in assessment.testsets %}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
