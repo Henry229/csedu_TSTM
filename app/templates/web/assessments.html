@@ -101,8 +101,8 @@
                                               <th></th>
                                               {% for sub_list in sub['list'] %}
                                               {% for assessment in sub_list.assessments %}
-                                              {{ sub_list }}
                                               {% for ts in assessment.testsets %}
+                                              {{ ts }}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
                                               {% if ts.enable_report %}
