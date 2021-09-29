@@ -690,7 +690,7 @@ def assessment_list():
                 temp_testsets = []
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
-                        for ts in a.testsets:
+                        for ts in reversed(a.testsets):
                             if ts.id in temp_testsets:
                                 a.testsets.remove(ts)
                             else:
