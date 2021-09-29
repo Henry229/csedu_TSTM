@@ -29,7 +29,7 @@
       </label>
     </div>
     <div class="float-right">
-        <button type="button" id="report_error" class="btn btn-danger text-white">{{ test }}</button>
+        <button type="button" id="report_error" class="btn btn-danger text-white">Online Help</button>
     </div>
   </div>
   {% if assessments_list|length==0 %}
@@ -100,9 +100,8 @@
                                           <tr>
                                               <th></th>
                                               {% for sub_list in sub['list'] %}
-                                              {% for a in sub_list.assessments %}
-                                              {% for ts in a.testsets %}
-                                              {{ ts }}
+                                              {% for _assessment in sub_list.assessments %}
+                                              {% for ts in _assessment.testsets %}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
                                               {% if ts.enable_report %}
@@ -125,8 +124,8 @@
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
                                                   {% for sub_list in sub['list'] %}
-                                                  {% for assessment in sub_list.assessments %}
-                                                  {% for ts in assessment.testsets %}
+                                                  {% for _assessment in sub_list.assessments %}
+                                                  {% for ts in _assessment.testsets %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
