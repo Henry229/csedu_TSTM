@@ -115,13 +115,9 @@
                                                   <td>
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
-                                                  {% for sub_list in sub['list'] %}
-{% for _assessment in sub_list.assessments %}
-                                                      {{ _assessment.testsets }}
+                                                  {% for ts in sub['list'] %}
 
-                                                  {% for ts in _assessment.testsets %}
                                                   <td class="testset">
-                                                  {{ ts.testsets }}
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
                                                                  data-testset-id="{{ ts.id }}" value="{{ ts.name }}"
@@ -240,8 +236,6 @@
                                                         {% endif %}
                                                       </td>
 
-                                                      {% endfor %}
-                                                  {% endfor %}
                                                   {% endfor %}
                                               </tr>
                                           {% endfor %}
