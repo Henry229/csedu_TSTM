@@ -665,7 +665,6 @@ def assessment_list():
 
     homeworks_grouped = []
     sorted_grouped = sorted(homeworks, key=lambda x: x.name)
-    test = len(sorted_grouped)
     for key, group in groupby(sorted_grouped, lambda x: x.name):
         assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
         testsets = []
@@ -674,6 +673,8 @@ def assessment_list():
             testsets.extend(thing.testsets)
             if assessment_grouped['first_assessment'] is None:
                 assessment_grouped['first_assessment'] = thing
+
+        test = len(testsets)
 
         testsets_grouped = sorted(testsets, key=lambda x: x.subject)
         for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
