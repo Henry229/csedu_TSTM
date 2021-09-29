@@ -99,10 +99,16 @@
                                           {% for sub in assessment.subjects %}
                                           <tr>
                                               <th></th>
+                                              {% for sub_list in sub['list'] %}
+                                              {% for _assessment in sub_list.assessments %}
+                                              {% for ts in _assessment.testsets %}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
                                               <th>Report</th>
                                               <th align="center"><span class="btn btn-default"><i class="fa fa-microphone"></i></span></th>
+                                              {% endfor %}
+                                              {% endfor %}
+                                              {% endfor %}
                                           </tr>
                                           {% endfor %}
                                           </thead>
