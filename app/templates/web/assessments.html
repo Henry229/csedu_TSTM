@@ -29,7 +29,7 @@
       </label>
     </div>
     <div class="float-right">
-        <button type="button" id="report_error" class="btn btn-danger text-white">Online Help</button>
+        <button type="button" id="report_error" class="btn btn-danger text-white">{{ test }}</button>
     </div>
   </div>
   {% if assessments_list|length==0 %}
@@ -100,7 +100,8 @@
                                           <tr>
                                               <th></th>
                                               {% for sub_list in sub['list'] %}
-                                              {% for ts in sub_list.assessments[0].testsets %}
+                                              {% for assessment in sub_list.assessments %}
+                                              {% for ts in assessment.testsets %}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
                                               {% if ts.enable_report %}
@@ -110,7 +111,7 @@
                                                   <th align="center"><span class="btn btn-default"><i
                                                           class="fa fa-microphone"></i></span></th>
                                               {% endif %}
-
+                                              {% endfor %}
                                               {% endfor %}
                                               {% endfor %}
                                           </tr>
@@ -123,7 +124,8 @@
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
                                                   {% for sub_list in sub['list'] %}
-                                                  {% for ts in sub_list.assessments[0].testsets %}
+                                                  {% for assessment in sub_list.assessments %}
+                                                  {% for ts in assessment.testsets %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
@@ -240,7 +242,7 @@
                                                           {% endif %}
                                                       </td>
                                                   {% endif %}
-
+                                                  {% endfor %}
                                                   {% endfor %}
                                                   {% endfor %}
                                               </tr>

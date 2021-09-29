@@ -667,6 +667,7 @@ def assessment_list():
 
     homeworks_grouped = []
     sorted_grouped = sorted(homeworks, key=lambda x: x.name)
+    test = len(sorted_grouped)
     for key, group in groupby(sorted_grouped, lambda x: x.name):
         assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
         testsets = []
@@ -676,14 +677,13 @@ def assessment_list():
             if assessment_grouped['first_assessment'] is None:
                 assessment_grouped['first_assessment'] = thing
 
-        #testsets_grouped = sorted(testsets, key=lambda x: x.subject)
-        #for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
-        for key1, group1 in groupby(testsets, lambda x: x.subject):
+        testsets_grouped = sorted(testsets, key=lambda x: x.subject)
+        for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
             grouped1 = {'name': key1, 'list':[]}
             for thing1 in group1:
                 grouped1['list'].append(thing1)
 
-        assessment_grouped['subjects'].append(grouped1)
+            assessment_grouped['subjects'].append(grouped1)
 
         homeworks_grouped.append(assessment_grouped)
 
@@ -729,7 +729,7 @@ def assessment_list():
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
-                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days)
+                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=test)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
