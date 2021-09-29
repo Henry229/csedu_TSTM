@@ -691,7 +691,12 @@ def assessment_list():
                     for a in sub_list.assessments:
                         for ts in a.testsets:
                             if _subjects['name'] == ts.subject:
-                                temp_testsets.append(ts)
+                                exits = False
+                                for _set in temp_testsets:
+                                    if ts.id == _set.id:
+                                        exits = True
+                                if not exits:
+                                    temp_testsets.append(ts)
                 _subjects['testsets'] = temp_testsets
 
         for homework in homeworks_grouped:
