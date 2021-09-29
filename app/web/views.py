@@ -702,7 +702,7 @@ def assessment_list():
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
                         for ts in a.testsets:
-                            _subjects['header_count'] += 1
+                            homework['header_count'] += 1
 
         #my_set = set(homeworks_grouped)
         #homeworks_grouped = list(homeworks_grouped)
