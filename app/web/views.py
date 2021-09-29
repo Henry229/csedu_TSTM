@@ -693,10 +693,10 @@ def assessment_list():
                         for ts in a.testsets:
                             if ts.id in temp_testsets:
                                 #a.testsets.remove(ts)
-                                ts['remove'] = '1'
+                                ts.remove = "1"
                             else:
                                 temp_testsets.append(ts.id)
-                                ts['remove'] = '0'
+                                ts.remove = "0"
 
 
         for homework in homeworks_grouped:
