@@ -665,7 +665,6 @@ def assessment_list():
 
     homeworks_grouped = []
     sorted_grouped = sorted(homeworks, key=lambda x: x.name)
-    test = len(sorted_grouped)
     for key, group in groupby(sorted_grouped, lambda x: x.name):
         assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
         testsets = []
@@ -684,6 +683,10 @@ def assessment_list():
             assessment_grouped['subjects'].append(grouped1)
 
         homeworks_grouped.append(assessment_grouped)
+
+        test = homeworks_grouped
+        #my_set = set(homeworks_grouped)
+        #homeworks_grouped = list(homeworks_grouped)
 
     assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks_grouped}
     log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
