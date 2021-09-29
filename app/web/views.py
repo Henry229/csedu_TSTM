@@ -733,7 +733,7 @@ def assessment_list():
         runner_version = str(int(datetime.utcnow().timestamp()))
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
-                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days)
+                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=homeworks_grouped)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
