@@ -690,7 +690,7 @@ def assessment_list():
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
                         for ts in a.testsets:
-                            if _subjects['name'] == ts.id:
+                            if _subjects['name'] == ts.subject:
                                 temp_testsets.append(ts)
                 _subjects['testsets'] = temp_testsets
 
