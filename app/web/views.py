@@ -684,17 +684,6 @@ def assessment_list():
 
         homeworks_grouped.append(assessment_grouped)
 
-        #remove testset if there is equal id in testset of each assessment
-        for homework in homeworks_grouped:
-            for _subjects in homework['subjects']:
-                temp_testsets = []
-                for sub_list in _subjects['list']:
-                    for a in sub_list.assessments:
-                        for ts in a.testsets:
-                            if ts.id in temp_testsets:
-                                a.testsets.remove(ts)
-                            else:
-                                temp_testsets.append(ts.id)
 
         #my_set = set(homeworks_grouped)
         #homeworks_grouped = list(homeworks_grouped)
