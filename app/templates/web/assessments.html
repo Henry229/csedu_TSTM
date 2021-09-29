@@ -96,27 +96,15 @@
                                              value="{{ assessment.first_assessment.GUID }}">
                                       <table id="testsets" class="display table table-hover" style="width:100%">
                                           <thead>
+                                          {% for sub in assessment.subjects %}
                                           <tr>
                                               <th></th>
-                                          {% for sub in assessment.subjects %}
-                                              {% for sub_list in sub['list'] %}
-                                              {% for _assessment in sub_list.assessments %}
-                                              {% for ts in _assessment.testsets %}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
-                                              {% if ts.enable_report %}
-                                                  <th>Report</th>
-                                              {% endif %}
-                                              {% if ts.enable_video %}
-                                                  <th align="center"><span class="btn btn-default"><i
-                                                          class="fa fa-microphone"></i></span></th>
-                                              {% endif %}
-                                              {% endfor %}
-                                              {% endfor %}
-                                              {% endfor %}
-                                              {% endfor %}
+                                              <th>Report</th>
+                                              <th align="center"><span class="btn btn-default"><i class="fa fa-microphone"></i></span></th>
                                           </tr>
-
+                                          {% endfor %}
                                           </thead>
                                           <tbody>
                                           {% for sub in assessment.subjects %}
@@ -199,8 +187,9 @@
                                                                  data-testset-id="{{ ts.id }}" value="Start">
                                                       {% endif %}
                                                   </td>
-                                                  {% if ts.enable_report %}
+
                                                       <td>
+                                                        {% if ts.enable_report %}
                                                           {% if ts.enrolled and not ts.resumable %}
                                                               {% if Codebook.get_code_name(ts.subject)=='Writing' and not ts.enable_writing_report %}
                                                                   <input type="button" class="btn btn-secondary btn-block"
@@ -223,10 +212,11 @@
                                                               <input type="button" class="btn btn-secondary btn-block"
                                                                      value="Not Available" disabled>
                                                           {% endif %}
+                                                       {% endif %}
                                                       </td>
-                                                  {% endif %}
-                                                  {% if ts.enable_video %}
+
                                                       <td>
+                                                        {% if ts.enable_video %}
                                                           {% if ts.enrolled and not ts.resumable  and ts.explanation_link %}
                                                               <button class="btn btn-outline-danger" type="button"
                                                                      id="view_explanation_window"
@@ -241,8 +231,9 @@
                                                                       disabled><i
                                                                       class="fa fa-stop"></i></button>
                                                           {% endif %}
+                                                        {% endif %}
                                                       </td>
-                                                  {% endif %}
+
                                                   {% endfor %}
                                                   {% endfor %}
                                                   {% endfor %}
