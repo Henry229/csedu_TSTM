@@ -690,11 +690,14 @@ def assessment_list():
                 temp_testsets = []
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
-                        for ts in reversed(a.testsets):
+                        for ts in a.testsets:
                             if ts.id in temp_testsets:
-                                a.testsets.remove(ts)
+                                #a.testsets.remove(ts)
+                                ts['remove'] = '1'
                             else:
                                 temp_testsets.append(ts.id)
+                                ts['remove'] = '0'
+
 
         for homework in homeworks_grouped:
             homework['header_count'] = 0

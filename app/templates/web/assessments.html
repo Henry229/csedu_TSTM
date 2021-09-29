@@ -118,6 +118,7 @@
                                                   {% for sub_list in sub['list'] %}
                                                   {% for _assessment in sub_list.assessments %}
                                                   {% for ts in _assessment.testsets %}
+                                                  {% if ts["remove"] == '0' %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
@@ -236,7 +237,7 @@
                                                           {% endif %}
                                                         {% endif %}
                                                       </td>
-
+                                                    {% endif %}
                                                   {% endfor %}
                                                   {% endfor %}
                                                   {% endfor %}
