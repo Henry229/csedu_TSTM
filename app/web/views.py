@@ -691,7 +691,7 @@ def assessment_list():
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
                         for ts in a.testsets:
-                                testsets.remove(ts)
+                                a.testsets.remove(ts)
 
         for homework in homeworks_grouped:
             for _subjects in homework['subjects']:
