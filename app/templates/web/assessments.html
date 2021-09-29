@@ -133,14 +133,14 @@
                                                               <input type="button"
                                                                      class="btn btn-primary btn-block resume"
                                                                      data-student-user-id="{{ student_user_id }}"
-                                                                     data-assessment-guid="{{ assessment.GUID }}"
+                                                                     data-assessment-guid="{{ ts.assessment_guid }}"
                                                                      data-testset-id="{{ ts.id }}"
                                                                      data-session-key="{{ ts.session_key }}"
                                                                      value="Resume">
                                                           {% elif ts.restartable %}
                                                             <input type="button" class="btn btn-primary btn-block start"
                                                                  data-student-user-id="{{ student_user_id }}"
-                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-assessment-guid="{{ ts.assessment_guid }}"
                                                                  data-testset-id="{{ ts.id }}" value="Retry">
                                                           {% else %}
                                                               <input type="button" class="btn btn-secondary btn-block"
@@ -184,7 +184,7 @@
                                                           {% endif %}
                                                           <input type="button" class="btn btn-primary btn-block start"
                                                                  data-student-user-id="{{ student_user_id }}"
-                                                                 data-assessment-guid="{{ assessment.GUID }}"
+                                                                 data-assessment-guid="{{ ts.assessment_guid }}"
                                                                  data-testset-id="{{ ts.id }}" value="Start">
                                                       {% endif %}
                                                   </td>
@@ -199,8 +199,8 @@
                                                                 {% if ts.report_type == 'report' %}
                                                                   <input type="button" class="btn btn-primary report"
                                                                          data-student-user-id="{{ student_user_id }}"
-                                                                         data-assessment-id="{{ assessment.id }}"
-                                                                         data-assessment-guid="{{ assessment.GUID }}"
+                                                                         data-assessment-id="{{ ts.assessment_id }}"
+                                                                         data-assessment-guid="{{ ts.assessment_guid }}"
                                                                          data-testset-id="{{ ts.id }}"
                                                                          value="View Report">
                                                                 {% else %}
