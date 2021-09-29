@@ -96,20 +96,12 @@
                                              value="{{ assessment.first_assessment.GUID }}">
                                       <table id="testsets" class="display table table-hover" style="width:100%">
                                           <thead>
-                                          {% set temp_testsets = [] %}
                                           {% for sub in assessment.subjects %}
                                           <tr>
                                               <th></th>
                                               {% for sub_list in sub['list'] %}
                                               {% for a in sub_list.assessments %}
                                               {% for ts in a.testsets %}
-                                                {% set temp_exists = False %}
-                                                {% for _value in temp_testsets %}
-                                                    {% if ts == _value %}
-                                                    {% set temp_exists = True %}
-                                                    {% endif %}
-                                                {% endfor %}
-                                              {% if temp_exists == False %}
                                               {{ ts }}
                                               <th class="testset">Test Set</th>
                                               <th>Status</th>
@@ -119,8 +111,6 @@
                                               {% if ts.enable_video %}
                                                   <th align="center"><span class="btn btn-default"><i
                                                           class="fa fa-microphone"></i></span></th>
-                                              {% endif %}
-                                              {{ temp_testsets.append(ts.id) }}
                                               {% endif %}
                                               {% endfor %}
                                               {% endfor %}
