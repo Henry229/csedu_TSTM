@@ -702,7 +702,8 @@ def assessment_list():
         for homework in homeworks_grouped:
             homework['header_count'] = 0
             for _subjects in homework['subjects']:
-                if len(_subjects['list']) > homework['header_count']:
+                #if len(_subjects['list']) > homework['header_count']:
+                if len(_subjects['testsets']) > homework['header_count']:
                     homework['header_count'] = len(_subjects['list'])
 
 
