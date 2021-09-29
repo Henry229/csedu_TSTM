@@ -669,9 +669,8 @@ def assessment_list():
         assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
         testsets = []
 
+        test = len(group)
         for thing in group:
-            test = thing.testsets
-
             testsets.extend(thing.testsets)
             if assessment_grouped['first_assessment'] is None:
                 assessment_grouped['first_assessment'] = thing
