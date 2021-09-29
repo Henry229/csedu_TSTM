@@ -701,8 +701,8 @@ def assessment_list():
             for _subjects in homework['subjects']:
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
-                        for ts in a.testsets:
-                            homework['header_count'] += 1
+                        if len(a.testsets) > homework['header_count']:
+                            homework['header_count'] = len(a.testsets)
 
         #my_set = set(homeworks_grouped)
         #homeworks_grouped = list(homeworks_grouped)
