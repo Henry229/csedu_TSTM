@@ -697,8 +697,8 @@ def assessment_list():
                                 temp_testsets.append(ts.id)
 
         for homework in homeworks_grouped:
+            homework['header_count'] = 0
             for _subjects in homework['subjects']:
-                _subjects['header_count'] = 0
                 for sub_list in _subjects['list']:
                     for a in sub_list.assessments:
                         for ts in a.testsets:
