@@ -96,9 +96,10 @@
                                              value="{{ assessment.first_assessment.GUID }}">
                                       <table id="testsets" class="display table table-hover" style="width:100%">
                                           <thead>
-                                          <tr>
-                                              <th></th>
                                           {% for sub in assessment.subjects %}
+                                            <tr>
+                                              <th></th>
+
 
                                               {% for sub_list in sub['list'] %}
                                               {% for _assessment in sub_list.assessments %}
@@ -110,8 +111,8 @@
                                               {% endfor %}
                                               {% endfor %}
                                               {% endfor %}
-                                               {% endfor %}
                                           </tr>
+                                        {% endfor %}
 
                                           </thead>
                                           <tbody>
