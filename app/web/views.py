@@ -685,6 +685,18 @@ def assessment_list():
         homeworks_grouped.append(assessment_grouped)
 
         for homework in homeworks_grouped:
+            for _subjects in homework['subjects']:
+                temp_testsets = []
+                for sub_list in _subjects['list']:
+                    for a in sub_list.assessments:
+                        for ts in a.testsets:
+                            if ts.id in temp_testsets:
+                                print('a')
+                            else:
+                                temp_testsets.append(ts)
+                _subjects['testsets'] = temp_testsets
+
+        for homework in homeworks_grouped:
             homework['header_count'] = 0
             for _subjects in homework['subjects']:
                 if len(_subjects['list']) > homework['header_count']:

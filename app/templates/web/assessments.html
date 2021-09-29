@@ -92,8 +92,7 @@
                               <input type="hidden" id="student_user_id" value="{{ student_user_id }}">
                               <div class="row d-inline-block">
                                   <div class="col">
-                                      <input type="hidden" name="assessment_guid"
-                                             value="{{ assessment.first_assessment.GUID }}">
+                                      <input type="hidden" name="assessment_guid" value="{{ assessment.first_assessment.GUID }}">
                                       <table id="testsets" class="display table table-hover" style="width:100%">
                                           <thead>
                                             <tr>
@@ -115,7 +114,7 @@
                                                   <td>
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
-                                                  {% for ts in sub['list'] %}
+                                                  {% for ts in sub['testsets'] %}
 
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
