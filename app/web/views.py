@@ -676,8 +676,8 @@ def assessment_list():
             if assessment_grouped['first_assessment'] is None:
                 assessment_grouped['first_assessment'] = thing
 
-        testsets_grouped = sorted(testsets, key=lambda x: x.subject)
-        for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
+        #testsets_grouped = sorted(testsets, key=lambda x: x.subject)
+        for key1, group1 in groupby(testsets, lambda x: x.subject):
             grouped1 = {'name': key1, 'list':[]}
             for thing1 in group1:
                 grouped1['list'].append(thing1)
