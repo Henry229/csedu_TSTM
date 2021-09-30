@@ -534,8 +534,11 @@ def assessment_list():
                     # if tset.finish_time is not None:
                     if hasattr(tset, 'finish_time') and tset.finish_time is not None:
                         finish_time = tset.finish_time
-                        is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
-                        if is_7days_after_finished is True:
+                        days = 7  #defalut value
+                        if test_type_additional_info['enable_video_days']:
+                            days = int(test_type_additional_info['enable_video_days'])
+                        is_days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=days)) >= datetime.now(pytz.utc)
+                        if is_days_after_finished is True:
                             tset.enable_video = True
                     else:
                         tset.enable_video = True
@@ -684,6 +687,7 @@ def assessment_list():
 
         homeworks_grouped.append(assessment_grouped)
 
+        #the duplicate on each testsets of list. so creating new json item.
         for homework in homeworks_grouped:
             for _subjects in homework['subjects']:
                 temp_testsets = []
