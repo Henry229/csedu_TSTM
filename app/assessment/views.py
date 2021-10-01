@@ -638,7 +638,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
                     ret = fake_return()
                 else:
-                    if subject == 'Writing' and test_type_name.lower().find('naplan') < 0:
+                    if subject == 'Writing':
                         # Do not Send files to CSonlineschool using FTP. It makes the sync slow and time out.
                         # need to find other way later for sync file to csonlineschool
                         continue
