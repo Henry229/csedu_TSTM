@@ -74,7 +74,20 @@ def omr_marking():
             assessment_guid = assessment.assessment_guid
             student_user_id = student.user_id
             attempt_count = 1
-            test_type_name = Codebook.get_code_name(assessment.test_type)
+            test_type_name = None
+            is_subject_of_test_type = False
+            row = Codebook.query.filter_by(id=assessment.test_type).first()
+            if row:
+                test_type_name = row.code_name
+                if row.additional_info:
+                    for x, y in row.additional_info.items():
+                        if x == 'omr_subject':
+                            if bool(y):
+                                is_subject_of_test_type = True
+
+            if not is_subject_of_test_type:
+                return bad_request(message="The test type is not the subject of OMR System.")
+
             dt = datetime.utcnow()
             start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
 
