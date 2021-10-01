@@ -555,6 +555,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                 pdf_file_path = None
                 for m in enroll.marking:
                     if subject == 'Writing':
+                        # skip Writing subject. doesn't need to sync.
+                        continue
                         m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                         if m_writing is None:
                             if not m.candidate_r_value:
