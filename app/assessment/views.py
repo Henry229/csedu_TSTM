@@ -555,6 +555,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                 pdf_file_path = None
                 for m in enroll.marking:
                     if subject == 'Writing':
+                        # skip Writing subject. doesn't need to sync.
+                        continue
                         m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
                         if m_writing is None:
                             if not m.candidate_r_value:
@@ -636,7 +638,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
 
                     ret = fake_return()
                 else:
-                    if subject == 'Writing' and test_type_name.lower().find('naplan') < 0:
+                    if subject == 'Writing':
                         # Do not Send files to CSonlineschool using FTP. It makes the sync slow and time out.
                         # need to find other way later for sync file to csonlineschool
                         continue
