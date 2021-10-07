@@ -1,4 +1,6 @@
 import json
+import random
+import string
 import subprocess
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -11,7 +13,7 @@ from flask import jsonify, request, current_app
 
 from app.api.errors import bad_request
 from app.models import AssessmentEnroll, Assessment, Codebook, Student, Marking, Item, Testset, AssessmentHasTestset, \
-    TestletHasItem
+    TestletHasItem, Role, User
 from config import Config
 from qti.itemservice.itemservice import ItemService
 from .assessments import parse_processed_response, parse_correct_response, allowed_file, save_writing_data
@@ -39,7 +41,41 @@ def omr_marking():
 
     student = Student.query.filter_by(student_id=info[0].get("student_id")).first()
     if student is None:
-        return bad_request(message="Student does not exist.")
+        if info[0].get("stud_first_name") is None or info[0].get("stud_last_name") is None or info[0].get("branch") is None:
+            return bad_request(message="Student sent from OMR System is wrong.")
+        if (info[0].get("stud_first_name").strip() == '' and info[0].get("stud_last_name").strip() == '') or info[0].get("branch").strip() == '':
+            return bad_request(message="Student sent from OMR System is wrong.")
+
+        role = Role.query.filter_by(name='Test_taker').first()
+        student_user = User(
+            username="%s %s (%s)" % (
+                info[0].get("stud_first_name").strip(), info[0].get("stud_last_name").strip(), info[0].get("student_id")),
+            role=role,
+            confirmed=True,
+            active=True,
+            email=info[0].get("student_id") + '@cseducation.com.au')
+        temp_password = ''.join(
+            random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        student_user.password = temp_password
+        db.session.add(student_user)
+        db.session.commit()  # Commit to get the student_user.id
+
+        student = Student(student_id=info[0].get("student_id"),
+                          user_id=student_user.id,
+                          branch=info[0].get("branch").strip())
+
+        info_test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
+                                            Codebook.additional_info.contains(
+                                                {"campus_prefix": info[0].get("branch").strip()})).first()
+        if info_test_center:
+            if info_test_center.additional_info.get("state") is not None:
+                student.state = info_test_center.additional_info["state"]
+            else:
+                if info_test_center.additional_info.get("branch_state") is not None:
+                    student.state = info_test_center.additional_info["branch_state"]
+
+        db.session.add(student)
+        db.session.commit()
 
     test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
                                         Codebook.additional_info.contains(
