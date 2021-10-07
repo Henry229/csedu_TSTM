@@ -202,7 +202,6 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
-                                            is_2hours_after_finished=is_2hours_after_finished,
                                             is_7days_after_finished=is_7days_after_finished,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
