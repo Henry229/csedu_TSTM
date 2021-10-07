@@ -38,7 +38,7 @@ def check_sample_login():
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if session.get('sample') is None:
-                return redirect(url_for('sample.sample_index'))
+                return redirect(url_for('sample.index'))
             return f(*args, **kwargs)
 
         return decorated_function

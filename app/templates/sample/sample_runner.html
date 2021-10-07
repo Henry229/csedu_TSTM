@@ -275,6 +275,60 @@
                 }
             });
         });
+
+        $('button.header-summary').click(function(){
+            let is_summary_show = $('.summary-container').is(":visible");
+            //let is_summary_show = !is_item_show;
+            if(is_summary_show==false){
+                $.ajax({ url: '/api/sample/summary/{{ sample_assessment_enroll_id }}',
+                    type: 'get',
+                    success: function(response){
+                        if (response.result === 'success') {
+                            let question_filter = $('.question-filter');
+                            question_filter.find('.all span').text(response.data.question_count);
+                            question_filter.find('.answered span').text(response.data.answered.length);
+                            question_filter.find('.not_answered span').text(response.data.not_answered.length);
+                            question_filter.find('.not_read span').text((response.data.question_count-response.data.answered.length-response.data.not_answered.length));
+                            question_filter.find('.flagged span').text(response.data.flagged.length);
+
+                            let html = '';
+                            let answer_css = '';
+                            let is_contained;
+                            for(let i=0; i<response.data.question_count; i++){
+                                let question_no = i+1;
+                                answer_css = '';
+                                is_contained = response.data.answered.includes(question_no);
+                                if(is_contained){
+                                    answer_css = 'answered';
+                                }else{
+                                    is_contained = response.data.not_answered.includes(question_no);
+                                    if(is_contained) answer_css = 'not_answered';
+                                }
+                                is_contained = response.data.flagged.includes(question_no);
+                                if(is_contained){
+                                    answer_css = 'flagged' + (answer_css!=''?' ': '') + answer_css;
+                                }
+                                if(answer_css==''){
+                                    answer_css = 'not_read';
+                                }
+                                html += '<button class="'+ answer_css +' filtered">'+String(question_no)+'</button>';
+                            }
+                            $('.question-list-summary').html(html);
+
+                            $('.item-container').toggle();
+                            $('.summary-container').toggle();
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#errorModal').modal('show');
+                    }
+                });
+
+            }else{
+                $('.item-container').toggle();
+                $('.summary-container').toggle();
+            }
+        });
     });
 
     function getRendered(){

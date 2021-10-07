@@ -136,7 +136,6 @@ def my_report(assessment_id, ts_id, student_user_id):
     if finish_time is None: finish_time = row.start_time
 
 
-    is_2hours_after_finished = (pytz.utc.localize(finish_time) + timedelta(hours=2)) >= datetime.now(pytz.utc)
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
 
@@ -149,6 +148,10 @@ def my_report(assessment_id, ts_id, student_user_id):
     enable_holiday = False
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
+
+
+
+
     if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
         if test_type_additional_info['enable_holiday'] == "true":
             enable_holiday = True

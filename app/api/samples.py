@@ -264,7 +264,28 @@ def sample_flag(sample_assessment_enroll_id, question_no, run_session=None):
 
     return success(data)
 
+@api.route('/sample/summary/<int:sample_assessment_enroll_id>', methods=['GET'])
+@check_sample_login_api()
+def sample_summary(sample_assessment_enroll_id):
+    question_count = db.session.query(SampleAssessmentEnroll, SampleAssessmentItems
+    ).filter(SampleAssessmentEnroll.sample_assessment_id == SampleAssessmentItems.sample_assessment_id
+    ).filter(SampleAssessmentEnroll.id == sample_assessment_enroll_id).count()
+    marking = SampleMarking.query.with_entities(SampleMarking.question_no, SampleMarking.is_flagged, SampleMarking.candidate_r_value). \
+        filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id).all()
 
+    answered = [row.question_no for row in marking if row.candidate_r_value != None]
+    not_answered = [row.question_no for row in marking if row.candidate_r_value == None]
+    flagged = [row.question_no for row in marking if row.is_flagged == True]
+
+    data = {
+        'question_count': question_count,
+        'marking_count': 0,
+        'answered': answered,
+        'not_answered': not_answered,
+        'flagged': flagged
+    }
+
+    return success(data)
 
 def get_sec(time_str):
     h, m, s = time_str.split(':')

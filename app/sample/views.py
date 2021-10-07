@@ -58,11 +58,11 @@ def agreement():
 
     user = SampleUsers.query.filter_by(id=session["sample"]).first()
     if user is None:
-        return redirect(url_for('sample.sample_index'))
+        return redirect(url_for('sample.index'))
 
     assessment = SampleAssessment.query.filter_by(id=assessment_id).first()
     if assessment is None:
-        return redirect(url_for('sample.sample_index'))
+        return redirect(url_for('sample.index'))
 
     return render_template('sample/agreement.html', name='Sample Tester - ' + user.username, assessment=assessment)
 
@@ -71,11 +71,11 @@ def agreement():
 def testing():
     session_key = request.args.get('session')
     if session_key is None:
-        return redirect(url_for('sample.sample_index'))
+        return redirect(url_for('sample.index'))
 
     user = SampleUsers.query.filter_by(id=session["sample"]).first()
     if user is None:
-        return redirect(url_for('sample.sample_index'))
+        return redirect(url_for('sample.index'))
 
     sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
     if sample_assessment_enroll is None:
