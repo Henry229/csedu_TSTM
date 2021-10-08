@@ -169,6 +169,8 @@ def process_inward():
     except:
         return internal_server_error('Wrong token')
 
+    log.debug("Inward: %s" % token)
+
     args = json.loads(token.decode('UTF-8'))
     log.debug("Inward: %s" % args)
     state = list(Config.CS_BRANCH_STATES.keys())[0]  # Set default state
