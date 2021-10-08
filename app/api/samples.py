@@ -276,8 +276,8 @@ def sample_summary(sample_assessment_enroll_id):
     marking = SampleMarking.query.with_entities(SampleMarking.question_no, SampleMarking.is_flagged, SampleMarking.candidate_r_value). \
         filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id).all()
 
-    answered = [row.question_no for row in marking if row.candidate_r_value != None]
-    not_answered = [row.question_no for row in marking if row.candidate_r_value == None]
+    answered = [row.question_no for row in marking if row.candidate_r_value != None and not(isinstance(row.candidate_r_value, list) and len(row.candidate_r_value)==1 and row.candidate_r_value[0]=='')]
+    not_answered = [row.question_no for row in marking if row.candidate_r_value == None or (isinstance(row.candidate_r_value, list) and len(row.candidate_r_value)==1 and row.candidate_r_value[0]=='')]
     flagged = [row.question_no for row in marking if row.is_flagged == True]
 
     data = {

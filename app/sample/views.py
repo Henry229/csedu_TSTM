@@ -12,7 +12,7 @@ from . import sample
 from .. import db
 from ..decorators import check_sample_login, permission_required
 from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testset, Item, TestletHasItem, \
-    SampleAssessmentItems, SampleAssessmentEnroll
+    SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking
 
 '''New Sample Page - rendering template'''
 
@@ -80,6 +80,8 @@ def testing():
     sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
+
+    test1 = SampleMarking.query.first()
 
     question_no = 1
     last = False
