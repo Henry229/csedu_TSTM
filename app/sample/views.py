@@ -1,3 +1,4 @@
+import base64
 import json
 import re
 import uuid
@@ -80,8 +81,6 @@ def testing():
     sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
-
-    test1 = SampleMarking.query.first()
 
     question_no = 1
     last = False
