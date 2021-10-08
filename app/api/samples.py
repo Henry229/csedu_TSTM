@@ -149,6 +149,7 @@ def sample_responses():
     question_no = request.json.get('question_no')
     response = request.json.get('response')
     is_next = bool(request.json.get('is_next'))
+    direct_question_no = request.json.get('direct_question_no')
 
     if session_key is None:
         return bad_request()
@@ -229,16 +230,18 @@ def sample_responses():
     marking.is_correct = is_correct
     db.session.commit()
 
-    if max_question_no == question_no:
-        data = {'last': 1}
-        return success(data)
+    if direct_question_no is not None:
+        return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, direct_question_no)
     else:
-
-        if is_next:
-            param_question_no = question_no + 1
+        if max_question_no == question_no:
+            data = {'last': 1}
+            return success(data)
         else:
-            param_question_no = question_no - 1
-        return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
+            if is_next:
+                param_question_no = question_no + 1
+            else:
+                param_question_no = question_no - 1
+            return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
 
 
 

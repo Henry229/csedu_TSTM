@@ -329,6 +329,13 @@
                 $('.summary-container').toggle();
             }
         });
+
+        $('.summary-container').on('click','.question-list-summary button:not(.not_read)', function() {
+            $('.tools-ruler').hide();
+            $('.tools-protractor').hide();
+            let response = _handler.getResponse();
+            processAssessmentResponse(response, undefined, parseInt($(this).text()));
+        });
     });
 
     function getRendered(){
@@ -464,11 +471,12 @@
         _calculateSize();
     };
 
-    let processAssessmentResponse = function (response, button_type) {
+    let processAssessmentResponse = function (response, button_type, direct_question_no) {
         var url = '/api/sample/responses';
         var data = {
             'session': '{{- session_key -}}',
             'question_no': parseInt(getCookie('question_no')),
+            'direct_question_no': direct_question_no==undefined?null:direct_question_no,
             'is_next': button_type=='next' ? true: false
         };
         if (response.writing_text) {
