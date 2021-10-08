@@ -335,6 +335,12 @@
             $('.tools-protractor').hide();
             let response = _handler.getResponse();
             processAssessmentResponse(response, undefined, parseInt($(this).text()));
+        }).on('click','.filter-btn', function() {
+            let buttons = $('.question-list-summary').find('button');
+            buttons.removeClass('inactive');
+            if($(this).data('filter')!='all'){
+                buttons.not('.'+$(this).data('filter')).addClass('inactive')
+            }
         });
     });
 

@@ -1,3 +1,7 @@
 .number {visibility: hidden}
 
 .active-flag {color:#cc6666 !important;}
+
+button.not_read {cursor: default}
+
+.inactive {opacity:0.2 !important;}
