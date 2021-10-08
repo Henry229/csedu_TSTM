@@ -513,6 +513,11 @@
                         }else{
                             $('.footer-back-btn').hide();
                         }
+
+                        if(direct_question_no!=undefined){
+                            $('.item-container').toggle();
+                            $('.summary-container').toggle();
+                        }
                     }
                 } else {
                     if (response.message) {
