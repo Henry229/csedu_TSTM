@@ -134,10 +134,21 @@ def sample_rendered(sample_assessment_id, sample_assessment_enroll_id, question_
         db.session.add(marking_inserted)
         db.session.commit()
 
+    max_question_no_marked = db.session.query(func.max(SampleMarking.question_no)).filter(SampleMarking.sample_assessment_enroll_id==sample_assessment_enroll_id).scalar()
+    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==sample_assessment_id).scalar()
+    if max_question_no == question_no:
+        last = True
+    else:
+        last = False
+    if max_question_no_marked == max_question_no:
+        all_readed = True
+    else:
+        all_readed = False
     response['flagged'] = flagged
     response['saved_answer'] = saved_answer
     response['question_no'] = question_no
-    response['last'] = 0
+    response['last'] = last
+    response['all_readed'] = all_readed
 
     return success(response)
 
@@ -162,10 +173,6 @@ def sample_responses():
 
     assessmentItems = SampleAssessmentItems.query.filter_by(sample_assessment_id=assessmentEnroll.sample_assessment_id, question_no=question_no).first()
     if assessmentItems is None:
-        return bad_request()
-
-    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==assessmentEnroll.sample_assessment_id).scalar()
-    if question_no > max_question_no or question_no < 1:
         return bad_request()
 
     # response_json = request.json
@@ -233,15 +240,11 @@ def sample_responses():
     if direct_question_no is not None:
         return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, direct_question_no)
     else:
-        if max_question_no == question_no:
-            data = {'last': 1}
-            return success(data)
+        if is_next:
+            param_question_no = question_no + 1
         else:
-            if is_next:
-                param_question_no = question_no + 1
-            else:
-                param_question_no = question_no - 1
-            return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
+            param_question_no = question_no - 1
+        return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
 
 
 

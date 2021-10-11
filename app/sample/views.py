@@ -82,19 +82,7 @@ def testing():
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
 
-    question_no = 1
-    last = False
-    first = True
-    if request.cookies.get('question_no'):
-        question_no = int(request.cookies.get('question_no'))
-
-    max_question_no = db.session.query(func.max(SampleAssessmentItems.question_no)).filter(SampleAssessmentItems.sample_assessment_id==sample_assessment_enroll.sample_assessment_id).scalar()
-    if question_no == max_question_no:
-        last = True
-    if question_no > 1:
-        first = False
-
-    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, sample_assessment_enroll_id=sample_assessment_enroll.id, first=first, last=last, name='Sample Tester - ' + user.username)
+    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, sample_assessment_enroll_id=sample_assessment_enroll.id, name='Sample Tester - ' + user.username)
 
 
 @sample.route('/creation/items/<int:sample_assessment_id>', methods=['GET'])
