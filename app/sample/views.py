@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 
 import pytz
+from PIL import ImageFont
 from flask import render_template, flash, request, redirect, url_for, session, jsonify, render_template_string
 from flask_login import login_required, current_user
 from sqlalchemy import func
@@ -150,3 +151,23 @@ def creation(sample_assessment_id):
 
     return render_template_string('success')
 
+
+@sample.route('/report', methods=['GET', 'POST'])
+@check_sample_login()
+def report():
+    fnt = ImageFont.truetype('app/static/writing/font/Kalam-Regular.ttf', 13)
+
+    '''
+        session_key = request.args.get('session')
+        if session_key is None:
+            return redirect(url_for('sample.index'))
+
+        user = SampleUsers.query.filter_by(id=session["sample"]).first()
+        if user is None:
+            return redirect(url_for('sample.index'))
+
+        sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
+        if sample_assessment_enroll is None:
+            return redirect(request.referrer)
+    '''
+    return render_template('sample/sample_report.html')
