@@ -328,7 +328,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
-        template_file = 'report/my_report_vocabulary_pdf_.html',
+        template_file = 'report/my_report_vocabulary_pdf.html',
 
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, score=score,
