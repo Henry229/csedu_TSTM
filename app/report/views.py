@@ -286,7 +286,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     read_time = marking.read_time.strftime("%Y-%m-%d %a")
     item_id = marking.item_id
 
-    sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
+    sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value ' \
           'from ' \
           '(select row_number() over() as id, value from json_array_elements(:correct_r_value)) a ' \
           'left join ' \
@@ -303,18 +303,32 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     list = []
     for row in rows:
         correct_r_value = json.dumps(row.correct_r_value)
+        value_num = correct_r_value[correct_r_value.rfind('_') + 1:]
         if correct_r_value.find(" gap_") > -1:
             end = correct_r_value.index(" gap_")
             correct_r_value = correct_r_value[1:end]
+
+        candidate_r_value = None
         candidate_r_value = json.dumps(row.candidate_r_value)
-        if candidate_r_value.find(" gap_") > -1:
-            end = candidate_r_value.index(" gap_")
-            candidate_r_value = candidate_r_value[1:end]
+        if len(candidate_r_value.strip()) > 0:
+            for r in rows:
+                student_value = json.dumps(r.candidate_r_value)
+                if student_value[student_value.rfind('_')+1:] == correct_r_value:
+                    candidate_r_value = student_value
+
+            if candidate_r_value.find(" gap_") > -1:
+                end = candidate_r_value.index(" gap_")
+                candidate_r_value = candidate_r_value[1:end]
+
+        if correct_r_value == candidate_r_value:
+            is_correct = True
+        else:
+            is_correct = False
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
                      'id': row.id,
-                     'is_correct': row.is_correct})
+                     'is_correct': is_correct})
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
