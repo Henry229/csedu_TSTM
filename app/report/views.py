@@ -356,11 +356,12 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     if not os.path.exists("report"):
         os.makedirs("report")
 
-    html.write_pdf(target=pdf_file_path, presentational_hints=False)
+    html.write_pdf(target=pdf_file_path, presentational_hints=True)
     rsp = send_file(
         pdf_file_path,
         mimetype='application/pdf',
         as_attachment=True,
+        cache_timeout=False,
         attachment_filename=pdf_file_path)
     return rsp
 
