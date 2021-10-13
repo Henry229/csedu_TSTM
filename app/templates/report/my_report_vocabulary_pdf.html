@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <link href="file:///{{ static_folder }}/report/css/my_report.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="header">
+    <table>
+        <tr>
+            <td>
+                <h1 style="color:#397e38"> {{ assessment_name }}  ({{ subject }}) </h1>
+            </td>
+            <td align="right">
+                <img src="file:///{{ static_folder }}/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="student_info">
+    <table id="t_student_info">
+        <tr>
+            <th> Student Name:</th>
+            <td>&nbsp;{{ Student.getCSStudentName(student_user_id) }} </td>
+            <th> Score:</th>
+            <td>&nbsp;{{ score }} </td>
+        </tr>
+        <tr>
+            <th> Grade:</th>
+            <td>&nbsp;{{ grade }}</td>
+            <th> Test Date:</th>
+            <td>&nbsp;{{ read_time }} </td>
+        </tr>
+    </table>
+</div>
+<br>
+<div class="report_content">
+    {% if markings %}
+        <div class="row">
+            <div class="col">
+                <table class="table" style="width:100%" id="t_mark_info">
+                    <thead>
+                    <tr>
+                        <th align="center">No.</th>
+                        <th align="center">My Answer</th>
+                        <th align="center">Result</th>
+                        <th align="center">Correct Answer</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for marking in markings %}
+                        <tr>
+                            <td>{{- marking.id -}}</td>
+                            <td>{{ marking.candidate_r_value }}</td>
+                            <td>{% if marking.is_correct %}
+                                <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                                <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                            <td>{{ marking.correct_r_value }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>
