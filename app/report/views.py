@@ -1,3 +1,4 @@
+import json
 import os
 from collections import namedtuple
 from datetime import datetime, date, timedelta
@@ -294,7 +295,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
           'left join ' \
           '(select row_number() over() as id, value from json_array_elements(:candidate_r_value::varchar)) b ' \
           'on a.id = b.id'
-    cursor_1 = db.engine.execute(sql, {'correct_r_value': marking.correct_r_value, 'candidate_r_value': marking.candidate_r_value})
+    cursor_1 = db.engine.execute(sql, {'correct_r_value': json.dumps(marking.correct_r_value), 'candidate_r_value': json.dumps(marking.candidate_r_value)})
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
 
