@@ -160,3 +160,7 @@ html img.writing_image {
 .bg-dark {
     background-color: #2f353a !important;
 }
+
+td {
+    text-align: center;
+}
