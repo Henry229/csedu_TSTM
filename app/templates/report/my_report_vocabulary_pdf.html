@@ -55,12 +55,12 @@
                     <tbody>
                     {% for marking in markings %}
                         <tr>
-                            <td>{{- marking.id -}}</td>
-                            <td>{{ marking.candidate_r_value }}</td>
-                            <td>{% if marking.is_correct %}
+                            <td align="center">{{- marking.id -}}</td>
+                            <td align="center">{{ marking.candidate_r_value }}</td>
+                            <td align="center">{% if marking.is_correct %}
                                 <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                 <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
-                            <td>{{ marking.correct_r_value }}</td>
+                            <td align="center">{{ marking.correct_r_value }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
