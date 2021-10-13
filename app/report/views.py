@@ -312,7 +312,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         for r in rows:
             if r.candidate_r_value:
                 student_value = json.dumps(r.candidate_r_value)
-                if student_value[student_value.rfind('_')+1:] == correct_r_value:
+                if student_value[student_value.rfind('_')+1:] == value_num:
                     end = student_value.index(" gap_")
                     candidate_r_value = student_value[1:end]
 
