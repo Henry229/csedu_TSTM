@@ -323,7 +323,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
-                     'id': row.id,
+                     'id': 1,
                      'is_correct': is_correct})
 
     template_file = 'report/my_report_vocabulary.html'
