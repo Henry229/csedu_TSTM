@@ -296,10 +296,6 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
 
-    correct_count = len([r.id for r in rows if r.correct_r_value == r.candidate_r_value])
-
-    score = '{} out of {}'.format(correct_count, len(rows))
-
     list = []
     for row in rows:
         correct_r_value = json.dumps(row.correct_r_value)
@@ -325,6 +321,9 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
                      'candidate_r_value': candidate_r_value,
                      'id': row.id,
                      'is_correct': is_correct})
+
+    correct_count = len([l.id for l in list if l.is_correct])
+    score = '{} out of {}'.format(correct_count, len(list))
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
