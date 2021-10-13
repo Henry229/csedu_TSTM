@@ -305,11 +305,11 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         correct_r_value = json.dumps(row.correct_r_value)
         if correct_r_value.find(" gap_") > -1:
             end = correct_r_value.index(" gap_")
-            correct_r_value = correct_r_value[:end]
+            correct_r_value = correct_r_value[1:end]
         candidate_r_value = json.dumps(row.candidate_r_value)
         if candidate_r_value.find(" gap_") > -1:
             end = candidate_r_value.index(" gap_")
-            candidate_r_value = candidate_r_value[:end]
+            candidate_r_value = candidate_r_value[1:end]
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
