@@ -308,7 +308,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
             end = correct_r_value.index(" gap_")
             correct_r_value = correct_r_value[1:end]
 
-        candidate_r_value = None
+        candidate_r_value = ''
         for r in rows:
             if r.candidate_r_value:
                 student_value = json.dumps(r.candidate_r_value)
