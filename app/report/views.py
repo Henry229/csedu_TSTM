@@ -286,7 +286,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     read_time = marking.read_time
     item_id = marking.item_id
 
-    sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
+    sql = 'select a.id, a.value::varchar as correct_r_value, b.value::varchar as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
           'from ' \
           '(select row_number() over() as id, value from json_array_elements(:correct_r_value)) a ' \
           'left join ' \
@@ -301,12 +301,12 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     score = '{} out of {}'.format(correct_count, len(rows))
 
     for row in rows:
-        if json.dumps(row.correct_r_value).find(" gap_") > -1:
-            end = json.dumps(row.correct_r_value).index(" gap_")
-            row.correct_r_value = json.dumps(row.correct_r_value)[:end]
-        if json.dumps(row.candidate_r_value).find(" gap_") > -1:
-            end = json.dumps(row.candidate_r_value).index(" gap_")
-            row.candidate_r_value = json.dumps(row.candidate_r_value)[:end]
+        if row.correct_r_value.find(" gap_") > -1:
+            end = row.correct_r_value.index(" gap_")
+            row.correct_r_value[:end]
+        if row.candidate_r_value.find(" gap_") > -1:
+            end = row.candidate_r_value.index(" gap_")
+            row.candidate_r_value[:end]
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
