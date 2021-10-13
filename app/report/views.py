@@ -115,6 +115,22 @@ def my_report(assessment_id, ts_id, student_user_id):
     # Todo: Check accessibility to get report
     # refresh_mviews()
 
+
+    #in the case that subject is Vocabulary, the source is separated
+
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
+    if testset is None:
+        url = request.referrer
+        flash('testset data is not available')
+        return redirect(url)
+
+    test_subject_string = Codebook.get_code_name(testset.subject)
+    if test_subject_string.lower() == 'vocabulary':
+        return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
+
+    grade = Codebook.get_code_name(testset.grade)
+    test_type = testset.test_type
+
     pdf = False
     pdf_url = "%s?type=pdf" % request.url
     if 'type' in request.args.keys():
@@ -139,18 +155,11 @@ def my_report(assessment_id, ts_id, student_user_id):
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
 
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
-    test_subject_string = Codebook.get_code_name(testset.subject)
-    grade = Codebook.get_code_name(testset.grade)
-    test_type = testset.test_type
 
     # setting review period for Holiday course
     enable_holiday = False
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
-
-
-
 
     if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
         if test_type_additional_info['enable_holiday'] == "true":
@@ -235,6 +244,101 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
+
+def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string):
+    grade = Codebook.get_code_name(testset.grade)
+    test_type = testset.test_type
+
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+        filter_by(assessment_id=assessment_id). \
+        filter_by(testset_id=ts_id). \
+        filter_by(student_user_id=student_user_id)
+    row = query.order_by(AssessmentEnroll.id.desc()).first()
+    if row is None:
+        url = request.referrer
+        flash('Assessment Enroll data not available')
+        return redirect(url)
+
+    assessment_enroll_id = row.id
+
+    finish_time = row.finish_time
+    if finish_time is None: finish_time = row.start_time
+
+    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+
+    '''
+    markings = query_my_report_body(assessment_enroll_id, ts_id)
+    markings = db.session.query(Marking.assessment_enroll_id, Marking.testset_id,
+                                         Marking.read_time, Marking.candidate_r_value, Marking.is_correct, Marking.correct_r_value,
+                                         Marking.question_no). \
+        join(AssessmentEnroll, Marking.assessment_enroll_id == AssessmentEnroll.id). \
+        filter(Marking.assessment_enroll_id == assessment_enroll_id).first()
+    '''
+    marking = Marking.query.filter(Marking.assessment_enroll_id == assessment_enroll_id).first()
+    if marking is None:
+        url = request.referrer
+        flash('Marking data is not available')
+        return redirect(url)
+
+    read_time = marking.read_time
+    item_id = marking.item_id
+
+    sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
+          'from ' \
+          '(select row_number() over() as id, value from json_array_elements(:correct_r_value)) a ' \
+          'left join ' \
+          '(select row_number() over() as id, value from json_array_elements(:candidate_r_value)) b ' \
+          'on a.id = b.id'
+    cursor_1 = db.engine.execute(sql, {'correct_r_value': marking.correct_r_value, 'candidate_r_value': marking.candidate_r_value})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+
+    correct_count = len([r.id for r in rows if r.correct_r_value == r.candidate_r_value])
+
+    score = '{} out of {}'.format(correct_count, len(rows))
+
+    template_file = 'report/my_report_vocabulary.html'
+    if pdf:
+        template_file = 'report/my_report_vocabulary_pdf.html',
+
+    rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
+                                            subject=test_subject_string, score=score,
+                                            markings=rows, read_time=read_time, item_id=item_id,
+                                            student_user_id=student_user_id, static_folder=current_app.static_folder,
+                                            pdf_url=pdf_url, grade=grade,
+                                            test_type=test_type)
+    if not pdf:
+        return rendered_template_pdf
+    # PDF download
+    from weasyprint import HTML
+
+    html = HTML(string=rendered_template_pdf)
+
+    pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
+                                 str(student_user_id),
+                                 "report",
+                                 "test_report_%s_%s_%s_%s.pdf" % (
+                                     assessment_enroll_id, assessment_id, ts_id, student_user_id))
+
+    os.chdir(os.path.join(current_app.config['USER_DATA_FOLDER']))
+    if not os.path.exists(str(student_user_id)):
+        os.makedirs(str(student_user_id))
+    os.chdir(str(student_user_id))
+    if not os.path.exists("report"):
+        os.makedirs("report")
+
+    html.write_pdf(target=pdf_file_path, presentational_hints=True)
+    rsp = send_file(
+        pdf_file_path,
+        mimetype='application/pdf',
+        as_attachment=True,
+        attachment_filename=pdf_file_path)
+    return rsp
 
 @report.route('/ts_v2/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
