@@ -302,9 +302,9 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
 
     for row in rows:
         if row.correct_r_value.find(" gap_") > -1:
-            row.correct_r_value = row.correct_r_value[0:row.correct_r_value.index(" gap_")-1]
+            row.correct_r_value = row.correct_r_value[0:row.correct_r_value.index(" gap_")]
         if row.candidate_r_value.find(" gap_") > -1:
-            row.candidate_r_value = row.candidate_r_value[0:row.candidate_r_value.index(" gap_")-1]
+            row.candidate_r_value = row.candidate_r_value[0:row.candidate_r_value.index(" gap_")]
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
