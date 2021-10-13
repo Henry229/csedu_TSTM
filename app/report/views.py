@@ -303,7 +303,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     for row in rows:
         if row.correct_r_value.find(" gap_") > -1:
             end = row.correct_r_value.index(" gap_")
-            row.correct_r_value[:end]
+            row.correct_r_value = 'aa'
         if row.candidate_r_value.find(" gap_") > -1:
             end = row.candidate_r_value.index(" gap_")
             row.candidate_r_value[:end]
