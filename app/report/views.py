@@ -328,7 +328,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
 
     template_file = 'report/my_report_vocabulary.html'
     if pdf:
-        template_file = 'report/my_report_vocabulary_pdf_pdf.html',
+        template_file = 'report/my_report_vocabulary_pdf.html',
 
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, score=score,
@@ -346,7 +346,8 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "report",
-                                 "sdafasdfsafdfaf.pdf" )
+                                 "test_report_%s_%s_%s_%s.pdf" % (
+                                     assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
     os.chdir(os.path.join(current_app.config['USER_DATA_FOLDER']))
     if not os.path.exists(str(student_user_id)):
