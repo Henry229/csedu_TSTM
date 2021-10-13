@@ -323,7 +323,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
                      'is_correct': is_correct})
 
     #correct_count = len([l.id for l in list if l.is_correct])
-    correct_count = len(list(filter(lambda x: (x["is_correct"] == True), list)))
+    correct_count = len(list(filter(lambda x: (x.is_correct == True), list)))
     score = '{} out of {}'.format(correct_count, len(list))
 
     template_file = 'report/my_report_vocabulary.html'
