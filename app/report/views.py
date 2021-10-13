@@ -290,9 +290,9 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
 
     sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
           'from ' \
-          '(select row_number() over() as id, value from json_array_elements(:correct_r_value)) a ' \
+          '(select row_number() over() as id, value from json_array_elements(\':correct_r_value\')) a ' \
           'left join ' \
-          '(select row_number() over() as id, value from json_array_elements(:candidate_r_value)) b ' \
+          '(select row_number() over() as id, value from json_array_elements(\'candidate_r_value\')) b ' \
           'on a.id = b.id'
     cursor_1 = db.engine.execute(sql, {'correct_r_value': marking.correct_r_value, 'candidate_r_value': marking.candidate_r_value})
     Record = namedtuple('Record', cursor_1.keys())
