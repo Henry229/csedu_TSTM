@@ -283,7 +283,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         flash('Marking data is not available')
         return redirect(url)
 
-    read_time = marking.read_time.strftime("%Y-%m-%d")
+    read_time = marking.read_time.strftime("%Y-%m-%d %a")
     item_id = marking.item_id
 
     sql = 'select a.id, a.value as correct_r_value, b.value as candidate_r_value, case when a.value::varchar = b.value::varchar then true else false end as is_correct ' \
