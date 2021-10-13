@@ -6,6 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>CS Education</title>
+    <style type="text/css">
+        td {text-align: center}
+    </style>
     <link href="file:///{{ static_folder }}/report/css/my_report.css" rel="stylesheet">
 </head>
 <body>
@@ -54,7 +57,7 @@
                     <tbody>
                     {% for marking in markings %}
                         <tr>
-                            <td align="center" style="text-align: center">{{- marking.id -}}</td>
+                            <td align="center">{{- marking.id -}}</td>
                             <td align="center">{{ marking.candidate_r_value }}</td>
                             <td align="center">{% if marking.is_correct %}
                                 <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
