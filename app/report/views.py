@@ -346,7 +346,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "report",
-                                 "test_report_%s_%s_%s_%s.pdf" % (
+                                 "test_report_%s_%s_%s_%s_.pdf" % (
                                      assessment_enroll_id, assessment_id, ts_id, student_user_id))
 
     os.chdir(os.path.join(current_app.config['USER_DATA_FOLDER']))
