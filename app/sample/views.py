@@ -178,6 +178,15 @@ def report():
     if assessment is None:
         return redirect(url_for('sample.index'))
 
+    sql = 'select round(avg(case when correct_count = 0 then 0 else ques_count / correct_count end)) score ' \
+          'from (select ' \
+          '		(select count(1) from sample_marking where sample_assessment_enroll_id = a.id) as ques_count ' \
+          '		,(select count(1) from sample_marking where sample_assessment_enroll_id = a.id and is_correct = true) as correct_count ' \
+          '	from sample_assessment_enroll a ' \
+          '	where sample_assessment_id = :sample_assessment_id ' \
+          ') t'
+    total_score = db.session.execute(text(sql), {'sample_assessment_id': assessment.id}).scalar()
+
     sql = 'select a.question_no ' \
           ',d.correct_r_value as correct_r_value ' \
           ',a.candidate_r_value as candidate_r_value ' \
@@ -247,4 +256,4 @@ def report():
 
     return render_template('sample/sample_report.html', user=user, assessment=assessment,
                            sample_assessment_enroll=sample_assessment_enroll, markings=list, crroect_count=crroect_count,
-                           my_score=my_score)
+                           my_score=my_score, total_score=total_score)
