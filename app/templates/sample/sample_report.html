@@ -51,15 +51,15 @@
     {% for marking in markings %}
     <tr>
       <th scope="row" class="txt-align-c">{{ marking.question_no }}</th>
-      <td class="txt-align-c">{{ marking.candidate_r_value }}</td>
-      <td class="txt-align-c">
+      <td class="txt-align-c cont-color">{{ marking.candidate_r_value }}</td>
+      <td class="txt-align-c cont-color">
       {% if marking.is_correct %}
         <i class="fa fa-check" style="color: #4dbd74"></i>
       {% else %}
         <i class="fa fa-times" style="color: #f86c6b"></i>
       {% endif %}
       </td>
-      <td class="txt-align-c">{{ marking.correct_r_value }}</td>
+      <td class="txt-align-c cont-color">{{ marking.correct_r_value }}</td>
       <td>{{ marking.subcategory_name }}</td>
       <td>{{ marking.interaction_type }}</td>
       <td class="txt-align-c">{{ marking.percentile }}%</td>
