@@ -215,7 +215,18 @@ def report():
         if row.candidate_r_value is None:
             candidate_r_value = ''
         else:
-            candidate_r_value = json.dumps(row.candidate_r_value)
+            if type(row.candidate_r_value).__name__ == 'list':
+                if len(row.candidate_r_value) == 1 and row.candidate_r_value[0] == '':
+                    candidate_r_value = ''
+                else:
+                    candidate_r_value = json.dumps(row.candidate_r_value)
+            else:
+                correct_r_value = json.dumps(row.correct_r_value)
+                if candidate_r_value[:1] == '"':
+                    candidate_r_value = candidate_r_value[1:]
+                if candidate_r_value[-1:] == '"':
+                    candidate_r_value = candidate_r_value[:-1]
+
         if row.is_correct is None:
             is_correct = False
         else:
