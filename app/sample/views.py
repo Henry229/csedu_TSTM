@@ -203,6 +203,7 @@ def report():
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
 
+    crroect_count = 0
     list = []
     for row in rows:
         correct_r_value = json.dumps(row.correct_r_value)
@@ -231,6 +232,8 @@ def report():
             is_correct = False
         else:
             is_correct = row.is_correct
+            if is_correct:
+                crroect_count += crroect_count
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
@@ -241,4 +244,4 @@ def report():
                      'is_correct': is_correct})
 
     return render_template('sample/sample_report.html', user=user, assessment=assessment,
-                           sample_assessment_enroll=sample_assessment_enroll, markings=list)
+                           sample_assessment_enroll=sample_assessment_enroll, markings=list, crroect_count=crroect_count)
