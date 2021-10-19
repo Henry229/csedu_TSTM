@@ -221,7 +221,7 @@ def report():
                 else:
                     candidate_r_value = json.dumps(row.candidate_r_value)
             else:
-                correct_r_value = json.dumps(row.correct_r_value)
+                candidate_r_value = json.dumps(row.candidate_r_value)
                 if candidate_r_value[:1] == '"':
                     candidate_r_value = candidate_r_value[1:]
                 if candidate_r_value[-1:] == '"':
