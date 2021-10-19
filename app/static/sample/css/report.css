@@ -21,3 +21,4 @@ main {width: 960px !important; margin-left: 0 !important;}
 .table thead th {border-bottom:none; text-align: center}
 .cont-color {background-color: #ecf2f9}
 .cont-focus-color {background-color: #deebfc}
+.font-red {color:red}
