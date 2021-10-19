@@ -1,0 +1,21 @@
+.float-l {float:left}
+.w100p {width: 100%}
+.w60 {width: 60px !important;}
+.w150 {width: 150px !important;}
+.txt-align-c {text-align: center}
+.card-header {background-color: #deebfc}
+.margin-r-10 {margin-right: 10px;}
+.margin-l-10 {margin-left: 10px;}
+.cover {
+    display: flex;
+    justify-content: space-between;
+}
+.sub-title {position:relative; top:80px; color: #838dea}
+body {background-color: white !important;}
+.card-body {height: 103px}
+
+.app-body {margin: auto auto}
+main {width: 960px !important;}
+
+.table-primary {background-color:#deebfc}
+.table thead th {border-bottom:none; text-align: center}

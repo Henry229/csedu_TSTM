@@ -3,9 +3,70 @@
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
 {% block styles %}
     {{ super() }}
+    <link href="/static/sample/css/report.css" rel="stylesheet">
 {% endblock %}
 {% block app_content %}
-
+<div class='cover'>
+    <div class="main-title"><h3>{{ assessment.sample_type }}</h3></div>
+    <div>
+        <div class="w100p">
+            <label class="margin-r-10 w60">Name</label> : <span class="margin-l-10">{{ user.username }}</span>
+        </div>
+        <div class="w100p">
+            <label class="margin-r-10 w60">Test Date</label> : <span class="margin-l-10">{{ sample_assessment_enroll.test_date }}</span>
+        </div>
+    </div>
+</div>
+<div class='cover'>
+    <div class="sub-title"><h2>{{ assessment.name }}</h2></div>
+    <div>
+        <div class="card w150 txt-align-c float-l margin-r-10">
+          <h6 class="card-header">Student Score</h6>
+          <div class="card-body">
+            <h2>65%</h2>
+            <p class="card-text">23 out of 40</p>
+          </div>
+        </div>
+        <div class="card w150 txt-align-c float-l">
+          <h6 class="card-header">Test Average</h6>
+          <div class="card-body">
+            <h2>65%</h2>
+          </div>
+        </div>
+    </div>
+</div>
+<table class="table">
+  <thead class="table-primary">
+    <tr>
+      <th scope="col">No</th>
+      <th scope="col">Student Answer</th>
+      <th scope="col">Correct</th>
+      <th scope="col">Correct Answer</th>
+      <th scope="col">Category</th>
+      <th scope="col">Description</th>
+      <th scope="col">Correct(%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for marking in markings %}
+    <tr>
+      <th scope="row" class="txt-align-c">{{ marking.question_no }}</th>
+      <td class="txt-align-c">{{ marking.candidate_r_value }}</td>
+      <td class="txt-align-c">
+      {% if marking.is_correct %}
+        <i class="fa fa-check" style="color: #4dbd74"></i>
+      {% else %}
+        <i class="fa fa-times" style="color: #f86c6b"></i>
+      {% endif %}
+      </td>
+      <td class="txt-align-c">{{ marking.correct_r_value }}</td>
+      <td>{{ marking.subcategory_name }}</td>
+      <td>{{ marking.interaction_type }}</td>
+      <td class="txt-align-c">{{ marking.percentile }}%</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock app_content %}
 {% block scripts %}

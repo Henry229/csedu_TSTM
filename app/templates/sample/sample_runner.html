@@ -343,6 +343,19 @@
                 buttons.not('.'+$(this).data('filter')).addClass('inactive')
             }
         });
+
+        $('.footer-finish-btn').click(function(){
+        $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
+                type: 'get',
+                success: function(response){
+                    window.location.href = '/sample/report?session={{- session_key -}}';
+                },
+                error: function(xhr) {
+                    $('#errorModal').modal('show');
+                }
+            });
+        });
+
     });
 
     function getRendered(){
@@ -549,6 +562,8 @@
             $('.summary-container').hide();
         }
     };
+
+
 
     let flagRendered = function (flagged) {
         let flag_btn = $('.footer-flag-btn');

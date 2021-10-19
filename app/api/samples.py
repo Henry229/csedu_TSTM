@@ -293,6 +293,21 @@ def sample_summary(sample_assessment_enroll_id):
 
     return success(data)
 
+@api.route('/sample/finish/<int:sample_assessment_enroll_id>', methods=['GET'])
+@check_sample_login_api()
+def sample_finish(sample_assessment_enroll_id):
+    assessment_enroll = SampleAssessmentEnroll.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id).first()
+    if assessment_enroll is None:
+        return bad_request()
+
+    if assessment_enroll.finish_time is not None:
+        assessment_enroll.finish_time = datetime.utcnow()
+        db.session.commit()
+
+
+
+    return success()
+
 def get_sec(time_str):
     h, m, s = time_str.split(':')
     return int(h) * 3600 + int(m) * 60 + int(s)

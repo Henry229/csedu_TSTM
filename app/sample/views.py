@@ -2,13 +2,14 @@ import base64
 import json
 import re
 import uuid
+from collections import namedtuple
 from datetime import datetime
 
 import pytz
 from PIL import ImageFont
 from flask import render_template, flash, request, redirect, url_for, session, jsonify, render_template_string
 from flask_login import login_required, current_user
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from . import sample
 from .. import db
@@ -17,6 +18,7 @@ from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testse
     SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking
 
 '''New Sample Page - rendering template'''
+
 
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
@@ -33,8 +35,8 @@ def index():
                     session["sample"] = row.id
                 else:
                     user = SampleUsers(email=email,
-                                    username=name,
-                                    created_time=datetime.utcnow())
+                                       username=name,
+                                       created_time=datetime.utcnow())
                     db.session.add(user)
                     db.session.commit()
 
@@ -68,6 +70,7 @@ def agreement():
 
     return render_template('sample/agreement.html', name='Sample Tester - ' + user.username, assessment=assessment)
 
+
 @sample.route('/testing', methods=['GET', 'POST'])
 @check_sample_login()
 def testing():
@@ -83,7 +86,10 @@ def testing():
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
 
-    return render_template('sample/sample_runner.html', session_key=session_key, sample_assessment_id=sample_assessment_enroll.sample_assessment_id, sample_assessment_enroll_id=sample_assessment_enroll.id, name='Sample Tester - ' + user.username)
+    return render_template('sample/sample_runner.html', session_key=session_key,
+                           sample_assessment_id=sample_assessment_enroll.sample_assessment_id,
+                           sample_assessment_enroll_id=sample_assessment_enroll.id,
+                           name='Sample Tester - ' + user.username)
 
 
 @sample.route('/creation/items/<int:sample_assessment_id>', methods=['GET'])
@@ -102,7 +108,8 @@ def creation(sample_assessment_id):
     if testset is None:
         return render_template_string('fail')
 
-    sample_assessment_items_count = SampleAssessmentItems.query.filter_by(sample_assessment_id=sample_assessment_id).count()
+    sample_assessment_items_count = SampleAssessmentItems.query.filter_by(
+        sample_assessment_id=sample_assessment_id).count()
 
     if sample_assessment_items_count > 0:
         return render_template_string('fail')
@@ -114,18 +121,17 @@ def creation(sample_assessment_id):
         comma = branching.find(',', end)
         testlet_id = int(branching[end:comma])
 
-        items = db.session.query(*Item.__table__.columns,TestletHasItem.weight). \
+        items = db.session.query(*Item.__table__.columns, TestletHasItem.weight). \
             select_from(Item). \
             join(TestletHasItem, Item.id == TestletHasItem.item_id). \
             filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
 
-
         for item in items:
-            i = {'item_id':item.id,
-                 'testlet_id':testlet_id,
-                 'correct_r_value':item.correct_r_value,
-                 'weight':item.weight,
-                 'outcome_score':item.outcome_score
+            i = {'item_id': item.id,
+                 'testlet_id': testlet_id,
+                 'correct_r_value': item.correct_r_value,
+                 'weight': item.weight,
+                 'outcome_score': item.outcome_score
                  }
             results.append(i)
 
@@ -152,22 +158,70 @@ def creation(sample_assessment_id):
     return render_template_string('success')
 
 
-@sample.route('/report', methods=['GET', 'POST'])
-@check_sample_login()
+@sample.route('/report', methods=['GET'])
 def report():
-    fnt = ImageFont.truetype('app/static/writing/font/Kalam-Regular.ttf', 13)
+    session_key = request.args.get('session')
+    if session_key is None:
+        return redirect(url_for('sample.index'))
 
-    '''
-        session_key = request.args.get('session')
-        if session_key is None:
-            return redirect(url_for('sample.index'))
+    user = SampleUsers.query.filter_by(id=session["sample"]).first()
+    if user is None:
+        return redirect(url_for('sample.index'))
 
-        user = SampleUsers.query.filter_by(id=session["sample"]).first()
-        if user is None:
-            return redirect(url_for('sample.index'))
+    sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
+    if sample_assessment_enroll is None:
+        return redirect(request.referrer)
 
-        sample_assessment_enroll = SampleAssessmentEnroll.query.filter_by(session_key=session_key).first()
-        if sample_assessment_enroll is None:
-            return redirect(request.referrer)
-    '''
-    return render_template('sample/sample_report.html')
+    sample_assessment_enroll.test_date = sample_assessment_enroll.start_time.strftime("%Y-%m-%d %a")
+
+    assessment = SampleAssessment.query.filter_by(id=sample_assessment_enroll.sample_assessment_id).first()
+    if assessment is None:
+        return redirect(url_for('sample.index'))
+
+    sql = 'select a.question_no ' \
+          ',d.correct_r_value as correct_r_value ' \
+          ',a.candidate_r_value as candidate_r_value ' \
+          ',a.is_correct ' \
+          ',( ' \
+          '  select 100*COALESCE(sum(CASE WHEN bb.is_correct THEN 1 ELSE 0 END),0)/count(DISTINCT aa.id) ' \
+          'from (select * from sample_assessment_enroll where sample_assessment_id = c.id) aa ' \
+          'join (select aaa.item_id, bbb.* ' \
+          '		from sample_assessment_items aaa, sample_marking bbb where aaa.sample_assessment_id = c.id and aaa.question_no = bbb.question_no ' \
+          '	 ) bb ' \
+          'on aa.id = bb.sample_assessment_enroll_id ' \
+          'where bb.item_id = d.item_id ' \
+          ') percentile ' \
+          ',(select code_name from codebook where id = (case when e.subcategory = 0 then e.category else e.subcategory end)) as subcategory_name ' \
+          ',e.interaction_type ' \
+          'from sample_marking a ' \
+          'join (select * from sample_assessment_enroll where id=:sample_assessment_enroll) b on a.sample_assessment_enroll_id = b.id ' \
+          'join sample_assessment c on b.sample_assessment_id = c.id ' \
+          'join sample_assessment_items d on c.id = d.sample_assessment_id and a.question_no = d.question_no ' \
+          'join item e on d.item_id = e.id ' \
+          'order by a.question_no'
+    cursor_1 = db.engine.execute(text(sql), {'sample_assessment_enroll': sample_assessment_enroll.id})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+
+    list = []
+    for row in rows:
+        correct_r_value = json.dumps(row.correct_r_value)
+        if row.candidate_r_value is None:
+            candidate_r_value = ''
+        else:
+            candidate_r_value = json.dumps(row.candidate_r_value)
+        if row.is_correct is None:
+            is_correct = False
+        else:
+            is_correct = json.dumps(row.is_correct)
+
+        list.append({'correct_r_value': correct_r_value,
+                     'candidate_r_value': candidate_r_value,
+                     'question_no': row.question_no,
+                     'percentile': row.percentile,
+                     'subcategory_name': row.subcategory_name,
+                     'interaction_type': row.interaction_type,
+                     'is_correct': is_correct})
+
+    return render_template('sample/sample_report.html', user=user, assessment=assessment,
+                           sample_assessment_enroll=sample_assessment_enroll, markings=list)
