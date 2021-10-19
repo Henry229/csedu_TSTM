@@ -15,7 +15,7 @@ body {background-color: white !important;}
 .card-body {height: 103px}
 
 .app-body {margin: auto auto}
-main {width: 960px !important;}
+main {width: 960px !important; margin-left: 0 !important;}
 
 .table-primary {background-color:#deebfc}
 .table thead th {border-bottom:none; text-align: center}
