@@ -181,7 +181,7 @@ def report():
     sql = 'select a.question_no ' \
           ',d.correct_r_value as correct_r_value ' \
           ',a.candidate_r_value as candidate_r_value ' \
-          ',a.is_correct ' \
+          ',a.is_correct::text ' \
           ',( ' \
           '  select 100*COALESCE(sum(CASE WHEN bb.is_correct THEN 1 ELSE 0 END),0)/count(DISTINCT aa.id) ' \
           'from (select * from sample_assessment_enroll where sample_assessment_id = c.id) aa ' \
@@ -230,7 +230,7 @@ def report():
         if row.is_correct is None:
             is_correct = False
         else:
-            is_correct = json.dumps(row.is_correct)
+            is_correct = bool(row.is_correct)
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
