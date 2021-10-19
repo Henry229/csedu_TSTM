@@ -243,5 +243,8 @@ def report():
                      'interaction_type': row.interaction_type,
                      'is_correct': is_correct})
 
+    my_score = round(crroect_count % len(list))
+
     return render_template('sample/sample_report.html', user=user, assessment=assessment,
-                           sample_assessment_enroll=sample_assessment_enroll, markings=list, crroect_count=crroect_count)
+                           sample_assessment_enroll=sample_assessment_enroll, markings=list, crroect_count=crroect_count,
+                           my_score=my_score)
