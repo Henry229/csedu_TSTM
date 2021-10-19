@@ -50,9 +50,9 @@
   <tbody>
     {% for marking in markings %}
     <tr>
-      <th scope="row" class="txt-align-c">{{ marking.question_no }}</th>
+      <th scope="row" class="txt-align-c cont-color">{{ marking.question_no }}</th>
       <td class="txt-align-c cont-color">{{ marking.candidate_r_value }}</td>
-      <td class="txt-align-c cont-color">
+      <td class="txt-align-c cont-focus-color">
       {% if marking.is_correct %}
         <i class="fa fa-check" style="color: #4dbd74"></i>
       {% else %}
