@@ -206,6 +206,12 @@ def report():
     list = []
     for row in rows:
         correct_r_value = json.dumps(row.correct_r_value)
+        if correct_r_value is not None:
+            if correct_r_value[:1] == '"':
+                correct_r_value = correct_r_value[1:]
+            if correct_r_value[-1:] == '"':
+                correct_r_value = correct_r_value[:-1]
+
         if row.candidate_r_value is None:
             candidate_r_value = ''
         else:
