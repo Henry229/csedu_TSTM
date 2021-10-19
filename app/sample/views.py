@@ -217,7 +217,7 @@ def report():
     for row in rows:
 
         correct_r_value = ''
-        if row.is_correct is False:
+        if row.is_correct is None or row.is_correct is False:
             correct_r_value = json.dumps(row.correct_r_value)
             if correct_r_value is not None:
                 if correct_r_value[:1] == '"':
