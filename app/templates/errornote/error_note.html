@@ -200,8 +200,6 @@
                       {% endif %}
                     </td>
                     <td>
-                      {% if marking.view_answer_enable %}
-
                         {%- if marking.item.category == 281 -%}
                         {%- if marking.verbal_correct_r_value -%}
                         {% for _l in marking.verbal_correct_r_value %}
@@ -220,12 +218,14 @@
                             {% endif %}
                         {%- endif -%}
                         {%- else -%}
-                            {% if marking.correct_r_value %}
-                             {{- marking.correct_r_value -}}
-                            {% endif %}
-                        {%- endif -%}
 
+                      {% if marking.view_answer_enable %}
+                        {% if marking.correct_r_value %}
+                         {{- marking.correct_r_value -}}
+                        {% endif %}
                       {% endif %}
+
+                       {%- endif -%}
                     </td>
                   </tr>
               {% endfor %}
