@@ -165,6 +165,8 @@ def error_note(assessment_enroll_id):
         if not hasattr(_marking, 'verbal_correct_r_value'):
             is_verbal_all = False
 
+    is_verbal_all = True
+
     template_file = 'errornote/error_note.html'
     rendered_template = render_template(template_file, assessment_name=assessment_name,
                                         assessment_enroll_id=assessment_enroll_id,
