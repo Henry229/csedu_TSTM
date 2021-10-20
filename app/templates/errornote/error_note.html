@@ -114,14 +114,14 @@
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
-              {% if is_verbal is sameas False %}
+              {% if not is_verbal %}
               <tr>
-                <th>My Answer{{ is_verbal }}</th>
+                <th>My Answer</th>
+                <th>Mark</th>
+                {% if is_all_correct is sameas false %}
+                <th>My Answer</th>
                 <th>Mark</th>
                 {% endif %}
-                {% if is_all_correct is sameas false %}
-                <th>My Answer{{ is_verbal }}</th>
-                <th>Mark</th>
               </tr>
               {% endif %}
               </thead>
