@@ -132,7 +132,7 @@ def error_note(assessment_enroll_id):
 
                             last_r_values.append({'no':str(correct_qes_no), 'value':ques_last_value, 'correct': _is_correct})
                             is_existent = True
-               
+
 
                 #if not is_existent:
                 #    last_r_values.append({'no': str(len(last_r_values)+1), 'value': '', 'correct': False})
