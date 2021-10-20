@@ -90,14 +90,15 @@
     color:var(--red);
 }
 
-.t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(5) {
-    width: auto !important;
-    max-width: none !important;
+.t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(8) {
+    width: 300px !important;
+    max-width: 300px !important;
 }
 
 .marking-card {
     margin-bottom: 10px;
     display: inline-block !important;
+    min-width: 60px;
 
 }
 .marking-card > .card-header {
