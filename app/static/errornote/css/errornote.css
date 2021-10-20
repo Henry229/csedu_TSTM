@@ -111,3 +111,6 @@
 #t_student_info .thead-light td, #t_student_info .thead-light th {
     border:0.5px solid #0f0f0f !important;
 }
+.t_verbal thead th {
+    border-bottom-width:1px !important;
+}
