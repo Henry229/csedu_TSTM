@@ -64,17 +64,25 @@ def error_note(assessment_enroll_id):
             marking.view_answer_enable = marking.question_no in retried_questions
 
         #if category is verbal, multiple drag drop question.. treating to be shape of box
-        if marking.item.category == 281 and marking.item.subcategory != 311:
+        if marking.item.category == 281:
             correct_r_values = []
-            for value in marking.correct_r_value:
-                if value.find(" gap_") > -1:
-                    ques_no = value[value.rfind('_') + 1:]
-                    end = value.index(" gap_")
-                    ques_correct_value = value[0:end]
-                    correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':ques_correct_value})
-            if len(correct_r_values) > 0:
-                marking.verbal_correct_r_value = correct_r_values
-                is_verbal = True
+            if marking.item.subcategory != 311:
+                for value in marking.correct_r_value:
+                    if value.find(" gap_") > -1:
+                        ques_no = value[value.rfind('_') + 1:]
+                        end = value.index(" gap_")
+                        ques_correct_value = value[0:end]
+                        correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':ques_correct_value})
+                if len(correct_r_values) > 0:
+                    marking.verbal_correct_r_value = correct_r_values
+                    is_verbal = True
+            else:
+                #inlineChoiceInteraction
+                for value in marking.correct_r_value:
+                    correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':value})
+                if len(correct_r_values) > 0:
+                    marking.verbal_correct_r_value = correct_r_values
+                    is_verbal = True
 
             candidate_r_values = []
             candidate_all_correct = True
