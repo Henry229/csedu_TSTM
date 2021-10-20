@@ -163,6 +163,11 @@
                     </td>
                     {% endif %}
                     <td>
+                      {% if is_verbal %}
+                      {% if not marking.candidate_all_correct %}
+                      <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
+                      {% endif %}
+                      {% else %}
                       {% if not marking.is_correct and not marking.last_is_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
                       {% endif %}

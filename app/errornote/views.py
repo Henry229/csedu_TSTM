@@ -76,6 +76,7 @@ def error_note(assessment_enroll_id):
                 is_verbal = True
 
             candidate_r_values = []
+            candidate_all_correct = True
             for r_value in marking.correct_r_value:
                 is_existent = False
                 r_ques_no = '0'
@@ -91,13 +92,16 @@ def error_note(assessment_enroll_id):
                             end = value.index(" gap_")
                             ques_candidate_value = value[0:end]
                             candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
+                            if _is_correct is False:
+                                candidate_all_correct = False
                             is_existent = True
                 if not is_existent:
                     candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
+                    candidate_all_correct = False
 
             if len(candidate_r_values) > 0:
                 marking.verbal_candidate_r_value = candidate_r_values
-
+                marking.candidate_all_correct = candidate_all_correct
 
         markings.append(marking)
     correct_percent = correct_count * 100.0 / question_count
