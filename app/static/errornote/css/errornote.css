@@ -97,7 +97,8 @@
 }
 .marking-card {
     margin-bottom: 10px;
-    display: inherit;
+    display: inline-block;
+
 }
 .marking-card > .card-header {
     padding: 0;
