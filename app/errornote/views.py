@@ -86,8 +86,8 @@ def error_note(assessment_enroll_id):
                         ques_no = value[value.rfind('_') + 1:]
                         if r_ques_no == ques_no:
                             _is_correct = False
-                                if r_value == value:
-                                    _is_correct = True
+                            if r_value == value:
+                                _is_correct = True
                             end = value.index(" gap_")
                             ques_candidate_value = value[0:end]
                             candidate_r_values.append({'no':ques_no, 'value':ques_candidate_value, 'correct': _is_correct})
