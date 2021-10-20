@@ -105,14 +105,21 @@ def error_note(assessment_enroll_id):
 
 
             last_r_values = []
-            for index, r_value in marking.last_r_value:
+            last_r_value_index = 0
+            for r_value in marking.last_r_value:
+                last_r_value_index += 1
                 is_existent = False
                 r_ques_no = '0'
                 if r_value.find(" gap_") > -1:
                     r_ques_no = r_value[r_value.rfind('_') + 1:]
+                    end = r_value.index(" gap_")
+                    ques_last_value = r_value[0:end]
+                #else:
+                #    if r_value['RESPONSE_' + str(correct_qes_no)] is not None:
+                #    elif value['RESPONSE'] is not None:
+                #        r_ques_no = str(last_r_value_index)
+                #        ques_last_value =  r_value
 
-                end = r_value.index(" gap_")
-                ques_last_value = r_value[0:end]
                 correct_qes_no = 0
                 for value in marking.correct_r_value:
                     correct_qes_no += 1
@@ -125,6 +132,8 @@ def error_note(assessment_enroll_id):
 
                             last_r_values.append({'no':str(correct_qes_no), 'value':ques_last_value, 'correct': _is_correct})
                             is_existent = True
+               
+
                 #if not is_existent:
                 #    last_r_values.append({'no': str(len(last_r_values)+1), 'value': '', 'correct': False})
 
