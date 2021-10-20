@@ -158,7 +158,7 @@ def error_note(assessment_enroll_id):
                     ques_last_value = marking.last_r_value[key]
 
                     _is_correct = False
-                    if marking.last_r_value[key] == marking.last_r_value[key]:
+                    if ques_last_value == marking.correct_r_value[key]:
                         _is_correct = True
 
                     last_r_values.append({'no': r_ques_no, 'value': ques_last_value, 'correct': _is_correct})
