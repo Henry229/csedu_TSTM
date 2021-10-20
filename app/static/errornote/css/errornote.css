@@ -90,10 +90,17 @@
     color:var(--red);
 }
 
-.t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(4), .t_verbal tr td:nth-child(6) {
+.t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(5), .t_verbal tr td:nth-child(8) {
     width: 300px !important;
     max-width: 300px !important;
 }
+
+.t_all_verbal tr td:nth-child(3), .t_all_verbal tr td:nth-child(4), .t_all_verbal tr td:nth-child(6) {
+    width: 300px !important;
+    max-width: 300px !important;
+}
+
+t_all_verbal
 
 .marking-card {
     margin-bottom: 10px;

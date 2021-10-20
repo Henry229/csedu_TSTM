@@ -47,6 +47,7 @@ def error_note(assessment_enroll_id):
     markings = []
     question_count, correct_count = 0, 0
     is_verbal = False
+    is_verbal_all = True
     for marking, code_name in marking_query:
         question_count = question_count + 1
         marking.category_name = code_name
@@ -161,6 +162,8 @@ def error_note(assessment_enroll_id):
     for _marking in markings:
         if _marking.is_correct is None or not _marking.is_correct:
             is_all_correct = False
+        if not hasattr(_marking, 'verbal_correct_r_value'):
+            is_verbal_all = False
 
     template_file = 'errornote/error_note.html'
     rendered_template = render_template(template_file, assessment_name=assessment_name,
@@ -169,7 +172,8 @@ def error_note(assessment_enroll_id):
                                         score=score, markings=markings, retry_session_key=retry_session_key,
                                         last_error_count=last_error_count, test_datetime=test_datetime,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                        grade=grade, is_all_correct=is_all_correct, is_verbal=is_verbal)
+                                        grade=grade, is_all_correct=is_all_correct, is_verbal=is_verbal,
+                                        is_verbal_all=is_verbal_all)
     return rendered_template
 
 
