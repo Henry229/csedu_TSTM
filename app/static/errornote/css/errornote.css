@@ -90,6 +90,11 @@
     color:var(--red);
 }
 
+.t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(5) {
+    width: auto;
+    max-width: none;
+}
+}
 .marking-card {
     margin-bottom: 10px;
     display: inherit;

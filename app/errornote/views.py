@@ -46,6 +46,7 @@ def error_note(assessment_enroll_id):
         .filter(Marking.assessment_enroll_id == assessment_enroll_id).order_by(Marking.question_no).all()
     markings = []
     question_count, correct_count = 0, 0
+    is_verbal = False
     for marking, code_name in marking_query:
         question_count = question_count + 1
         marking.category_name = code_name
@@ -72,6 +73,7 @@ def error_note(assessment_enroll_id):
                     correct_r_values.append({'no':ques_no, 'value':ques_correct_value})
             if len(correct_r_values) > 0:
                 marking.verbal_correct_r_value = correct_r_values
+                is_verbal = True
 
             candidate_r_values = []
             for value in marking.candidate_r_value:
@@ -112,7 +114,7 @@ def error_note(assessment_enroll_id):
                                         score=score, markings=markings, retry_session_key=retry_session_key,
                                         last_error_count=last_error_count, test_datetime=test_datetime,
                                         student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                        grade=grade, is_all_correct=is_all_correct)
+                                        grade=grade, is_all_correct=is_all_correct, is_verbal=is_verbal)
     return rendered_template
 
 
