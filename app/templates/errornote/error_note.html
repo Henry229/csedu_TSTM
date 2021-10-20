@@ -133,7 +133,7 @@
                     {{- marking.question_no -}}
                     </td>
                     <td>
-                        {%- if marking.item.category == 281 -%}
+                        {%- if marking.item.category == 281 and marking.item.subcategory != 311 -%}
                         {%- if marking.verbal_candidate_r_value -%}
                         {% for _l in marking.verbal_candidate_r_value %}
                         <div class="card text-center marking-card">
@@ -157,7 +157,7 @@
                             {{- marking.candidate_r_value -}}
                         {%- endif -%}
                     </td>
-                    {% if marking.item.category != 281 %}
+                    {% if marking.item.category != 281 and marking.item.subcategory != 311 %}
                     <td>
                       {%- if marking.is_correct -%}
                       <i class="fa fa-check" style="color: #4dbd74"></i>
@@ -169,7 +169,7 @@
                     {% if is_all_correct is sameas false %}
                     <td>
 
-                        {%- if marking.item.category == 281 -%}
+                        {%- if marking.item.category == 281 and marking.item.subcategory != 311 -%}
                         {%- if marking.verbal_last_r_value -%}
                         {% for _l in marking.verbal_last_r_value %}
                         <div class="card text-center marking-card">
@@ -198,7 +198,7 @@
                         {%- endif -%}
 
                     </td>
-                    {% if marking.item.category != 281 %}
+                    {% if marking.item.category != 281 and marking.item.subcategory != 311 %}
                     <td>
                     {% if marking.last_is_correct is not none %}
                       {%- if marking.last_is_correct -%}
@@ -222,7 +222,7 @@
                       {% endif %}
                     </td>
                     <td>
-                        {%- if marking.item.category == 281 -%}
+                        {%- if marking.item.category == 281 and marking.item.subcategory != 311 -%}
                         {%- if marking.last_r_value and marking.verbal_last_r_value -%}
                         {%- if marking.verbal_correct_r_value -%}
                         {% for _l in marking.verbal_correct_r_value %}

@@ -63,7 +63,7 @@ def error_note(assessment_enroll_id):
             marking.view_answer_enable = marking.question_no in retried_questions
 
         #if category is verbal, multiple drag drop question.. treating to be shape of box
-        if marking.item.category == 281:
+        if marking.item.category == 281 and marking.item.subcategory != 311:
             correct_r_values = []
             for value in marking.correct_r_value:
                 if value.find(" gap_") > -1:
