@@ -93,7 +93,7 @@ def error_note(assessment_enroll_id):
                             candidate_r_values.append({'no':ques_no, 'value':ques_candidate_value, 'correct': _is_correct})
                             is_existent = True
                 if not is_existent:
-                    candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '&nbsp;', 'correct': False})
+                    candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
 
             if len(candidate_r_values) > 0:
                 marking.verbal_candidate_r_value = candidate_r_values

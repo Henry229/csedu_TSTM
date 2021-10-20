@@ -110,7 +110,7 @@
                               {{ _l.no }}
                           </div>
                           <div class="card-body">
-                            <span>{{ _l.value }}</span>
+                            <span>{% if _l.value == '' %}&nbsp;{% else %}{{ _l.value }}{% endif %}</span>
                           </div>
                         </div>
                         {% endfor %}
