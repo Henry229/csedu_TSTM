@@ -118,3 +118,6 @@
 .t_all_verbal thead th {
     border-bottom-width:1px !important;
 }
+.table-bordered thead th {
+    border-bottom-width: 1px !important;
+}
