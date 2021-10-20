@@ -97,7 +97,7 @@
 }
 .marking-card {
     margin-bottom: 10px;
-    display: inline-block;
+    display: inline-block !important;
 
 }
 .marking-card > .card-header {
