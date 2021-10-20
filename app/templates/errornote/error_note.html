@@ -170,8 +170,7 @@
                     {% endif %}
                     {% if is_all_correct is sameas false %}
                     <td>
-
-                        {%- if marking.item.category == 281 and marking.item.subcategory != 311 -%}
+                        {%- if marking.item.category == 281 -%}
                         {%- if marking.verbal_last_r_value -%}
                         {% for _l in marking.verbal_last_r_value %}
                         <div class="card text-center marking-card">
