@@ -107,10 +107,15 @@
                         {% for _l in marking.verbal_candidate_r_value %}
                         <div class="card text-center marking-card">
                           <div class="card-header">
-                              {{ _l.no }}
+                              {{- _l.no -}}
+                              {% if _l.correct %}
+                              <i class="fa fa-check" style="color: #4dbd74"></i>
+                              {% else %}
+                              <i class="fa fa-times" style="color: #f86c6b"></i>
+                              {% endif %}
                           </div>
                           <div class="card-body">
-                            <span>{% if _l.value == '' %}&nbsp;{% else %}{{ _l.value }}{% endif %}</span>
+                            <span>{% if _l.value == '' %}&nbsp;{% else %}{{- _l.value -}}{% endif %}</span>
                           </div>
                         </div>
                         {% endfor %}
