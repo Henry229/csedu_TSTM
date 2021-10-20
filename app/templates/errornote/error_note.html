@@ -34,6 +34,7 @@
         <div class="col">
           {% if is_verbal %}
           <table class="table" id="t_student_info">
+            <thead class="thead-light">
             <tr>
               <th style="width:12%"> Name</th>
               <td style="width:20%"> {{ Student.getCSStudentName(student_user_id) }} </td>
@@ -42,6 +43,7 @@
               <th style="width:12%"> Date</th>
               <td style="width:24%"> {{ test_datetime }}</td>
             </tr>
+            </thead>
           </table>
           {% else %}
           <table class="table col-6" id="t_student_info">
