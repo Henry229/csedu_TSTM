@@ -152,7 +152,7 @@ def error_note(assessment_enroll_id):
             else:
                 for index, key in enumerate(marking.last_r_value.keys()):
                     if key.find("RESPONSE_") > -1:
-                        r_ques_no = str(int(r_ques_no = key[key.rfind('_') + 1:]) + 1)
+                        r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
                     else:
                         r_ques_no = '1'
                     ques_last_value = marking.last_r_value[key]
