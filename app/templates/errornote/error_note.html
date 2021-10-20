@@ -88,7 +88,7 @@
                 <th rowspan="2">Category</th>
                 <th rowspan="2">Question</th>
 
-                {% if marking.item.category == 281 %}
+                {% if is_verbal %}
 
                 {% if is_all_correct is sameas false %}
                 <th>First Result</th>
@@ -116,12 +116,12 @@
               </tr>
               <tr>
                 <th>My Answer</th>
-                {% if marking.item.category != 281 %}
+                {% if is_verbal %}
                 <th>Mark</th>
                 {% endif %}
                 {% if is_all_correct is sameas false %}
                 <th>My Answer</th>
-                {% if marking.item.category != 281 %}
+                {% if is_verbal %}
                 <th>Mark</th>
                 {% endif %}
                 {% endif %}
