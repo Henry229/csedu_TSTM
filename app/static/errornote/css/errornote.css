@@ -91,8 +91,8 @@
 }
 
 .t_verbal tr td:nth-child(3), .t_verbal tr td:nth-child(5) {
-    width: auto;
-    max-width: none;
+    width: auto !important;
+    max-width: none !important;
 }
 }
 .marking-card {
