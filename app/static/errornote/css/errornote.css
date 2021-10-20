@@ -89,3 +89,14 @@
 .txt-red {
     color:var(--red);
 }
+
+.marking-card {
+    margin-bottom: 10px;
+    display: inherit;
+}
+.marking-card > .card-header {
+    padding: 0;
+}
+.marking-card > .card-body {
+    padding: 2px;
+}
