@@ -114,7 +114,16 @@
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
-            
+              {% if is_verbal is sameas false %}
+              <tr>
+                <th>My Answer</th>
+                <th>Mark</th>
+                {% endif %}
+                {% if is_all_correct is sameas false %}
+                <th>My Answer</th>
+                <th>Mark</th>
+              </tr>
+              {% endif %}
               </thead>
               <tbody>
               {% for marking in markings %}
