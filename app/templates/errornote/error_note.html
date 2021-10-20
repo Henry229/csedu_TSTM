@@ -148,9 +148,35 @@
                     </td>
                     {% if is_all_correct is sameas false %}
                     <td>
-                    {% if marking.last_r_value is not none %}
-                        {{- marking.last_r_value -}}
-                    {% endif %}
+
+                        {%- if marking.item.category == 281 -%}
+                        {%- if marking.verbal_last_r_value -%}
+                        {% for _l in marking.verbal_last_r_value %}
+                        <div class="card text-center marking-card">
+                          <div class="card-header">
+                              {{- _l.no -}}
+                              {% if _l.correct %}
+                              <i class="fa fa-check" style="color: #4dbd74"></i>
+                              {% else %}
+                              <i class="fa fa-times" style="color: #f86c6b"></i>
+                              {% endif %}
+                          </div>
+                          <div class="card-body">
+                            <span>{% if _l.value == '' %}&nbsp;{% else %}{{- _l.value -}}{% endif %}</span>
+                          </div>
+                        </div>
+                        {% endfor %}
+                        {%- else -%}
+                            {% if marking.last_r_value is not none %}
+                                {{- marking.last_r_value -}}
+                            {% endif %}
+                        {%- endif -%}
+                        {%- else -%}
+                            {% if marking.last_r_value is not none %}
+                                {{- marking.last_r_value -}}
+                            {% endif %}
+                        {%- endif -%}
+
                     </td>
                     <td>
                     {% if marking.last_is_correct is not none %}
