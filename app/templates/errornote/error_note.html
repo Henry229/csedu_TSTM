@@ -114,9 +114,9 @@
                 <th rowspan="2">Retry</th>
                 <th rowspan="2">Answers</th>
               </tr>
+              {% if not is_verbal %}
               <tr>
                 <th>My Answer</th>
-                {% if is_verbal %}
                 <th>Mark</th>
                 {% endif %}
                 {% if is_all_correct is sameas false %}
@@ -124,8 +124,8 @@
                 {% if is_verbal %}
                 <th>Mark</th>
                 {% endif %}
-                {% endif %}
               </tr>
+              {% endif %}
               </thead>
               <tbody>
               {% for marking in markings %}
