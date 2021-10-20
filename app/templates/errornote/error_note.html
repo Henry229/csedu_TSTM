@@ -32,6 +32,18 @@
     <div class="card-body">
       <div class="row">
         <div class="col">
+          {% if is_verbal %}
+          <table class="table col-6" id="t_student_info">
+            <tr>
+              <th> Name</th>
+              <td> {{ Student.getCSStudentName(student_user_id) }} </td>
+              <th> Grade</th>
+              <td> {{ grade }}</td>
+              <th> Date</th>
+              <td> {{ test_datetime }}</td>
+            </tr>
+          </table>
+          {% else %}
           <table class="table col-6" id="t_student_info">
             <tr>
               <th> Name</th>
@@ -46,6 +58,7 @@
               <td> {{ test_datetime }}</td>
             </tr>
           </table>
+          {% endif %}
         </div>
       </div>
       <br>

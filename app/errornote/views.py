@@ -70,7 +70,7 @@ def error_note(assessment_enroll_id):
                     ques_no = value[value.rfind('_') + 1:]
                     end = value.index(" gap_")
                     ques_correct_value = value[0:end]
-                    correct_r_values.append({'no':ques_no, 'value':ques_correct_value})
+                    correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':ques_correct_value})
             if len(correct_r_values) > 0:
                 marking.verbal_correct_r_value = correct_r_values
                 is_verbal = True
@@ -90,7 +90,7 @@ def error_note(assessment_enroll_id):
                                 _is_correct = True
                             end = value.index(" gap_")
                             ques_candidate_value = value[0:end]
-                            candidate_r_values.append({'no':ques_no, 'value':ques_candidate_value, 'correct': _is_correct})
+                            candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
                             is_existent = True
                 if not is_existent:
                     candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
