@@ -105,24 +105,28 @@ def error_note(assessment_enroll_id):
 
 
             last_r_values = []
-            for r_value in marking.correct_r_value:
+            for r_value in marking.last_r_value:
                 is_existent = False
                 r_ques_no = '0'
                 if r_value.find(" gap_") > -1:
                     r_ques_no = r_value[r_value.rfind('_') + 1:]
-                for value in marking.last_r_value:
+
+                end = r_value.index(" gap_")
+                ques_last_value = r_value[0:end]
+                correct_qes_no = 0
+                for value in marking.correct_r_value:
+                    correct_qes_no += 1
                     if value.find(" gap_") > -1:
                         ques_no = value[value.rfind('_') + 1:]
                         if r_ques_no == ques_no:
                             _is_correct = False
                             if r_value == value:
                                 _is_correct = True
-                            end = value.index(" gap_")
-                            ques_last_value = value[0:end]
-                            last_r_values.append({'no':str(len(last_r_values)+1), 'value':ques_last_value, 'correct': _is_correct})
+
+                            last_r_values.append({'no':str(correct_qes_no), 'value':ques_last_value, 'correct': _is_correct})
                             is_existent = True
-                if not is_existent:
-                    last_r_values.append({'no': str(len(last_r_values)+1), 'value': '', 'correct': False})
+                #if not is_existent:
+                #    last_r_values.append({'no': str(len(last_r_values)+1), 'value': '', 'correct': False})
 
             if len(last_r_values) > 0:
                 marking.verbal_last_r_value = last_r_values
