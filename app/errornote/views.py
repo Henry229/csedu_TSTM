@@ -60,6 +60,30 @@ def error_note(assessment_enroll_id):
             marking.explanation_link = view_explanation(testset_id=ts_id, item_id=marking.item_id)
             marking.explanation_link_enable = marking.question_no in retried_questions
             marking.view_answer_enable = marking.question_no in retried_questions
+
+        #if category is verbal, multiple drag drop question.. treating to be shape of box
+        if marking.item.category == 281:
+            correct_r_values = []
+            for value in marking.correct_r_value:
+                if value.find(" gap_") > -1:
+                    ques_no = value[value.rfind('_') + 1:]
+                    end = value.index(" gap_")
+                    ques_correct_value = value[0:end]
+                    correct_r_values.append({'no':ques_no, 'value':ques_correct_value})
+            if len(correct_r_values) > 0:
+                marking.verbal_correct_r_value = correct_r_values
+
+            candidate_r_values = []
+            for value in marking.candidate_r_value:
+                if value.find(" gap_") > -1:
+                    ques_no = value[value.rfind('_') + 1:]
+                    end = value.index(" gap_")
+                    ques_candidate_value = value[0:end]
+                    candidate_r_values.append({'no':ques_no, 'value':ques_candidate_value})
+            if len(candidate_r_values) > 0:
+                marking.verbal_candidate_r_value = candidate_r_values
+
+
         markings.append(marking)
     correct_percent = correct_count * 100.0 / question_count
     score = '{} out of {} ({:.2f}%)'.format(correct_count, question_count, correct_percent)

@@ -102,7 +102,24 @@
                     {{- marking.question_no -}}
                     </td>
                     <td>
-                        {{- marking.candidate_r_value -}}
+                        {%- if marking.item.category == 281 -%}
+                        {%- if marking.verbal_candidate_r_value -%}
+                        {% for _l in marking.verbal_candidate_r_value %}
+                        <div class="card text-center">
+                          <div class="card-header">
+                              {{ _l.no }}
+                          </div>
+                          <div class="card-body">
+                            <span>{{ _l.value }}</span>
+                          </div>
+                        </div>
+                        {% endfor %}
+                        {%- else -%}
+                            {{- marking.candidate_r_value -}}
+                        {%- endif -%}
+                        {%- else -%}
+                            {{- marking.candidate_r_value -}}
+                        {%- endif -%}
                     </td>
                     <td>
                       {%- if marking.is_correct -%}
