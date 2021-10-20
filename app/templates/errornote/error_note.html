@@ -223,6 +223,7 @@
                     </td>
                     <td>
                         {%- if marking.item.category == 281 -%}
+                        {%- if marking.last_r_value and marking.verbal_last_r_value -%}
                         {%- if marking.verbal_correct_r_value -%}
                         {% for _l in marking.verbal_correct_r_value %}
                         <div class="card text-center marking-card">
@@ -238,6 +239,7 @@
                             {% if marking.correct_r_value %}
                              {{- marking.correct_r_value -}}
                             {% endif %}
+                        {%- endif -%}
                         {%- endif -%}
                         {%- else -%}
 
