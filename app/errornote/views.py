@@ -116,6 +116,7 @@ def error_note(assessment_enroll_id):
                 if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == ''):
                     candidate_all_correct = False
                 else:
+                    print(marking.candidate_r_value)
                     for index, key in enumerate(marking.candidate_r_value.keys()):
                         if key.find("RESPONSE_") > -1:
                             r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
