@@ -157,28 +157,35 @@ def error_note(assessment_enroll_id):
 
             last_r_values = []
             if marking.item.subcategory != 311:
-                last_r_value_index = 0
-                for r_value in marking.last_r_value:
-                    last_r_value_index += 1
-                    r_ques_no = '0'
+                if type(marking.last_r_value) is str:
+                    marking.last_r_value = [marking.last_r_value]
+                    _is_correct = False
+                    if value in marking.correct_r_value:
+                        _is_correct = True
+                    last_r_values.append({'no': str(len(last_r_values) + 1), 'value': value, 'correct': _is_correct})
+                else:
+                    last_r_value_index = 0
+                    for r_value in marking.last_r_value:
+                        last_r_value_index += 1
+                        r_ques_no = '0'
 
-                    ques_last_value = None
-                    if r_value.find(" gap_") > -1:
-                        r_ques_no = r_value[r_value.rfind('_') + 1:]
-                        end = r_value.index(" gap_")
-                        ques_last_value = r_value[0:end]
+                        ques_last_value = None
+                        if r_value.find(" gap_") > -1:
+                            r_ques_no = r_value[r_value.rfind('_') + 1:]
+                            end = r_value.index(" gap_")
+                            ques_last_value = r_value[0:end]
 
-                    correct_qes_no = 0
-                    for value in marking.correct_r_value:
-                        correct_qes_no += 1
-                        if value.find(" gap_") > -1:
-                            ques_no = value[value.rfind('_') + 1:]
-                            if r_ques_no == ques_no:
-                                _is_correct = False
-                                if r_value == value:
-                                    _is_correct = True
+                        correct_qes_no = 0
+                        for value in marking.correct_r_value:
+                            correct_qes_no += 1
+                            if value.find(" gap_") > -1:
+                                ques_no = value[value.rfind('_') + 1:]
+                                if r_ques_no == ques_no:
+                                    _is_correct = False
+                                    if r_value == value:
+                                        _is_correct = True
 
-                    last_r_values.append({'no':str(correct_qes_no), 'value':ques_last_value, 'correct': _is_correct})
+                        last_r_values.append({'no':str(correct_qes_no), 'value':ques_last_value, 'correct': _is_correct})
 
                 if len(last_r_values) > 0:
                     marking.verbal_last_r_value = last_r_values
