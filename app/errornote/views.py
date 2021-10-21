@@ -113,7 +113,7 @@ def error_note(assessment_enroll_id):
                     marking.verbal_candidate_r_value = candidate_r_values
                     marking.candidate_all_correct = candidate_all_correct
             else:
-                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == ''):
+                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is str) or (type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == ''):
                     candidate_all_correct = False
                 else:
                     print(marking.candidate_r_value)
