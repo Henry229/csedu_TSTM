@@ -95,6 +95,10 @@ def error_note(assessment_enroll_id):
                     r_ques_no = '0'
                     if r_value.find(" gap_") > -1:
                         r_ques_no = r_value[r_value.rfind('_') + 1:]
+
+                    if type(marking.candidate_r_value) is str:
+                        marking.candidate_r_value = [marking.candidate_r_value]
+
                     for value in marking.candidate_r_value:
                         if value.find(" gap_") > -1:
                             ques_no = value[value.rfind('_') + 1:]
