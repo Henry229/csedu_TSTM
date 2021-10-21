@@ -91,16 +91,18 @@ def error_note(assessment_enroll_id):
             candidate_all_correct = True
             if marking.item.subcategory != 311:
                 if type(marking.candidate_r_value) is str:
-                    if type(marking.candidate_r_value) is str:
+                    if marking.candidate_r_value != '':
                         marking.candidate_r_value = [marking.candidate_r_value]
-                    _is_correct = False
-                    if value in marking.correct_r_value:
-                        _is_correct = True
-                    candidate_r_values.append(
-                        {'no': str(len(candidate_r_values) + 1), 'value': value, 'correct': _is_correct})
-                    if _is_correct is False:
-                        candidate_all_correct = False
-                    is_existent = True
+                        _is_correct = False
+                        if value in marking.correct_r_value:
+                            _is_correct = True
+                        candidate_r_values.append(
+                            {'no': str(len(candidate_r_values) + 1), 'value': value, 'correct': _is_correct})
+                        if _is_correct is False:
+                            candidate_all_correct = False
+                        is_existent = True
+                    else:
+                        is_existent = False
                 elif type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == '':
                     is_existent = False
                 else:
