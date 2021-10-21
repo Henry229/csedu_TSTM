@@ -90,36 +90,37 @@ def error_note(assessment_enroll_id):
             candidate_r_values = []
             candidate_all_correct = True
             if marking.item.subcategory != 311:
-                for r_value in marking.correct_r_value:
-                    is_existent = False
-                    r_ques_no = '0'
-                    if r_value.find(" gap_") > -1:
-                        r_ques_no = r_value[r_value.rfind('_') + 1:]
+                if type(marking.candidate_r_value) is str:
+                    marking.candidate_r_value = [marking.candidate_r_value]
+                    _is_correct = False
+                    if value in marking.correct_r_value:
+                        _is_correct = True
+                    candidate_r_values.append(
+                        {'no': str(len(candidate_r_values) + 1), 'value': value, 'correct': _is_correct})
+                    if _is_correct is False:
+                        candidate_all_correct = False
+                    is_existent = True
+                else:
+                    for r_value in marking.correct_r_value:
+                        is_existent = False
+                        r_ques_no = '0'
+                        if r_value.find(" gap_") > -1:
+                            r_ques_no = r_value[r_value.rfind('_') + 1:]
 
-                    if type(marking.candidate_r_value) is str:
-                        marking.candidate_r_value = [marking.candidate_r_value]
+                        for value in marking.candidate_r_value:
+                            if value.find(" gap_") > -1:
+                                ques_no = value[value.rfind('_') + 1:]
+                                if r_ques_no == ques_no:
+                                    _is_correct = False
+                                    if r_value == value:
+                                        _is_correct = True
+                                    end = value.index(" gap_")
+                                    ques_candidate_value = value[0:end]
+                                    candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
+                                    if _is_correct is False:
+                                        candidate_all_correct = False
+                                    is_existent = True
 
-                    for value in marking.candidate_r_value:
-                        if value.find(" gap_") > -1:
-                            ques_no = value[value.rfind('_') + 1:]
-                            if r_ques_no == ques_no:
-                                _is_correct = False
-                                if r_value == value:
-                                    _is_correct = True
-                                end = value.index(" gap_")
-                                ques_candidate_value = value[0:end]
-                                candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
-                                if _is_correct is False:
-                                    candidate_all_correct = False
-                                is_existent = True
-                        else:
-                            _is_correct = False
-                            if value in marking.correct_r_value:
-                                _is_correct = True
-                            candidate_r_values.append({'no': str(len(candidate_r_values) + 1), 'value': value, 'correct': _is_correct})
-                            if _is_correct is False:
-                                candidate_all_correct = False
-                            is_existent = True
 
                     if not is_existent:
                         candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
