@@ -112,6 +112,15 @@ def error_note(assessment_enroll_id):
                                 if _is_correct is False:
                                     candidate_all_correct = False
                                 is_existent = True
+                        else:
+                            _is_correct = False
+                            if value in marking.correct_r_value:
+                                _is_correct = True
+                            candidate_r_values.append({'no': str(len(candidate_r_values) + 1), 'value': value, 'correct': _is_correct})
+                            if _is_correct is False:
+                                candidate_all_correct = False
+                            is_existent = True
+
                     if not is_existent:
                         candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
                         candidate_all_correct = False
