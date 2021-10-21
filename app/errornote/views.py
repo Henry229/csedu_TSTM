@@ -100,11 +100,6 @@ def error_note(assessment_enroll_id):
                             {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value[0], 'correct': _is_correct})
                         if _is_correct is False:
                             candidate_all_correct = False
-                        is_existent = True
-                    else:
-                        is_existent = False
-                elif type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == '':
-                    is_existent = False
                 else:
                     for r_value in marking.correct_r_value:
                         is_existent = False
@@ -134,7 +129,7 @@ def error_note(assessment_enroll_id):
                     marking.verbal_candidate_r_value = candidate_r_values
                     marking.candidate_all_correct = candidate_all_correct
             else:
-                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is str) or (type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == ''):
+                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is str and marking.candidate_r_value == ''):
                     candidate_all_correct = False
                 else:
                     print(marking.candidate_r_value)
