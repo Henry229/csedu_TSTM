@@ -94,10 +94,10 @@ def error_note(assessment_enroll_id):
                     if marking.candidate_r_value != '':
                         marking.candidate_r_value = [marking.candidate_r_value]
                         _is_correct = False
-                        if marking.candidate_r_value in marking.correct_r_value:
+                        if marking.candidate_r_value[0] in marking.correct_r_value:
                             _is_correct = True
                         candidate_r_values.append(
-                            {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value, 'correct': _is_correct})
+                            {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value[0], 'correct': _is_correct})
                         if _is_correct is False:
                             candidate_all_correct = False
                         is_existent = True
@@ -166,9 +166,9 @@ def error_note(assessment_enroll_id):
                     if marking.last_r_value != '':
                         marking.last_r_value = [marking.last_r_value]
                         _is_correct = False
-                        if marking.last_r_value in marking.correct_r_value:
+                        if marking.last_r_value[0] in marking.correct_r_value:
                             _is_correct = True
-                        last_r_values.append({'no': str(len(last_r_values) + 1), 'value': marking.last_r_value, 'correct': _is_correct})
+                        last_r_values.append({'no': str(len(last_r_values) + 1), 'value': marking.last_r_value[0], 'correct': _is_correct})
                 else:
                     last_r_value_index = 0
                     for r_value in marking.last_r_value:
