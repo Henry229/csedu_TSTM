@@ -63,7 +63,7 @@ def error_note(assessment_enroll_id):
             marking.explanation_link_enable = marking.question_no in retried_questions
             marking.view_answer_enable = marking.question_no in retried_questions
 
-        #if category is verbal
+        #when category is verbal
         if marking.item.category == 281 and (type(marking.correct_r_value) is list or type(marking.correct_r_value) is dict):
             correct_r_values = []
             if marking.item.subcategory != 311:
@@ -100,6 +100,10 @@ def error_note(assessment_enroll_id):
                             {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value[0], 'correct': _is_correct})
                         if _is_correct is False:
                             candidate_all_correct = False
+                    else:
+                        for r_value in marking.correct_r_value:
+                            candidate_r_values.append({'no': str(len(candidate_r_values) + 1), 'value': '', 'correct': False})
+
                 else:
                     for r_value in marking.correct_r_value:
                         is_existent = False
