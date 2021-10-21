@@ -144,6 +144,8 @@ def error_note(assessment_enroll_id):
                 for r_value in marking.last_r_value:
                     last_r_value_index += 1
                     r_ques_no = '0'
+
+                    ques_last_value = None
                     if r_value.find(" gap_") > -1:
                         r_ques_no = r_value[r_value.rfind('_') + 1:]
                         end = r_value.index(" gap_")
