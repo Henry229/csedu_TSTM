@@ -163,12 +163,12 @@ def error_note(assessment_enroll_id):
             last_r_values = []
             if marking.item.subcategory != 311:
                 if type(marking.last_r_value) is str:
-                    if marking.last_r_value != '':
-                        marking.last_r_value = [marking.last_r_value]
-                        _is_correct = False
-                        if value in marking.correct_r_value:
-                            _is_correct = True
-                        last_r_values.append({'no': str(len(last_r_values) + 1), 'value': value, 'correct': _is_correct})
+                    #if marking.last_r_value != '':
+                    marking.last_r_value = [marking.last_r_value]
+                    _is_correct = False
+                    if marking.last_r_value in marking.correct_r_value:
+                        _is_correct = True
+                    last_r_values.append({'no': str(len(last_r_values) + 1), 'value': marking.last_r_value, 'correct': _is_correct})
                 else:
                     last_r_value_index = 0
                     for r_value in marking.last_r_value:
