@@ -73,6 +73,9 @@ def error_note(assessment_enroll_id):
                         end = value.index(" gap_")
                         ques_correct_value = value[0:end]
                         correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':ques_correct_value})
+                    else:
+                        correct_r_values.append({'no':str(len(correct_r_values)+1), 'value':value})
+
                 if len(correct_r_values) > 0:
                     marking.verbal_correct_r_value = correct_r_values
                     is_verbal = True
