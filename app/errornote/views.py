@@ -91,7 +91,8 @@ def error_note(assessment_enroll_id):
             candidate_all_correct = True
             if marking.item.subcategory != 311:
                 if type(marking.candidate_r_value) is str or (type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == ''):
-                    marking.candidate_r_value = [marking.candidate_r_value]
+                    if type(marking.candidate_r_value) is str:
+                        marking.candidate_r_value = [marking.candidate_r_value]
                     _is_correct = False
                     if value in marking.correct_r_value:
                         _is_correct = True
