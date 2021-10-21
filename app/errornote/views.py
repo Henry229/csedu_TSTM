@@ -85,32 +85,54 @@ def error_note(assessment_enroll_id):
                     is_verbal = True
 
             candidate_r_values = []
-            candidate_all_correct = True
-            for r_value in marking.correct_r_value:
-                is_existent = False
-                r_ques_no = '0'
-                if r_value.find(" gap_") > -1:
-                    r_ques_no = r_value[r_value.rfind('_') + 1:]
-                for value in marking.candidate_r_value:
-                    if value.find(" gap_") > -1:
-                        ques_no = value[value.rfind('_') + 1:]
-                        if r_ques_no == ques_no:
-                            _is_correct = False
-                            if r_value == value:
-                                _is_correct = True
-                            end = value.index(" gap_")
-                            ques_candidate_value = value[0:end]
-                            candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
-                            if _is_correct is False:
-                                candidate_all_correct = False
-                            is_existent = True
-                if not is_existent:
-                    candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
-                    candidate_all_correct = False
+            if marking.item.subcategory != 311:
+                candidate_all_correct = True
+                for r_value in marking.correct_r_value:
+                    is_existent = False
+                    r_ques_no = '0'
+                    if r_value.find(" gap_") > -1:
+                        r_ques_no = r_value[r_value.rfind('_') + 1:]
+                    for value in marking.candidate_r_value:
+                        if value.find(" gap_") > -1:
+                            ques_no = value[value.rfind('_') + 1:]
+                            if r_ques_no == ques_no:
+                                _is_correct = False
+                                if r_value == value:
+                                    _is_correct = True
+                                end = value.index(" gap_")
+                                ques_candidate_value = value[0:end]
+                                candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
+                                if _is_correct is False:
+                                    candidate_all_correct = False
+                                is_existent = True
+                    if not is_existent:
+                        candidate_r_values.append({'no': str(len(candidate_r_values)+1), 'value': '', 'correct': False})
+                        candidate_all_correct = False
 
-            if len(candidate_r_values) > 0:
-                marking.verbal_candidate_r_value = candidate_r_values
-                marking.candidate_all_correct = candidate_all_correct
+                if len(candidate_r_values) > 0:
+                    marking.verbal_candidate_r_value = candidate_r_values
+                    marking.candidate_all_correct = candidate_all_correct
+            else:
+                candidate_all_correct = True
+                for index, key in enumerate(marking.candidate_r_value.keys()):
+                    if key.find("RESPONSE_") > -1:
+                        r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
+                    else:
+                        r_ques_no = '1'
+                    ques_candidate_value = marking.candidate_r_value[key]
+
+                    _is_correct = False
+                    if ques_candidate_value == marking.correct_r_value[int(r_ques_no)-1]:
+                        _is_correct = True
+
+                    if not _is_correct:
+                        candidate_all_correct = False
+
+                    candidate_r_values.append({'no': r_ques_no, 'value': ques_candidate_value, 'correct': _is_correct})
+
+                if len(candidate_r_values) > 0:
+                    marking.verbal_candidate_r_value = candidate_r_values
+                    marking.candidate_all_correct = candidate_all_correct
 
 
             last_r_values = []

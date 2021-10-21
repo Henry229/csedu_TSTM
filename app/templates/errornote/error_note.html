@@ -135,7 +135,7 @@
                     {{- marking.question_no -}}
                     </td>
                     <td>
-                        {%- if marking.item.category == 281 and marking.item.subcategory != 311 -%}
+                        {%- if marking.item.category == 281 -%}
                         {%- if marking.verbal_candidate_r_value -%}
                         {% for _l in marking.verbal_candidate_r_value %}
                         <div class="card text-center marking-card">
