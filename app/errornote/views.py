@@ -97,7 +97,7 @@ def error_note(assessment_enroll_id):
                         if marking.candidate_r_value[0] in marking.correct_r_value:
                             _is_correct = True
                         candidate_r_values.append(
-                            {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value[0], 'correct': _is_correct})
+                            {'no': str(len(candidate_r_values) + 1), 'value': 'asfa', 'correct': _is_correct})
                         if _is_correct is False:
                             candidate_all_correct = False
                         is_existent = True
