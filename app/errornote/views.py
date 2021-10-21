@@ -102,7 +102,7 @@ def error_note(assessment_enroll_id):
                         candidate_all_correct = False
                     is_existent = True
                 elif type(marking.candidate_r_value) is list and len(marking.candidate_r_value) == 1 and marking.candidate_r_value[0] == '':
-                    print('None')
+                    is_existent = False
                 else:
                     for r_value in marking.correct_r_value:
                         is_existent = False
