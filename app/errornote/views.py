@@ -1,11 +1,11 @@
-from flask import render_template, flash, request, current_app, redirect, url_for
+from flask import render_template, flash, request, current_app, redirect
 from flask_login import login_required, current_user
 from sqlalchemy import desc, or_, and_
 
 from . import errornote
 from ..decorators import permission_required
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews, AssessmentRetry, \
-    Marking, Item, RetryMarking, AssessmentHasTestset
+    Marking, Item, RetryMarking
 from ..web.views import view_explanation
 
 
@@ -15,17 +15,6 @@ from ..web.views import view_explanation
 def error_note(assessment_enroll_id):
     # Todo: Check accessibility to get report
     #refresh_mviews()
-
-    assessment1 = Assessment.query.with_entities(Assessment.id.label('assessment_id'), Assessment.test_type,
-                                                Testset.test_duration,
-                                                Assessment.GUID.label('assessment_guid'),
-                                                Testset.id.label('testset_id'),
-                                                Testset.branching). \
-        join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id). \
-        join(Testset, AssessmentHasTestset.testset_id == Testset.id). \
-        filter(Testset.GUID == '5199497a-1f4c-4671-a8fb-1c6fc3cadfb3', Testset.active == True).order_by(desc(Assessment.id)).first()
-    if assessment1 is not None:
-        return redirect(url_for('web.assessment_list'))
 
     assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
     if assessment_enroll is None:
