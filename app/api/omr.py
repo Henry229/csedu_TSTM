@@ -39,7 +39,7 @@ def omr_marking():
     examInfo = request.json[1]
     info = request.json[2]
 
-    info[0]['student_id'] = 'admin'
+    #info[0]['student_id'] = 'admin'
     student = Student.query.filter_by(student_id=info[0].get("student_id")).first()
     if student is None:
         if info[0].get("stud_first_name") is None or info[0].get("stud_last_name") is None or info[0].get("branch") is None:
