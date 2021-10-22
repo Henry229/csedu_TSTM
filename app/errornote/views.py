@@ -133,8 +133,16 @@ def error_note(assessment_enroll_id):
                     marking.verbal_candidate_r_value = candidate_r_values
                     marking.candidate_all_correct = candidate_all_correct
             else:
-                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is str and marking.candidate_r_value == ''):
-                    candidate_all_correct = False
+                if (marking.candidate_r_value is None) or (type(marking.candidate_r_value) is str):
+                    if marking.candidate_r_value is None:
+                        candidate_all_correct = False
+                    else:
+                        if marking.candidate_r_value == '':
+                            candidate_all_correct = False
+                        else:
+                            candidate_r_values.append({'no': '1', 'value': marking.candidate_r_value, 'correct': marking.is_correct})
+                            if not marking.is_correct:
+                                candidate_all_correct = False
                 else:
                     print(marking.candidate_r_value)
                     for index, key in enumerate(marking.candidate_r_value.keys()):
