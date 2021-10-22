@@ -144,7 +144,6 @@ def error_note(assessment_enroll_id):
                             if not marking.is_correct:
                                 candidate_all_correct = False
                 else:
-                    print(marking.candidate_r_value)
                     for index, key in enumerate(marking.candidate_r_value.keys()):
                         if key.find("RESPONSE_") > -1:
                             r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
@@ -203,18 +202,21 @@ def error_note(assessment_enroll_id):
                     marking.verbal_last_r_value = last_r_values
             else:
                 if marking.last_r_value is not None:
-                    for index, key in enumerate(marking.last_r_value.keys()):
-                        if key.find("RESPONSE_") > -1:
-                            r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
-                        else:
-                            r_ques_no = '1'
-                        ques_last_value = marking.last_r_value[key]
+                    if type(marking.last_r_value) is str:
+                        last_r_values.append({'no': '1', 'value': marking.last_r_value, 'correct': marking.last_is_correct})
+                    else:
+                        for index, key in enumerate(marking.last_r_value.keys()):
+                            if key.find("RESPONSE_") > -1:
+                                r_ques_no = str(int(key[key.rfind('_') + 1:]) + 1)
+                            else:
+                                r_ques_no = '1'
+                            ques_last_value = marking.last_r_value[key]
 
-                        _is_correct = False
-                        if ques_last_value == marking.correct_r_value[int(r_ques_no)-1]:
-                            _is_correct = True
+                            _is_correct = False
+                            if ques_last_value == marking.correct_r_value[int(r_ques_no)-1]:
+                                _is_correct = True
 
-                        last_r_values.append({'no': r_ques_no, 'value': ques_last_value, 'correct': _is_correct})
+                            last_r_values.append({'no': r_ques_no, 'value': ques_last_value, 'correct': _is_correct})
 
                     if len(last_r_values) > 0:
                         marking.verbal_last_r_value = last_r_values
