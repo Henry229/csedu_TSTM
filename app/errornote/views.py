@@ -24,7 +24,7 @@ def error_note(assessment_enroll_id):
         join(AssessmentHasTestset, Assessment.id == AssessmentHasTestset.assessment_id). \
         join(Testset, AssessmentHasTestset.testset_id == Testset.id). \
         filter(Testset.GUID == '5199497a-1f4c-4671-a8fb-1c6fc3cadfb3', Testset.active == True).order_by(desc(Assessment.id)).first()
-    if assessment1 is None:
+    if assessment1 is not None:
         return redirect(url_for('web.assessment_list'))
 
     assessment_enroll = AssessmentEnroll.query.filter_by(id=assessment_enroll_id).first()
