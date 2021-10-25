@@ -39,7 +39,6 @@ def omr_marking():
     examInfo = request.json[1]
     info = request.json[2]
 
-    #info[0]['student_id'] = 'admin'
     student = Student.query.filter_by(student_id=info[0].get("student_id")).first()
     if student is None:
         if info[0].get("stud_first_name") is None or info[0].get("stud_last_name") is None or info[0].get("branch") is None:
@@ -122,8 +121,8 @@ def omr_marking():
                             if bool(y):
                                 is_subject_of_test_type = True
 
-            if not is_subject_of_test_type:
-                return bad_request(message="The test type is not the subject of OMR System.")
+            #if not is_subject_of_test_type:
+            #    return bad_request(message="The test type is not the subject of OMR System.")
 
             dt = datetime.utcnow()
             start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
@@ -178,7 +177,8 @@ def omr_marking():
                 qti_xml = item_service.get_qti_xml_path()
                 processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
                 identifier = None
-                answers = marking_to_value(score)
+                #answers = marking_to_value(score)
+                answers = ['C', 'F']
                 if len(answers) == 1:
                     identifier = answers[0]
                 else:
