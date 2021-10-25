@@ -177,8 +177,9 @@ def omr_marking():
                 qti_xml = item_service.get_qti_xml_path()
                 processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
                 identifier = None
-                #answers = marking_to_value(score)
-                answers = ['C', 'F']
+                print("chs: ", score)
+                answers = marking_to_value(score)
+                #answers = ['C', 'F']
                 if len(answers) == 1:
                     identifier = answers[0]
                 else:
