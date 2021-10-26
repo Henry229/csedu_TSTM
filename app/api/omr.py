@@ -121,8 +121,8 @@ def omr_marking():
                             if bool(y):
                                 is_subject_of_test_type = True
 
-            #if not is_subject_of_test_type:
-            #    return bad_request(message="The test type is not the subject of OMR System.")
+            if not is_subject_of_test_type:
+                return bad_request(message="The test type is not the subject of OMR System.")
 
             dt = datetime.utcnow()
             start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
@@ -177,10 +177,11 @@ def omr_marking():
                 qti_xml = item_service.get_qti_xml_path()
                 processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
                 identifier = None
-                print("chs: ", score)
-                answers = marking_to_value(score)
-                #answers = ['C', 'F']
-                if len(answers) == 1:
+
+                answers = answer_to_value(score)
+                if len(answers) == 0:
+                    identifier = ''
+                elif len(answers) == 1:
                     identifier = answers[0]
                 else:
                     identifier = answers
@@ -276,6 +277,7 @@ def receive_image(f):
     handler.close()
     return handler
 
+# [False, False, True, False, False, True, False] -> ['C', 'F']
 def marking_to_value(score):
     alfa = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     candidate_r_value = []
@@ -286,3 +288,21 @@ def marking_to_value(score):
             candidate_r_value.append(alfa[idx])
 
     return candidate_r_value
+
+#Answer': '36' -> ['C', 'F']
+def answer_to_value(score):
+    def Convert(string):
+        list1 = []
+        list1[:0] = string
+        return list1
+
+    alfa = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    candidate_r_value = []
+    markings = Convert(score[0]["Answer"])
+
+    for val in markings:
+        candidate_r_value.append(alfa[int(val) -1])
+
+    return candidate_r_value
+
+
