@@ -109,6 +109,13 @@
             subtitle: 'Sales, Expenses, and Profit: 2014-2017',
           },
           height: 350,
+            hAxis: {
+    viewWindow: {
+        min: 0,
+        max: 100
+    },
+    ticks: [0, 25, 50, 75, 100] // display labels every 25
+},
           bars: 'horizontal' // Required for Material Bar Charts.
         };
 
