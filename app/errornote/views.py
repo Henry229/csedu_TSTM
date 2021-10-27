@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import desc, or_, and_
 
 from . import errornote
-from ..decorators import permission_required
+from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset, refresh_mviews, AssessmentRetry, \
     Marking, Item, RetryMarking
 from ..web.views import view_explanation
@@ -11,7 +11,7 @@ from ..web.views import view_explanation
 
 @errornote.route('/<int:assessment_enroll_id>', methods=['GET'])
 @login_required
-@permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def error_note(assessment_enroll_id):
     # Todo: Check accessibility to get report
     #refresh_mviews()
