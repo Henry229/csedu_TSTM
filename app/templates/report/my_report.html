@@ -123,8 +123,8 @@
             <table style="width:100%" id="t_student_info">
                 <tr>
                     <th> Student Name:{{current_time}} </th>
-                    <td{% if test_subject_string == 'vocabulary' %} colspan="3" {% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
-                    {% if test_subject_string != 'vocabulary' %}
+                    <td{% if test_subject_string == 'Vocabulary' %} colspan="3" {% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
+                    {% if test_subject_string != 'Vocabulary' %}
                     <th> Rank:</th>
                     <td> {{ rank }} </td>
                     {% endif %}
