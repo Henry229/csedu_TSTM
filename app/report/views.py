@@ -805,7 +805,7 @@ def center():
     score_query = '{' + testset_name_list + '}'  # candidate score by testset
 
     new_query = text("SELECT  * FROM CROSSTAB \
-        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, ae.id, a2.name, \
+        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, ts.assessment_enroll_id, a2.name, \
         a2.id,t2.name, \
         CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
         ELSE 0 END, ''('', Max(ts.rank_v), '')'')  score \
@@ -819,7 +819,7 @@ def center():
         join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
         join test_summary_mview ts on m.assessment_enroll_id= ts.assessment_enroll_id   \
         where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
-        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, ae.id, \
+        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, ts.assessment_enroll_id, \
         t2.name \
         order by s.student_id',\
         $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
