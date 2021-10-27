@@ -122,8 +122,8 @@
         <div class="card-body">
             <table style="width:100%" id="t_student_info">
                 <tr>
-                    <th> Student Name:{{current_time}} {{ subject }}</th>
-                    <td{% if subject == 'Vocabulary' %} colspan="3" {% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
+                    <th> Student Name:{{current_time}}</th>
+                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
                     {% if subject != 'Vocabulary' %}
                     <th> Rank:</th>
                     <td> {{ rank }} </td>

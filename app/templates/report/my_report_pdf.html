@@ -33,9 +33,11 @@
     <table id="t_student_info">
         <tr>
             <th> Student Name:</th>
-            <td>&nbsp;{{ Student.getCSStudentName(student_user_id) }} </td>
+            <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}>&nbsp;{{ Student.getCSStudentName(student_user_id) }} </td>
+            {% if subject != 'Vocabulary' %}
             <th> Rank:</th>
             <td>&nbsp;{{ rank }} </td>
+            {% endif %}
         </tr>
         <tr>
             <th> Student ID:</th>
