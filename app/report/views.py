@@ -126,8 +126,8 @@ def my_report(assessment_id, ts_id, student_user_id):
         return redirect(url)
 
     test_subject_string = Codebook.get_code_name(testset.subject)
-    if test_subject_string.lower() == 'vocabulary':
-        return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
+    #if test_subject_string.lower() == 'vocabulary':
+    #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
 
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
