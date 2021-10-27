@@ -131,9 +131,9 @@
                                                 <!--<a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=rl.assessment_id, student_user_id=rl.user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>-->
                                                 {% endif %}
                                                 {% if Codebook.get_code_name(test_type) == 'Homework' %}
-                                                <a class="badge badge-danger" href="{{ url_for('errornote.error_note',assessment_enroll_id=rl.assessment_enroll_id) }}" name="btnTestReport" target="_blank"> Test Report{{ tsset }}</a>
+                                                <a class="badge badge-danger" href="{{ url_for('errornote.error_note',assessment_enroll_id=rl.assessment_enroll_id) }}" name="btnTestReport" target="_blank"> Test Report{{ rl.assessment_enroll_id }}</a>
                                                 {% else %}
-                                                <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report {{ tsset }}</a>
+                                                <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report {{ rl.assessment_enroll_id }}</a>
                                                 {% endif %}
                                             {% else %}
                                                 <!--<span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>-->
