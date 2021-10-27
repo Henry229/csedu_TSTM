@@ -243,12 +243,14 @@ def report():
     if assessment is None:
         return redirect(url_for('sample.index'))
 
-    sql = 'select round(avg(case when correct_count = 0 then 0 else ques_count / correct_count end)) score ' \
+    sql = 'select round(case when correct_count = 0 then 0 else (correct_count:: decimal / ques_count:: decimal * 100) end) score ' \
           'from (select ' \
-          '		(select count(1) from sample_marking where sample_assessment_enroll_id = a.id) as ques_count ' \
-          '		,(select count(1) from sample_marking where sample_assessment_enroll_id = a.id and is_correct = true) as correct_count ' \
+          '		 count(b.question_no) as ques_count, ' \
+          '		 sum(case when c.is_correct = true then 1 else 0 end) as correct_count ' \
           '	from sample_assessment_enroll a ' \
-          '	where sample_assessment_id = :sample_assessment_id ' \
+          'join sample_assessment_items b on a.sample_assessment_id  = b.sample_assessment_id ' \
+          'left join sample_marking c on a.id = c.sample_assessment_enroll_id and b.question_no = c.question_no ' \
+          'where a.sample_assessment_id = :sample_assessment_id ' \
           ') t'
     total_score = db.session.execute(text(sql), {'sample_assessment_id': assessment.id}).scalar()
 
@@ -280,7 +282,6 @@ def report():
     crroect_count = 0
     list = []
     for row in rows:
-
         correct_r_value = ''
         if row.is_correct is None or row.is_correct is False:
             correct_r_value = json.dumps(row.correct_r_value)
@@ -322,6 +323,29 @@ def report():
 
     my_score = round(crroect_count % len(list))
 
+    sql = 'select (select code_name from codebook c where id = t.category) as category_name, ' \
+          'my_ques_count, my_correct_count, ' \
+          'round(case when correct_count = 0 then 0 else (correct_count:: decimal / ques_count:: decimal * 100) end, 2) score, ' \
+          'round(case when my_correct_count = 0 then 0 else (my_correct_count:: decimal / my_ques_count:: decimal * 100) end, 2) my_score ' \
+          'from ( ' \
+          'select d.category, ' \
+          'count(b.question_no) as ques_count, ' \
+          'sum(case when a.id = :sample_assessment_enroll_id then 1 else 0 end) as my_ques_count, ' \
+          'sum(case when c.is_correct = true then 1 else 0 end) as correct_count, ' \
+          'sum(case when a.id = :sample_assessment_enroll_id and c.is_correct = true then 1 else 0 end) as my_correct_count ' \
+          'from ' \
+          'sample_assessment_enroll a ' \
+          'join sample_assessment_items b on a.sample_assessment_id  = b.sample_assessment_id ' \
+          'left join sample_marking c on a.id = c.sample_assessment_enroll_id and b.question_no = c.question_no ' \
+          'join item d on b.item_id = d.id ' \
+          'where a.sample_assessment_id = :sample_assessment_id ' \
+          'group by d.category ' \
+          ') t '
+
+    cursor_1 = db.engine.execute(text(sql), {'sample_assessment_id': assessment.id, 'sample_assessment_enroll_id': sample_assessment_enroll.id})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+
     return render_template('sample/sample_report.html', user=user, assessment=assessment,
                            sample_assessment_enroll=sample_assessment_enroll, markings=list, crroect_count=crroect_count,
-                           my_score=my_score, total_score=total_score)
+                           my_score=my_score, total_score=total_score, categories=rows)
