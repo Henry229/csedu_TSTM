@@ -9,6 +9,19 @@ from ..models import Codebook, Permission, AssessmentEnroll, Assessment, Testset
 from ..web.views import view_explanation
 
 
+@errornote.route('/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@login_required
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
+def error_note_homework(assessment_id, ts_id, student_user_id):
+    assessment_enroll = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, student_user_id=student_user_id,
+                                                    testset_id=ts_id)\
+        .order_by(desc(AssessmentEnroll.attempt_count)).first()
+
+
+    if assessment_enroll is not None:
+        return error_note(assessment_enroll.id)
+
+
 @errornote.route('/<int:assessment_enroll_id>', methods=['GET'])
 @login_required
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
