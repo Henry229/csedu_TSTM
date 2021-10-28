@@ -212,7 +212,7 @@
                     {% endif %}
                     {% endif %}
                     <td>
-                      {{ is_verbal }}
+                      {{ marking.candidate_all_correct }}
                       {% if is_verbal %}
                       {% if not marking.candidate_all_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
