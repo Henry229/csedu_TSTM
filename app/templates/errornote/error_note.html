@@ -212,7 +212,8 @@
                     {% endif %}
                     {% endif %}
                     <td>
-                      {{ marking.verbal_last_r_value }}
+                      last_r_value : {{ last_r_value }}
+                      verbal_last_r_value : {{ marking.verbal_last_r_value }}
                       {% if is_verbal %}
                       {% if not marking.candidate_all_correct %}
                       <button class="btn btn-outline-danger btn-small retry-question-btn" data-question-no="{{ marking.question_no }}">Retry</button>
