@@ -101,7 +101,7 @@ def error_note(assessment_enroll_id):
                     is_verbal = True
 
             candidate_r_values = []
-            candidate_all_correct = False
+            candidate_all_correct = True
             if marking.item.subcategory != 311:
                 if type(marking.candidate_r_value) is str:
                     if marking.candidate_r_value != '':
@@ -111,9 +111,10 @@ def error_note(assessment_enroll_id):
                             _is_correct = True
                         candidate_r_values.append(
                             {'no': str(len(candidate_r_values) + 1), 'value': marking.candidate_r_value[0], 'correct': _is_correct})
-                        if _is_correct is True:
-                            candidate_all_correct = True
+                        if _is_correct is False:
+                            candidate_all_correct = False
                     else:
+                        candidate_all_correct = False
                         for r_value in marking.correct_r_value:
                             candidate_r_values.append({'no': str(len(candidate_r_values) + 1), 'value': '', 'correct': False})
 
@@ -134,8 +135,8 @@ def error_note(assessment_enroll_id):
                                     end = value.index(" gap_")
                                     ques_candidate_value = value[0:end]
                                     candidate_r_values.append({'no':str(len(candidate_r_values)+1), 'value':ques_candidate_value, 'correct': _is_correct})
-                                    if _is_correct is True:
-                                        candidate_all_correct = True
+                                    if _is_correct is False:
+                                        candidate_all_correct = False
                                     is_existent = True
 
                         if not is_existent:
@@ -154,8 +155,8 @@ def error_note(assessment_enroll_id):
                             candidate_all_correct = False
                         else:
                             candidate_r_values.append({'no': '1', 'value': marking.candidate_r_value, 'correct': marking.is_correct})
-                            if marking.is_correct:
-                                candidate_all_correct = True
+                            if not marking.is_correct:
+                                candidate_all_correct = False
                 else:
                     for index, key in enumerate(marking.candidate_r_value.keys()):
                         if key.find("RESPONSE_") > -1:
@@ -168,8 +169,8 @@ def error_note(assessment_enroll_id):
                         if ques_candidate_value == marking.correct_r_value[int(r_ques_no)-1]:
                             _is_correct = True
 
-                        if _is_correct:
-                            candidate_all_correct = True
+                        if not _is_correct:
+                            candidate_all_correct = False
 
                         candidate_r_values.append({'no': r_ques_no, 'value': ques_candidate_value, 'correct': _is_correct})
 
