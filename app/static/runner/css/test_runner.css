@@ -536,7 +536,7 @@ textarea:focus.qti-item.qti-interaction.solid {
     border-radius: 2px;
     position: relative;
     top: 0;
-    min-width: 80px;
+    min-width: 380px;
     min-height: 20px;
     display: inline-block;
 }
