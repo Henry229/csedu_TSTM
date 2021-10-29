@@ -897,7 +897,8 @@ var ItemHandlers = (function () {
                 tolerance: "touch",
                 start: function(event, ui) {
                     //$(ui.helper).clone(true).height(29).width(50);
-                    $(ui.helper).height(29).width(50);
+                    $(ui.helper).text($(ui.helper).substr(1, 5) + '...');
+                    $(ui.helper).height(29).width(70);
                 //$(this).height(29).width(50);
                 }
             });
