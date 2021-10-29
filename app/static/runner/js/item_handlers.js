@@ -889,13 +889,6 @@ var ItemHandlers = (function () {
         this.cardinality = options.data.cardinality;
 
         this.processUI = function (answer) {
-            let x, y;
-            
-            $('.source .qti-choice').click(function(e){
-                x = e.pageX - this.offsetLeft;
-                y = e.pageY - this.offsetTop;
-            });
-
             $('.source .qti-choice').draggable({
                 scope: "tasks",
                 zIndex: 10,
@@ -906,6 +899,7 @@ var ItemHandlers = (function () {
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
                     $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).css("maxWidth","100");
+                    $(ui.helper)[0].offsetLeft = $(ui.helper)[0].offsetLeft + 100;
                 }
             });
             $('.qti-gap').droppable({
