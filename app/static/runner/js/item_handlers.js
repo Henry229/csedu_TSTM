@@ -889,20 +889,20 @@ var ItemHandlers = (function () {
         this.cardinality = options.data.cardinality;
 
         this.processUI = function (answer) {
+            let x, y;
+            $('.source .qti-choice').click(function(e){
+                x = e.pageX - this.offsetLeft;
+                y = e.pageY - this.offsetTop;
+            });
+
+
             $('.source .qti-choice').draggable({
                 scope: "tasks",
                 zIndex: 10,
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
-                /*
                 start: function(event, ui) {
-                    $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
-                    $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
-                    $(ui.helper).width(100);
-                }
-                */
-                stop: function(event, ui) {
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
                     $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).width(100);
