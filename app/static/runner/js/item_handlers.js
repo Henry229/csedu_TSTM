@@ -903,6 +903,8 @@ var ItemHandlers = (function () {
                 }
                 */
                 stop: function(event, ui) {
+                    $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
+                    $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).width(100);
                 }
             });
