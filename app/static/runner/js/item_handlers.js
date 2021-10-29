@@ -903,12 +903,17 @@ var ItemHandlers = (function () {
                     if(event.offsetX > 100){
                         //$(ui.helper)[0].offsetLeft = $(ui.helper)[0].offsetLeft + event.offsetX;
 
-                        $(ui.helper).css({
-                            "left": $(ui.helper)[0].offsetLeft + event.offsetX,
-                        });
+                        //$(ui.helper).css({
+                        //    "left": $(ui.helper)[0].offsetLeft + event.offsetX,
+                        //});
 
                     }
                 }
+
+                ,drag: function() {
+                  debugger
+                  },
+
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
