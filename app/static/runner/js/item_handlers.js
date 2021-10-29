@@ -891,11 +891,11 @@ var ItemHandlers = (function () {
         this.processUI = function (answer) {
             $('.source .qti-choice').draggable({
                 scope: "tasks",
-                snap: false,
                 zIndex: 10,
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
+                cursorAt: { left: 150 },
                 start: function(event, ui) {
                     /*
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
