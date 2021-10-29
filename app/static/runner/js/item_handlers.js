@@ -895,8 +895,7 @@ var ItemHandlers = (function () {
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
-               
-            stop: function() {
+                start: function() {
                 $(this).height(29).width(50);
             }
             });
