@@ -893,7 +893,6 @@ var ItemHandlers = (function () {
                 scope: "tasks",
                 zIndex: 10,
                 opacity: 0.95,
-                helper: "clone",
                 start: function() {
                 $(this).height(29).width(50);
                 },
