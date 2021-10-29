@@ -911,7 +911,9 @@ var ItemHandlers = (function () {
                 }
 
                 ,drag: function(event, ui) {
-                  debugger
+                    $(ui.helper).css({
+                            "left": $(ui.helper)[0].offsetLeft + event.offsetX,
+                    });
                   },
 
             });
