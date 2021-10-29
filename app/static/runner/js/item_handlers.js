@@ -895,20 +895,26 @@ var ItemHandlers = (function () {
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
+                /*
                 start: function(event, ui) {
-                    //$(ui.helper).clone(true).height(29).width(50);
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
-                    $(ui.helper).text($(ui.helper).text().substr(1, 7) + '...');
+                    $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).width(100);
-                //$(this).height(29).width(50);
                 }
+                */
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
+                /*
                 drop: function (event, ui) {
                     var target = event.target;
                     target.source = ui.draggable;
                     $(target).find('.gapmatch-content').html(ui.draggable.find('.qti-block').html());
+                }
+                */
+                stop: function(event, ui) {
+                    debugger
+                    //$(this).height(29).width(50);
                 }
             });
             this.setSavedAnswer(answer);
