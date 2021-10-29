@@ -902,19 +902,16 @@ var ItemHandlers = (function () {
                     $(ui.helper).width(100);
                 }
                 */
+                stop: function() {
+                    debugger
+                }
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
-                /*
                 drop: function (event, ui) {
                     var target = event.target;
                     target.source = ui.draggable;
                     $(target).find('.gapmatch-content').html(ui.draggable.find('.qti-block').html());
-                }
-                */
-                stop: function(event, ui) {
-                    debugger
-                    //$(this).height(29).width(50);
                 }
             });
             this.setSavedAnswer(answer);
