@@ -890,16 +890,16 @@ var ItemHandlers = (function () {
 
         this.processUI = function (answer) {
             $('.source .qti-choice').draggable({
-                scope: "tasks",
                 zIndex: 10,
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
                 start: function(event, ui) {
+                    /*
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
                     $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).css("maxWidth","100");
-
+                    */
                     if(event.offsetX > 100){
                         //$(ui.helper)[0].offsetLeft = $(ui.helper)[0].offsetLeft + event.offsetX;
 
@@ -911,9 +911,11 @@ var ItemHandlers = (function () {
                 }
 
                 ,drag: function(event, ui) {
+                    /*
                     $(ui.helper).css({
                             "left": $(ui.helper)[0].offsetLeft + event.offsetX,
                     });
+                     */
                   },
 
             });
