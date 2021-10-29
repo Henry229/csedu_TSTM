@@ -910,7 +910,7 @@ var ItemHandlers = (function () {
                     }
                 }
 
-                ,drag: function() {
+                ,drag: function(event, ui) {
                   debugger
                   },
 
