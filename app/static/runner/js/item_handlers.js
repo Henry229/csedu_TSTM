@@ -903,7 +903,7 @@ var ItemHandlers = (function () {
                 }
                 */
                 stop: function(event, ui) {
-                    debugger
+                    $(ui.helper).width(100);
                 }
             });
             $('.qti-gap').droppable({
