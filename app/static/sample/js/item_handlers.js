@@ -893,14 +893,11 @@ var ItemHandlers = (function () {
                 scope: "tasks",
                 zIndex: 10,
                 opacity: 0.95,
-                drop: function (event, ui) {
-                    alert(1);
-                }
+                helper: "clone"
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
                 drop: function (event, ui) {
-                    alert(2);
                     var target = event.target;
                     target.source = ui.draggable;
                     $(target).find('.gapmatch-content').html(ui.draggable.find('.qti-block').html());
