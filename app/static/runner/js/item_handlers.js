@@ -902,7 +902,7 @@ var ItemHandlers = (function () {
                     $(ui.helper).width(100);
                 }
                 */
-                stop: function() {
+                stop: function(event, ui) {
                     debugger
                 }
             });
