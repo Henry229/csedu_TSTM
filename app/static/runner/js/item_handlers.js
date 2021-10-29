@@ -905,7 +905,7 @@ var ItemHandlers = (function () {
                 start: function(event, ui) {
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
                     $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
-                    $(ui.helper).width(100);
+                    $(ui.helper).css("maxWidth","100");
                 }
             });
             $('.qti-gap').droppable({
