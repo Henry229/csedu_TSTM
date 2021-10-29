@@ -893,12 +893,7 @@ var ItemHandlers = (function () {
                 scope: "tasks",
                 zIndex: 10,
                 opacity: 0.95,
-                start: function() {
-                $(this).height(29).width(50);
-                },
-                stop: function() {
-                    $(this).height(29).width(50);
-                }
+                tolerance: "touch"
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
