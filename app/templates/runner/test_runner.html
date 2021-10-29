@@ -298,6 +298,16 @@
 
   <script type="text/javascript">
       $(document).ready(function () {
+        $("li.ui-draggable-handle").draggable({
+            start: function() {
+                $(this).height(29).width(50);
+            },
+            stop: function() {
+                $(this).height(29).width(50);
+            }
+        });
+
+
           {# assessment_session_id is used as a key to check
                  - the student came from testset list
                  - or pushed a refresh button.
