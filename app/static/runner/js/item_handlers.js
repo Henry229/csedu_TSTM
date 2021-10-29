@@ -891,6 +891,7 @@ var ItemHandlers = (function () {
         this.processUI = function (answer) {
             $('.source .qti-choice').draggable({
                 scope: "tasks",
+                snap: true,
                 zIndex: 1000,
                 opacity: 0.95,
                 helper: "clone",
