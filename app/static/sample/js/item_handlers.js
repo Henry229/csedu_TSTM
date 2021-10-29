@@ -900,6 +900,7 @@ var ItemHandlers = (function () {
             $('.qti-gap').droppable({
                 scope: "tasks",
                 drop: function (event, ui) {
+                    alert(2);
                     var target = event.target;
                     target.source = ui.draggable;
                     $(target).find('.gapmatch-content').html(ui.draggable.find('.qti-block').html());
