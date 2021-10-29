@@ -896,7 +896,8 @@ var ItemHandlers = (function () {
                 helper: "clone",
                 tolerance: "touch",
                 start: function(event, ui) {
-                    $(ui.helper).clone(true).height(29).width(50);
+                    //$(ui.helper).clone(true).height(29).width(50);
+                    $(ui.helper).height(29).width(50);
                 //$(this).height(29).width(50);
                 }
             });
