@@ -897,8 +897,9 @@ var ItemHandlers = (function () {
                 tolerance: "touch",
                 start: function(event, ui) {
                     //$(ui.helper).clone(true).height(29).width(50);
-                    $(ui.helper).text($(ui.helper).text().substr(1, 5) + '...');
-                    $(ui.helper).height(29).width(70);
+                    $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
+                    //$(ui.helper).text($(ui.helper).text().substr(1, 5) + '...');
+                    $(ui.helper).width(100);
                 //$(this).height(29).width(50);
                 }
             });
