@@ -908,7 +908,7 @@ var ItemHandlers = (function () {
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
-                tolerance: "fit",
+                tolerance: "intersect",
                 drop: function (event, ui) {
                     var target = event.target;
                     target.source = ui.draggable;
