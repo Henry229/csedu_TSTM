@@ -895,9 +895,10 @@ var ItemHandlers = (function () {
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
-                start: function() {
-                $(this).height(29).width(50);
-            }
+                start: function(event, ui) {
+                    $(ui.helper).clone(true).height(29).width(50);
+                //$(this).height(29).width(50);
+                }
             });
             $('.qti-gap').droppable({
                 scope: "tasks",
