@@ -895,7 +895,7 @@ var ItemHandlers = (function () {
                 opacity: 0.95,
                 helper: "clone",
                 tolerance: "touch",
-                cursorAt: { left: 150 },
+                cursorAt: { left: 300 },
                 start: function(event, ui) {
 
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
