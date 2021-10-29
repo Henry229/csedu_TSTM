@@ -890,7 +890,8 @@ var ItemHandlers = (function () {
 
         this.processUI = function (answer) {
             let x, y;
-            $(document).click(function(e){
+            
+            $('.source .qti-choice').click(function(e){
                 x = e.pageX - this.offsetLeft;
                 y = e.pageY - this.offsetTop;
             });
