@@ -284,12 +284,16 @@
     </div>
   </div>
 
+    <style type="text/css">
+        .qti-interaction {width: 2000px !important;}
+    </style>
+
 {% endblock app_content %}
 {% block scripts %}
   {{ super() }}
   <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
   <script src="/static/ui/vendors/jquery-ui-rotatable/jquery.ui.rotatable.min.js"></script>
-  <script src="/static/runner/js/item_handlers.js"></script>
+  <script src="/static/runner/js/item_handlers.js?v={{ runner_version }}"></script>
   <script src="/static/runner/js/item_runner.js?v={{ runner_version }}"></script>
   <script src="/static/runner/js/test_runner.js?v={{ runner_version }}"></script>
   <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
@@ -298,16 +302,6 @@
 
   <script type="text/javascript">
       $(document).ready(function () {
-        $("li.ui-draggable-handle").draggable({
-            start: function() {
-                $(this).height(29).width(50);
-            },
-            stop: function() {
-                $(this).height(29).width(50);
-            }
-        });
-
-
           {# assessment_session_id is used as a key to check
                  - the student came from testset list
                  - or pushed a refresh button.
