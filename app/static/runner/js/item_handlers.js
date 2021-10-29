@@ -894,16 +894,15 @@ var ItemHandlers = (function () {
                 zIndex: 10,
                 opacity: 0.95,
                 helper: "clone",
-                cursorAt: { left: 0 },
+                //cursorAt: { left: 0 },
                 start: function(event, ui) {
                     /*
                     $(ui.helper).css("overflow","hidden").css("text-overflow","ellipsis").css("white-space","nowrap");
                     $(ui.helper).text($(ui.helper).text().substr(1, 10) + '...');
                     $(ui.helper).css("maxWidth","100");
                     */
-                    if(event.offsetX > 100){
-
-                    }
+                    //if(event.offsetX > 100){
+                    //}
                 }
             });
             $('.qti-gap').droppable({
