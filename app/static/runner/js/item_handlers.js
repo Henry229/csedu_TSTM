@@ -895,7 +895,6 @@ var ItemHandlers = (function () {
                 y = e.pageY - this.offsetTop;
             });
 
-
             $('.source .qti-choice').draggable({
                 scope: "tasks",
                 zIndex: 10,
