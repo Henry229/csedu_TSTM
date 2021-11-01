@@ -465,8 +465,8 @@ def flag(item_id):
 
 
 @api.route('/responses/<int:item_id>', methods=['POST'])
-@permission_required(Permission.ITEM_EXEC)
-@validate_session
+#@permission_required(Permission.ITEM_EXEC)
+#@validate_session
 def response_process(item_id, assessment_session=None):
     # item_id = request.json.get('item_id')
     question_no = request.json.get('question_no')
