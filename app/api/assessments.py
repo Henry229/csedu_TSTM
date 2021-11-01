@@ -490,6 +490,10 @@ def response_process(item_id, assessment_session=None):
     db.session.expunge(student)
 
     # check timeout: give 5 seconds gap
+    log.info("A user is logged in. Logging the user out chs")
+    log.info(assessment_session.get_value('test_duration'))
+    log.info(assessment_session.get_value('start_time'))
+
     timeout = (assessment_session.get_value('test_duration') * 60
                - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
     if timeout <= 0:
