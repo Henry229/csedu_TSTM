@@ -490,15 +490,12 @@ def response_process(item_id, assessment_session=None):
     db.session.expunge(student)
 
     # check timeout: give 5 seconds gap
-    log.info("A user is logged in. Logging the user out chs")
-    log.info(assessment_session.get_value('test_duration'))
-    log.info(assessment_session.get_value('start_time'))
-
+    '''
     timeout = (assessment_session.get_value('test_duration') * 60
                - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
     if timeout <= 0:
         return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
-
+    '''
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
     # remove from the db session
