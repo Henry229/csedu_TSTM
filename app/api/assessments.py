@@ -465,8 +465,8 @@ def flag(item_id):
 
 
 @api.route('/responses/<int:item_id>', methods=['POST'])
-#@permission_required(Permission.ITEM_EXEC)
-#@validate_session
+@permission_required(Permission.ITEM_EXEC)
+@validate_session
 def response_process(item_id, assessment_session=None):
     # item_id = request.json.get('item_id')
     question_no = request.json.get('question_no')
@@ -490,12 +490,11 @@ def response_process(item_id, assessment_session=None):
     db.session.expunge(student)
 
     # check timeout: give 5 seconds gap
-    '''
     timeout = (assessment_session.get_value('test_duration') * 60
                - (int(datetime.now().timestamp()) - assessment_session.get_value('start_time'))) + 5
     if timeout <= 0:
         return bad_request(error_code=TEST_SESSION_ERROR, message="Test session is finished!")
-    '''
+
     # response_json = request.json
     qti_item_obj = Item.query.filter_by(id=item_id).first()
     # remove from the db session
