@@ -159,7 +159,7 @@ def sample_responses():
     session_key = request.json.get('session')
     question_no = request.json.get('question_no')
     response = request.json.get('response')
-    is_next = bool(request.json.get('is_next'))
+    is_next = request.json.get('is_next')
     direct_question_no = request.json.get('direct_question_no')
 
     if session_key is None:
@@ -243,6 +243,7 @@ def sample_responses():
         if is_next is None:
             return success({'finish': True})
         else:
+            is_next = bool(is_next)
             if is_next:
                 param_question_no = question_no + 1
             else:
