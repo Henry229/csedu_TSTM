@@ -356,7 +356,6 @@
             let response = _handler.getResponse();
             processAssessmentResponse(response);
         });
-
     });
 
     function messageShow(message_type){
@@ -418,6 +417,7 @@
             if(data.test_duration>0){
                 counter = setInterval(timer, 1000);
             }else{
+                debugger
                 let timer_display = $('.timer-display');
                 timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
                 $('.number').css('visibility','visible');
