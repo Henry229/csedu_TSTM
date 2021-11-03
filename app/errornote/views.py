@@ -256,7 +256,7 @@ def error_note(assessment_enroll_id):
     for _marking in markings:
         if _marking.is_correct is None or not _marking.is_correct:
             is_all_correct = False
-        if not hasattr(_marking, 'verbal_correct_r_value'):
+        if _marking.item.category != 281:
             is_verbal_all = False
 
     template_file = 'errornote/error_note.html'
