@@ -515,21 +515,22 @@
                 $('#errorModal').modal('show');
             },
             success: function (response) {
-                if(response.data.finish != undefined){
-                    $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
-                        type: 'get',
-                        success: function(response){
-                            window.location.href = '/sample/report?session={{- session_key -}}';
-                        },
-                        error: function(xhr) {
-                            $('#errorModal').modal('show');
-                        }
-                    });
-                }
                 if (response.result === 'success') {
-                    setCookie('question_no', response.data.question_no);
-                    let data = response.data;
-                    drawingForm(data, false);
+                    if(response.data.finish != undefined){
+                        $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
+                            type: 'get',
+                            success: function(response){
+                                window.location.href = '/sample/report?session={{- session_key -}}';
+                            },
+                            error: function(xhr) {
+                                $('#errorModal').modal('show');
+                            }
+                        });
+                    }else{
+                        setCookie('question_no', response.data.question_no);
+                        let data = response.data;
+                        drawingForm(data, false);
+                    }
                 } else {
                     if (response.message) {
                         $('#errorModal .modal-body').html(response.message);
