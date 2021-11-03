@@ -208,10 +208,10 @@
           </button>
         </div>
         <div class="modal-body">
-          Please click the Okay button to return to test set.
+          An unexpected error occurred. Please try again.
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary error-confirm">Okay</button>
+          <button type="button" class="btn btn-primary error-confirm">OK</button>
         </div>
       </div>
     </div>
@@ -230,6 +230,7 @@
     let count, counter;
     let _handler;
     let _interaction_type;
+    let _modal_type;
 
     $(function(){
         _$container = $('.item-container');
@@ -237,6 +238,9 @@
 
         $('#errorModal .error-confirm').on('click', function () {
             $('#errorModal').modal('hide');
+            if(_modal_type=='time'){
+                window.location.href = '/sample/report?session={{- session_key -}}';
+            }
         });
 
         $('.footer-next-btn').on('click', function () {
@@ -272,6 +276,7 @@
                     }
                 },
                 error: function(xhr) {
+                    messageShow('error');
                     $('#errorModal').modal('show');
                 }
             });
@@ -321,6 +326,7 @@
                         }
                     },
                     error: function(xhr) {
+                        messageShow('error');
                         $('#errorModal').modal('show');
                     }
                 });
@@ -353,6 +359,25 @@
 
     });
 
+    function messageShow(message_type){
+        let title = '';
+        let message = '';
+
+        _modal_type = message_type;
+        switch (message_type){
+            case 'error':
+                title = 'Error';
+                message = 'An unexpected error occurred. Please try again.';
+                break;
+            case 'time':
+                title = 'Times over';
+                message = 'The test is over.';
+                break;
+        }
+        $('#errorModal .modal-body').html(message);
+        $('#dataModalLabel').text(title);
+    }
+
     function getRendered(){
         let question_no = getCookie('question_no');
         if(question_no == undefined) question_no = 1;
@@ -372,6 +397,7 @@
                     }
                 },
                 error: function(xhr) {
+                    messageShow('error');
                     $('#errorModal').modal('show');
                 },
                 complete:function(data){
@@ -395,6 +421,7 @@
                 let timer_display = $('.timer-display');
                 timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
                 $('.number').css('visibility','visible');
+                messageShow('time');
             }
         }
         _disableButtons(false);
@@ -511,7 +538,7 @@
                 _disableButtons(false, button_type);
             },
             error: function (jqXHR, textStatus, errorThrown ) {
-                $('#errorModal .modal-body').html('Error occurred in the main process');
+                messageShow('error');
                 $('#errorModal').modal('show');
             },
             success: function (response) {
@@ -523,6 +550,7 @@
                                 window.location.href = '/sample/report?session={{- session_key -}}';
                             },
                             error: function(xhr) {
+                                messageShow('error');
                                 $('#errorModal').modal('show');
                             }
                         });
@@ -533,6 +561,7 @@
                     }
                 } else {
                     if (response.message) {
+                        messageShow('error');
                         $('#errorModal .modal-body').html(response.message);
                         $('#errorModal').modal('show');
                     }
@@ -569,8 +598,6 @@
             $('.summary-container').hide();
         }
     };
-
-
 
     let flagRendered = function (flagged) {
         let flag_btn = $('.footer-flag-btn');
