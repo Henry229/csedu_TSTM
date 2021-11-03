@@ -403,7 +403,7 @@
 
         $(function(){
             $('body').on('click','.tests-list-body span', function (){
-                alert(1);
+                $(this).find('a').click();
             });
         });
     </script>
