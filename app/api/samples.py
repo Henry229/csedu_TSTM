@@ -240,11 +240,14 @@ def sample_responses():
     if direct_question_no is not None:
         return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, direct_question_no)
     else:
-        if is_next:
-            param_question_no = question_no + 1
+        if is_next is None:
+            return success()
         else:
-            param_question_no = question_no - 1
-        return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
+            if is_next:
+                param_question_no = question_no + 1
+            else:
+                param_question_no = question_no - 1
+            return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, param_question_no)
 
 
 

@@ -349,16 +349,6 @@
             $('.tools-protractor').hide();
             let response = _handler.getResponse();
             processAssessmentResponse(response);
-
-            $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
-                type: 'get',
-                success: function(response){
-                    window.location.href = '/sample/report?session={{- session_key -}}';
-                },
-                error: function(xhr) {
-                    $('#errorModal').modal('show');
-                }
-            });
         });
 
     });
@@ -502,7 +492,7 @@
             'session': '{{- session_key -}}',
             'question_no': parseInt(getCookie('question_no')),
             'direct_question_no': direct_question_no==undefined?null:direct_question_no,
-            'is_next': button_type=='next' ? true: false
+            'is_next': button_type==undefined?null:(button_type=='next' ? true: false)
         };
         if (response.writing_text) {
             data['writing_text'] = response.writing_text;
@@ -525,6 +515,18 @@
                 $('#errorModal').modal('show');
             },
             success: function (response) {
+                debugger
+                /*
+                $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
+                    type: 'get',
+                    success: function(response){
+                        window.location.href = '/sample/report?session={{- session_key -}}';
+                    },
+                    error: function(xhr) {
+                        $('#errorModal').modal('show');
+                    }
+                });
+                */
                 if (response.result === 'success') {
                     setCookie('question_no', response.data.question_no);
                     let data = response.data;
