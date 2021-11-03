@@ -241,7 +241,7 @@ def sample_responses():
         return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, direct_question_no)
     else:
         if is_next is None:
-            return success()
+            return success({'finish': True})
         else:
             if is_next:
                 param_question_no = question_no + 1
