@@ -26,3 +26,11 @@ main {width: 960px !important; margin-left: 0 !important;}
 .google-visualization-table-table tbody tr td:nth-child(3),
 .google-visualization-table-table tbody tr td:nth-child(4)
 {text-align:right}
+
+.pb30{padding-bottom: 30px}
+
+@media (min-width: 992px) {
+    .header-fixed .app-body {
+        margin-top: 0px !important;
+    }
+}
