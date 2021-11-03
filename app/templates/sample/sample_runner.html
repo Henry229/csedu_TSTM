@@ -345,7 +345,12 @@
         });
 
         $('.footer-finish-btn').click(function(){
-        $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
+            $('.tools-ruler').hide();
+            $('.tools-protractor').hide();
+            let response = _handler.getResponse();
+            processAssessmentResponse(response);
+
+            $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
                 type: 'get',
                 success: function(response){
                     window.location.href = '/sample/report?session={{- session_key -}}';
