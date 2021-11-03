@@ -440,6 +440,8 @@
         count--;
         if (count < 0) {
             clearInterval(counter);
+            let timer_display = $('.timer-display');
+            timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
             messageShow('time');
         }
         let _hhmmss = formatTime(count);
