@@ -400,6 +400,12 @@
         for(var i=0;i<list1.length; i++) {
             $(lis.get(i)).html('<span><a href="/sample/agreement?id='+list1[i]["id"]+'">'+list1[i]["name"]+'</a></span>');
         }
+
+        $(function(){
+            $('body').on('click','.tests-list-body span', function (){
+                alert(1);
+            });
+        });
     </script>
     {% endblock %}
 </body>
