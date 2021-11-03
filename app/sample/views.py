@@ -194,30 +194,30 @@ def report():
     total_score = db.session.execute(text(sql), {'sample_assessment_id': assessment.id}).scalar()
 
     sql = 'select a.question_no ' \
-          ',a.correct_r_value as correct_r_value ' \ 
-          ',a.candidate_r_value as candidate_r_value ' \ 
-          ',a.is_correct ' \ 
-          ',( ' \ 
-          '  select 100*COALESCE(sum(CASE WHEN bb.is_correct THEN 1 ELSE 0 END),0)/count(DISTINCT aa.id) ' \ 
-          'from (select * from sample_assessment_enroll where sample_assessment_id = c.id) aa ' \ 
-          'join (select aaa.item_id, bbb.* ' \ 
-          '		from sample_assessment_items aaa, sample_marking bbb where aaa.sample_assessment_id = c.id and aaa.question_no = bbb.question_no ' \ 
-          '	 ) bb ' \ 
-          'on aa.id = bb.sample_assessment_enroll_id ' \ 
-          'where bb.item_id = a.item_id ' \ 
-          ') percentile ' \ 
-          ',(select code_name from codebook where id = (case when d.subcategory = 0 then d.category else d.subcategory end)) as subcategory_name ' \ 
-          ',d.interaction_type ' \ 
+          ',a.correct_r_value as correct_r_value ' \
+          ',a.candidate_r_value as candidate_r_value ' \
+          ',a.is_correct ' \
+          ',( ' \
+          '  select 100*COALESCE(sum(CASE WHEN bb.is_correct THEN 1 ELSE 0 END),0)/count(DISTINCT aa.id) ' \
+          'from (select * from sample_assessment_enroll where sample_assessment_id = c.id) aa ' \
+          'join (select aaa.item_id, bbb.* ' \
+          '		from sample_assessment_items aaa, sample_marking bbb where aaa.sample_assessment_id = c.id and aaa.question_no = bbb.question_no ' \
+          '	 ) bb ' \
+          'on aa.id = bb.sample_assessment_enroll_id ' \
+          'where bb.item_id = a.item_id ' \
+          ') percentile ' \
+          ',(select code_name from codebook where id = (case when d.subcategory = 0 then d.category else d.subcategory end)) as subcategory_name ' \
+          ',d.interaction_type ' \
           'from ( ' \
-          '	select aa.item_id, aa.question_no, bb.candidate_mark ' \  
+          '	select aa.item_id, aa.question_no, bb.candidate_mark ' \
           '	, bb.candidate_r_value, bb.is_correct, bb.is_flagged, bb.outcome_score ' \
           '	, aa.correct_r_value, case when bb.sample_assessment_enroll_id is null then :sample_assessment_enroll else bb.sample_assessment_enroll_id end as sample_assessment_enroll_id ' \
-          '	from sample_assessment_items aa left join sample_marking bb on aa.question_no = bb.question_no ' \ 
+          '	from sample_assessment_items aa left join sample_marking bb on aa.question_no = bb.question_no ' \
           '	and aa.sample_assessment_id = :sample_assessment_id and bb.sample_assessment_enroll_id = :sample_assessment_enroll ' \
-          '	) a ' \ 
-          'join sample_assessment_enroll b on a.sample_assessment_enroll_id = b.id ' \ 
-          'join sample_assessment c on b.sample_assessment_id = c.id ' \ 
-          'join item d on a.item_id = d.id ' \ 
+          '	) a ' \
+          'join sample_assessment_enroll b on a.sample_assessment_enroll_id = b.id ' \
+          'join sample_assessment c on b.sample_assessment_id = c.id ' \
+          'join item d on a.item_id = d.id ' \
           'order by a.question_no'
     cursor_1 = db.engine.execute(text(sql), {'sample_assessment_enroll': sample_assessment_enroll.id, 'sample_assessment_id': assessment.id})
     Record = namedtuple('Record', cursor_1.keys())
