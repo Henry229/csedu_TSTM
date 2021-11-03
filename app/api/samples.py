@@ -296,7 +296,7 @@ def sample_summary(sample_assessment_enroll_id):
 @api.route('/sample/finish/<int:sample_assessment_enroll_id>', methods=['GET'])
 @check_sample_login_api()
 def sample_finish(sample_assessment_enroll_id):
-    assessment_enroll = SampleAssessmentEnroll.query.filter_by(sample_assessment_enroll_id=sample_assessment_enroll_id).first()
+    assessment_enroll = SampleAssessmentEnroll.query.filter_by(id=sample_assessment_enroll_id).first()
     if assessment_enroll is None:
         return bad_request()
 
