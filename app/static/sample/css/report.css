@@ -29,8 +29,6 @@ main {width: 960px !important; margin-left: 0 !important;}
 
 .pb30{padding-bottom: 30px}
 
-@media (min-width: 992px) {
-    .header-fixed .app-body {
-        margin-top: 0px !important;
-    }
+.header-fixed .app-body {
+    margin-top: 0px !important;
 }
