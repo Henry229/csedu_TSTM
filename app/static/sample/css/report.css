@@ -27,8 +27,9 @@ main {width: 960px !important; margin-left: 0 !important;}
 .google-visualization-table-table tbody tr td:nth-child(4)
 {text-align:right}
 
-.pb20{padding-bottom: 20px}
+.pb10{padding-bottom: 10px}
 .pt20{padding-top: 20px}
+.mt5{margin-top: 5px}
 
 .header-fixed .app-body {
     margin-top: 0px !important;
