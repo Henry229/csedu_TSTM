@@ -249,7 +249,7 @@ def report():
             is_correct = False
         else:
             is_correct = row.is_correct
-            if is_correct:
+            if is_correct is True:
                 crroect_count += crroect_count
 
         list.append({'correct_r_value': correct_r_value,
