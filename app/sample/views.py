@@ -245,12 +245,12 @@ def report():
                 if candidate_r_value[-1:] == '"':
                     candidate_r_value = candidate_r_value[:-1]
 
-        if row.is_correct is None:
-            is_correct = False
-        else:
-            is_correct = row.is_correct
-            if is_correct is True:
-                crroect_count += crroect_count
+        #if row.is_correct is None:
+        #    is_correct = False
+        #else:
+        is_correct = row.is_correct
+        if is_correct is True:
+            crroect_count += crroect_count
 
         list.append({'correct_r_value': correct_r_value,
                      'candidate_r_value': candidate_r_value,
