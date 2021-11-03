@@ -440,7 +440,8 @@
         count--;
         if (count < 0) {
             clearInterval(counter);
-            messageShow('time');
+            let response = _handler.getResponse();
+            processAssessmentResponse(response);
             return;
         }
         let _hhmmss = formatTime(count);
@@ -547,16 +548,20 @@
             success: function (response) {
                 if (response.result === 'success') {
                     if(response.data.finish != undefined){
-                        $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
-                            type: 'get',
-                            success: function(response){
-                                window.location.href = '/sample/report?session={{- session_key -}}';
-                            },
-                            error: function(xhr) {
-                                messageShow('error');
-                                $('#errorModal').modal('show');
-                            }
-                        });
+                        if(counter==undefined){
+                            messageShow('time');
+                        }else{
+                            $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
+                                type: 'get',
+                                success: function(response){
+                                    window.location.href = '/sample/report?session={{- session_key -}}';
+                                },
+                                error: function(xhr) {
+                                    messageShow('error');
+                                    $('#errorModal').modal('show');
+                                }
+                            });
+                        }
                     }else{
                         setCookie('question_no', response.data.question_no);
                         let data = response.data;

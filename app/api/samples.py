@@ -237,6 +237,11 @@ def sample_responses():
     marking.is_correct = is_correct
     db.session.commit()
 
+    if direct_question_no is None and is_next is None:
+        if assessmentEnroll.finish_time is None:
+            assessmentEnroll.finish_time = datetime.utcnow()
+            db.session.commit()
+
     if direct_question_no is not None:
         return sample_rendered(assessmentEnroll.sample_assessment_id, assessmentEnroll.id, direct_question_no)
     else:
