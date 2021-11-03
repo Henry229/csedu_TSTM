@@ -24,7 +24,6 @@ from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testse
 
 '''New Sample Page - rendering template'''
 
-
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
