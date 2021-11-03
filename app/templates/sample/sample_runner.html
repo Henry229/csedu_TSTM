@@ -416,7 +416,7 @@
             count = data.test_duration;
             if(data.test_duration>0){
                 counter = setInterval(timer, 1000);
-                if (count < 0) messageShow('time');
+                alert(2);
             }else{
                 let timer_display = $('.timer-display');
                 timer_display.find('.hours .number, .minutes .number, .seconds .number').html('00');
@@ -438,7 +438,10 @@
 
     function timer() {
         count--;
-        if (count < 0) return clearInterval(counter);
+        if (count < 0) {
+            alert(1);
+            return clearInterval(counter);
+        }
         let _hhmmss = formatTime(count);
 
         $('.timer-display .hours .number').html(_hhmmss[0]);
