@@ -27,66 +27,6 @@ from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testse
 
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
-    testset = Testset.query.filter_by(id=1912).first()
-
-    item_list = []
-    branching = json.dumps(testset.branching)
-    ends = [m.end() for m in re.finditer('"id":', testset.branching)]
-    for end in ends:
-        comma = branching.find(',', end)
-        testlet_id = int(branching[end:comma])
-
-        items = db.session.query(*Item.__table__.columns, TestletHasItem.weight, TestletHasItem.order). \
-            select_from(Item). \
-            join(TestletHasItem, Item.id == TestletHasItem.item_id). \
-            filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
-
-        for item in items:
-            i = {'item_id': item.id,
-                 'testlet_id': testlet_id,
-                 'order': item.order,
-                 'correct_r_value': item.correct_r_value,
-                 'weight': item.weight,
-                 'outcome_score': item.outcome_score
-                 }
-            item_list.append(i)
-
-    for item in item_list:
-        score = list(filter(lambda x: (x["QuestionNo"] == str(item.get('order'))), scores))
-
-        qti_item_obj = Item.query.filter_by(id=item.get('item_id')).first()
-        db.session.expunge(qti_item_obj)
-
-        processed = None
-        try:
-            item_service = ItemService(qti_item_obj.file_link)
-            qti_xml = item_service.get_qti_xml_path()
-            processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
-            identifier = None
-            answers = marking_to_value(score)
-            if len(answers) == 1:
-                identifier = answers[0]
-            else:
-                identifier = answers
-            response = {"RESPONSE": {
-                "base": {
-                    "identifier": identifier
-                }
-            }}
-            parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
-            try:
-                result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
-                processed = result.stdout.decode("utf-8")
-                processed = json.loads(processed)
-            except Exception as e:
-                response['processed'] = "Not implemented."
-        except Exception as e:
-            print(e)
-        if processed is None:
-            return bad_request(message="Processing response error")
-
-
-
     if request.method == 'POST':
         if session.get('sample') is None:
             email = request.form.get('email', '', type=str)
