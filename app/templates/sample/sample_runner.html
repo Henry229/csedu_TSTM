@@ -548,7 +548,7 @@
             success: function (response) {
                 if (response.result === 'success') {
                     if(response.data.finish != undefined){
-                        if(count<=0>){
+                        if(count<=0){
                             messageShow('time');
                         }else{
                             $.ajax({url: '/api/sample/finish/{{ sample_assessment_enroll_id }}',
