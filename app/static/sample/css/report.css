@@ -22,3 +22,5 @@ main {width: 960px !important; margin-left: 0 !important;}
 .cont-color {background-color: #ecf2f9}
 .cont-focus-color {background-color: #deebfc}
 .font-red {color:red}
+
+talbe.google-visualization-table-table tbody tr td:nth-child(2) {text-align:right}
