@@ -84,8 +84,14 @@
       </div>
     </div>
   </div>
-
 {% endblock app_content %}
+{% block styles %}
+    <style type="text/css">
+    .header-fixed .app-header, .app-footer {
+        display: none !important;
+    }
+    </style>
+{% endblock %}
 {% block scripts %}
   {{ super() }}
   <script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
