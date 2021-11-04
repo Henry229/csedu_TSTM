@@ -90,6 +90,9 @@ def testing():
     if sample_assessment_enroll is None:
         return redirect(request.referrer)
 
+    #if sample_assessment_enroll.finish_time is not None:
+    return redirect("/sample/report?session={}".format(session_key))
+
     return render_template('sample/sample_runner.html', session_key=session_key,
                            sample_assessment_id=sample_assessment_enroll.sample_assessment_id,
                            sample_assessment_enroll_id=sample_assessment_enroll.id,
