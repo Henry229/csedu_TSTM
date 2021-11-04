@@ -46,3 +46,7 @@ main {width: 960px !important; margin-left: 0 !important;}
     margin-right: 20px;
     color: white;
 }
+
+.header-fixed .app-header, .app-footer {
+    display: none !important;
+}
