@@ -50,3 +50,6 @@ main {width: 960px !important; margin-left: 0 !important;}
 .header-fixed .app-header, .app-footer {
     display: none !important;
 }
+.header-fixed .app-body {
+    margin-top: 0px !important;
+}
