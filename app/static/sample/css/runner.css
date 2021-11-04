@@ -5,3 +5,10 @@
 button.not_read {cursor: default}
 
 .inactive {opacity:0.2 !important;}
+
+.header-fixed .app-header, .app-footer {
+    display: none !important;
+}
+.header-fixed .app-body {
+    margin-top: 0px !important;
+}
