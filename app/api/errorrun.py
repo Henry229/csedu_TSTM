@@ -9,12 +9,13 @@ from functools import wraps
 
 from flask import request, current_app, render_template
 from flask_login import current_user
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, func
 
 from app.api import api
 from app.decorators import permission_required
 from app.api.jwplayer import get_signed_player, jwt_signed_url
-from app.models import Permission, AssessmentEnroll, Marking, Item, Codebook, Student, AssessmentRetry, RetryMarking
+from app.models import Permission, AssessmentEnroll, Marking, Item, Codebook, Student, AssessmentRetry, RetryMarking, \
+    Assessment, Testset, TestletHasItem
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
 from .errorrunsession import ErrorRunSession
@@ -578,3 +579,34 @@ def error_run_writing_text():
     db.session.commit()
 
     return success()
+
+
+@api.route('/errorrun/instruction', methods=['POST'])
+@permission_required(Permission.ITEM_EXEC)
+def error_run_instruction():
+    data = {}
+    testset_id = request.form.get('testset_id', 0, type=int)
+    assessment_guid = request.form.get('assessment_guid', '', type=str)
+
+    assessment = Assessment.query.filter_by(GUID=assessment_guid).first()
+    if assessment:
+        codebook = Codebook.query.filter_by(id=assessment.test_type).first()
+        if codebook:
+            if codebook.additional_info:
+                for x, y in codebook.additional_info.items():
+                    if x == 'instruction':
+                        data['instruction'] = y
+
+    question_count = 0
+    testset = Testset.query.filter_by(id=testset_id).first()
+    if testset:
+        branching = json.dumps(testset.branching)
+        ends = [m.end() for m in re.finditer('"id":', branching)]
+        for end in ends:
+            comma = branching.find(',', end)
+            testlet_id = int(branching[end:comma])
+            count = TestletHasItem.query.filter_by(testlet_id=testlet_id).count()
+            question_count = question_count + count
+    data['question_count'] = question_count
+
+    return success(data)

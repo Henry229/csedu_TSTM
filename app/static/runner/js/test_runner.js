@@ -350,6 +350,9 @@ var TestRunner = (function () {
                 var rsp_data = response.data || {};
                 _session = rsp_data.session;
 
+                //total question in summary
+                $('.question-total').text(rsp_data.new_questions.length);
+
                 var question_no = rsp_data.next_question_no;
                 for (var i = 0; i < rsp_data.new_questions.length; i++) {
                     var q = rsp_data.new_questions[i];

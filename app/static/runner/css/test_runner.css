@@ -1339,3 +1339,16 @@ button.footer-finish-btn {
 .pd-t15 {padding-top: 15px}
 
 .modal-error-report {max-width: 610px !important;}
+
+.instruction-container-body {padding-top:105px;padding-left:50px;color: #666666;}
+
+.instruction-container h2 {font-size: 25px}
+.instruction-container p {margin: 0 0 10px;font-size: 18px;}
+.instruction-container ul {font-size: 18px}
+
+.item-card {display:-webkit-box !important;}
+
+.question-of {font-weight:500;font-size:16px}
+
+.header-summary i {color:#585e73}
+.header-summary i:hover {color:#005d93}

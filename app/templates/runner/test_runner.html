@@ -29,9 +29,10 @@
             <button class="header-summary">
 					<span class="summary-text">
 						<span class="summary-label">Question</span>
-						<span class="summary-text-bold"> </span>
 						<span class="summary-text-bold question-number"></span>
-						<i class="fas fa-list-ul"></i>
+						<span class="summary-text-bold question-of"> of </span>
+						<span class="summary-text-bold question-total">  </span>
+                        <i class="fas fa-th"></i>
 					</span>
             </button>
           </div>
@@ -251,10 +252,18 @@
             </footer>
           </div>
         </div>
+
+        <div class="instruction-container" style="display: none">
+            <div class="instruction-container-body"></div>
+        </div>
+
         <div class="item-footer">
           <div class="footer-center">
             <button class="start-no-btn">No</button>
-              <button class="start-yes-btn" disabled>Yes</button>
+            <button class="start-yes-btn" disabled>Yes</button>
+          </div>
+          <div class="footer-center text-center" style="display: none">
+            <button class="start-test-btn">Test</button>
           </div>
           <div class="navigator">
           </div>
@@ -298,6 +307,11 @@
 
   <script type="text/javascript">
       $(document).ready(function () {
+          {# fit to window height with contents size #}
+          $('.item-card').css({'cssText':'height:' + String(window.innerHeight -3) + 'px !important'});
+          $('.notice-info').css({'cssText':'min-height:' + String(window.innerHeight - 225) + 'px !important;max-height:' + String(window.innerHeight - 225) + 'px !important;'});
+          $('.notice-content').css({'cssText':'max-height:' + String(window.innerHeight- 370) + 'px !important'});
+
           {# assessment_session_id is used as a key to check
                  - the student came from testset list
                  - or pushed a refresh button.
@@ -318,17 +332,29 @@
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;
-
-                  var options = {
-                      assessment_guid: assessment_guid,
-                      testset_id: $('input[name="testset_id"]').val(),
-                      student_user_id: student_user_id,
-                      tnc_agree_checked: true,
-                      session_cb: function (session_id) {
-                          window.location.replace("/testing?session=" + session_id);
+                  let v= Math.random().toString(36).substr(2, 5);
+                  $.post('/api/errorrun/instruction',{'assessment_guid': assessment_guid, 'testset_id': $('input[name="testset_id"]').val()},
+                    function(data, status, xhr) {
+                      if(data.data.instruction==undefined){
+                        $('.start-test-btn').click();
+                      }else{
+                          let question_count = data.data.question_count;
+                          $.ajax({url: "/static/errornote/html/instructions/"+data.data.instruction+".html?v="+v}).done(function(data) {
+                            let container = $('.instruction-container');
+                            let body = $('.instruction-container-body');
+                            $('.notice-container').hide();
+                            body.html(data);
+                            if($('#question_count').length>0) $('#question_count').text(question_count);
+                            container.fadeIn('slow');
+                            let footer = $('.item-footer').children('div');
+                            footer.eq(0).hide();
+                            footer.eq(1).show();
+                          });
                       }
-                  };
-                  TestRunner.init($('.item-container'), options);
+                    }).fail(function(jqxhr, settings, ex) {
+                        alert('failed, ' + ex);
+                    }
+                  );
               });
               $('.start-no-btn').on('click', function () {
                   window.location.replace("/tests/assessments?guid_list=" + assessment_guid)
@@ -340,7 +366,18 @@
                       $('.start-yes-btn').attr('disabled', true);
                   }
               });
-
+              $('.start-test-btn').on('click', function () {
+                  var options = {
+                      assessment_guid: assessment_guid,
+                      testset_id: $('input[name="testset_id"]').val(),
+                      student_user_id: student_user_id,
+                      tnc_agree_checked: true,
+                      session_cb: function (session_id) {
+                          window.location.replace("/testing?session=" + session_id);
+                      }
+                  };
+                  TestRunner.init($('.item-container'), options);
+              });
           {% endif %}
       });
   </script>
