@@ -352,6 +352,7 @@ var TestRunner = (function () {
 
                 //total question in summary
                 $('.question-total').text(rsp_data.new_questions.length);
+                $('.question-of').removeClass("d-none");
 
                 var question_no = rsp_data.next_question_no;
                 for (var i = 0; i < rsp_data.new_questions.length; i++) {
