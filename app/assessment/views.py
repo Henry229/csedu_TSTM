@@ -467,12 +467,16 @@ def virtual_omr_sync(assessment_id=None, duration=3):
     process = False
     result = {}
 
+    log.info("Hongseok start1 {}",assessment_id)
+
     sync_hash = uuid.uuid4().hex
     start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
     vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
 
     start_time = time.time()
     vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
+
+    log.info("Hongseok start2 {}",assessment_id)
 
     # Check security key for web request.
     if assessment_id:
@@ -484,7 +488,11 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         except:
             pass
 
+    log.info("Hongseok start3 {}",assessment_id)
+
     if process:
+        log.info("Hongseok start4 {}", assessment_id)
+
         lockfile = 'virtual_omr_sync.lock'
         locktimeout = 120
         if os.path.exists(lockfile):
@@ -505,6 +513,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
             vomr_logger.debug(f'[{sync_hash}] Create lock file - {lock_info}')
             f.write(lock_info)
+
+        log.info("Hongseok start5 {}", assessment_id)
 
         #
         # sync_enable_list = ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']
