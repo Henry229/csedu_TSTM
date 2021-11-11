@@ -515,7 +515,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         else:
             assessments = Assessment.query.filter_by(active=True).filter(Assessment.test_type.in_(sync_enable_list)).all()
 
-        log.info("Hongseok 1")
+        log.info("Hongseok assessments lennth {}", len(assessments))
 
         for assessment in assessments:
             vomr_logger.info("=" * 80)
