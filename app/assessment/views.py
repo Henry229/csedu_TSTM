@@ -732,7 +732,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
     return "Invalid Request", 500
 
 
-@assessment.route('/test', methods=['POST'])
+@assessment.route('/virtual_test', methods=['POST'])
 def virtual_test(assessment_id=None, duration=3):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
