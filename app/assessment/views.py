@@ -370,7 +370,7 @@ def manage():
     search_form.test_center.data = test_center
     rows = None
     item_form = None
-    # query = Assessment.query.filter_by(active=True)
+    #query = Assessment.query.filter_by(active=True)
     query = Assessment.query
     if flag:
         if test_type:
@@ -443,282 +443,16 @@ def virtual_omr(assessment_id):
 @permission_required(Permission.ADMIN)
 def virtual_omr_resync(assessment_id):
     '''
-    Sync given or all active assessment markings. Need to manage lock file to prevent surge
-    To call this one use curl with post and the json data of SYNC_SECRET_KEY
-    :param: assessment_id - A specific assessment to sync
-    :param: duration - days from today to sync
-    :return:
+    Re-Sync marking data to csonlineschool through CS_API
+    :return: Sync status page
     '''
-    process = False
-    result = {}
-    duration = 3
-
-    assessment_id = 1221
-    log.info("Hongseok start1 {}", str(assessment_id))
-
-    sync_hash = uuid.uuid4().hex
-    start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
-    vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
-
-    start_time = time.time()
-    vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
-
-    log.info("Hongseok start2 {}", str(assessment_id))
-
-    # Check security key for web request.
-    if assessment_id:
-        process = True
-    else:  # Called through the route. Check the security key. Post data type must be json with {'SYNC_SECRET_KEY': 'value....'}
-        try:
-            if request.json['SYNC_SECRET_KEY'] == Config.SYNC_SECRET_KEY and request.remote_addr == '127.0.0.1':
-                process = True
-        except:
-            pass
-
-    log.info("Hongseok start3 {}", str(assessment_id))
-
-    if process:
-        log.info("Hongseok start4 {}", str(assessment_id))
-
-        lockfile = 'virtual_omr_sync.lock'
-        locktimeout = 120
-        if os.path.exists(lockfile):
-            vomr_logger.info(f'[{sync_hash}] Lock file exists. Checking age')
-            age = int(time.time() - os.path.getmtime(lockfile))
-            vomr_logger.info(f'[{sync_hash}] {age}s. Timeout : {locktimeout}s')
-            if age > locktimeout:
-                vomr_logger.debug(f'[{sync_hash}] Delete timed out lockfile')
-                try:
-                    os.unlink(lockfile)
-                except os.error as e:
-                    vomr_logger.error(f'[{sync_hash}] {e}')
-            else:
-                return f'[{sync_hash}] Lock file found. Sync may be in progress. Please try again in %ss' % (
-                        locktimeout - age), 200
-
-        with open(lockfile, 'w') as f:
-            lock_info = "%s @ %s" % (str(os.getpid()), datetime.now(pytz.timezone('Australia/Sydney')))
-            vomr_logger.debug(f'[{sync_hash}] Create lock file - {lock_info}')
-            f.write(lock_info)
-
-        log.info("Hongseok start5 {}", str(assessment_id))
-
-        #
-        # sync_enable_list = ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']
-        # temporary add selective test type 391
-        sync_enable_list = [774, 1324, 1325, 1333, 1334, 391]
-        if assessment_id:  # A specific assessement only. called from virtual_omr()
-            assessments = Assessment.query.filter_by(id=assessment_id).filter(
-                Assessment.test_type.in_(sync_enable_list)).all()
-        else:
-            assessments = Assessment.query.filter_by(active=True).filter(
-                Assessment.test_type.in_(sync_enable_list)).all()
-
-        log.info("Hongseok assessments lennth {}", str(len(assessments)))
-
-        for assessment in assessments:
-            vomr_logger.info("=" * 80)
-            vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
-            vomr_logger.info("=" * 80)
-
-            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
-                AssessmentEnroll.start_time >= start_day).all()
-            responses = []
-            responses_text = []
-
-            test_type_name = Codebook.get_code_name(assessment.test_type)
-
-            log.info("Hongseok enroll length{}", str(len(enrolls)))
-
-            for enroll in enrolls:
-                # pass to sync for homework
-                # if test_type_name.lower().find('homework') print>= 0:
-                # if test_type_name.lower() not in ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']:
-                #    continue
-                testset = Testset.query.filter_by(id=enroll.testset_id).first()
-                subject = Codebook.get_subject_name(testset.id)
-                # Sync only ended or timed out test. Give extra 11min to be safe
-                end_time = pytz.utc.localize(enroll.end_time(margin=11))
-                vomr_logger.debug(
-                    f'[{sync_hash}] Sync [{assessment.name}] {assessment.GUID}, {testset.GUID}({testset.id}), {enroll.student.student_id}({enroll.student.user_id})')
-                if enroll.finish_time:
-                    vomr_logger.info(f'[{sync_hash}] > Test finished at {enroll.finish_time}')
-                    sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
-                    if end_time < sync_after_utc:
-                        vomr_logger.info(f'[{sync_hash}] > Result older than {duration} days. Skip')
-                        continue
-                else:
-                    if end_time:
-                        vomr_logger.debug(
-                            f'[{sync_hash}] > start time: {enroll.start_time} + duration {testset.test_duration} = end time {end_time}')
-                        if end_time >= datetime.now(pytz.utc):
-                            vomr_logger.info(f'[{sync_hash}] > Not timed out yet. Skip')
-                            continue
-                answers = {}
-                pdf_file_path = None
-                for m in enroll.marking:
-                    if subject == 'Writing':
-                        # skip Writing subject. doesn't need to sync.
-                        continue
-                        m_writing = MarkingForWriting.query.filter_by(marking_id=m.id).first()
-                        if m_writing is None:
-                            if not m.candidate_r_value:
-                                vomr_logger.debug(
-                                    f'[{sync_hash}] mw > candidate_r_value is null for marking_id({m.id})')
-                            vomr_logger.debug(f'[{sync_hash}] mw > No marking_for_writing found for marking_id({m.id})')
-                            continue
-                        vomr_logger.debug(
-                            f'[{sync_hash}] mw > marking_id({m.id}), marking_for_writing_id({m_writing.id})')
-                        # Check marker's marking detail is empty
-                        if not m_writing.is_mark_done():
-                            vomr_logger.debug(
-                                f'[{sync_hash}] mw > Marker not finished marking: marking_for_writing_id({m_writing.id})')
-
-                            class fake_return(object):
-                                text = "Marking For Writing data not found."
-                                status_code = 0
-
-                            ret = fake_return()
-                        # Get merged writing markings file
-                        m_student_user_id = enroll.student_user_id
-                        try:
-                            marked_images, single_image, pdf_file_path = get_merged_images(m_student_user_id,
-                                                                                           m_writing,
-                                                                                           local_file=True)
-                            pdf_file_path = pdf_file_path.replace('file:///', '')
-                            vomr_logger.info(f'[{sync_hash}] mw > pdf report file for FTP ({pdf_file_path})')
-                        except Exception as e:
-                            vomr_logger.error(f'[{sync_hash}] {e}')
-                            continue
-
-                        writing = {}
-                        writing['candidate_marked_file_link'] = os.path.basename(pdf_file_path)
-                        writing['candidate_mark_detail'] = m_writing.candidate_mark_detail
-                        writing['markers_comment'] = m_writing.markers_comment
-                        try:
-                            writing['start_time'] = enroll.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-                        except Exception as e:
-                            vomr_logger.error(f'[{sync_hash}] Getting start time: {e}')
-                        try:
-                            if enroll.finish_time:
-                                writing['end_time'] = enroll.finish_time.strftime("%m/%d/%Y, %H:%M:%S")
-                            else:
-                                writing['end_time'] = ""  # finish_time=None when timeout before test finish
-                        except Exception as e:
-                            vomr_logger.error(f'[{sync_hash}] Getting end time: {e}')
-                        answers[str(m.question_no)] = writing
-                    else:
-                        # student answer is expected to be A, B, C, D which needs to be converted to 1, 2, 3, 4
-                        try:
-
-                            item = Item.query.filter_by(id=m.item_id).first()
-
-                            if item.interaction_type == "choiceInteraction" and len(m.candidate_r_value) > 0:
-                                answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
-                            elif len(m.candidate_r_value) <= 0:
-                                answers[str(m.question_no)] = ""
-                            else:
-                                answers[str(m.question_no)] = m.candidate_r_value
-
-                        except Exception as e:
-                            # vomr_logger.error(
-                            #    f'[{sync_hash}] ({e}) interaction_type: item.interaction_type({item.interaction_type}) m.item_id({m.item_id})')
-                            pass
-
-                marking = {
-                    'GUID': testset.GUID,
-                    'student_id': enroll.student.student_id,
-                    'answers': answers,
-                    'branch_state': assessment.branch_state,
-                    'test_type': test_type_name
-                }
-                if len(answers) < 1:
-                    vomr_logger.debug(f'[{sync_hash}] No answer found: testset_id({testset.id}) enroll_id({enroll.id})')
-
-                    class fake_return(object):
-                        text = "No student answer found"
-                        status_code = 0
-
-                    ret = fake_return()
-                else:
-                    if subject == 'Writing':
-                        # Do not Send files to CSonlineschool using FTP. It makes the sync slow and time out.
-                        # need to find other way later for sync file to csonlineschool
-                        continue
-
-                        # CSEdu assign serial number(char) for each assessment in the name
-                        # Extract the assigned number(char)
-                        _names = assessment.name.rsplit(" ")
-                        marking['year'] = assessment.year
-                        marking['year_number'] = _names[len(_names) - 1]
-
-                        url = '/essay_writing_synchronised'
-                        if os.path.exists(pdf_file_path):
-                            files = {
-                                'file': (os.path.basename(pdf_file_path), open(pdf_file_path, 'rb'), "application/pdf")
-                            }
-                            data = {
-                                'json': (None, json.dumps(marking), 'application/json')
-                            }
-                            vomr_logger.info(f'[{sync_hash}] mw > sending writing answers to cs_api')
-                            ret = requests.post(Config.CS_API_URL + url, files=files, data=data, verify=False)
-                        else:
-                            vomr_logger.error(f'[{sync_hash}] mw > Student Writing File not found: {pdf_file_path}')
-
-                            class fake_return(object):
-                                text = "Student Writing File not found."
-                                status_code = 0
-
-                            ret = fake_return()
-                    else:
-                        url = '/answer_eleven_synchronised'
-                        ret = requests.post(Config.CS_API_URL + url, json=marking, verify=False)
-                responses.append({'testset_name': testset.name,
-                                  'testset_guid': testset.GUID,
-                                  'student_id': enroll.student.student_id,
-                                  'response': ret})
-                responses_text.append({'testset_name': testset.name,
-                                       'testset_guid': testset.GUID,
-                                       'student_id': enroll.student.student_id,
-                                       'response': ret.text})
-                if ret.status_code == 200:
-                    vomr_logger.info(f'[{sync_hash}] > Success')
-                    enroll.synced = True
-                    enroll.synced_time = datetime.now(pytz.utc)
-                    db.session.commit()
-                elif ret.status_code != 0:
-                    vomr_logger.error(f'[{sync_hash}] > Error. {ret.text}')
-
-            # There should be only one assessment if an id is given
-            if assessment_id:
-                vomr_logger.info(f'[{sync_hash}] Remove the lock file')
-                os.unlink(lockfile)
-                return render_template('assessment/virtual_orm.html', name=assessment.name, guid=assessment.GUID,
-                                       responses=responses)
-            else:
-                result[assessment.id] = responses_text
-        vomr_logger.info(f'[{sync_hash}] Remove the lock file')
-        os.unlink(lockfile)
-        synced = 0
-        total = 0
-        added = 0
-        for k, v in result.items():
-            for i in v:
-                r = i['response']
-                m = re.match('^([0-9]+) \/ ([0-9]+).*([0-9]+).*', r)
-                if m:
-                    synced += int(m.group(1))
-                    total += int(m.group(2))
-                    added += int(m.group(3))
-        current_time = time.time()
-        vomr_logger.info(
-            f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
-        log.info(
-            f'[{sync_hash}] Hongseok COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
-
-        return jsonify(result), 200
-    log.info('hongseok fail')
-    return "Invalid Request", 500
+    vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
+    enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).all()
+    for enroll in enrolls:
+        enroll.synced = False
+        enroll.synced_time = None
+    db.session.commit()
+    return virtual_omr_sync(assessment_id, duration=7)
 
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
@@ -733,16 +467,12 @@ def virtual_omr_sync(assessment_id=None, duration=3):
     process = False
     result = {}
 
-    log.info("Hongseok start1 {}", assessment_id)
-
     sync_hash = uuid.uuid4().hex
     start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
     vomr_logger.info(f'[{sync_hash}] Process AssessmentEnroll started after {start_day.isoformat()}')
 
     start_time = time.time()
     vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
-
-    log.info("Hongseok start2 {}", assessment_id)
 
     # Check security key for web request.
     if assessment_id:
@@ -754,11 +484,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         except:
             pass
 
-    log.info("Hongseok start3 {}", assessment_id)
-
     if process:
-        log.info("Hongseok start4 {}", assessment_id)
-
         lockfile = 'virtual_omr_sync.lock'
         locktimeout = 120
         if os.path.exists(lockfile):
@@ -780,20 +506,14 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             vomr_logger.debug(f'[{sync_hash}] Create lock file - {lock_info}')
             f.write(lock_info)
 
-        log.info("Hongseok start5 {}", assessment_id)
-
         #
         # sync_enable_list = ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']
         # temporary add selective test type 391
         sync_enable_list = [774, 1324, 1325, 1333, 1334, 391]
         if assessment_id:  # A specific assessement only. called from virtual_omr()
-            assessments = Assessment.query.filter_by(id=assessment_id).filter(
-                Assessment.test_type.in_(sync_enable_list)).all()
+            assessments = Assessment.query.filter_by(id=assessment_id).filter(Assessment.test_type.in_(sync_enable_list)).all()
         else:
-            assessments = Assessment.query.filter_by(active=True).filter(
-                Assessment.test_type.in_(sync_enable_list)).all()
-
-        log.info("Hongseok assessments lennth {}", len(assessments))
+            assessments = Assessment.query.filter_by(active=True).filter(Assessment.test_type.in_(sync_enable_list)).all()
 
         for assessment in assessments:
             vomr_logger.info("=" * 80)
@@ -806,8 +526,6 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             responses_text = []
 
             test_type_name = Codebook.get_code_name(assessment.test_type)
-
-            log.info("Hongseok enroll length{}", len(enrolls))
 
             for enroll in enrolls:
                 # pass to sync for homework
@@ -992,11 +710,7 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         current_time = time.time()
         vomr_logger.info(
             f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
-        log.info(
-            f'[{sync_hash}] Hongseok COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
-
         return jsonify(result), 200
-    log.info('hongseok fail')
     return "Invalid Request", 500
 
 
