@@ -86,14 +86,15 @@ def _search_testsets():
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def _get_testsets():
     id = request.args.get('id', 0, int)
-    log.info('hongseok id {}', id)
+
     assessment = Assessment.query.filter_by(id=id).first()
     rows, testset_list = [], []
-    for testset in assessment.testsets:
-        if testset.delete == True:
-            continue
-        else:
-            testset_list.append(testset)
+    if assessment is not None:
+        for testset in assessment.testsets:
+            if testset.delete == True:
+                continue
+            else:
+                testset_list.append(testset)
     if assessment is not None:
         rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
                 row in testset_list]
