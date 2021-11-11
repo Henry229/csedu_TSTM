@@ -745,7 +745,7 @@ def virtual_test(assessment_id=None, duration=3):
     result = {}
 
     assessment_id = 1221
-    log.info("Hongseok start1 {}",assessment_id)
+    log.info("Hongseok start1 {}",str(assessment_id))
 
     sync_hash = uuid.uuid4().hex
     start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
@@ -754,7 +754,7 @@ def virtual_test(assessment_id=None, duration=3):
     start_time = time.time()
     vomr_logger.info(f"[{sync_hash}] START : Syncing tests completed for last {duration} days")
 
-    log.info("Hongseok start2 {}",assessment_id)
+    log.info("Hongseok start2 {}",str(assessment_id))
 
     # Check security key for web request.
     if assessment_id:
@@ -766,10 +766,10 @@ def virtual_test(assessment_id=None, duration=3):
         except:
             pass
 
-    log.info("Hongseok start3 {}",assessment_id)
+    log.info("Hongseok start3 {}",str(assessment_id))
 
     if process:
-        log.info("Hongseok start4 {}", assessment_id)
+        log.info("Hongseok start4 {}", str(assessment_id))
 
         lockfile = 'virtual_omr_sync.lock'
         locktimeout = 120
@@ -792,7 +792,7 @@ def virtual_test(assessment_id=None, duration=3):
             vomr_logger.debug(f'[{sync_hash}] Create lock file - {lock_info}')
             f.write(lock_info)
 
-        log.info("Hongseok start5 {}", assessment_id)
+        log.info("Hongseok start5 {}", str(assessment_id))
 
         #
         # sync_enable_list = ['summative test', 'cbstt', 'cboctt', 'oncboctt', 'oncbstt']
@@ -803,7 +803,7 @@ def virtual_test(assessment_id=None, duration=3):
         else:
             assessments = Assessment.query.filter_by(active=True).filter(Assessment.test_type.in_(sync_enable_list)).all()
 
-        log.info("Hongseok assessments lennth {}", len(assessments))
+        log.info("Hongseok assessments lennth {}", str(len(assessments)))
 
         for assessment in assessments:
             vomr_logger.info("=" * 80)
@@ -817,7 +817,7 @@ def virtual_test(assessment_id=None, duration=3):
 
             test_type_name = Codebook.get_code_name(assessment.test_type)
 
-            log.info("Hongseok enroll length{}", len(enrolls))
+            log.info("Hongseok enroll length{}", str(len(enrolls)))
 
             for enroll in enrolls:
                 # pass to sync for homework
