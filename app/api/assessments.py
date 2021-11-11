@@ -86,6 +86,7 @@ def _search_testsets():
 @permission_required(Permission.ASSESSMENT_MANAGE)
 def _get_testsets():
     id = request.args.get('id', 0, int)
+    log.info('hongseok {}', id)
     assessment = Assessment.query.filter_by(id=id).first()
     rows, testset_list = [], []
     for testset in assessment.testsets:

@@ -515,6 +515,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         else:
             assessments = Assessment.query.filter_by(active=True).filter(Assessment.test_type.in_(sync_enable_list)).all()
 
+        log.info("Hongseok 1")
+
         for assessment in assessments:
             vomr_logger.info("=" * 80)
             vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
@@ -526,6 +528,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             responses_text = []
 
             test_type_name = Codebook.get_code_name(assessment.test_type)
+
+            log.info("Hongseok enroll length{}", len(enrolls))
 
             for enroll in enrolls:
                 # pass to sync for homework
@@ -710,7 +714,11 @@ def virtual_omr_sync(assessment_id=None, duration=3):
         current_time = time.time()
         vomr_logger.info(
             f'[{sync_hash}] COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
+        log.info(
+            f'[{sync_hash}] Hongseok COMPLETE : Total {synced}/{total} synced. {added} added. Took {current_time - start_time} sec')
+
         return jsonify(result), 200
+    log.info('hongseok fail')
     return "Invalid Request", 500
 
 
