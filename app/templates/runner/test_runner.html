@@ -333,6 +333,9 @@
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;
+                  if(Boolean("{{ instruction_grade }}")==false){
+                    $('.start-test-btn').click();
+                  }
                   let v= Math.random().toString(36).substr(2, 5);
                   $.post('/api/errorrun/instruction',{'assessment_guid': assessment_guid, 'testset_id': $('input[name="testset_id"]').val()},
                     function(data, status, xhr) {

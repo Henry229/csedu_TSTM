@@ -1143,11 +1143,21 @@ def testing():
     # jwpalyer_library_url = current_app.config['JWPLAYER_LIBRARY_URL']
     # context['jwpalyer_library_url'] = jwpalyer_library_url
 
+    instruction_grade = False
     if testset_id is not None:
         testset = Testset.query.filter_by(id=testset_id).first()
         if testset is None:
             return redirect(url_for('web.testset_list', error="Invalid testset requested!"))
         context['testset'] = testset
+        #checking grade for instruction
+        codebook = Codebook.query.filter_by(id=testset.grade).first()
+        if codebook:
+            if codebook.additional_info:
+                for x, y in codebook.additional_info.items():
+                    if x == 'instruction':
+                        if bool(y):
+                            instruction_grade = True
+    context['instruction_grade'] = instruction_grade
 
     try:
         with open(os.path.join(basedir, 'runner_version.txt')) as f:
