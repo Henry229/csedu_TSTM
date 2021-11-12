@@ -333,7 +333,7 @@
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;
-                  if(Boolean("{{ instruction_grade }}")==false){
+                  if("{{ instruction_grade }}".toLowerCase() === 'false'){
                     $('.start-test-btn').click();
                     return;
                   }
