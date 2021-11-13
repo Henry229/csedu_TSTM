@@ -613,10 +613,10 @@ def virtual_omr_sync(assessment_id=None, duration=3):
                             if item.interaction_type == "choiceInteraction" and len(m.candidate_r_value) > 0:
                                 answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
                             elif item.interaction_type == "inlineChoiceInteraction" and len(m.candidate_r_value) > 0:
-                                if type(marking.candidate_r_value) is list:
-                                    answers[str(m.question_no)] = ""
-                                else:
-                                    answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
+                                #if type(marking.candidate_r_value) is list:
+                                #    answers[str(m.question_no)] = ""
+                                #else:
+                                answers[str(m.question_no)] = ord(m.candidate_r_value) - 64
                             elif len(m.candidate_r_value) <= 0:
                                 answers[str(m.question_no)] = ""
                             else:
