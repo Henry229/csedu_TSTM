@@ -520,8 +520,8 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
             vomr_logger.info("=" * 80)
 
-            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
-                AssessmentEnroll.start_time >= start_day).limit(100).all()
+            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, testset_id=229).filter(
+                AssessmentEnroll.start_time >= start_day).all()
             responses = []
             responses_text = []
 
