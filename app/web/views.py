@@ -126,11 +126,9 @@ def is_authorised(student, timeout=120):
             if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
                 return True, errors
             else:
-                print("Student's CSOnlineSchool session has been expired")
-                #errors.append("Student's CSOnlineSchool session has been expired")
+                errors.append("Student's CSOnlineSchool session has been expired")
         else:
-            print("Student's CSOnlineSchool session has been expired")
-            #errors.append("Student logged in different IP address from CSOnlineSchool")
+            errors.append("Student logged in different IP address from CSOnlineSchool")
     else:
         errors.append("Student not logged into CSOnlineSchool")
     return True if os.environ.get('TSTM_TUNING_TEST') else False, errors  # TODO - For tuning test only. Remove later
@@ -328,10 +326,10 @@ def assessment_list():
             guid_list = [assessment_guid]
         else:
             # Show all assessment enrols if there is no guid parameter.
-            enrols = AssessmentEnroll.query.filter_by(student_user_id=422).all()
+            enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
             guid_list = list({e.assessment_guid for e in enrols})
 
-    student = Student.query.filter_by(user_id=422).first()
+    student = Student.query.filter_by(user_id=current_user.id).first()
     if student is None:
         return page_not_found(e="Login user not registered as student")
 
@@ -434,7 +432,7 @@ def assessment_list():
         # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
         enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
             .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                    AssessmentEnroll.student_user_id == 422) \
+                    AssessmentEnroll.student_user_id == current_user.id) \
             .order_by(asc(AssessmentEnroll.attempt_count)).all()
         enrolled = {e.testset.GUID: e for e in enrolled_q}
         # list 로 변경.
@@ -558,7 +556,7 @@ def assessment_list():
                     join(AssessmentEnroll). \
                     filter(Marking.id == MarkingForWriting.marking_id). \
                     filter(AssessmentEnroll.id == Marking.assessment_enroll_id). \
-                    filter(AssessmentEnroll.student_user_id == 422). \
+                    filter(AssessmentEnroll.student_user_id == current_user.id). \
                     filter(Marking.testset_id == tset.id).all()
                 for mw in mws:
                     # tset.enable_writing_report = True if mw.markers_comment else False
@@ -585,7 +583,7 @@ def assessment_list():
             if test_type == "Online Selective":
                 enrolled_q = AssessmentEnroll.query.join(Testset, Testset.id == AssessmentEnroll.testset_id) \
                     .filter(AssessmentEnroll.assessment_guid == assessment_guid,
-                            AssessmentEnroll.student_user_id == 422,
+                            AssessmentEnroll.student_user_id == current_user.id,
                             AssessmentEnroll.testset_id == tset.id) \
                     .order_by(asc(AssessmentEnroll.attempt_count)).first()
                 if enrolled_q:
@@ -755,7 +753,7 @@ def assessment_list():
             runner_version = f.readline().strip()
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
-    return render_template('web/assessments.html', student_user_id=422, assessments_list=assessments_list,
+    return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
                            btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=homeworks_grouped)
 
