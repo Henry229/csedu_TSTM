@@ -249,7 +249,7 @@ def process_inward():
         db.session.commit()
         login_user(student_user)
 
-        return page_not_found("Invalid Request")
+        return page_not_found(test_guid)
 
         # student_data = get_member_info(student_user_id)
 
