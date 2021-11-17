@@ -204,11 +204,12 @@ def process_inward():
         }
     else:
         try:
+            print(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
         authorised, errors = is_authorised(member, session_timeout)
-    if not authorised:
+    if authorised:
         # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         # ilike can't find exact matching student id e.g. ethan_H
         registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(), Student.state == state).first()
@@ -258,8 +259,6 @@ def process_inward():
                 if len(guid_list):
                     all_guids = []
                     for guid in guid_list:
-                        if len(all_guids) > 10:
-                            break
                         all_guids += get_assessment_guids(guid, test_type)
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:

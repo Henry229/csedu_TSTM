@@ -311,7 +311,7 @@ def get_student_info(state, stud_id):
     Get member info from CS_API
     :param state: csonlineschool state. NSW or VIC for now
     :param stud_id: csonlineschool student id
-    :return: a member info
+    :return: a member infoz
     """
     print(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id))
     info = requests.get(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id),
