@@ -128,7 +128,7 @@ def is_authorised(student, timeout=120):
             else:
                 errors.append("Student's CSOnlineSchool session has been expired")
         else:
-            errors.append("Student logged in different IP address from CSOnlineSchool")
+            print("Student logged in different IP address from CSOnlineSchool")
     else:
         print("Student not logged into CSOnlineSchool")
     return True if os.environ.get('TSTM_TUNING_TEST') else False, errors  # TODO - For tuning test only. Remove later
