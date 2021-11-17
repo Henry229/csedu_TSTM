@@ -249,7 +249,7 @@ def process_inward():
         db.session.commit()
         login_user(student_user)
 
-        return page_not_found(test_guid)
+
 
         # student_data = get_member_info(student_user_id)
 
@@ -259,6 +259,7 @@ def process_inward():
             return redirect(url_for('web.assessment_list', guid_list=",".join(guids)))
         else:
             if member['sales']:
+                return page_not_found(member['sales'])
                 guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
                 if len(guid_list):
                     all_guids = []
