@@ -130,7 +130,7 @@ def is_authorised(student, timeout=120):
         else:
             errors.append("Student logged in different IP address from CSOnlineSchool")
     else:
-        errors.append("Student not logged into CSOnlineSchool")
+        print("Student not logged into CSOnlineSchool")
     return True if os.environ.get('TSTM_TUNING_TEST') else False, errors  # TODO - For tuning test only. Remove later
 
 
@@ -186,7 +186,7 @@ def process_inward():
         test_type = None
 
     forbidden(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
-    
+
     if test_type == 'stresstest':
         try:
             if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:
