@@ -258,7 +258,7 @@ def process_inward():
                 if len(guid_list):
                     all_guids = []
                     for guid in guid_list:
-                        if len(all_guids) > 50:
+                        if len(all_guids) > 70:
                             break;
                         all_guids += get_assessment_guids(guid, test_type)
 
