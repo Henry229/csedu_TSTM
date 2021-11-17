@@ -260,11 +260,12 @@ def process_inward():
         else:
             if member['sales']:
                 guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
-                return page_not_found(guid_list)
                 if len(guid_list):
                     all_guids = []
                     for guid in guid_list:
                         all_guids += get_assessment_guids(guid, test_type)
+                    return page_not_found(all_guids)
+
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
                     return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
