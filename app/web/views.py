@@ -185,7 +185,7 @@ def process_inward():
     if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
-    forbidden(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
+    page_not_found(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
 
     if test_type == 'stresstest':
         try:
