@@ -259,6 +259,12 @@ def process_inward():
                     all_guids = []
                     for guid in guid_list:
                         all_guids += get_assessment_guids(guid, test_type)
+
+                    all_guids = []
+                    assessment_tmp = Assessment.query.filter(Assessment.GUID.in_(guid_list)).order_by(Assessment.id.desc()).limit(50).all()
+                    for guid in assessment_tmp:
+                        all_guids += get_assessment_guids(guid, test_type)
+
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
                     return redirect(url_for('web.index'))  # TODO use report.my_report# TODO use report.my_report
