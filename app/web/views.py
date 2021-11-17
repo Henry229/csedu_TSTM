@@ -211,6 +211,7 @@ def process_inward():
             return forbidden("Invalid Request")
         authorised, errors = is_authorised(member, session_timeout)
     if authorised:
+        return page_not_found('<br>'.join(errors))
         # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         # ilike can't find exact matching student id e.g. ethan_H
         registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(), Student.state == state).first()
@@ -267,7 +268,7 @@ def process_inward():
             else:
                 logout_user()
                 return forbidden('No available test found')
-    return page_not_found('<br>'.join(errors))
+    return forbidden('<br>'.join(errors))
 
 
 def get_assessment_guids(guid, test_type=None):
