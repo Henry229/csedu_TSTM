@@ -215,6 +215,7 @@ def process_inward():
         # ilike can't find exact matching student id e.g. ethan_H
         registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(), Student.state == state).first()
         if registered_student:
+            return page_not_found("Invalid Request")
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
             student_user.username = "%s %s (%s)" % (
