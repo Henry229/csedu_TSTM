@@ -20,12 +20,20 @@ from ..api.errors import bad_request
 from ..api.omr import marking_to_value
 from ..decorators import check_sample_login, permission_required
 from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testset, Item, TestletHasItem, \
-    SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking
+    SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking, Assessment
+from ..web.views import get_assessment_guids
 
 '''New Sample Page - rendering template'''
 
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
+    guid_list = ['17c99750-27d2-476f-a190-430d460df955','842e2922-290d-4398-a2cf-d2eb76e41c9b']
+    all_guids = []
+    assessment_tmp = Assessment.query.filter(Assessment.GUID.in_(guid_list)).order_by(Assessment.id.desc()).limit(
+        50).all()
+    for guid in assessment_tmp:
+        all_guids += get_assessment_guids(guid, 1333)
+
     if request.method == 'POST':
         if session.get('sample') is None:
             email = request.form.get('email', '', type=str)
