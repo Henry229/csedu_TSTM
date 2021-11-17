@@ -129,6 +129,8 @@ def is_authorised(student, timeout=120):
                 errors.append("Student's CSOnlineSchool session has been expired")
         else:
             errors.append("Student logged in different IP address from CSOnlineSchool")
+    else:
+        errors.append("Student not logged into CSOnlineSchool")
     return True if os.environ.get('TSTM_TUNING_TEST') else False, errors  # TODO - For tuning test only. Remove later
 
 
@@ -202,7 +204,7 @@ def process_inward():
         }
     else:
         try:
-            print(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
+            forbidden(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
