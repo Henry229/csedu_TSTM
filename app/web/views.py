@@ -257,7 +257,7 @@ def process_inward():
                 guid_list = [sale['test_type']['title_a'] for sale in member['sales']]
                 if len(guid_list):
                     all_guids = []
-                    for guid in guid_list:
+                    for guid in reversed(guid_list):
                         if len(all_guids) > 70:
                             break;
                         all_guids += get_assessment_guids(guid, test_type)
