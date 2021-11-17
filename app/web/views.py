@@ -267,7 +267,7 @@ def process_inward():
             else:
                 logout_user()
                 return forbidden('No available test found')
-    return forbidden('<br>'.join(errors))
+    return page_not_found('<br>'.join(errors))
 
 
 def get_assessment_guids(guid, test_type=None):
