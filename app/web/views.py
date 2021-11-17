@@ -264,7 +264,7 @@ def process_inward():
                     all_guids = []
                     for guid in guid_list:
                         all_guids += get_assessment_guids(guid, test_type)
-                    return page_not_found(all_guids)
+                    return page_not_found(url_for('web.assessment_list', guid_list=",".join(all_guids)))
 
                     return redirect(url_for('web.assessment_list', guid_list=",".join(all_guids)))
                 else:
