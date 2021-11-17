@@ -182,10 +182,13 @@ def process_inward():
     except:
         test_type = None
     log.debug(test_type)
+
+    page_not_found(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
+
     if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
-    page_not_found(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
+
 
     if test_type == 'stresstest':
         try:
