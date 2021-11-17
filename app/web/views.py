@@ -128,9 +128,9 @@ def is_authorised(student, timeout=120):
             else:
                 errors.append("Student's CSOnlineSchool session has been expired")
         else:
-            print("Student logged in different IP address from CSOnlineSchool")
+            errors.append("Student logged in different IP address from CSOnlineSchool")
     else:
-        print("Student not logged into CSOnlineSchool")
+        errors.append("Student not logged into CSOnlineSchool")
     return True if os.environ.get('TSTM_TUNING_TEST') else False, errors  # TODO - For tuning test only. Remove later
 
 
@@ -182,13 +182,8 @@ def process_inward():
     except:
         test_type = None
     log.debug(test_type)
-
-    page_not_found(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
-
     if test_type != "homework" and test_type != "stresstest":
         test_type = None
-
-
 
     if test_type == 'stresstest':
         try:
@@ -209,7 +204,6 @@ def process_inward():
         }
     else:
         try:
-            forbidden(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
