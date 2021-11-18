@@ -614,7 +614,9 @@ def error_run_instruction():
                 join(TestletHasItem, Item.id == TestletHasItem.item_id). \
                 filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
 
-            subjects.extend(list({i.subject for i in items}))
+            #subjects.extend(list({i.subject for i in items}))
+            for i in items:
+                subjects.append(i.subject)
             question_count = question_count + len(items)
     data['subjects'] = []
     if len(subjects) > 0:
