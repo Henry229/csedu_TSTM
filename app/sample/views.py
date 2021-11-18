@@ -20,19 +20,38 @@ from ..api.errors import bad_request
 from ..api.omr import marking_to_value
 from ..decorators import check_sample_login, permission_required
 from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testset, Item, TestletHasItem, \
-    SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking, Assessment
-from ..web.views import get_assessment_guids
+    SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking
+from collections import Counter
 
 '''New Sample Page - rendering template'''
 
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
-    guid_list = ['17c99750-27d2-476f-a190-430d460df955','842e2922-290d-4398-a2cf-d2eb76e41c9b']
-    all_guids = []
-    assessment_tmp = Assessment.query.filter(Assessment.GUID.in_(guid_list)).order_by(Assessment.id.desc()).limit(
-        50).all()
-    for guid in assessment_tmp:
-        all_guids += get_assessment_guids(guid, 1333)
+    data = {}
+    testset_id = 30
+    question_count = 0
+    testset = Testset.query.filter_by(id=testset_id).first()
+    subjects = []
+    if testset:
+        data['duration'] = testset.test_duration
+        branching = json.dumps(testset.branching)
+        ends = [m.end() for m in re.finditer('"id":', branching)]
+        for end in ends:
+            comma = branching.find(',', end)
+            testlet_id = int(branching[end:comma])
+
+            items = db.session.query(*Item.__table__.columns). \
+                select_from(Item). \
+                join(TestletHasItem, Item.id == TestletHasItem.item_id). \
+                filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
+
+            subjects.extend(list({i.subject for i in items}))
+            question_count = question_count + len(items)
+    data['subjects'] = []
+    if len(subjects) > 0:
+        subjects = dict((x,subjects.count(x)) for x in set(subjects))
+        for key, value in subjects.items():
+            data['subjects'].append({Codebook.get_code_name(key) : value})
 
     if request.method == 'POST':
         if session.get('sample') is None:

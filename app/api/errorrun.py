@@ -624,4 +624,6 @@ def error_run_instruction():
 
     data['question_count'] = question_count
 
+    data['instruction'] = 'oc'
+
     return success(data)
