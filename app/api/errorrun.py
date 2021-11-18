@@ -590,6 +590,7 @@ def error_run_instruction():
 
     assessment = Assessment.query.filter_by(GUID=assessment_guid).first()
     if assessment:
+        data['assessment_name'] = assessment.name
         codebook = Codebook.query.filter_by(id=assessment.test_type).first()
         if codebook:
             if codebook.additional_info:
@@ -599,14 +600,28 @@ def error_run_instruction():
 
     question_count = 0
     testset = Testset.query.filter_by(id=testset_id).first()
+    subjects = []
     if testset:
+        data['duration'] = testset.test_duration
         branching = json.dumps(testset.branching)
         ends = [m.end() for m in re.finditer('"id":', branching)]
         for end in ends:
             comma = branching.find(',', end)
             testlet_id = int(branching[end:comma])
-            count = TestletHasItem.query.filter_by(testlet_id=testlet_id).count()
-            question_count = question_count + count
+
+            items = db.session.query(*Item.__table__.columns). \
+                select_from(Item). \
+                join(TestletHasItem, Item.id == TestletHasItem.item_id). \
+                filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
+
+            subjects.extend(list({i.subject for i in items}))
+            question_count = question_count + len(items)
+    data['subjects'] = []
+    if len(subjects) > 0:
+        subjects = dict((x,subjects.count(x)) for x in set(subjects))
+        for key, value in subjects.items():
+            data['subjects'].append({Codebook.get_code_name(key) : value})
+
     data['question_count'] = question_count
 
     return success(data)

@@ -333,7 +333,7 @@
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;
-
+                  /*
                   let testset_id = $('input[name="testset_id"]').val();
                   let v= Math.random().toString(36).substr(2, 5);
                   if(assessment_guid=='7b1dc68f-b26b-4476-8c15-a840b6340b5d' && testset_id=='1999'){
@@ -350,8 +350,8 @@
                   }else{
                     $('.start-test-btn').click();
                   }
+                  */
 
-                  /*
                   if("{{ instruction_grade }}".toLowerCase() === 'false'){
                     $('.start-test-btn').click();
                     return;
@@ -362,13 +362,25 @@
                       if(data.data.instruction==undefined){
                         $('.start-test-btn').click();
                       }else{
-                          let question_count = data.data.question_count;
+                          let inst_question_count = data.data.question_count;
+                          let inst_assessment_name = data.data.assessment_name;
+                          let inst_duration = data.data.duration;
+                          let inst_subjects = '';
+                          let subjects = data.data.subjects;
+                          for(let i=0; i<subjects.length;i++){
+                              for (let key in subjects[i]) {
+                                  inst_subjects += '<li>' + key + ' : ' + subjects[i][key] + ' questions</li>';
+                               }
+                          }
                           $.ajax({url: "/static/errornote/html/instructions/"+data.data.instruction+".html?v="+v}).done(function(data) {
                             let container = $('.instruction-container');
                             let body = $('.instruction-container-body');
                             $('.notice-container').hide();
                             body.html(data);
-                            if($('#question_count').length>0) $('#question_count').text(question_count);
+                            if($('#inst_question_count').length>0) $('#inst_question_count').text(inst_question_count);
+                            if($('#inst_assessment_name').length>0) $('#inst_assessment_name').text(inst_assessment_name);
+                            if($('#inst_duration').length>0) $('#inst_duration').text(inst_duration);
+                            if($('#inst_subjects').length>0) $('#inst_subjects').html(inst_subjects);
                             container.fadeIn('slow');
                             let footer = $('.item-footer').children('div');
                             footer.eq(0).hide();
@@ -379,7 +391,7 @@
                         alert('failed, ' + ex);
                     }
                   );
-                  */
+
               });
               $('.start-no-btn').on('click', function () {
                   window.location.replace("/tests/assessments?guid_list=" + assessment_guid)
