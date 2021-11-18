@@ -21,38 +21,11 @@ from ..api.omr import marking_to_value
 from ..decorators import check_sample_login, permission_required
 from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testset, Item, TestletHasItem, \
     SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking
-from collections import Counter
 
 '''New Sample Page - rendering template'''
 
 @sample.route('/index', methods=['GET', 'POST'])
 def index():
-    data = {}
-    testset_id = 30
-    question_count = 0
-    testset = Testset.query.filter_by(id=testset_id).first()
-    subjects = []
-    if testset:
-        data['duration'] = testset.test_duration
-        branching = json.dumps(testset.branching)
-        ends = [m.end() for m in re.finditer('"id":', branching)]
-        for end in ends:
-            comma = branching.find(',', end)
-            testlet_id = int(branching[end:comma])
-
-            items = db.session.query(*Item.__table__.columns). \
-                select_from(Item). \
-                join(TestletHasItem, Item.id == TestletHasItem.item_id). \
-                filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
-
-            subjects.extend(list({i.subject for i in items}))
-            question_count = question_count + len(items)
-    data['subjects'] = []
-    if len(subjects) > 0:
-        subjects = dict((x,subjects.count(x)) for x in set(subjects))
-        for key, value in subjects.items():
-            data['subjects'].append({Codebook.get_code_name(key) : value})
-
     if request.method == 'POST':
         if session.get('sample') is None:
             email = request.form.get('email', '', type=str)
