@@ -18,6 +18,7 @@ from . import sample
 from .. import db
 from ..api.errors import bad_request
 from ..api.omr import marking_to_value
+from ..api.reports import query_my_report_body
 from ..decorators import check_sample_login, permission_required
 from ..models import SampleUsers, Codebook, SampleAssessment, Permission, Testset, Item, TestletHasItem, \
     SampleAssessmentItems, SampleAssessmentEnroll, SampleMarking

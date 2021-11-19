@@ -206,8 +206,6 @@ def my_report(assessment_id, ts_id, student_user_id):
                         marking.correct_r_value = gap_list
         '''
 
-    markings = [Record(*marking) for marking in markings]
-
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
