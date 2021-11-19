@@ -195,7 +195,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 
         if marking.correct_r_value is not None:
             if isinstance(marking.correct_r_value, list):
-                marking.correct_r_value = None
+                marking.correct_r_value = 'A'
 
 
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
