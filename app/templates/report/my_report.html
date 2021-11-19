@@ -191,7 +191,7 @@
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
                                             <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
                                         <td>{% if not marking.is_correct and marking.correct_r_value %}
-                                            {{ modifying_value_from(marking.correct_r_value) }}{% endif %}</td>
+                                            {{ marking.correct_r_value }}{% endif %}</td>
                                         <td>{{ marking.item_percentile }}%</td>
                                         <td>{{ Codebook.get_code_name(marking.subcategory) }}</td>
                                     </tr>
