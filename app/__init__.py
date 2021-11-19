@@ -101,7 +101,7 @@ def create_app(config_name):
 
     @app.context_processor
     def modifying_value_from(v):
-        return {'correct_r_value': v}
+        dict(modifying_value_from=v)
 
     return app
 
