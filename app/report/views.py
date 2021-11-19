@@ -229,7 +229,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
-                                            explanation_link=explanation_link, test_type=test_type,foo=y)
+                                            explanation_link=explanation_link, test_type=test_type,r_value=modifying_r_value)
     if not pdf:
         return rendered_template_pdf
     # PDF download
@@ -258,17 +258,18 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
-def y(value):
+def modifying_r_value(value):
     if value is None:
         return value
     elif isinstance(value, list):
         if len(value) > 0:
+            result = []
             for v in value:
                 if " gap_" in v:
-                    v = v[:v.rfind(" gap_")]
+                    result.append(v[:v.rfind(" gap_")])
                 else:
-                    return v
-            return v
+                    result.append(v)
+            return result
         else:
             return value
     else:
