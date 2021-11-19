@@ -185,7 +185,7 @@
                                                 <i class="fa fa-play-circle" style="color: lightgrey"></i>
                                             {% endif %}
                                         </td>
-                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                                        <td>{% if marking.candidate_r_value %}{{ r_value(marking.candidate_r_value) }}{% else %}
                                             answer_unsubmission{% endif %}</td>
                                         <td>{% if marking.is_correct %}
                                             <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
