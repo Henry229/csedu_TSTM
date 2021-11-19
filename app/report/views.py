@@ -266,7 +266,7 @@ def modifying_r_value(value):
             result = []
             for v in value:
                 if " gap_" in v:
-                    result.append( v[v.rfind(" gap_"):] + ' ' + v[:v.rfind(" gap_")])
+                    result.append( v[v.rfind("_"):] + ' ' + v[:v.rfind(" gap_")])
                 else:
                     result.append(v)
             return result
