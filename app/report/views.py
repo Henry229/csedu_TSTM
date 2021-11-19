@@ -259,7 +259,20 @@ def my_report(assessment_id, ts_id, student_user_id):
     return rsp
 
 def y(value):
-    return value
+    if value is None:
+        return value
+    elif isinstance(value, list):
+        if len(value) > 0:
+            for v in value:
+                if " gap_" in v:
+                    v = v[:v.rfind(" gap_")]
+                else:
+                    return v
+            return v
+        else:
+            return value
+    else:
+        return value
 
 def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string):
     grade = Codebook.get_code_name(testset.grade)
