@@ -99,10 +99,6 @@ def create_app(config_name):
     def inject_now():
         return {'now': datetime.today()}
 
-    @app.context_processor
-    def modifying_value_from(v):
-        dict(modifying_value_from=v)
-
     return app
 
 
