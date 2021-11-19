@@ -101,20 +101,7 @@ def create_app(config_name):
 
     @app.context_processor
     def modifying_value_from(value):
-        if value is None:
-            return value
-        elif isinstance(value, list):
-            if len(value) > 0:
-                for v in value:
-                    if " gap_" in v:
-                        v =  v[:v.rfind(" gap_")]
-                    else:
-                        return v
-                return v
-            else:
-                return value
-        else:
-            return value
+        return {'correct_r_value': value}
 
     return app
 
