@@ -195,7 +195,10 @@ def my_report(assessment_id, ts_id, student_user_id):
 
         if marking.correct_r_value is not None:
             if isinstance(marking.correct_r_value, list):
-                marking.correct_r_value = 'A'
+                if len(marking.correct_r_value) > 0:
+                    for v in marking.correct_r_value:
+                        if " gap_" in v:
+                            v = v[:v.rfind(" gap_")]
 
 
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
