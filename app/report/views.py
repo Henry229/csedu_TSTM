@@ -198,7 +198,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                 if len(marking.correct_r_value) > 0:
                     for v in marking.correct_r_value:
                         if " gap_" in v:
-                            v = v[:v.rfind(" gap_")]
+                            raise Exception("error!!")
 
 
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
