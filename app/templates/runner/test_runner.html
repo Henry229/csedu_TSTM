@@ -370,7 +370,7 @@
                           let subjects = data.data.subjects;
                           for(let i=0; i<subjects.length;i++){
                               for (let key in subjects[i]) {
-                                  inst_subjects += '<li>' + key + ' : ' + subjects[i][key] + ' question' + (subjects[i][key]>1?'s','') + '</li>';
+                                  inst_subjects += '<li>' + key + ' : ' + subjects[i][key] + ' question' + (subjects[i][key]>1?'s':'') + '</li>';
                                }
                           }
                           $.ajax({url: "/static/errornote/html/instructions/"+data.data.instruction+".html?v="+v}).done(function(data) {
