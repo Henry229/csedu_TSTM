@@ -193,6 +193,14 @@ def my_report(assessment_id, ts_id, student_user_id):
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
 
+        if marking.correct_r_value is not None:
+            if isinstance(marking.correct_r_value, list):
+                if len(marking.correct_r_value) > 0:
+                    for v in marking.correct_r_value:
+                        if " gap_" in v:
+                            v = v[:v.rfind(" gap_")]
+
+
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
