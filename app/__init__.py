@@ -96,8 +96,24 @@ def create_app(config_name):
     app.json_encoder = AlchemyEncoder
 
     @app.context_processor
-    def inject_now():
-        return {'now': datetime.today()}
+    def utility_processor():
+        def inject_now():
+            return {'now': datetime.today()}
+        def modifying_value_from(value):
+            if value is None:
+                return value
+            elif isinstance(value, list):
+                if len(value) > 0:
+                    for v in value:
+                        if " gap_" in v:
+                            v =  v[:v.rfind(" gap_")]
+                        else:
+                            return v
+                    return v
+                else:
+                    return value
+            else:
+                return value
 
     return app
 
