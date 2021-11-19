@@ -229,7 +229,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade,
-                                            explanation_link=explanation_link, test_type=test_type)
+                                            explanation_link=explanation_link, test_type=test_type,foo=y)
     if not pdf:
         return rendered_template_pdf
     # PDF download
@@ -258,6 +258,8 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
+def y(text):
+    return text
 
 def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string):
     grade = Codebook.get_code_name(testset.grade)
