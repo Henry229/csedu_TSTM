@@ -192,7 +192,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     explanation_link = {}
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
-
+        marking.correct_r_value = 'A'
+        '''
         if marking.correct_r_value is not None:
             if isinstance(marking.correct_r_value, list):
                 if len(marking.correct_r_value) > 0:
@@ -204,6 +205,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                             gap_list.append(v[:v.rfind(" gap_")])
                     if gap_exists:
                         marking.correct_r_value = gap_list
+        '''
 
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
