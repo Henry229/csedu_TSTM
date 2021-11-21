@@ -333,25 +333,6 @@
               var assessment_guid = $('input[name="assessment_guid"]').val();
               $('.start-yes-btn').on('click', function () {
                   if ($('#tnc_agree_checkbox').is(':checked') === false) return;
-                  /*
-                  let testset_id = $('input[name="testset_id"]').val();
-                  let v= Math.random().toString(36).substr(2, 5);
-                  if(assessment_guid=='7b1dc68f-b26b-4476-8c15-a840b6340b5d' && testset_id=='1999'){
-                      $.ajax({url: "/static/errornote/html/instructions/oc.html?v="+v}).done(function(data) {
-                        let container = $('.instruction-container');
-                        let body = $('.instruction-container-body');
-                        $('.notice-container').hide();
-                        body.html(data);
-                        container.fadeIn('slow');
-                        let footer = $('.item-footer').children('div');
-                        footer.eq(0).hide();
-                        footer.eq(1).show();
-                      });
-                  }else{
-                    $('.start-test-btn').click();
-                  }
-                  */
-
                   if("{{ instruction_grade }}".toLowerCase() === 'false'){
                     $('.start-test-btn').click();
                     return;
