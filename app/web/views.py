@@ -711,8 +711,8 @@ def assessment_list():
                                 if not exits:
                                     #ts.assessment_guid = ts.assessments[0].GUID
                                     #ts.assessment_id = ts.assessments[0].id
-                                    ts.assessment_guid = _subjects.GUID
-                                    ts.assessment_id = _subjects.id
+                                    ts.assessment_guid = sub_list.GUID
+                                    ts.assessment_id = sub_list.id
                                     temp_testsets.append(ts)
                 _subjects['testsets'] = temp_testsets
 
