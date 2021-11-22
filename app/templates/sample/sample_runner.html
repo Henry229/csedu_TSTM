@@ -31,11 +31,15 @@
     cursor: col-resize;
 }
 
-.col-6 {
+.qti-itemBody .grid-row .col-6.with-scroll {
+    flex: unset;
+    max-width: unset;
+    min-width: 50%;
+}
+.qti-itemBody .grid-row .col-6.with-scroll + .col-6 {
     flex: unset;
     max-width: unset;
 }
-
     </style>
 
 {% endblock %}
