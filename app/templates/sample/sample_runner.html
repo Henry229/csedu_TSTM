@@ -422,6 +422,7 @@
                     if (response.result === 'success') {
                         let data = response.data;
                         drawingForm(data, true);
+                        aaa();
                     }
                 },
                 error: function(xhr) {
@@ -651,151 +652,150 @@
 
 
 <script type="text/javascript">
-(function($) {
-  $(function() {
+function aaa() {
 
-      var htm = $(".qti-itemBody .col-6").eq(1);
-      var txt = '';
+    var htm = $(".qti-itemBody .col-6").eq(1);
+    var txt = '';
 
-      txt += '';
-txt += '<div>';
-        txt += '<div class="qti-interaction qti-blockInteraction qti-choiceInteraction" data-serial="i7vpujllcc3s3ry9jr59qer38" data-qti-class="choiceInteraction">';
-txt += '  For questions <strong>1 – 6</strong>, choose the answer (<strong>A, B, C </strong>or <strong>D</strong>) which you think best answers the question.<br>';
-txt += '<br>';
-txt += 'Why did the author write Matilda’s age in <em>italics </em>in the first paragraph?&nbsp;<br>';
-txt += '&nbsp;';
-txt += '  <div class="instruction-container"></div>';
-txt += '  <ol data-identifier="RESPONSE" data-base-type="identifier" class="plain block-listing solid choice-area ">';
-txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="A" data-serial="inv0kmu0z0m1lc5js2wbvcq65">';
-txt += '    <div class="pseudo-label-box">';
-txt += '        <label class="real-label">';
-txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="A" tabindex="1">';
-txt += '            <span class="icon-radio"></span>';
-txt += '        </label>';
-txt += '        <div class="label-box">';
-txt += '           <div class="label-content clear" contenteditable="false">';
-txt += '               &nbsp;To show how Matilda could count.&nbsp;';
-txt += '               <svg class="overlay-answer-eliminator">';
-txt += '                   <line x1="0" y1="100%" x2="100%" y2="0"></line>';
-txt += '                   <line x1="0" y1="0" x2="100%" y2="100%"></line>';
-txt += '               </svg>';
-txt += '           </div>';
-txt += '       </div>';
-txt += '   </div>';
-txt += '   <label data-eliminable="container" data-label="Eliminate">';
-txt += '       <span data-eliminable="trigger" class="icon-checkbox"></span>';
-txt += '   </label>';
-txt += '</li>';
-txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="B" data-serial="i8rv2wx2y8qqcooeolxd6ktmq">';
-txt += '    <div class="pseudo-label-box">';
-txt += '        <label class="real-label">';
-txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="B" tabindex="1">';
-txt += '            <span class="icon-radio"></span>';
-txt += '        </label>';
-txt += '        <div class="label-box">';
-txt += '            <div class="label-content clear" contenteditable="false">';
-txt += '                &nbsp;To emphasise how clever Matilda was for her age.&nbsp;';
-txt += '                <svg class="overlay-answer-eliminator">';
-txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
-txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
-txt += '                </svg>';
-txt += '            </div>';
-txt += '        </div>';
-txt += '    </div>';
-txt += '    <label data-eliminable="container" data-label="Eliminate">';
-txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
-txt += '    </label>';
-txt += '</li>';
-txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="C" data-serial="itlg991cdxifswlq1qlvbc42h">';
-txt += '    <div class="pseudo-label-box">';
-txt += '        <label class="real-label">';
-txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="C" tabindex="1">';
-txt += '            <span class="icon-radio"></span>';
-txt += '        </label>';
-txt += '        <div class="label-box">';
-txt += '            <div class="label-content clear" contenteditable="false">';
-txt += '                &nbsp;It is grammatically correct to show numbers in italics.&nbsp;';
-txt += '                <svg class="overlay-answer-eliminator">';
-txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
-txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
-txt += '                </svg>';
-txt += '            </div>';
-txt += '        </div>';
-txt += '    </div>';
-txt += '    <label data-eliminable="container" data-label="Eliminate">';
-txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
-txt += '    </label>';
-txt += '</li>';
-txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="D" data-serial="ifhg8ks00j7po2up7auq9vbb5">';
-txt += '    <div class="pseudo-label-box">';
-txt += '        <label class="real-label">';
-txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="D" tabindex="1">';
-txt += '            <span class="icon-radio"></span>';
-txt += '        </label>';
-txt += '        <div class="label-box">';
-txt += '            <div class="label-content clear" contenteditable="false">';
-txt += '                &nbsp;To signify that the ages were just guesses and may not be accurate.&nbsp;';
-txt += '                <svg class="overlay-answer-eliminator">';
-txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
-txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
-txt += '                </svg>';
-txt += '            </div>';
-txt += '        </div>';
-txt += '    </div>';
-txt += '    <label data-eliminable="container" data-label="Eliminate">';
-txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
-txt += '    </label>';
-txt += '</li>';
-txt += '  </ol>';
-txt += '  <div class="notification-container"></div>';
-txt += '</div>';
-txt += '      </div>';
-txt += '<span class="slider"></span>';
-txt += '';
-htm.html(txt);
+    txt += '';
+    txt += '<div>';
+    txt += '<div class="qti-interaction qti-blockInteraction qti-choiceInteraction" data-serial="i7vpujllcc3s3ry9jr59qer38" data-qti-class="choiceInteraction">';
+    txt += '  For questions <strong>1 – 6</strong>, choose the answer (<strong>A, B, C </strong>or <strong>D</strong>) which you think best answers the question.<br>';
+    txt += '<br>';
+    txt += 'Why did the author write Matilda’s age in <em>italics </em>in the first paragraph?&nbsp;<br>';
+    txt += '&nbsp;';
+    txt += '  <div class="instruction-container"></div>';
+    txt += '  <ol data-identifier="RESPONSE" data-base-type="identifier" class="plain block-listing solid choice-area ">';
+    txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="A" data-serial="inv0kmu0z0m1lc5js2wbvcq65">';
+    txt += '    <div class="pseudo-label-box">';
+    txt += '        <label class="real-label">';
+    txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="A" tabindex="1">';
+    txt += '            <span class="icon-radio"></span>';
+    txt += '        </label>';
+    txt += '        <div class="label-box">';
+    txt += '           <div class="label-content clear" contenteditable="false">';
+    txt += '               &nbsp;To show how Matilda could count.&nbsp;';
+    txt += '               <svg class="overlay-answer-eliminator">';
+    txt += '                   <line x1="0" y1="100%" x2="100%" y2="0"></line>';
+    txt += '                   <line x1="0" y1="0" x2="100%" y2="100%"></line>';
+    txt += '               </svg>';
+    txt += '           </div>';
+    txt += '       </div>';
+    txt += '   </div>';
+    txt += '   <label data-eliminable="container" data-label="Eliminate">';
+    txt += '       <span data-eliminable="trigger" class="icon-checkbox"></span>';
+    txt += '   </label>';
+    txt += '</li>';
+    txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="B" data-serial="i8rv2wx2y8qqcooeolxd6ktmq">';
+    txt += '    <div class="pseudo-label-box">';
+    txt += '        <label class="real-label">';
+    txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="B" tabindex="1">';
+    txt += '            <span class="icon-radio"></span>';
+    txt += '        </label>';
+    txt += '        <div class="label-box">';
+    txt += '            <div class="label-content clear" contenteditable="false">';
+    txt += '                &nbsp;To emphasise how clever Matilda was for her age.&nbsp;';
+    txt += '                <svg class="overlay-answer-eliminator">';
+    txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
+    txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
+    txt += '                </svg>';
+    txt += '            </div>';
+    txt += '        </div>';
+    txt += '    </div>';
+    txt += '    <label data-eliminable="container" data-label="Eliminate">';
+    txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
+    txt += '    </label>';
+    txt += '</li>';
+    txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="C" data-serial="itlg991cdxifswlq1qlvbc42h">';
+    txt += '    <div class="pseudo-label-box">';
+    txt += '        <label class="real-label">';
+    txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="C" tabindex="1">';
+    txt += '            <span class="icon-radio"></span>';
+    txt += '        </label>';
+    txt += '        <div class="label-box">';
+    txt += '            <div class="label-content clear" contenteditable="false">';
+    txt += '                &nbsp;It is grammatically correct to show numbers in italics.&nbsp;';
+    txt += '                <svg class="overlay-answer-eliminator">';
+    txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
+    txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
+    txt += '                </svg>';
+    txt += '            </div>';
+    txt += '        </div>';
+    txt += '    </div>';
+    txt += '    <label data-eliminable="container" data-label="Eliminate">';
+    txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
+    txt += '    </label>';
+    txt += '</li>';
+    txt += '		  <li class="qti-choice qti-simpleChoice" data-identifier="D" data-serial="ifhg8ks00j7po2up7auq9vbb5">';
+    txt += '    <div class="pseudo-label-box">';
+    txt += '        <label class="real-label">';
+    txt += '            <input type="radio" name="response-i7vpujllcc3s3ry9jr59qer38" value="D" tabindex="1">';
+    txt += '            <span class="icon-radio"></span>';
+    txt += '        </label>';
+    txt += '        <div class="label-box">';
+    txt += '            <div class="label-content clear" contenteditable="false">';
+    txt += '                &nbsp;To signify that the ages were just guesses and may not be accurate.&nbsp;';
+    txt += '                <svg class="overlay-answer-eliminator">';
+    txt += '                    <line x1="0" y1="100%" x2="100%" y2="0"></line>';
+    txt += '                    <line x1="0" y1="0" x2="100%" y2="100%"></line>';
+    txt += '                </svg>';
+    txt += '            </div>';
+    txt += '        </div>';
+    txt += '    </div>';
+    txt += '    <label data-eliminable="container" data-label="Eliminate">';
+    txt += '        <span data-eliminable="trigger" class="icon-checkbox"></span>';
+    txt += '    </label>';
+    txt += '</li>';
+    txt += '  </ol>';
+    txt += '  <div class="notification-container"></div>';
+    txt += '</div>';
+    txt += '      </div>';
+    txt += '<span class="slider"></span>';
+    txt += '';
+    htm.html(txt);
 
 
     var isMouseDown = false,
-      $panelOne = $(".qti-itemBody .col-6").eq(0),
-      $panelTwo = $(".qti-itemBody .col-6").eq(1),
-      $panelContainer = $panelOne.parent(),
-      getParentWidth = function() {
-        return $panelContainer.width();
-      },
-      mouseMoveHandler = function(e) {
-        if (!isMouseDown) return;
+        $panelOne = $(".qti-itemBody .col-6").eq(0),
+        $panelTwo = $(".qti-itemBody .col-6").eq(1),
+        $panelContainer = $panelOne.parent(),
+        getParentWidth = function () {
+            return $panelContainer.width();
+        },
+        mouseMoveHandler = function (e) {
+            if (!isMouseDown) return;
 
-		var clientX = e.clientX || (e.touches && e.touches[0].clientX);
-		if(isNaN(clientX))
-			return;
+            var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            if (isNaN(clientX))
+                return;
 
 
-		var width = (clientX / getParentWidth()) * 100;
+            var width = (clientX / getParentWidth()) * 100;
 
-        // don't allow a value that's smaller than zero;
-        width = width < 0 ? 0 : width;
+            // don't allow a value that's smaller than zero;
+            width = width < 0 ? 0 : width;
 
-        // apply size to panel 1
-        $panelOne.css({ width: width + "%" });
+            // apply size to panel 1
+            $panelOne.css({width: width + "%"});
 
-        // apply size to panel 2
-        $panelTwo.css({ width: 100 - width + "%" });
-      };
+            // apply size to panel 2
+            $panelTwo.css({width: 100 - width + "%"});
+        };
 
     // mouseDown event
-    $(".slider").on("mousedown touchstart", function() {
-      // only bind a the mouseMove handler on the first cycle
-      !isMouseDown && $panelContainer.on("mousemove touchmove", mouseMoveHandler);
-      isMouseDown = true;
+    $(".slider").on("mousedown touchstart", function () {
+        // only bind a the mouseMove handler on the first cycle
+        !isMouseDown && $panelContainer.on("mousemove touchmove", mouseMoveHandler);
+        isMouseDown = true;
     });
 
-    $(window).on("mouseup touchend", function() {
-      isMouseDown = false;
-      // detach then mouseMove handler
-      $panelContainer.off("mousemove touchmove");
+    $(window).on("mouseup touchend", function () {
+        isMouseDown = false;
+        // detach then mouseMove handler
+        $panelContainer.off("mousemove touchmove");
     });
-  });
-})(jQuery);
+}
+
 </script>
 
 
