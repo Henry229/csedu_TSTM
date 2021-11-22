@@ -709,8 +709,10 @@ def assessment_list():
                                     if ts.id == _set.id:
                                         exits = True
                                 if not exits:
-                                    ts.assessment_guid = ts.assessments[0].GUID
-                                    ts.assessment_id = ts.assessments[0].id
+                                    #ts.assessment_guid = ts.assessments[0].GUID
+                                    #ts.assessment_id = ts.assessments[0].id
+                                    ts.assessment_guid = a.GUID
+                                    ts.assessment_id = a.id
                                     temp_testsets.append(ts)
                 _subjects['testsets'] = temp_testsets
 
