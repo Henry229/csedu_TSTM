@@ -20,7 +20,7 @@
     user-select: none;
 }
 
-.slider::before {
+.slider-button {
     position: absolute;
     left: 0rem;
     top: 50%;
@@ -666,10 +666,12 @@
 <script type="text/javascript">
 function aaa() {
     if($(".qti-itemBody > .grid-row .with-scroll").length>0){
-        $(".qti-itemBody .grid-row div:eq(1)").prepend('<span class="slider"></span>');
+        let r_container = $(".qti-itemBody .grid-row div:eq(1)");
+         r_container.prepend('<span class="slider"></span>');
+         r_container.prepend('<span class="slider-button"></span>');
     }
 
-    $(".item-container").on("click .slider::before", function () {
+    $(".item-container").on("click .slider-button", function () {
         alert(1);
     });
 
