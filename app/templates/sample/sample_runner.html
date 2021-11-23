@@ -683,14 +683,16 @@ function aaa() {
     }
 
     $(".item-container").on("click", ".slider-button", function () {
-        let l_container = $(".qti-itemBody > .grid-row .with-scroll");
-        l_container.css({'max-width': '100%','flex': '0 0 100%'});
+        //let l_container = $(".qti-itemBody > .grid-row .with-scroll");
+        let l_containers = $(".qti-itemBody > .grid-row > div");
+        l_containers.css({'max-width': '100%','flex': '0 0 100%'});
         $('.slider, .slider-button').hide();
         $('.slider-button-rotate').show();
     })
     .on("click", ".slider-button-rotate", function () {
-        let l_container = $(".qti-itemBody > .grid-row .with-scroll");
-        l_container.css({'max-width': '50%','flex': '0 0 50%'});
+        //let l_container = $(".qti-itemBody > .grid-row .with-scroll");
+        let l_containers = $(".qti-itemBody > .grid-row > div");
+        l_containers.css({'max-width': '50%','flex': '0 0 50%'});
         $('.slider, .slider-button').show();
         $('.slider-button-rotate').hide();
     });
