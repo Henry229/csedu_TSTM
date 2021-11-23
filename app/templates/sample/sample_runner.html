@@ -442,7 +442,6 @@
                     if (response.result === 'success') {
                         let data = response.data;
                         drawingForm(data, true);
-                        aaa();
                     }
                 },
                 error: function(xhr) {
@@ -654,6 +653,8 @@
             $('.item-container').show();
             $('.summary-container').hide();
         }
+
+        aaa();
     };
 
     let flagRendered = function (flagged) {
