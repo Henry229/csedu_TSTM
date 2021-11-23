@@ -43,6 +43,8 @@
     left: unset;
     right: 0rem;
     transform: rotate(180deg);
+    margin-right: 10px;
+    display: none;
 }
 
 .qti-itemBody col-6 with-scroll { transition: all 2s;}
@@ -676,13 +678,21 @@ function aaa() {
          r_container.prepend('<span class="slider"></span>');
          r_container.prepend('<span class="slider-button"></span>');
 
-         let l_container = $(".qti-itemBody > .grid-row .with-scroll");
-         l_container.prepend('<span class="slider-button slider-button-rotate"></span>');
+         let l_container_container = $(".qti-itemBody > .grid-row .with-scroll").parent();
+         l_container_container.prepend('<span class="slider-button slider-button-rotate"></span>');
     }
 
     $(".item-container").on("click", ".slider-button", function () {
         let l_container = $(".qti-itemBody > .grid-row .with-scroll");
         l_container.css({'max-width': '100%','flex': '0 0 100%'});
+        $('.slider, .slider-button').hide();
+        $('.slider-button-rotate').show();
+    })
+    .on("click", ".slider-button-rotate", function () {
+        let l_container = $(".qti-itemBody > .grid-row .with-scroll");
+        l_container.css({'max-width': '50%','flex': '0 0 50%'});
+        $('.slider, .slider-button').show();
+        $('.slider-button-rotate').hide();
     });
 
 }
