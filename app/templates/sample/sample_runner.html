@@ -665,17 +665,13 @@
 
 <script type="text/javascript">
 function aaa() {
-
-
-    //txt += '<span class="slider"></span>';
-    //txt += '';
-    //htm.html(txt);
-
     if($(".qti-itemBody > .grid-row .with-scroll").length>0){
         $(".qti-itemBody .grid-row div:eq(1)").prepend('<span class="slider"></span>');
     }
 
-
+    $(".item-container").on("click .slider", function () {
+        alert(1);
+    });
 
 }
 
