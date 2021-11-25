@@ -174,26 +174,9 @@ var ItemRunner = (function () {
         if (MathJax)
             MathJax.typeset();
         _calculateSize();
-    };
 
-    var drawRendered = function (data) {
-        var rendered_html = data.html;
-        _$container.empty();
-        var div = $(rendered_html);
-        if (data.jw_player) {
-            _hideJWPlayer(div);
-            if (data.jw_player.player_url) {
-                _$container.append($('<script src="' + data.jw_player.player_url + '"></script>'));
-                window.jwplayer = null;
-            }
-        }
-        _$container.append(div);
-        if (_mode === 'preview') {
-            div = $('<div class="alert alert-secondary" role="alert">');
-            _$container.append(div);
-            _$preview_score = div;
-        }else{
-            //making resizable splitter
+        //making resizable splitter
+        if (_mode == 'assessment') {
             if($(".qti-itemBody > .grid-row .with-scroll").length>0){
                 let r_container = $(".qti-itemBody .grid-row div:eq(1)");
                  r_container.prepend('<span class="slider"></span>');
@@ -217,6 +200,25 @@ var ItemRunner = (function () {
                 $('.slider, .slider-button').show();
                 $('.slider-button-rotate').hide();
             });
+        }
+    };
+
+    var drawRendered = function (data) {
+        var rendered_html = data.html;
+        _$container.empty();
+        var div = $(rendered_html);
+        if (data.jw_player) {
+            _hideJWPlayer(div);
+            if (data.jw_player.player_url) {
+                _$container.append($('<script src="' + data.jw_player.player_url + '"></script>'));
+                window.jwplayer = null;
+            }
+        }
+        _$container.append(div);
+        if (_mode === 'preview') {
+            div = $('<div class="alert alert-secondary" role="alert">');
+            _$container.append(div);
+            _$preview_score = div;
         }
     };
 
