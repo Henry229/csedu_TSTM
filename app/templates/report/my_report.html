@@ -131,9 +131,11 @@
                 </tr>
                 <tr>
                     <th> Student ID:</th>
-                    <td> {{ Student.getCSStudentId(student_user_id) }}</td>
+                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentId(student_user_id) }}</td>
+                    {% if subject != 'Vocabulary' %}
                     <th> Score:</th>
                     <td> {{ score }} </td>
+                    {% endif %}
                 </tr>
                 <tr>
                     <th> Grade:</th>
