@@ -653,8 +653,7 @@
             $('.item-container').show();
             $('.summary-container').hide();
         }
-
-        aaa();
+        resizableSplitter();
     };
 
     let flagRendered = function (flagged) {
@@ -673,7 +672,7 @@
 
 
 <script type="text/javascript">
-function aaa() {
+function resizableSplitter() {
     if($(".qti-itemBody > .grid-row .with-scroll").length>0){
         let r_container = $(".qti-itemBody .grid-row div:eq(1)");
          r_container.prepend('<span class="slider"></span>');

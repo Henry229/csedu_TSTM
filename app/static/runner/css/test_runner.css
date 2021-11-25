@@ -1352,3 +1352,43 @@ button.footer-finish-btn {
 
 .header-summary i {color:#585e73}
 .header-summary i:hover {color:#005d93}
+
+
+.slider {
+    z-index: 999999;
+    display: block;
+    position: absolute;
+    width: 1px;
+    background-color: transparent;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow: visible;
+    user-select: none;
+}
+.slider-button {
+    position: absolute;
+    left: 0rem;
+    top: 50%;
+    height: 18px;
+    width: 18px;
+    background-color: transparent;
+    cursor: pointer;
+    font-family: 'Font Awesome 5 Free';
+    /*content: "\f152";*/
+    background-image: url(/static/runner/img/arrow-icon.png);
+    background-repeat: no-repeat;
+    content: '';
+    background-size: 10px 30px;
+    display: inline-block;
+    width: 10px;
+    height: 30px;
+}
+.slider-button-rotate {
+    left: unset;
+    right: 0rem;
+    transform: rotate(180deg);
+    margin-right: 10px;
+    display: none;
+}
+.qti-itemBody col-6 with-scroll { transition: all 2s;}

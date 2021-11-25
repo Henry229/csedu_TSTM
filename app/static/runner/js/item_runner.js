@@ -192,6 +192,31 @@ var ItemRunner = (function () {
             div = $('<div class="alert alert-secondary" role="alert">');
             _$container.append(div);
             _$preview_score = div;
+        }else{
+            //making resizable splitter
+            if($(".qti-itemBody > .grid-row .with-scroll").length>0){
+                let r_container = $(".qti-itemBody .grid-row div:eq(1)");
+                 r_container.prepend('<span class="slider"></span>');
+                 r_container.prepend('<span class="slider-button"></span>');
+
+                 let l_container_container = $(".qti-itemBody > .grid-row .with-scroll").parent();
+                 l_container_container.prepend('<span class="slider-button slider-button-rotate"></span>');
+            }
+
+            $(".item-container").on("click", ".slider-button", function () {
+                //let l_container = $(".qti-itemBody > .grid-row .with-scroll");
+                let l_containers = $(".qti-itemBody > .grid-row > div");
+                l_containers.css({'max-width': '100%','flex': '0 0 100%'});
+                $('.slider, .slider-button').hide();
+                $('.slider-button-rotate').show();
+            })
+            .on("click", ".slider-button-rotate", function () {
+                //let l_container = $(".qti-itemBody > .grid-row .with-scroll");
+                let l_containers = $(".qti-itemBody > .grid-row > div");
+                l_containers.css({'max-width': '50%','flex': '0 0 50%'});
+                $('.slider, .slider-button').show();
+                $('.slider-button-rotate').hide();
+            });
         }
     };
 
