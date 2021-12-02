@@ -446,8 +446,8 @@ def virtual_omr_resync_enroll(assessment_id, assessment_enroll_id):
     Re-Sync marking data to csonlineschool through CS_API
     :return: Sync status page
     '''
-    vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
-    enroll = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, assessment_enroll_id=assessment_enroll_id).first()
+    vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s and %s" % assessment_id, assessment_enroll_id)
+    enroll = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, id=assessment_enroll_id).first()
     if enroll is not None:
         enroll.synced = False
         enroll.synced_time = None
