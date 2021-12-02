@@ -438,6 +438,22 @@ def virtual_omr(assessment_id):
     return virtual_omr_sync(assessment_id, duration=7)
 
 
+@assessment.route('/virtual_omr_resync/<string:assessment_id>/<string:assessment_enroll_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def virtual_omr_resync_enroll(assessment_id, assessment_enroll_id):
+    '''
+    Re-Sync marking data to csonlineschool through CS_API
+    :return: Sync status page
+    '''
+    vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
+    enroll = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, assessment_enroll_id=assessment_enroll_id).first()
+    if enroll is not None:
+        enroll.synced = False
+        enroll.synced_time = None
+        db.session.commit()
+    return virtual_omr_sync(assessment_id, duration=7, assessment_enroll_id=assessment_enroll_id)
+
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ADMIN)
@@ -454,9 +470,8 @@ def virtual_omr_resync(assessment_id):
     db.session.commit()
     return virtual_omr_sync(assessment_id, duration=7)
 
-
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=3):
+def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
@@ -520,8 +535,14 @@ def virtual_omr_sync(assessment_id=None, duration=3):
             vomr_logger.info(f'[{sync_hash}] Assessment : {assessment.GUID}')
             vomr_logger.info("=" * 80)
 
-            enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
-                AssessmentEnroll.start_time >= start_day).all()
+            enrolls = []
+            if assessment_enroll_id is None:
+                enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
+                    AssessmentEnroll.start_time >= start_day).all()
+            else:
+                enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False, id=assessment_enroll_id).filter(
+                    AssessmentEnroll.start_time >= start_day).all()
+
             responses = []
             responses_text = []
 
