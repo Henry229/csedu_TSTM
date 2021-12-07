@@ -558,7 +558,7 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
                 end_time = pytz.utc.localize(enroll.end_time(margin=11))
                 vomr_logger.debug(
                     f'[{sync_hash}] Sync [{assessment.name}] {assessment.GUID}, {testset.GUID}({testset.id}), {enroll.student.student_id}({enroll.student.user_id})')
-                '''
+                
                 if enroll.finish_time:
                     vomr_logger.info(f'[{sync_hash}] > Test finished at {enroll.finish_time}')
                     sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
@@ -572,7 +572,6 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
                         if end_time >= datetime.now(pytz.utc):
                             vomr_logger.info(f'[{sync_hash}] > Not timed out yet. Skip')
                             continue
-                '''
                 answers = {}
                 pdf_file_path = None
                 for m in enroll.marking:
