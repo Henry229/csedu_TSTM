@@ -1425,6 +1425,7 @@ def enroll_info():
     # Default set date as today
     if not search_student_id and not search_date:
         search_date = date.today().strftime('%Y-%m-%d')
+
     return render_template('report/assessment_enroll_info.html', enrolls=enrolls, search_date=search_date)
 
 

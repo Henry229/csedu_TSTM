@@ -30,6 +30,7 @@
                     <th>Finish Time</th>
                     <th>Synced</th>
                     <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -46,6 +47,12 @@
                         <td>{{ enroll.start_time }}t</td>
                         <td>{{ enroll.finish_time }}</td>
                         <td>{{ enroll.synced }}</td>
+                        <td>
+                            {% if enroll.assessment.test_type in [774, 1324, 1325, 1333, 1334, 391] %}
+                            <span class="btn btn-sm btn-outline-dark btn-reset-test" id="btn-sync"
+                                   data-enroll-id="{{ enroll.id }}" data-assessment-id="{{ enroll.assessment_id }}">Sync</span>
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="btn btn-sm btn-outline-dark btn-reset-test" id="btn-reset-{{ enroll.id }}"
                                    data-enroll-id="{{ enroll.id }}" data-assessment="{{ enroll.assessment.name }}"
@@ -69,6 +76,7 @@
                     <th>Start Time</th>
                     <th>Finish Time</th>
                     <th>Synced</th>
+                    <td></td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -136,6 +144,12 @@
                 $('INPUT[name="cs_student_id"]').val(_student);
                 $('INPUT[name="week_no"]').val('');
              });
+
+            $('.main').on('click', '#btn-sync', function(){
+               let assessment_id = $(this).data('assessment-id');
+               let enroll_id = $(this).data('enroll-id');
+               window.open('/assessment/virtual_omr_resync/'+assessment_id+'/'+enroll_id, '_blank').focus();
+            });
         } );
 
         function reset_test(modal_name) {
