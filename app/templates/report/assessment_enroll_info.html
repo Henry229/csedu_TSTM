@@ -49,8 +49,10 @@
                         <td>{{ enroll.synced }}</td>
                         <td>
                             {% if enroll.assessment.test_type in [774, 1324, 1325, 1333, 1334, 391] %}
+                                {% if Codebook.get_code_name(enroll.testset.subject) != 'Writing' %}
                             <span class="btn btn-sm btn-outline-dark btn-reset-test" id="btn-sync"
                                    data-enroll-id="{{ enroll.id }}" data-assessment-id="{{ enroll.assessment_id }}">Sync</span>
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
