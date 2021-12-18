@@ -1,7 +1,7 @@
 import json
+import re
 import uuid
 from datetime import datetime
-from typing import re
 
 import pytz
 from flask import render_template, flash, request, redirect, url_for, jsonify
