@@ -57,13 +57,13 @@ function loadingQuestons(){
     }
     var d = {'testset_id': $('input[name="r_tl"]:checked').val()};
     $.ajax({
-        url: '/api/get_codebook_info/',
+        url: '/testset/manage/questions',
         method: 'GET',
         data: data,
         contentType: 'application/json',
         data: JSON.stringify(d),
         success: function (response) {
-
+            debugger
         }
     });
 }

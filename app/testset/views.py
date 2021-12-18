@@ -1,5 +1,7 @@
+import json
 import uuid
 from datetime import datetime
+from typing import re
 
 import pytz
 from flask import render_template, flash, request, redirect, url_for, jsonify
@@ -442,13 +444,7 @@ def manage():
         if not rows:
             flag = False
         flash('Found {} testset(s)'.format(len(rows)))
-
-    qti_item_obj = Item.query.filter_by(id=40843).first()
-    item_service = ItemService(qti_item_obj.file_link)
-    qti_item = item_service.get_item()
-    rendered_preview = qti_item.to_html()
-
-    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows, test=rendered_preview)
+    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows)
 
 @testset.route('/manage/questions', methods=['GET'])
 @login_required
@@ -456,7 +452,7 @@ def manage():
 def question_list():
     testset_id = request.args.get('testset_id', 0, type=int)
     testset = Testset.query.filter_by(id=testset_id).first()
-    subjects = []
+    result = []
     if testset:
         branching = json.dumps(testset.branching)
         ends = [m.end() for m in re.finditer('"id":', branching)]
@@ -470,11 +466,16 @@ def question_list():
                 filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
 
             for i in items:
-                subjects.append(i.subject)
 
-    #data = {'additional_info': additional_info}
-    #return jsonify(data)
-    return jsonify(subjects)
+                qti_item_obj = Item.query.filter_by(id=i.id).first()
+                item_service = ItemService(qti_item_obj.file_link)
+                qti_item = item_service.get_item()
+                data = {
+                    'item_id': i.id,
+                    'html': qti_item.to_html()
+                }
+                result.append(data)
+    return jsonify(result)
 
 
 
