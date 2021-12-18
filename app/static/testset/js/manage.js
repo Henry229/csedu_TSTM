@@ -59,7 +59,7 @@ function loadingQuestons(){
     $.ajax({
         url: '/testset/manage/questions',
         method: 'GET',
-        data: data,
+        data: d,
         contentType: 'application/json',
         data: JSON.stringify(d),
         success: function (response) {
