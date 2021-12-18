@@ -63,11 +63,11 @@ function loadingQuestons(){
             for(var i=0; i<response.length; i++){
                 var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
                 var obj = '';
-                obj += '<li className="d-flex">';
-                obj += '<div className="float-left flex-grow-1" style="height:30px">';
-                obj += '<input type="checkbox" className="form-check-input"><strong>'+(i+1) +'</strong><span>'+txt.substr(0, 30) + '...' +'</span>';
+                obj += '<li class="d-flex">';
+                obj += '<div class="float-left flex-grow-1" style="height:30px">';
+                obj += '<input type="checkbox" class="form-check-input"><strong>'+(i+1) +'</strong><span>'+txt.substr(0, 30) + '...' +'</span>';
                 obj += '</div>';
-                obj += '<div className="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
+                obj += '<div class="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
                 obj += '</li>';
                 $('#bindingModal ul').append(obj);
             }
