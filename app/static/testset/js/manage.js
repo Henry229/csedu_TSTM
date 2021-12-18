@@ -55,13 +55,10 @@ function loadingQuestons(){
         alert('select the testset item');
         return false;
     }
-    var d = {'testset_id': $('input[name="r_tl"]:checked').val()};
     $.ajax({
         url: '/testset/manage/questions',
         method: 'GET',
-        data: d,
-        contentType: 'application/json',
-        data: JSON.stringify(d),
+        data: {'testset_id': $('input[name="r_tl"]:checked').val()},
         success: function (response) {
             debugger
         }
