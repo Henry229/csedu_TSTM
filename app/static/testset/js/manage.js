@@ -60,16 +60,17 @@ function loadingQuestons(){
         method: 'GET',
         data: {'testset_id': $('input[name="r_tl"]:checked').val()},
         success: function (response) {
-            var txt = $.trim($(response[0].html).find('div.qti-interaction').text().replaceAll('\n', ''))
-            var obj = '';
-            obj += '<li className="d-flex">';
-            obj += '<div className="float-left flex-grow-1" style="height:30px">';
-            obj += '<input type="checkbox" className="form-check-input"><span>'+txt+'</span>';
-            obj += '</div>';
-            obj += '<div className="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
-            obj += '</li>';
-            $('#bindingModal ul').append(obj);
-
+            for(var i=0; i<response.length; i++){
+                var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
+                var obj = '';
+                obj += '<li className="d-flex">';
+                obj += '<div className="float-left flex-grow-1" style="height:30px">';
+                obj += '<input type="checkbox" className="form-check-input"><span>'+txt.substr(0, 15) + '...' +'</span>';
+                obj += '</div>';
+                obj += '<div className="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
+                obj += '</li>';
+                $('#bindingModal ul').append(obj);
+            }
         }
     });
 }
