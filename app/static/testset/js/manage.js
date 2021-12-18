@@ -59,6 +59,9 @@ function loadingQuestons(){
         url: '/testset/manage/questions',
         method: 'GET',
         data: {'testset_id': $('input[name="r_tl"]:checked').val()},
+        beforeSend: function () {
+            $('#bindingModal ul').empty();
+        },
         success: function (response) {
             for(var i=0; i<response.length; i++){
                 var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
