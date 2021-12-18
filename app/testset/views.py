@@ -448,7 +448,7 @@ def manage():
     qti_item = item_service.get_item()
     rendered_preview = qti_item.to_html()
 
-    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows, test=rendered_preview)
+    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows, test=qti_item)
 
 @testset.route('/manage/questions', methods=['GET'])
 @login_required
