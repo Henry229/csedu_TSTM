@@ -71,6 +71,11 @@
                         <div class="col-md-auto">
                             <form method="POST" class="form inline" role="form" id="clone_form" action="">
                                 <button class="btn btn-warning btn-square btn-sm" type="button"
+                                        data-toggle="modal"
+                                        data-target="#bindingModal"
+                                        value="binding" onclick="loadingQuestons()"> Binding Questions
+                                </button>
+                                <button class="btn btn-warning btn-square btn-sm" type="button"
                                         onclick="redirectTestsetCreate(this)"
                                         value="create"> New
                                 </button>
@@ -252,6 +257,35 @@
         </div>
     {% endif %}
     {% include "_modal.html" %}
+
+    <!-- Binding Modal -->
+    <div class="modal fade" id="bindingModal" tabindex="-1" aria-labelledby="bindingModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bindingModalLabel">Binding Questions</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+          </div>
+          <div class="modal-body p-0">
+            <div class="text-right px-2 py-2">
+                <button type="button" class="btn btn-primary">Bind</button>
+            </div>
+            <div style="overflow-y:scroll; width:100%; height:500px;">
+                <ul class="fa-ul">
+                    <li class="d-flex"><div class="float-left flex-grow-1" style="height:30px"><input type="checkbox" class="form-check-input"><span>asdfafsaf</span></div><div class="float-right" style="width:70px;height:30px"><span></span><span></span></div></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ test }}
 {% endblock app_content %}
 {% block scripts %}
     {{ super() }}

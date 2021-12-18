@@ -2,14 +2,15 @@ import uuid
 from datetime import datetime
 
 import pytz
-from flask import render_template, flash, request, redirect, url_for
+from flask import render_template, flash, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
+from qti.itemservice.itemservice import ItemService
 from . import testset
 from .forms import TestsetSearchForm, TestsetCreateForm
 from .. import db
 from ..decorators import permission_required
-from ..models import Testset, Codebook, Permission, Testlet
+from ..models import Testset, Codebook, Permission, Testlet, Item, TestletHasItem
 
 '''Testset Info Page - rendering template'''
 
@@ -441,7 +442,41 @@ def manage():
         if not rows:
             flag = False
         flash('Found {} testset(s)'.format(len(rows)))
-    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows)
+
+    qti_item_obj = Item.query.filter_by(id=40843).first()
+    item_service = ItemService(qti_item_obj.file_link)
+    qti_item = item_service.get_item()
+    rendered_preview = qti_item.to_html()
+
+    return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows, test=rendered_preview)
+
+@testset.route('/manage/questions', methods=['GET'])
+@login_required
+@permission_required(Permission.TESTSET_MANAGE)
+def question_list():
+    testset_id = request.args.get('testset_id', 0, type=int)
+    testset = Testset.query.filter_by(id=testset_id).first()
+    subjects = []
+    if testset:
+        branching = json.dumps(testset.branching)
+        ends = [m.end() for m in re.finditer('"id":', branching)]
+        for end in ends:
+            comma = branching.find(',', end)
+            testlet_id = int(branching[end:comma])
+
+            items = db.session.query(*Item.__table__.columns). \
+                select_from(Item). \
+                join(TestletHasItem, Item.id == TestletHasItem.item_id). \
+                filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
+
+            for i in items:
+                subjects.append(i.subject)
+
+    #data = {'additional_info': additional_info}
+    #return jsonify(data)
+    return jsonify(subjects)
+
+
 
 
 '''Search testset Page - rendering template'''

@@ -49,3 +49,21 @@ function redirectTestsetCreate(obj, mode) {
     $('#clone_form').attr("action", location);
     $('#clone_form').submit();
 }
+
+function loadingQuestons(){
+    if($('input[name="r_tl"]:checked').length==0){
+        alert('select the testset item');
+        return false;
+    }
+    var d = {'testset_id': $('input[name="r_tl"]:checked').val()};
+    $.ajax({
+        url: '/api/get_codebook_info/',
+        method: 'GET',
+        data: data,
+        contentType: 'application/json',
+        data: JSON.stringify(d),
+        success: function (response) {
+
+        }
+    });
+}
