@@ -460,7 +460,7 @@ def question_list():
             comma = branching.find(',', end)
             testlet_id = int(branching[end:comma])
 
-            items = db.session.query(*Item.__table__.columns). \
+            items = db.session.query(*Item.__table__.columns, TestletHasItem.order). \
                 select_from(Item). \
                 join(TestletHasItem, Item.id == TestletHasItem.item_id). \
                 filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
@@ -472,6 +472,7 @@ def question_list():
                 qti_item = item_service.get_item()
                 data = {
                     'item_id': i.id,
+                    'order': i.order,
                     'html': str(qti_item.to_html())
                 }
                 result.append(data)
