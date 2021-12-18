@@ -472,7 +472,7 @@ def question_list():
                 qti_item = item_service.get_item()
                 data = {
                     'item_id': i.id,
-                    'html': qti_item.to_html()
+                    'html': str(qti_item.to_html())
                 }
                 result.append(data)
     return jsonify(result)
