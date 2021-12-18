@@ -446,7 +446,7 @@ def manage():
     qti_item_obj = Item.query.filter_by(id=40843).first()
     item_service = ItemService(qti_item_obj.file_link)
     qti_item = item_service.get_item()
-    rendered_preview = qti_item.to_dict()['body']
+    rendered_preview = qti_item.to_dict()['body']['prompt']
 
     return render_template('testset/manage.html', is_rows=flag, form=search_form, stageData=stageData, testsets=rows, test=rendered_preview)
 
