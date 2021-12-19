@@ -26,6 +26,13 @@ $(document).ready(function () {
         $checked_radio = $(this);
         $('input[name="testset_id"]').val(_id);
     });
+
+    $('#bind').click(function(){
+        if($('#bindingModal input[type="checkbox"]:checked').length==0){
+            alert('please check the item');
+            return false;
+        }
+    });
 });
 
 /**

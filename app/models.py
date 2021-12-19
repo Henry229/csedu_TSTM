@@ -622,6 +622,18 @@ class Testset(db.Model):
         return '<Testset {}>'.format(self.name)
 
 
+class TestsetBinding(db.Model):
+    __tablename__ = 'testset_binding'
+
+    id = db.Column(db.Integer, primary_key=True)
+    question_no = db.Column(db.Integer)
+    testset_id = db.Column(db.Integer)
+    testset_id = db.Column(db.Integer, db.ForeignKey('testset.id'))
+    item_id = db.Column(db.Integer)
+
+    testset = db.relationship('Testset')
+
+
 class Assessment(db.Model):
     """Assessment Model: basic unit for test. """
     __tablename__ = 'assessment'
