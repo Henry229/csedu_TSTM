@@ -1392,3 +1392,7 @@ button.footer-finish-btn {
     display: none;
 }
 .qti-itemBody col-6 with-scroll { transition: all 2s;}
+
+#bindingModal select:focus{
+    outline: none;
+}
