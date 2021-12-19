@@ -66,7 +66,7 @@ function loadingQuestons(){
             for(var i=0; i<response.length; i++){
                 var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
                 var obj = '';
-                obj += '<div class="float-left flex-grow-1" style="height:30px">';
+                obj += '<div style="height:30px">';
                 obj += '<li class="d-flex">';
                 obj += '<input type="checkbox" class="form-check-input"><div class="d-inline-block" style="width:30px"><strong>'+(i+1) +'.</strong></div><span>'+txt.substr(0, 70) + '...' +'</span>';
                 //obj += '<div class="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
