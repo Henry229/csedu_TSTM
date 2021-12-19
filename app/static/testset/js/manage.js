@@ -68,7 +68,7 @@ function loadingQuestons(){
                 var obj = '';
                 obj += '<div style="height:30px">';
                 obj += '<li class="d-flex">';
-                obj += '<input type="checkbox" class="form-check-input"><div class="d-inline-block" style="width:30px"><strong>'+(i+1) +'.</strong></div><span>'+txt.substr(0, 70) + '...' +'</span>';
+                obj += '<input type="checkbox" class="form-check-input" style="position:unset;margin-left:unset;margin-right:10px"><div class="d-inline-block" style="width:30px"><strong>'+(i+1) +'.</strong></div><span>'+txt.substr(0, 70) + '...' +'</span>';
                 //obj += '<div class="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
                 obj += '</li>';
                 obj += '</div>';
