@@ -27,12 +27,31 @@ $(document).ready(function () {
         $('input[name="testset_id"]').val(_id);
     });
 
-    $('#bind').click(function(){
+    $('#bindAdd').click(function(){
         if($('#bindingModal input[type="checkbox"]:checked').length==0){
             alert('please check the item');
             return false;
+        }else{
+            var data = {
+                id: '1'
+            };
+            $.ajax({
+                url: '/testset/manage/bind/add',
+                method: 'GET',
+                data: data,
+                success: function (response) {
+                  alert(1);
+                }
+                ,error: function(XMLHttpRequest, textStatus, errorThrown) {
+                }
+            });
         }
+
+
     });
+
+
+
 });
 
 /**

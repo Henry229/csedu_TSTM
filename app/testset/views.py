@@ -12,7 +12,7 @@ from . import testset
 from .forms import TestsetSearchForm, TestsetCreateForm
 from .. import db
 from ..decorators import permission_required
-from ..models import Testset, Codebook, Permission, Testlet, Item, TestletHasItem
+from ..models import Testset, Codebook, Permission, Testlet, Item, TestletHasItem, TestsetBinding
 
 '''Testset Info Page - rendering template'''
 
@@ -477,6 +477,27 @@ def question_list():
                 result.append(data)
     return jsonify(result)
 
+@testset.route('/manage/bind/add', methods=['GET'])
+@login_required
+@permission_required(Permission.TESTSET_MANAGE)
+def add_bind():
+    testset_id = request.args.get('testset_id', 0, type=int)
+    question_no = request.args.get('question_no', 0, type=int)
+    item_id = request.args.get('item_id', 0, type=int)
+    bind_id = request.args.get('bind_id', 0, type=int)
+
+    testset = TestsetBinding(question_no=question_no,
+                      testset_id=testset_id,
+                      item_id=item_id,
+                      bind_id=bind_id)
+    db.session.add(testset)
+    db.session.commit()
+
+    data = {
+        'status': 'success'
+    }
+
+    return jsonify(data)
 
 
 

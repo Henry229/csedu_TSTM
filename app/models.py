@@ -627,9 +627,9 @@ class TestsetBinding(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     question_no = db.Column(db.Integer)
-    testset_id = db.Column(db.Integer)
     testset_id = db.Column(db.Integer, db.ForeignKey('testset.id'))
     item_id = db.Column(db.Integer)
+    bind_id = db.Column(db.Integer)
 
     testset = db.relationship('Testset')
 
