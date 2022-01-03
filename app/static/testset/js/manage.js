@@ -103,6 +103,7 @@ function loadingQuestons(){
             $('#bindingModal ul').empty();
         },
         success: function (response) {
+            debugger
             for(var i=0; i<response.length; i++){
                 var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
                 var item_id = response[i].item_id;

@@ -453,6 +453,7 @@ def question_list():
     testset_id = request.args.get('testset_id', 0, type=int)
     testset = Testset.query.filter_by(id=testset_id).first()
     result = []
+    bind = None
     if testset:
         branching = json.dumps(testset.branching)
         ends = [m.end() for m in re.finditer('"id":', branching)]
@@ -475,6 +476,9 @@ def question_list():
                     'html': str(qti_item.to_html())
                 }
                 result.append(data)
+        bind = TestsetBinding.query.filter_by(testset_id=testset_id).all()
+        rows = [(row.question_no, row.testset_id, row.bind_id, row.item_id) for row in bind]
+    response = jsonify({'ques': result, 'bind': rows})
     return jsonify(result)
 
 @testset.route('/manage/bind/add', methods=['GET'])
