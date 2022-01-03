@@ -1,5 +1,5 @@
 var _id;
-
+var _binds;
 $(document).ready(function () {
     /**
      * Initial setup processing:
@@ -103,10 +103,18 @@ function loadingQuestons(){
             $('#bindingModal ul').empty();
         },
         success: function (response) {
-            debugger
-            for(var i=0; i<response.length; i++){
-                var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
-                var item_id = response[i].item_id;
+            _binds = response.bind;
+            let tmp_bind_id = '';
+            for(var i=0; i<_binds.length; i++) {
+                if(_binds[i].bind_id != tmp_bind_id){
+                    var option = $("<option>Bind "+_binds[i].bind_id+"</option>");
+                    $('#bindingModal select[name="bind_list"]').append(option);
+                    tmp_bind_id = _binds[i].bind_id;
+                }
+            }
+            for(var i=0; i<response.ques.length; i++){
+                var txt = $.trim($(response.ques[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
+                var item_id = response.ques[i].item_id;
                 var obj = '';
                 obj += '<div style="height:30px">';
                 obj += '<li class="d-flex">';

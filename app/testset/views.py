@@ -476,7 +476,7 @@ def question_list():
                     'html': str(qti_item.to_html())
                 }
                 result.append(data)
-        bind = TestsetBinding.query.filter_by(testset_id=testset_id).all()
+        bind = TestsetBinding.query.filter_by(testset_id=testset_id).order_by(TestsetBinding.question_no.asc()).all()
         rows = [(row.question_no, row.testset_id, row.bind_id, row.item_id) for row in bind]
     response = {'ques': result, 'bind': rows}
     return jsonify(response)
