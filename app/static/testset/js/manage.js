@@ -105,6 +105,7 @@ function loadingQuestons(){
         success: function (response) {
             _binds = response.bind;
             let tmp_bind_id = '';
+            debugger
             for(var i=0; i<_binds.length; i++) {
                 if(_binds[i].bind_id != tmp_bind_id){
                     var option = $("<option>Bind "+_binds[i].bind_id+"</option>");
