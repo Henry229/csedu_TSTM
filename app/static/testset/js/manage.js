@@ -107,10 +107,10 @@ function loadingQuestons(){
             let tmp_bind_id = '';
             debugger
             for(var i=0; i<_binds.length; i++) {
-                if(_binds[i].bind_id != tmp_bind_id){
-                    var option = $("<option>Bind "+_binds[i].bind_id+"</option>");
+                if(_binds[i][2] != tmp_bind_id){
+                    var option = $("<option>Bind "+_binds[i][2]+"</option>");
                     $('#bindingModal select[name="bind_list"]').append(option);
-                    tmp_bind_id = _binds[i].bind_id;
+                    tmp_bind_id = _binds[i][2];
                 }
             }
             for(var i=0; i<response.ques.length; i++){
