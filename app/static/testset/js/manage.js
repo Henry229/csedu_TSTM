@@ -32,7 +32,6 @@ $(document).ready(function () {
             alert('please check the item');
             return false;
         }else{
-            debugger
             let itemIds = '';
             let questionNos = '';
             for(var i=0; i<$('#bindingModal input[type="checkbox"]:checked').length; i++){
@@ -58,7 +57,9 @@ $(document).ready(function () {
                 ,error: function(XMLHttpRequest, textStatus, errorThrown) {
                 }
             });
+            return false;
         }
+
 
 
     });
