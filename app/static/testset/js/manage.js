@@ -32,8 +32,12 @@ $(document).ready(function () {
             alert('please check the item');
             return false;
         }else{
+            debugger
             var data = {
-                id: '1'
+                "testset_id": $('#testsets input[type="radio"]:checked').val(),
+                "item_id": $('#bindingModal input[type="checkbox"]:checked').val(),
+                "question_no": $('#bindingModal input[type="checkbox"]:checked').attr('data-no'),
+                "bind_id": $('#bindingModal select[name="bind_list"] > option').length + 1,
             };
             $.ajax({
                 url: '/testset/manage/bind/add',
@@ -91,10 +95,11 @@ function loadingQuestons(){
         success: function (response) {
             for(var i=0; i<response.length; i++){
                 var txt = $.trim($(response[i].html).find('div.qti-interaction').text().replaceAll('\n', ''))
+                var item_id = response[i].item_id;
                 var obj = '';
                 obj += '<div style="height:30px">';
                 obj += '<li class="d-flex">';
-                obj += '<input type="checkbox" class="form-check-input" style="position:unset;margin-left:unset;margin-right:10px"><div class="d-inline-block" style="width:30px"><strong>'+(i+1) +'.</strong></div><span>'+txt.substr(0, 70) + '...' +'</span>';
+                obj += '<input type="checkbox" class="form-check-input" style="position:unset;margin-left:unset;margin-right:10px" data-no="'+(i+1)+'" value="'+item_id+'"><div class="d-inline-block" style="width:30px"><strong>'+(i+1)+'.</strong></div><span>'+txt.substr(0, 70) + '...' +'</span>';
                 //obj += '<div class="float-right" style="width:70px;height:30px"><span></span><span></span></div>';
                 obj += '</li>';
                 obj += '</div>';

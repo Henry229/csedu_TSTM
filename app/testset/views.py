@@ -482,15 +482,21 @@ def question_list():
 @permission_required(Permission.TESTSET_MANAGE)
 def add_bind():
     testset_id = request.args.get('testset_id', 0, type=int)
-    question_no = request.args.get('question_no', 0, type=int)
-    item_id = request.args.get('item_id', 0, type=int)
+    question_no = request.args.get('question_no', '', type=str)
+    item_id = request.args.get('item_id', '', type=str)
     bind_id = request.args.get('bind_id', 0, type=int)
 
-    testset = TestsetBinding(question_no=question_no,
-                      testset_id=testset_id,
-                      item_id=item_id,
-                      bind_id=bind_id)
-    db.session.add(testset)
+    if question_no:
+        question_no = question_no.split(',')
+    if item_id:
+        item_id = item_id.split(',')
+
+    for idx, item in  enumerate(item_id):
+        testset = TestsetBinding(question_no=question_no[idx],
+                          testset_id=testset_id,
+                          item_id=item,
+                          bind_id=bind_id)
+        db.session.add(testset)
     db.session.commit()
 
     data = {
