@@ -33,10 +33,18 @@ $(document).ready(function () {
             return false;
         }else{
             debugger
+            let itemIds = '';
+            let questionNos = '';
+            for(var i=0; i<$('#bindingModal input[type="checkbox"]:checked').length; i++){
+                if(itemIds!='') itemIds += ',';
+                itemIds += $($('#bindingModal input[type="checkbox"]:checked').get(i)).val();
+                if(questionNos!='') questionNos += ',';
+                questionNos += $($('#bindingModal input[type="checkbox"]:checked').get(i)).attr('data-no');
+            }
             var data = {
                 "testset_id": $('#testsets input[type="radio"]:checked').val(),
-                "item_id": $('#bindingModal input[type="checkbox"]:checked').val(),
-                "question_no": $('#bindingModal input[type="checkbox"]:checked').attr('data-no'),
+                "item_id": itemIds,
+                "question_no": questionNos,
                 "bind_id": $('#bindingModal select[name="bind_list"] > option').length + 1,
             };
             $.ajax({
@@ -44,7 +52,8 @@ $(document).ready(function () {
                 method: 'GET',
                 data: data,
                 success: function (response) {
-                  alert(1);
+                    var option = $("<option>Bind "+($('#bindingModal select[name="bind_list"] > option').length + 1)+"</option>");
+                    $('#bindingModal select[name="bind_list"]').append(option);
                 }
                 ,error: function(XMLHttpRequest, textStatus, errorThrown) {
                 }
