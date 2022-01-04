@@ -40,18 +40,22 @@ $(document).ready(function () {
                 if(questionNos!='') questionNos += ',';
                 questionNos += $($('#bindingModal input[type="checkbox"]:checked').get(i)).attr('data-no');
             }
+            let bind_id = 1;
+            if($('#bindingModal select[name="bind_list"] > option').length > 0){
+                bind_id = parseInt($('#bindingModal select[name="bind_list"] > option:last').text().split(' ')[1]) + 1;
+            }
             var data = {
                 "testset_id": $('#testsets input[type="radio"]:checked').val(),
                 "item_id": itemIds,
                 "question_no": questionNos,
-                "bind_id": $('#bindingModal select[name="bind_list"] > option').length + 1,
+                "bind_id": bind_id,
             };
             $.ajax({
                 url: '/testset/manage/bind/add',
                 method: 'GET',
                 data: data,
                 success: function (response) {
-                    var option = $("<option>Bind "+($('#bindingModal select[name="bind_list"] > option').length + 1)+"</option>");
+                    var option = $("<option>Bind "+String(bind_id)+"</option>");
                     $('#bindingModal select[name="bind_list"]').append(option);
                 }
             });
