@@ -54,8 +54,6 @@ $(document).ready(function () {
                     var option = $("<option>Bind "+($('#bindingModal select[name="bind_list"] > option').length + 1)+"</option>");
                     $('#bindingModal select[name="bind_list"]').append(option);
                 }
-                ,error: function(XMLHttpRequest, textStatus, errorThrown) {
-                }
             });
             return false;
         }
@@ -65,6 +63,29 @@ $(document).ready(function () {
         $("#bindingModal select[name=\"bind_list\"] > option:selected").prop("selected", false);
         $('#bindingModal input[type="checkbox"]:checked').prop('checked', false);
         return false;
+    });
+
+    $('#bindRemove').click(function(){
+        if($("#bindingModal select[name=\"bind_list\"] > option:selected").length==0){
+            alert('please select the binding');
+            return false;
+        }else{
+            let bind = $('#bindingModal select[name="bind_list"] > option:selected');
+            var data = {
+                "testset_id": $('#testsets input[type="radio"]:checked').val(),
+                "bind_id": bind.text().split(' ')[1],
+            };
+            $.ajax({
+                url: '/testset/manage/bind/remove',
+                method: 'GET',
+                data: data,
+                success: function (response) {
+                    bind.remove();
+                    $('#bindClear').click();
+                }
+            });
+            return false;
+        }
     });
 
 });

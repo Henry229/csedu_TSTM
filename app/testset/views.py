@@ -506,10 +506,23 @@ def add_bind():
     data = {
         'status': 'success'
     }
-
     return jsonify(data)
 
 
+@testset.route('/manage/bind/remove', methods=['GET'])
+@login_required
+@permission_required(Permission.TESTSET_MANAGE)
+def add_bind():
+    testset_id = request.args.get('testset_id', 0, type=int)
+    bind_id = request.args.get('bind_id', 0, type=int)
+
+    TestsetBinding.query.filter_by(testset_id=testset_id, bind_id=bind_id).delete()
+    db.session.commit()
+
+    data = {
+        'status': 'success'
+    }
+    return jsonify(data)
 
 '''Search testset Page - rendering template'''
 
