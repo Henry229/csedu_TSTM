@@ -59,12 +59,13 @@ $(document).ready(function () {
             });
             return false;
         }
-
-
-
     });
 
-
+    $('#bindClear').click(function(){
+        $("#bindingModal select[name=\"bind_list\"] > option:selected").prop("selected", false);
+        $('#bindingModal input[type="checkbox"]:checked').prop('checked', false);
+        return false;
+    });
 
 });
 
