@@ -57,6 +57,7 @@ $(document).ready(function () {
                 success: function (response) {
                     var option = $("<option>Bind "+String(bind_id)+"</option>");
                     $('#bindingModal select[name="bind_list"]').append(option);
+                    option.attr("selected", "selected");
                 }
             });
             return false;
