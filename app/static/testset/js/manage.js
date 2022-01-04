@@ -32,6 +32,11 @@ $(document).ready(function () {
             alert('please check the item');
             return false;
         }else{
+            if($('#bindingModal input[type="checkbox"]:checked').length==1) {
+                alert('please check at least one');
+                return false;
+            }
+
             let itemIds = '';
             let questionNos = '';
             for(var i=0; i<$('#bindingModal input[type="checkbox"]:checked').length; i++){
