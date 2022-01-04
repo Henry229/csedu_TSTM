@@ -512,7 +512,7 @@ def add_bind():
 @testset.route('/manage/bind/remove', methods=['GET'])
 @login_required
 @permission_required(Permission.TESTSET_MANAGE)
-def add_bind():
+def remove_bind():
     testset_id = request.args.get('testset_id', 0, type=int)
     bind_id = request.args.get('bind_id', 0, type=int)
 
