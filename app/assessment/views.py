@@ -453,6 +453,14 @@ def virtual_omr_resync_enroll(assessment_id, assessment_enroll_id):
         db.session.commit()
     return virtual_omr_sync(assessment_id, duration=7, assessment_enroll_id=assessment_enroll_id)
 
+
+@assessment.route('/virtual_omr_sync_testset/<string:assessment_id>/<string:testset_id>', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def virtual_omr_sync_testset(assessment_id, testset_id):
+    return virtual_omr_sync(assessment_id, duration=7, assessment_enroll_id=None, testset_id=testset_id)
+
+
 @assessment.route('/virtual_omr_resync/<string:assessment_id>', methods=['GET'])
 @login_required
 @permission_required(Permission.ADMIN)
@@ -470,7 +478,7 @@ def virtual_omr_resync(assessment_id):
     return virtual_omr_sync(assessment_id, duration=7)
 
 @assessment.route('/virtual_omr_sync', methods=['POST'])
-def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
+def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None, testset_id=None):
     '''
     Sync given or all active assessment markings. Need to manage lock file to prevent surge
     To call this one use curl with post and the json data of SYNC_SECRET_KEY
@@ -536,8 +544,11 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
 
             enrolls = []
             if assessment_enroll_id is None:
-                enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
-                    AssessmentEnroll.start_time >= start_day).all()
+                if testset_id is None:
+                    enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
+                        AssessmentEnroll.start_time >= start_day).all()
+                else:
+                    enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, testset_id=testset_id).all()
             else:
                 enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, id=assessment_enroll_id).all()
 
@@ -558,7 +569,7 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None):
                 vomr_logger.debug(
                     f'[{sync_hash}] Sync [{assessment.name}] {assessment.GUID}, {testset.GUID}({testset.id}), {enroll.student.student_id}({enroll.student.user_id})')
 
-                if assessment_enroll_id is None:
+                if assessment_enroll_id is None and testset_id is None:
                     if enroll.finish_time:
                         vomr_logger.info(f'[{sync_hash}] > Test finished at {enroll.finish_time}')
                         sync_after_utc = datetime.now(pytz.utc) - timedelta(days=duration)
