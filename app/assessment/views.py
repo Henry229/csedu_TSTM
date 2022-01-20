@@ -548,7 +548,7 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None, 
                     enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, synced=False).filter(
                         AssessmentEnroll.start_time >= start_day).all()
                 else:
-                    enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, testset_id=testset_id).all()
+                    enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, testset_id=testset_id, synced=False).all()
             else:
                 enrolls = AssessmentEnroll.query.filter_by(assessment_guid=assessment.GUID, id=assessment_enroll_id).all()
 
