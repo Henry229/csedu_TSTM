@@ -1,5 +1,12 @@
 $("#status").hide();
 
+$('#select_subject').on('change', function(){
+    $(this).parent().find('p').remove();
+    if($(this).val()!='0'){
+        $(this).parent().append('<p>'+$(this).val()+'</p>');
+    }
+});
+
 $('.code_type').on('change', function () {
     var $updateCodeObj = $(this).closest('tr').find("input.update_code");
     var $additionalInfoObj = $(this).closest('tr').find("textarea.additional_info");
