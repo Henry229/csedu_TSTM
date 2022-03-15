@@ -108,7 +108,9 @@ class Config(metaclass=MetaFlaskEnv):
 
     # Branch state. The first one is the default for assessment
     CS_BRANCH_STATES = {'NSW': 'Branches in NSW',
-                        'VIC': 'Branches in VIC'}
+                        'VIC': 'Branches in VIC',
+                        'QLD': 'Branches in QLD',
+                        'SA': 'Branches in SA'}
 
     # Student Reports
     ENABLE_STUDENT_REPORT = False
