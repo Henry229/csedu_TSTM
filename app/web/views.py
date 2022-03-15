@@ -540,17 +540,24 @@ def assessment_list():
 
             if test_type_additional_info is not None and test_type_additional_info['enable_video']:
                 if test_type_additional_info['enable_video'] == 'true':
-                    # if tset.finish_time is not None:
-                    if hasattr(tset, 'finish_time') and tset.finish_time is not None:
-                        finish_time = tset.finish_time
-                        days = 7  #defalut value
-                        if test_type_additional_info['enable_video_days']:
-                            days = int(test_type_additional_info['enable_video_days'])
-                        is_days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=days)) >= datetime.now(pytz.utc)
-                        if is_days_after_finished is True:
+                    #checking subject
+                    is_subject = False
+                    if test_type_additional_info.get('subject'):
+                        if tset.subject in test_type_additional_info['subject']:
+                            is_subject = True
+
+                    if is_subject:
+                        # if tset.finish_time is not None:
+                        if hasattr(tset, 'finish_time') and tset.finish_time is not None:
+                            finish_time = tset.finish_time
+                            days = 7  #defalut value
+                            if test_type_additional_info['enable_video_days']:
+                                days = int(test_type_additional_info['enable_video_days'])
+                            is_days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=days)) >= datetime.now(pytz.utc)
+                            if is_days_after_finished is True:
+                                tset.enable_video = True
+                        else:
                             tset.enable_video = True
-                    else:
-                        tset.enable_video = True
 
             # If subject is 'Writing', report enabled:
             #   - True when Marker's comment existing for 'ALL' items in Testset

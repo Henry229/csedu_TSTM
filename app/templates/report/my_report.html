@@ -171,7 +171,7 @@
                                                 {{ marking.question_no }}
 
                                             {% endif %}
-                                            {% if ((not marking.is_correct) and is_7days_after_finished) %}
+                                            {% if ((not video_for_incorrect) and is_7days_after_finished) or (video_for_incorrect and (not marking.is_correct) and is_7days_after_finished) %}
                                             {% if enable_video and explanation_link.get(marking.question_no) %}
                                                 <span
                                                        id="view_explanation_window"
@@ -225,7 +225,7 @@
                                             {% else %}
                                                 {{ marking.question_no }}
                                             {% endif %}
-                                            {% if ((not marking.is_correct) and is_7days_after_finished) %}
+                                            {% if ((not video_for_incorrect) and is_7days_after_finished) or (video_for_incorrect and (not marking.is_correct) and is_7days_after_finished) %}
                                             {% if enable_video and explanation_link.get(marking.question_no) %}
                                                 <span
                                                        id="view_explanation_window"

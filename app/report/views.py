@@ -162,6 +162,13 @@ def my_report(assessment_id, ts_id, student_user_id):
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
 
+    #show video to only incorrect queston
+    video_for_incorrect = True
+    if test_type_additional_info is not None:
+        if test_type_additional_info.get('video_for_incorrect'):
+            if test_type_additional_info['video_for_incorrect'] == "false":
+                video_for_incorrect = False
+
     if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
         if test_type_additional_info['enable_holiday'] == "true":
             enable_holiday = True
@@ -228,7 +235,7 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             is_7days_after_finished=is_7days_after_finished,
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
-                                            pdf_url=pdf_url, grade=grade,
+                                            pdf_url=pdf_url, grade=grade, video_for_incorrect=video_for_incorrect,
                                             explanation_link=explanation_link, test_type=test_type,r_value=modifying_r_value)
     if not pdf:
         return rendered_template_pdf
