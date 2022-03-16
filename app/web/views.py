@@ -43,7 +43,6 @@ import math
         return "For Item Bank Manager Only!"        
 """
 
-
 @web.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
