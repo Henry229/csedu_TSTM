@@ -211,6 +211,9 @@ def process_inward():
         '''
         log.debug("Hongseok state: %s" % state)
         log.debug("Hongseok student_id: %s" % student_id)
+        log.debug("Hongseok user: %s" % Config.CS_API_USER)
+        log.debug("Hongseok user: %s" % Config.CS_API_PASSWORD)
+
         member = get_student_info(state, student_id)
 
         authorised, errors = is_authorised(member, session_timeout)
