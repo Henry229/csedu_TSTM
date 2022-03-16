@@ -218,7 +218,7 @@ def process_inward():
         log.debug(HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD))
 
         member = get_student_info(state, student_id)
-
+        log.debug("Hongseok passed: %s" % state)
         authorised, errors = is_authorised(member, session_timeout)
     if authorised:
         # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
