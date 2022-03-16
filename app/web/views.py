@@ -12,6 +12,7 @@ import pytz
 import requests
 from flask import render_template, request, redirect, flash, url_for, jsonify
 from flask_login import login_required, login_user, current_user, logout_user
+from requests.auth import HTTPBasicAuth
 from sqlalchemy import asc, func
 
 from app import db
@@ -213,6 +214,8 @@ def process_inward():
         log.debug("Hongseok student_id: %s" % student_id)
         log.debug("Hongseok user: %s" % Config.CS_API_USER)
         log.debug("Hongseok user: %s" % Config.CS_API_PASSWORD)
+        log.debug(Config.CS_API_URL + "/member/%s/%s" % (state, student_id))
+        log.debug(HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD))
 
         member = get_student_info(state, student_id)
 
