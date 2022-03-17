@@ -118,6 +118,12 @@ def is_authorised(student, timeout=120):
         public_ip = request.headers.environ[
             'HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.headers.environ else request.headers.environ[
             'REMOTE_ADDR']
+
+        log.debug("hongseok: %s" % student_session['IP'])
+        log.debug("hongseok: %s" % public_ip)
+        log.debug("hongseok: %s" % server_public_ip)
+
+
         if student_session['IP'] in ("127.0.0.1", "1.158.42.34", public_ip, server_public_ip):
             # Check session expiration. Default 120min
             REG_DT = datetime.strptime(student_session['REG_DT'], "%a, %d %b %Y %H:%M:%S %Z")
