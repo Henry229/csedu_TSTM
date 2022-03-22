@@ -205,7 +205,6 @@ var ItemRunner = (function () {
         //making extract
         if (_mode == 'assessment') {
             if ($(".qti-itemBody > .grid-row .with-scroll").length > 0) {
-
 				let left_container;
 				if($(".qti-itemBody > .grid-row .with-scroll").children().length==1){
 					left_container = $($(".qti-itemBody > .grid-row .with-scroll").children().eq(0));
@@ -213,6 +212,8 @@ var ItemRunner = (function () {
 					left_container = $(".qti-itemBody > .grid-row .with-scroll");
 				}
                 if(left_container.html().indexOf("{^") > -1){
+                    $(".qti-itemBody > .grid-row .with-scroll").addClass('extract-root');
+
 					let arrText = left_container.html().split('{^');
                     let count = 0;
 					let new_arrText = [];
@@ -256,7 +257,7 @@ var ItemRunner = (function () {
 						}
 						left_container.append('<div class="extra-container">'+new_arrText[i]+'</div>');
 					}
-
+                    $('.extra-container').height($(".qti-itemBody > .grid-row .with-scroll").height()-$('a.extract').parent().height()-5);
 					$('a.extract:first').addClass('on');
                 }
             }

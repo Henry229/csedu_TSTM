@@ -1426,3 +1426,10 @@ button.footer-finish-btn {
 .qti-itemBody > .grid-row .with-scroll .extra-container:not(:nth-child(2)) {
 	display: none;
 }
+.item-card .item-body .grid-row .col-6.with-scroll.extract-root {
+	overflow-y: unset;
+}
+.extract-root .extra-container{
+	overflow-y: auto;
+	width: 100%;
+}
