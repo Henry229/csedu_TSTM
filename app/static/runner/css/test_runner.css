@@ -1399,3 +1399,30 @@ button.footer-finish-btn {
 #bindingModal select option{
     text-align: center;
 }
+
+.qti-itemBody > .grid-row .with-scroll .extract{
+    color: #3893a8;
+    cursor: pointer;
+    background-color: #dce5ec;
+    border: 1px solid #dce5ec;
+    font-weight: 700;
+    padding: 7px 10px;
+    display: inline-block;
+    height: 41px;
+    min-width: 100px;
+    text-align: center;
+}
+.qti-itemBody > .grid-row .with-scroll .extract.on{
+    color: #666;
+    cursor: default;
+    background-color: transparent;
+    border: 1px solid #b1aeae;
+    border-bottom-color: transparent;
+}
+
+.qti-itemBody > .grid-row .with-scroll .extract:not(:first-child) {
+	margin-left: 4px;
+}
+.qti-itemBody > .grid-row .with-scroll .extra-container:not(:nth-child(2)) {
+	display: none;
+}

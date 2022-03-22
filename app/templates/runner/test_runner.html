@@ -397,6 +397,14 @@
                   TestRunner.init($('.item-container'), options);
               });
           {% endif %}
+
+          //extract tabs
+          $('body').on('click', 'a.extract', function(){
+              $('a.extract').removeClass('on');
+              $(this).addClass('on');
+              $('.extra-container').hide();
+              $($('.extra-container').get($('a.extract').index(this))).show();
+          });
       });
   </script>
 {% endblock %}

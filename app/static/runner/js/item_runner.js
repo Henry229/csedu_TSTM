@@ -201,6 +201,67 @@ var ItemRunner = (function () {
                 $('.slider-button-rotate').hide();
             });
         }
+
+        //making extract
+        if (_mode == 'assessment') {
+            if ($(".qti-itemBody > .grid-row .with-scroll").length > 0) {
+
+				let left_container;
+				if($(".qti-itemBody > .grid-row .with-scroll").children().length==1){
+					left_container = $($(".qti-itemBody > .grid-row .with-scroll").children().eq(0));
+				}else{
+					left_container = $(".qti-itemBody > .grid-row .with-scroll");
+				}
+                if(left_container.html().indexOf("{^") > -1){
+					let arrText = left_container.html().split('{^');
+                    let count = 0;
+					let new_arrText = [];
+					for(let i=0;i<arrText.length;i++){
+						if(arrText[i].trim()!=''){
+							new_arrText.push(arrText[i]);
+							count++;
+						}
+					}
+					left_container.empty();
+					//creating tab
+					let extra_button_container = $('<div></div>');
+					for(let i=0; i<count; i++){
+						let spell = '';
+						switch(i){
+						    case 0: spell = 'A';break;
+						    case 1: spell = 'B';break;
+						    case 2: spell = 'C';break;
+						    case 3: spell = 'D';break;
+						    case 4: spell = 'E';break;
+						}
+
+                        extra_button_container.append("<a class='extract'>Extract " + spell + "</a>");
+                    }
+					left_container.append(extra_button_container);
+					for(let i=0; i<count; i++){
+						switch(i){
+						    case 0: new_arrText[i] = new_arrText[i].replace("<strong>Extract A</strong>", "").replace("Extract A", "");break;
+						    case 1: new_arrText[i] = new_arrText[i].replace("<strong>Extract B</strong>", "").replace("Extract B", "");break;
+						    case 2: new_arrText[i] = new_arrText[i].replace("<strong>Extract C</strong>", "").replace("Extract C", "");break;
+						    case 3: new_arrText[i] = new_arrText[i].replace("<strong>Extract D</strong>", "").replace("Extract D", "");break;
+						    case 4: new_arrText[i] = new_arrText[i].replace("<strong>Extract E</strong>", "").replace("Extract E", "");break;
+						}
+						new_arrText[i] = new_arrText[i].replace("^}", "");
+						new_arrText[i] = new_arrText[i].replace("^}", "");
+						if(new_arrText[i].substr(0, 5)=='<br>\n'){
+							new_arrText[i] = new_arrText[i].substr(5);
+						}
+						if(new_arrText[i].substr(0, 4)=='<br>'){
+							new_arrText[i] = new_arrText[i].substr(4);
+						}
+						left_container.append('<div class="extra-container">'+new_arrText[i]+'</div>');
+					}
+
+					$('a.extract:first').addClass('on');
+                }
+            }
+
+        }
     };
 
     var drawRendered = function (data) {
