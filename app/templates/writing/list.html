@@ -19,7 +19,7 @@
 {%- block scripts %}
     {{ super() }}
     <script src="/static/ui/js/tab.js"></script>
-    <script src="/static/writing/js/marking_list.js"></script>
+    <script src="/static/writing/js/marking_list.js?ver=2022032830"></script>
     <script type="text/javascript">
         $(function(){
             let marker_name = $('#marker_name');
@@ -123,6 +123,10 @@
                                     <div name="download_mark" class="d-inline-block">
                                     <i class="fas fa-check"></i>
                                     </div>
+                                {% endif %}
+                                {% if writing.is_candidate_file == 'N' %}
+                                    <input type="file" style="display:none;" data-writing-id="{{ writing.marking_id }}" data-student-user-id="{{ writing.student_user_id }}" data-marking-writing-id="{{ writing.marking_writing_id }}" data-student-id="{{ writing.student_id }}" multiple >
+                                    <button type="button" class="btn btn-primary btn-sm">upload</button>
                                 {% endif %}
                             </td>
                             <td>

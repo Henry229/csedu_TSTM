@@ -36,6 +36,48 @@ function search_assessment(year, test_type, marker_name) {
     });
 }
 
+const uploadFile = (files, writing_id, student_user_id, marking_writing_id, student_id) => {
+  const API_ENDPOINT = "/api/writing_marking_list/responses/file/" + writing_id;
+  const request = new XMLHttpRequest();
+  const formData = new FormData();
+
+  request.open("POST", API_ENDPOINT, true);
+  request.onreadystatechange = () => {
+    if (request.readyState === 4 && request.status === 200) {
+      let uploaded_files = JSON.parse(request.responseText).data.data;
+        let tr = $('input[data-marking-writing-id="'+marking_writing_id+'"]').closest('tr');
+        if(uploaded_files.length > 1){
+            let htm = '';
+            htm += '<a name="download1" class="badge badge-primary" data-marking_writing_id="'+marking_writing_id+'" href="/writing/writing_marking_list/download/'+marking_writing_id+'/'+student_user_id+'">zip</a>';
+            tr.find('td:eq(7)').html(htm);
+            tr.find('td:eq(5)').html('Y');
+        }else{
+            let extension = uploaded_files[0].substring(uploaded_files[0].indexOf('.'));
+            let htm = '';
+            htm += '<span class="btn btn-light btn-square btn-sm" data-toggle="tooltip" data-placement="top" data-original-title="file download" title="file download">';
+            htm += '<a name="download2" href="/api/userdata/writing/'+marking_writing_id+'/'+student_user_id+'/'+ uploaded_files[0] +'" data-marking_writing_id="'+marking_writing_id+'" download="writing_'+marking_writing_id+'_'+student_id + extension +'"><i class="fas fa-file-download" style="color: #ff0000"></i></a>"';
+            htm += '</span>';
+            tr.find('td:eq(7)').html(htm);
+            tr.find('td:eq(5)').html('Y');
+        }
+    } else if (request.readyState === 4 && request.status === 400) {
+      alert(JSON.parse(request.responseText).message);
+    }
+  };
+  if (files.length > 0) {
+    //This fileName and fileType are just for response checker in PHP.
+    let fileNames = [];
+    for (var i=0; i<files.length; i++) {
+        formData.append('files', files[i]);
+    }
+  }
+  formData.append('student_user_id', student_user_id);
+  formData.append('writing_text', '');
+  formData.append('has_files', 'true');
+
+  request.send(formData);
+};
+
 $(function(){
     $('#w_table').DataTable( {
         searching: false,
@@ -77,5 +119,14 @@ $(function(){
                 );
             }
         }
+    });
+
+    $('#w_table_wrapper, input[type="file"]').get(0).addEventListener("change", event => {
+      const files = event.target.files;
+      uploadFile(files, $(event.target).data('writing-id'), $(event.target).data('student-user-id'), $(event.target).data('marking-writing-id'), $(event.target).data('student-id'));
+    });
+
+    $('body').on('click', '#w_table_wrapper button', function(){
+        $(this).parent().find('input[type="file"]').click();
     });
 });

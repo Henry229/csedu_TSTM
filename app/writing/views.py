@@ -754,9 +754,10 @@ def marking(marking_writing_id, student_user_id):
             return render_template('writing/marking_onscreen_gradient.html', form=form, item_id=item_id,
                                    web_img_links=web_img_links,
                                    timestamp=str(round(time.time() * 1000)))
-        else:
-            log.debug('Marking For Writing: id(%s),student_user_id(%s) - marking_onscreen_load return null' % (
-                marking_writing_id, student_user_id))
+        #capture file is required. if there is no a capture, go on under error page. stop under function
+        #else:
+        #    log.debug('Marking For Writing: id(%s),student_user_id(%s) - marking_onscreen_load return null' % (
+        #        marking_writing_id, student_user_id))
     else:
         if marking_writing:
             log.debug('Marking For Writing: id(%s),student_user_id(%s) - student writing data not found' % (

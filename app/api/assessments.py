@@ -11,7 +11,7 @@ from time import time
 
 import pytz
 from flask import jsonify, request, current_app, render_template
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import load_only
 from werkzeug.utils import secure_filename
@@ -637,6 +637,34 @@ def response_process(item_id, assessment_session=None):
         'start_time': assessment_session.get_value('start_time'),
     })
     return success(data)
+
+@api.route('/writing_marking_list/responses/file/<int:marking_id>', methods=['POST'])
+@permission_required(Permission.WRITING_READ)
+@login_required
+def list_writing_marking_process_file(marking_id):
+    student_user_id = request.form.get('student_user_id')
+    writing_files = request.files.getlist('files')
+    writing_text = request.form.get('writing_text')
+    has_files = request.form.get('has_files', 'false')
+    has_files = has_files.lower() == 'true'
+    for f in writing_files:
+        if allowed_file(f.filename) is False:
+            return bad_request(message='File type is not supported.')
+
+    student = Student.query.filter_by(user_id=student_user_id).first()
+    if student is None:
+        return bad_request()
+    student_user_id = student.user_id
+    save_writing_data(student_user_id, marking_id, writing_files=writing_files, writing_text=writing_text,
+                      has_files=has_files)
+
+    file_names = []
+    row = MarkingForWriting.query.filter(MarkingForWriting.marking_id == marking_id).first()
+    if row:
+        for file_link in row.candidate_file_link:
+            file_names.append(row.candidate_file_link[file_link])
+
+    return success({"result": "success", "data": file_names})
 
 
 @api.route('/responses/file/<int:item_id>', methods=['POST'])
