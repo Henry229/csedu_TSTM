@@ -781,6 +781,7 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
+    log.debug("chs start: %s" % 's')
 
     if assessment_id == 0:
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
@@ -863,8 +864,12 @@ def center():
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
 
+    log.debug("chs: %s" % new_query)
+
     cursor = db.session.execute(new_query)
     report_list = list(cursor.fetchall())
+
+    log.debug("chs end: %s" % new_query)
 
     if int(testset_id) > 0:
         testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.branching).filter_by(
