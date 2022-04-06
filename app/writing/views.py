@@ -102,13 +102,20 @@ def list_writing_marking():
     assessment_enroll_ids = [row.id for row in query.all()]
 
     ############# no marking_writing creating
-    if current_user.is_administrator() is False:
+    #if current_user.is_administrator() is False:
+    if current_user.is_administrator() is True:
         marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
             join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
             join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id, isouter=True). \
             filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids)). \
+            filter(Marking.assessment_enroll_id == 168459). \
             filter(MarkingForWriting.id.is_(None)). \
             all()
+
+        if marking_writings is None:
+            log.debug("chs select: %s" % 'none')
+        else:
+            log.debug("chs select: %s" % 'exists')
 
         for m in marking_writings:
             if m.AssessmentEnroll.is_finished:
@@ -117,6 +124,7 @@ def list_writing_marking():
                             'writing_text') is not None:
                         save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
                                           writing_text=m.Marking.candidate_r_value.get('writing_text'))
+
                     else:
                         continue
 
