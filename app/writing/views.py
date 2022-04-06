@@ -130,9 +130,11 @@ def list_writing_marking():
                     else:
                         continue
                 '''
-                marking_writing = MarkingForWriting(marking_id=Marking.id, marker_id=AssessmentEnroll.student_user_id)
+                marking_writing = None
+                marking_writing = MarkingForWriting(marking_id=m.Marking.id, marker_id=m.AssessmentEnroll.student_user_id)
                 marking_writing.candidate_file_link = {}
-                #marking_writing.modified_time = datetime.utcnow()
+                marking_writing.created_time = m.Marking.created_time
+                marking_writing.modified_time = m.Marking.modified_time
                 db.session.add(marking_writing)
                 db.session.commit()
 
