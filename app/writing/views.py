@@ -118,6 +118,7 @@ def list_writing_marking():
             log.debug("chs select: %s" % 'exists')
 
         for m in marking_writings:
+            log.debug("chs finished: %s" % m.AssessmentEnroll.is_finished)
             if m.AssessmentEnroll.is_finished:
                 '''
                 if m.MarkingForWriting is None:
