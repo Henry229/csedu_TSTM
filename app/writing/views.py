@@ -131,7 +131,7 @@ def list_writing_marking():
                 '''
                 marking_writing = MarkingForWriting(marking_id=Marking.id, marker_id=AssessmentEnroll.student_user_id)
                 marking_writing.candidate_file_link = {}
-                marking_writing.modified_time = datetime.utcnow()
+                #marking_writing.modified_time = datetime.utcnow()
                 db.session.add(marking_writing)
                 db.session.commit()
 
