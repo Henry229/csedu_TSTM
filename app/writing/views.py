@@ -130,6 +130,7 @@ def list_writing_marking():
                     else:
                         continue
                 '''
+                
                 marking_writing = None
                 marking_writing = MarkingForWriting(marking_id=m.Marking.id, marker_id=m.AssessmentEnroll.student_user_id)
                 marking_writing.candidate_file_link = {}
