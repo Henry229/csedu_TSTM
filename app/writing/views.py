@@ -119,6 +119,7 @@ def list_writing_marking():
 
         for m in marking_writings:
             if m.AssessmentEnroll.is_finished:
+                '''
                 if m.MarkingForWriting is None:
                     if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
                             'writing_text') is not None:
@@ -127,6 +128,12 @@ def list_writing_marking():
 
                     else:
                         continue
+                '''
+                marking_writing = MarkingForWriting(marking_id=Marking.id, marker_id=AssessmentEnroll.student_user_id)
+                marking_writing.candidate_file_link = {}
+                marking_writing.modified_time = datetime.utcnow()
+                db.session.add(marking_writing)
+                db.session.commit()
 
     #############
 
