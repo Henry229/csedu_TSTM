@@ -113,24 +113,18 @@ def list_writing_marking():
 
         for m in marking_writings:
             if m.AssessmentEnroll.is_finished:
-                '''
-                if m.MarkingForWriting is None:
-                    if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
-                            'writing_text') is not None:
-                        save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
-                                          writing_text=m.Marking.candidate_r_value.get('writing_text'))
-
-                    else:
-                        continue
-                '''
-
-                marking_writing = None
-                marking_writing = MarkingForWriting(marking_id=m.Marking.id, marker_id=m.AssessmentEnroll.student_user_id)
-                marking_writing.candidate_file_link = {}
-                marking_writing.created_time = m.Marking.created_time
-                marking_writing.modified_time = m.Marking.modified_time
-                db.session.add(marking_writing)
-                db.session.commit()
+                if m.Marking.candidate_r_value is not None and m.Marking.candidate_r_value != '' and m.Marking.candidate_r_value.get(
+                        'writing_text') is not None:
+                    save_writing_data(m.AssessmentEnroll.student_user_id, m.Marking.id,
+                                      writing_text=m.Marking.candidate_r_value.get('writing_text'))
+                else:
+                    marking_writing = None
+                    marking_writing = MarkingForWriting(marking_id=m.Marking.id, marker_id=m.AssessmentEnroll.student_user_id)
+                    marking_writing.candidate_file_link = {}
+                    marking_writing.created_time = m.Marking.created_time
+                    marking_writing.modified_time = m.Marking.modified_time
+                    db.session.add(marking_writing)
+                    db.session.commit()
 
     #############
 
