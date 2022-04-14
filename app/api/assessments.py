@@ -569,7 +569,7 @@ def response_process(item_id, assessment_session=None):
                     outcome_score = 1
                     is_correct = True
     '''
-    
+
     # Update changes
     marking_updated = {
         "candidate_r_value": candidate_r_value,
