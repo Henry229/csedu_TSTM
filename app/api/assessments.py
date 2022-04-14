@@ -506,7 +506,11 @@ def response_process(item_id, assessment_session=None):
     if item_subject.lower() == 'writing':
         writing_text = request.json.get('writing_text')
 
-    log.debug("chs: %s" % response)
+    #The aswer by string in textEntryInteraction is trimmed.
+    if qti_item_obj.interaction_type == 'textEntryInteraction' and qti_item_obj.cardinality == 'single' and qti_item_obj.baseType == 'string':
+        if response.get('RESPONSE') and response.get('RESPONSE').get('base') and response.get('RESPONSE').get('base').get('string'):
+            response['RESPONSE']['base']['string'] = response['RESPONSE']['base']['string'].strip()
+
     processed = None
     # correct_response = ''
     try:
@@ -556,20 +560,6 @@ def response_process(item_id, assessment_session=None):
     correct_r_value = parse_correct_response(processed.get('correctResponses'))
     last_r_value = last_marking.candidate_r_value
     last_is_correct = last_marking.is_correct
-
-    '''
-    if not is_correct:
-        if qti_item_obj.interaction_type == 'textEntryInteraction' and qti_item_obj.cardinality == 'single' and qti_item_obj.baseType == 'string':
-            if candidate_r_value:
-                log.debug("chs: %s" % correct_r_value)
-                log.debug("chs1: %s" % candidate_r_value)
-                log.debug("type: %s" % type(correct_r_value))
-                log.debug("type1: %s" % type(candidate_r_value))
-                if correct_r_value.strip().lower() == candidate_r_value.strip().lower():
-                    candidate_mark = 1
-                    outcome_score = 1
-                    is_correct = True
-    '''
 
     # Update changes
     marking_updated = {
