@@ -561,6 +561,8 @@ def response_process(item_id, assessment_session=None):
             if candidate_r_value:
                 log.debug("chs: %s" % correct_r_value)
                 log.debug("chs1: %s" % candidate_r_value)
+                log.debug("type: %s" % type(correct_r_value))
+                log.debug("type1: %s" % type(candidate_r_value))
                 if correct_r_value.strip().lower() == candidate_r_value.strip().lower():
                     candidate_mark = 1
                     outcome_score = 1
