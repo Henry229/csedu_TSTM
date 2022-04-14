@@ -506,6 +506,7 @@ def response_process(item_id, assessment_session=None):
     if item_subject.lower() == 'writing':
         writing_text = request.json.get('writing_text')
 
+    log.debug("chs: %s" % response)
     processed = None
     # correct_response = ''
     try:
