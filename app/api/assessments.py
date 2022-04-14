@@ -556,6 +556,7 @@ def response_process(item_id, assessment_session=None):
     last_r_value = last_marking.candidate_r_value
     last_is_correct = last_marking.is_correct
 
+    '''
     if not is_correct:
         if qti_item_obj.interaction_type == 'textEntryInteraction' and qti_item_obj.cardinality == 'single' and qti_item_obj.baseType == 'string':
             if candidate_r_value:
@@ -567,7 +568,8 @@ def response_process(item_id, assessment_session=None):
                     candidate_mark = 1
                     outcome_score = 1
                     is_correct = True
-
+    '''
+    
     # Update changes
     marking_updated = {
         "candidate_r_value": candidate_r_value,
