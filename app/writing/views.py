@@ -103,7 +103,7 @@ def list_writing_marking():
 
     ############# no marking_writing creating
     #if current_user.is_administrator() is False:
-    '''
+
     if writing_code_id:
         marking_writings = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
             join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
@@ -126,7 +126,7 @@ def list_writing_marking():
                     marking_writing.modified_time = m.Marking.modified_time
                     db.session.add(marking_writing)
                     db.session.commit()
-    '''
+
     #############
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
