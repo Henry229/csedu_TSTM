@@ -106,6 +106,7 @@
                                     <th>Test Type</th>
                                     <th>Test Centre</th>
                                     <th>Review Period</th>
+                                    <th>created time</th>
                                     {% if current_user.is_administrator() %}
                                     <th></th>
                                     {% endif %}
@@ -146,6 +147,10 @@
                                                 <td class="assessment_review_period" id="{{ assessment.review_period }}">
                                                     <del> {{ assessment.review_period }} </del>
                                                 </td>
+                                                <td>
+                                                    <del> {{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }} </del>
+
+                                                </td>
 {#                                                <td class="assessment_date">#}
 {#                                                    <del> {{ assessment.session_date }}</del>#}
 {#                                                </td>#}
@@ -167,6 +172,7 @@
                                                     id="{{ assessment.branch_id }}"> {{ Codebook.get_code_name(assessment.branch_id) }}</td>
                                                 <td class="assessment_review_period" id="{{ assessment.review_period }}">
                                                     {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
+                                                <td>{{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }}</td>
                                                 {% if current_user.is_administrator() %}
                                                 <td>
                                                     <a href="{{ url_for('assessment.virtual_omr', assessment_id=assessment.id) }}" target="_blank"><button class="text-primary">Status</button></a>
