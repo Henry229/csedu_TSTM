@@ -220,7 +220,6 @@ def edit(id):
 
 '''Edit Testset Page - insert (versioned) row into DB'''
 
-
 @testset.route('/manage/update', methods=['POST'])
 @login_required
 @permission_required(Permission.TESTSET_MANAGE)
