@@ -262,7 +262,6 @@ def clone_insert():
                                 year=form.year.data,
                                 term=form.term.data,
                                 unit=form.unit.data,
-                                test_duration=form.test_duration.data,
                                 test_detail=form.test_detail.data,
                                 review_period=form.review_period.data,
                                 modified_by=current_user.id,
