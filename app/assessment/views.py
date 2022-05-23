@@ -240,6 +240,7 @@ def clone(id):
     form.test_detail.data = assessment.test_detail
     form.review_period.data = assessment.review_period
     form.session_date.data = assessment.session_date
+    form.session_valid_until.data = assessment.session_valid_until
     # form.session_start_time.data = assessment.session_start_time
     # form.session_end_time.data = assessment.session_end_time
     return render_template("assessment/clone.html", assessment_form=form)
@@ -264,10 +265,11 @@ def clone_insert():
                                 unit=form.unit.data,
                                 test_detail=form.test_detail.data,
                                 review_period=form.review_period.data,
+                                session_date = form.session_date.data,
+                                session_valid_until = form.session_valid_until.data,
                                 modified_by=current_user.id,
                                 modified_time=datetime.now(pytz.utc),
                                 created_time=datetime.now(pytz.utc))
-        assessment.session_date = form.session_date.data
         # assessment.session_start_time = form.session_start_time.data
         # assessment.session_end_time = form.session_end_time.data
         db.session.add(assessment)
