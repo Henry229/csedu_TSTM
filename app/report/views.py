@@ -103,6 +103,15 @@ def list_my_report():
     return redirect(url_for('web.assessment_list', guid_list=guid_list))
 
 
+@report.route('/grf/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@login_required
+# @permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
+def my_graph_report(assessment_id, ts_id, student_user_id):
+    template_file = 'report/my_report_graph.html'
+    return render_template(template_file)
+
+
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
 # @permission_required(Permission.ITEM_EXEC)
