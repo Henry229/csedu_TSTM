@@ -1,7 +1,14 @@
+body {
+    background-color: white !important;
+}
+
+.t_student_info th {background-color:#f7f7f7}
+
 .devidedsection {
     background-color: white;
     padding-left: 5em;
     padding-bottom: 1.5em;
+    border: 1px solid black;
 }
 
 ul {
