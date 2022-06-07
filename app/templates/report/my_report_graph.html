@@ -15,6 +15,7 @@
     <link href="/static/runner/css/test_runner.css" rel="stylesheet">
     <link href="/static/ui/css/style.css" rel="stylesheet">
     <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <link href="/static/report/css/my_report_graph.css" rel="stylesheet">
     <style>
         #t_header th {
             width: 85%;
@@ -82,17 +83,7 @@
 <body>
 <h4 class="ml-3 mt-3"><a href="/" class="text-decoration-none"><i class="icon-arrow-left-circle mr-3"></i>Back to
     list</a></h4>
-{% if markings %}
-    {% set marking_rep = markings[0] %}
-{% else %}
-    {% set marking_rep = None %}
-{% endif %}
 
-{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
-    {% set enable_video = True %}
-{% else %}
-    {% set enable_video = None %}
-{% endif %}
 {% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
     {% set enable_report = True %}
 {% else %}
@@ -123,25 +114,11 @@
             <table style="width:100%" id="t_student_info">
                 <tr>
                     <th> Student Name:{{current_time}}</th>
-                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
-                    {% if subject != 'Vocabulary' %}
-                    <th> Rank:</th>
-                    <td> {{ rank }} </td>
-                    {% endif %}
-                </tr>
-                <tr>
+                    <td> {{ Student.getCSStudentName(student_user_id) }} </td>
                     <th> Student ID:</th>
-                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentId(student_user_id) }}</td>
-                    {% if subject != 'Vocabulary' %}
-                    <th> Score:</th>
-                    <td> {{ score }} </td>
-                    {% endif %}
-                </tr>
-                <tr>
+                    <td> {{ Student.getCSStudentId(student_user_id) }}</td>
                     <th> Grade:</th>
                     <td> {{ grade }}</td>
-                    <th> Test Date:</th>
-                    <td> {{ marking_rep.read_time }}.</td>
                 </tr>
             </table>
             <br><br>
@@ -156,41 +133,72 @@
     {% endif %}
     <br>
     <br>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Loading... Try again if the contents not shown
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <!-- 16:9 aspect ratio -->
-        <!--<div class="embed-responsive embed-responsive-16by9">-->
-          <iframe class="embed-responsive-item" src="" id="video"  width="1050" height="700" frameborder="0"></iframe>
-        <!--</div>-->
-      </div>
-    </div>
-  </div>
+
+
+<ul class="devidedsection">
+	<li>
+		<div class="testset-title0">
+			Percentages of Students
+			in each level of
+			Performance
+		</div>
+		<ul class="ul-standard">
+		  <li class="h10p area1">10%</li>
+		  <li class="h15p area2">15%</li>
+		  <li class="h25p area3">25%</li>
+		  <li class="h50p area4">50%</li>
+		</ul>
+	</li>
+	<li>
+		<img class="arrow1" src="my_arrow.png">
+		<div class="testset-title">
+			Reading
+		</div>
+		<ul class="ul-standard">
+		  <li class="h10p area1"></li>
+		  <li class="h15p area2"></li>
+		  <li class="h25p area3"></li>
+		  <li class="h50p area4"></li>
+		</ul>
+	</li>
+	<li>
+		<div class="testset-title">
+			Mathematical Reasoning
+		</div>
+		<ul class="ul-standard">
+		  <li class="h10p area1"></li>
+		  <li class="h15p area2"></li>
+		  <li class="h25p area3"></li>
+		  <li class="h50p area4"></li>
+		</ul>
+	</li>
+	<li>
+		<div class="testset-title">
+			Thinking
+			Skills
+		</div>
+		<ul class="ul-standard">
+		  <li class="h10p area1"></li>
+		  <li class="h15p area2"></li>
+		  <li class="h25p area3"></li>
+		  <li class="h50p area4"></li>
+		</ul>
+	</li>
+	<li>
+		<div class="testset-title">
+			Writing
+		</div>
+		<ul class="ul-standard">
+		  <li class="h10p area1"></li>
+		  <li class="h15p area2"></li>
+		  <li class="h25p area3"></li>
+		  <li class="h50p area4"></li>
+		</ul>
+	</li>
+</ul>
+
+
+
 </div>
 <!-- Javascripts-->
 <script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
@@ -210,20 +218,21 @@
 <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
 <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
-        ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
-        $('#dataModal').on('hidden.bs.modal', function (e) {
-            $('#dataModal .modal-content').empty();
-        });
-    });
-    $("#videoModal").on("show.bs.modal", function (event) {
-        //var explanation_link = $('#view_explanation_window').data('link');
-        var explanation_link = $(event.relatedTarget).data('link');
-        $('#video').attr('src', explanation_link);
-    });
-   $("#videoModal").on("hidden.bs.modal", function (event) {
-        $('#video').attr('src', "");
-    });
+	$(function(){
+	debugger
+		let stick1 = $('.ul-standard:eq(1)').position();
+		let stick1Left = stick1.left;
+		let stick1Top = stick1.top;
+
+		stick1Left = stick1Left - $('.arrow1').width();
+		let myScore =(40 / 45) * 100;
+		//$('.arrow1').offset({ top: myScore * 5, left: stick1Left});
+
+
+		let top = $('.testset-title').height()+15+500-5;
+		//title:64.8, margin:15, extra:5
+		$('.arrow1').offset({ top: top - (myScore * 5), left: stick1Left});
+	});
 </script>
 </body>
 </html>

@@ -108,8 +108,21 @@ def list_my_report():
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def my_graph_report(assessment_id, ts_id, student_user_id):
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
+    if testset is None:
+        url = request.referrer
+        flash('testset data is not available')
+        return redirect(url)
+
+    test_subject_string = Codebook.get_code_name(testset.subject)
+    grade = Codebook.get_code_name(testset.grade)
+    test_type = testset.test_type
+
+    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+
     template_file = 'report/my_report_graph.html'
-    return render_template(template_file)
+    return render_template(template_file, assessment_name=assessment_name,
+                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id)
 
 
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
