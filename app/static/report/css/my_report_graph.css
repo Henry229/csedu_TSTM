@@ -2,7 +2,7 @@ body {
     background-color: white !important;
 }
 
-.t_student_info th {background-color:#f7f7f7}
+#t_student_info th {background-color:#f7f7f7}
 
 .devidedsection {
     background-color: white;
