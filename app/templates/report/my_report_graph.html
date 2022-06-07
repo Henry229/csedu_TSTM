@@ -190,9 +190,9 @@
 
 
 		let top = $('.testset-title').height()+15+500-5 + 245;
-		//title:64.8, margin:15, extra:5
+		//title:64.8, margin:15, extra:5 + 245
         debugger
-		$('.arrow1').offset({ top: top, left: stick1Left});
+		$('.arrow1').offset({ top: top- (myScore * 5), left: stick1Left});
 	});
 </script>
 </body>
