@@ -1,8 +1,8 @@
 .devidedsection {
     background-color: white;
     padding-left: 5em;
+    padding-bottom: 1.5em;
 }
-
 
 ul {
     list-style: none;
@@ -45,7 +45,7 @@ ul.devidedsection {
 .area3 {background-color:#BCDC4E}
 .area4 {background-color:#B3CFD4}
 
-.testset-title0 {width: 180px;font-weight:bold; height:64.8px;margin-right: 3em;margin-bottom:15px}
+.testset-title0 {width: 180px;font-weight:bold; height:64.8px;margin-right: 3em;margin-bottom:15px;display:flex;justify-content: center;flex-direction: column;}
 .testset-title {width: 120px;font-weight:bold;height:64.8px;display:flex;justify-content:center;flex-direction:column;margin-bottom:15px}
 .devidedsection > li:nth-child(1) {width:28%}
 .devidedsection > li:nth-child(n+2) {width:18%}
