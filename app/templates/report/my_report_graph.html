@@ -201,8 +201,8 @@
 	    let arrow2 = $($('.arrow1').get(1));
         if(arrow2.data('percent')!=''){
             let stick2 = $('.ul-standard:eq(2)').position();
-            let stick2Left = stick1.left;
-            let stick1Top = stick1.top;
+            let stick2Left = stick2.left;
+            let stick1Top = stick2.top;
 
             stick2Left = stick2Left - arrow2.width();
             let myScore = parseInt(arrow2.data('percent'));
