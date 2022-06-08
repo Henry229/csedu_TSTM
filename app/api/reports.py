@@ -593,18 +593,6 @@ def query_individual_progress_summary_report_by_plan(plan_id, student_user_id):
 
 def query_report_graph(assessment_id, student_user_id):
     sql_stmt = 'select t.testset_id, t.id as assessment_enroll_id, t.score, t.ranking, t.total, ' \
-               '(select (select code_name from codebook where id = t2.subject) from testset t2 where id = t.testset_id) as subject,' \
-               'round((ranking / cast( total as DECIMAL(4,1))) * 100) as my_pecent ' \   
-               'from ( ' \
-               'select e.testset_id, e.id, e.student_user_id, sum(m.candidate_mark) as score ' \
-               ',RANK() OVER (PARTITION BY e.testset_id ORDER BY sum(m.candidate_mark) desc) as ranking ' \
-               ',COUNT(*) OVER (PARTITION BY e.testset_id) as total ' \
-               'FROM marking m, ' \
-               '  (select * from assessment_enroll  where assessment_id = :assessment_id and finish_time is not null) e ' \
-               '  WHERE e.id = m.assessment_enroll_id ' \
-               'group by e.id, e.testset_id, e.student_user_id ' \
-               ') t ' \
-               'where student_user_id = :student_user_id ' \
                'order by id'
     cursor = db.session.execute(text(sql_stmt), {'assessment_id': assessment_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor.keys())
