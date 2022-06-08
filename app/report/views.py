@@ -132,8 +132,6 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
 
     i = 0
     for row in rows:
-        list.append({'subject': row.subject,
-                     'percent': row.my_pecent})
         if i == 0:
             subject1 = row.subject
             percent1 = row.my_pecent
