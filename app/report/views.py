@@ -130,7 +130,7 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
     percent3 = ''
     percent4 = ''
 
-    i = 0;
+    i = 0
     for row in rows:
         list.append({'subject': row.subject,
                      'percent': row.my_pecent})
