@@ -13,7 +13,7 @@ from common.logger import log
 from . import report
 from .forms import ReportSearchForm, ItemSearchForm
 from .. import db
-from ..api.reports import query_my_report_list_v, query_my_report_header, query_my_report_body, \
+from ..api.reports import query_my_report_list_v, query_my_report_header, query_my_report_body, query_report_graph, \
     make_naplan_student_report, query_all_report_data, \
     query_individual_progress_summary_report_list, \
     query_test_ranking_subject_list, query_test_ranking_data, build_test_ranking_excel_response, \
@@ -119,16 +119,16 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
     test_type = testset.test_type
 
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    '''
+
     rows = query_report_graph(assessment_id, student_user_id)
     list = []
     for row in rows:
         list.append({'subject': row.subject,
                      'percent': row.my_pecent})
-    '''
+
     template_file = 'report/my_report_graph.html'
     return render_template(template_file, assessment_name=assessment_name,
-                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id)
+                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, scores=list)
 
 
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
