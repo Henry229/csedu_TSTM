@@ -202,7 +202,7 @@
         if(arrow2.data('percent')!=''){
             let stick2 = $('.ul-standard:eq(2)').position();
             let stick2Left = stick2.left;
-            let stick1Top = stick2.top;
+            let stick2Top = stick2.top;
 
             stick2Left = stick2Left - arrow2.width();
             let myScore = parseInt(arrow2.data('percent'));
@@ -213,6 +213,23 @@
             //title:64.8, margin:15, extra:5 + 245
             arrow2.offset({ top: top- (myScore * 5), left: stick2Left});
             arrow2.show();
+        }
+
+	    let arrow3 = $($('.arrow1').get(2));
+        if(arrow3.data('percent')!=''){
+            let stick3 = $('.ul-standard:eq(3)').position();
+            let stick3Left = stick3.left;
+            let stick3Top = stick3.top;
+
+            stick3Left = stick3Left - arrow3.width();
+            let myScore = parseInt(arrow3.data('percent'));
+            //$('.arrow3').offset({ top: myScore * 5, left: stick3Left});
+
+
+            let top = $('.testset-title').height()+15+500-5 + 245;
+            //title:64.8, margin:15, extra:5 + 245
+            arrow3.offset({ top: top- (myScore * 5), left: stick3Left});
+            arrow3.show();
         }
 	});
 </script>
