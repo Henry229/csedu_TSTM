@@ -589,7 +589,7 @@ def query_individual_progress_summary_report_by_plan(plan_id, student_user_id):
     return rows
 
 
-
+'''
 def query_report_graph(assessment_id, student_user_id):
     sql_stmt = 'select t.testset_id, t.id as assessment_enroll_id, t.score, t.ranking, t.total, ' \
                '(select (select code_name from codebook where id = t2.subject) from testset t2 where id = t.testset_id) as subject,' \
@@ -609,7 +609,7 @@ def query_report_graph(assessment_id, student_user_id):
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
-
+'''
 
 '''Admin UI: Query individual progress summary report by subject'''
 
