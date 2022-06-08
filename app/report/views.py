@@ -121,14 +121,38 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
 
     rows = query_report_graph(assessment_id, student_user_id)
-    list = []
+    subject1 = ''
+    subject2 = ''
+    subject3 = ''
+    subject4 = ''
+    percent1 = ''
+    percent2 = ''
+    percent3 = ''
+    percent4 = ''
+
+    i = 0;
     for row in rows:
         list.append({'subject': row.subject,
                      'percent': row.my_pecent})
+        if i == 0:
+            subject1 = row.subject
+            percent1 = row.my_pecent
+        elif i == 1:
+            subject2 = row.subject
+            percent2 = row.my_pecent
+        elif i == 2:
+            subject3 = row.subject
+            percent3 = row.my_pecent
+        elif i == 3:
+            subject4 = row.subject
+            percent4 = row.my_pecent
+        ++i
 
     template_file = 'report/my_report_graph.html'
     return render_template(template_file, assessment_name=assessment_name,
-                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, scores=list)
+                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, subject1=subject1,
+                           percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3, percent3=percent3,
+                           subject4=subject4, percent4=percent4)
 
 
 @report.route('/ts/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
