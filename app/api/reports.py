@@ -5,6 +5,7 @@ from datetime import datetime
 from PIL import Image, ImageDraw
 from flask import current_app, render_template, request
 from flask_login import current_user
+from sqlalchemy import text
 
 from app.api import api
 from app.decorators import permission_required
@@ -605,7 +606,7 @@ def query_report_graph(assessment_id, student_user_id):
                ') t ' \
                'where student_user_id = :student_user_id ' \
                'order by id'
-    cursor = db.session.execute(sql_stmt, {'assessment_id': assessment_id, 'student_user_id': student_user_id})
+    cursor = db.session.execute(text(sql_stmt), {'assessment_id': assessment_id, 'student_user_id': student_user_id})
     Record = namedtuple('Record', cursor.keys())
     rows = [Record(*r) for r in cursor.fetchall()]
     return rows
