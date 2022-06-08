@@ -194,10 +194,26 @@
 
             let top = $('.testset-title').height()+15+500-5 + 245;
             //title:64.8, margin:15, extra:5 + 245
-            debugger
             arrow1.offset({ top: top- (myScore * 5), left: stick1Left});
+            arrow1.show();
         }
 
+	    let arrow2 = $($('.arrow1').get(1));
+        if(arrow2.data('percent')!=''){
+            let stick2 = $('.ul-standard:eq(2)').position();
+            let stick2Left = stick1.left;
+            let stick1Top = stick1.top;
+
+            stick2Left = stick2Left - arrow2.width();
+            let myScore = parseInt(arrow2.data('percent'));
+            //$('.arrow2').offset({ top: myScore * 5, left: stick2Left});
+
+
+            let top = $('.testset-title').height()+15+500-5 + 245;
+            //title:64.8, margin:15, extra:5 + 245
+            arrow2.offset({ top: top- (myScore * 5), left: stick2Left});
+            arrow2.show();
+        }
 	});
 </script>
 </body>
