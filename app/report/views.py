@@ -144,7 +144,7 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
         elif i == 3:
             subject4 = row.subject
             percent4 = row.my_pecent
-        ++i
+        i+=1
 
     template_file = 'report/my_report_graph.html'
     return render_template(template_file, assessment_name=assessment_name,
