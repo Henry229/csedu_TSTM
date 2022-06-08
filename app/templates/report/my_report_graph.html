@@ -110,7 +110,7 @@
 		</ul>
 	</li>
 	<li>
-		<img class="arrow1" src="/static/report/img/my_arrow.png">
+		<img class="arrow1" data-percent="{{ percent1 }}" src="/static/report/img/my_arrow.png" style="display: none">
 		<div class="testset-title">
 			{{ subject1 }}
 		</div>
@@ -122,6 +122,7 @@
 		</ul>
 	</li>
 	<li>
+        <img class="arrow1" data-percent="{{ percent2 }}" src="/static/report/img/my_arrow.png" style="display: none">
 		<div class="testset-title">
 			{{ subject2 }}
 		</div>
@@ -133,6 +134,7 @@
 		</ul>
 	</li>
 	<li>
+        <img class="arrow1" data-percent="{{ percent3 }}" src="/static/report/img/my_arrow.png" style="display: none">
 		<div class="testset-title">
 			{{ subject3 }}
 		</div>
@@ -144,6 +146,7 @@
 		</ul>
 	</li>
 	<li>
+        <img class="arrow1" data-percent="{{ percent4 }}" src="/static/report/img/my_arrow.png" style="display: none">
 		<div class="testset-title">
 			{{ subject4 }}
 		</div>
@@ -178,20 +181,23 @@
 <script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
 <script type="text/javascript">
 	$(function(){
-	debugger
-		let stick1 = $('.ul-standard:eq(1)').position();
-		let stick1Left = stick1.left;
-		let stick1Top = stick1.top;
+	    let arrow1 = $($('.arrow1').get(0));
+        if(arrow1.data('percent')!=''){
+            let stick1 = $('.ul-standard:eq(1)').position();
+            let stick1Left = stick1.left;
+            let stick1Top = stick1.top;
 
-		stick1Left = stick1Left - $('.arrow1').width();
-		let myScore =(40 / 45) * 100;
-		//$('.arrow1').offset({ top: myScore * 5, left: stick1Left});
+            stick1Left = stick1Left - arrow1.width();
+            let myScore = parseInt(arrow1.data('percent'));
+            //$('.arrow1').offset({ top: myScore * 5, left: stick1Left});
 
 
-		let top = $('.testset-title').height()+15+500-5 + 245;
-		//title:64.8, margin:15, extra:5 + 245
-        debugger
-		$('.arrow1').offset({ top: top- (myScore * 5), left: stick1Left});
+            let top = $('.testset-title').height()+15+500-5 + 245;
+            //title:64.8, margin:15, extra:5 + 245
+            debugger
+            arrow1.offset({ top: top- (myScore * 5), left: stick1Left});
+        }
+
 	});
 </script>
 </body>
