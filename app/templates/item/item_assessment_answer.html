@@ -35,17 +35,12 @@
                             <hr>
                             {{ form.assessment.label }}
                             {{ form.assessment }}
-                            {{ form.testset.label }}
-                            {{ form.testset }}
+                           
                             <button type="button" class="btn btn-success btn-sm" id="btn_search">Search</button>
                         </form>
                         <p/>
                     </div>
                     <br><br>
-                    {% if current_user.can(Permission.ITEM_MANAGE) %}
-                        <input class="btn btn-success btn-sm" id="export" type="button"
-                           style="float: right;margin-bottom: 2px" value="Export">
-                    {% endif %}
                     <table id="items" class="display table table-hover" style="width:100%">
                         <thead>
                         <tr>
