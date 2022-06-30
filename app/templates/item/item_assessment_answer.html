@@ -35,8 +35,8 @@
                             <hr>
                             {{ form.assessment.label }}
                             {{ form.assessment }}
-                            {{ form.testset.label }}
-                            {{ form.testset }}
+                            <label for="testset">Testset</label>
+                            <select id="testset" name="testset" required=""><option value="0"></option></select>
                             <button type="button" class="btn btn-success btn-sm" id="btn_search">Search</button>
                         </form>
                         <p/>
@@ -98,8 +98,12 @@
     <script>
         $(document).ready(function () {
             $( document ).ajaxSuccess(function( event, xhr, settings ) {
-              alert(1);
-              debugger
+              if(settings.url.indexOf('search_assessment')>-1){
+                  $('#testset').find('option').remove();
+                  if($('#assessment option').length > 0){
+
+                  }
+              }
             });
 
             $('#assessment').change(function(){
