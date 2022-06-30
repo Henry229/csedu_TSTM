@@ -1,0 +1,163 @@
+{% extends "ui/ui_base.html" %}
+
+{% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{%- block styles %}
+    {{ super() }}
+    <link href="/static/ui/css/tab.css" rel="stylesheet">
+{%- endblock styles %}
+{% block app_content %}
+    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Item Search </h3>
+    <br>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search - List
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                        <small class="text-muted">Assessment Search</small>
+                        <br>
+                        <form method="GET" class="form inline" role="form">
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                            {{ form.test_center }}
+                            <hr>
+                            {{ form.assessment.label }}
+                            {{ form.assessment }}
+                            {{ form.testset.label }}
+                            {{ form.testset }}
+                            <button type="button" class="btn btn-success btn-sm" id="btn_search">Search</button>
+                        </form>
+                        <p/>
+                    </div>
+                    <br><br>
+                    {% if current_user.can(Permission.ITEM_MANAGE) %}
+                        <input class="btn btn-success btn-sm" id="export" type="button"
+                           style="float: right;margin-bottom: 2px" value="Export">
+                    {% endif %}
+                    <table id="items" class="display table table-hover" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Item Name</th>
+                            <th>Correct Answers</th>
+                            <th>Grade</th>
+                            <th>Subject</th>
+                            <th>Level</th>
+                            <th>Category</th>
+                            <th>Sub Category</th>
+                            <th>Active</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>
+                        </tbody>
+                    </table>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Loading... Try again if the contents not shown
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    <script src="/static/runner/js/item_runner.js"></script>
+    <script src="/static/runner/js/item_handlers.js"></script>
+    <script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
+    <script src="/static/report/js/report_center.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#btn_search').click(function(){
+               if($('select[name="assessment"]').val()==undefined || $('select[name="assessment"]').val()==null || $('select[name="assessment"]').val()=='0') return false;
+               return true;
+            });
+
+            ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+            $('#dataModal').on('hidden.bs.modal', function (e) {
+                $('#dataModal .modal-content').empty();
+            });
+            $('#export').on('click', function () {
+                let setid= $('#assessment').val().split('_')[1];
+                var url = '/item/assessment/export?export=1' + '&testset_id=' + setid;
+                window.location = url;
+            });
+            $(".tab > input").change(function() {
+                if(this.id=='tab2') return false;
+                if(this.checked) {
+                    window.location = '/item/list';
+                }
+            });
+            $('#export').hide();
+            $('#btn_search').click(function(){
+                if($('#assessment').val()==null || $('#assessment').val()=='' || $('#assessment').val()=='0') return false;
+                let setid= $('#assessment').val().split('_')[1];
+                $.post('/item/assessment/list', {'testset_id':setid},function(d){
+                    let htm = '';
+                    if(d.data.length > 0) {
+                        $('#export').show();
+                        for (let i = 0; i < d.data.length; i++) {
+                            htm += '<tr>';
+                            htm += '<td>';
+                            htm += '<button class="btn btn-sm btn-outline-info" type="button" name="previewButton"';
+                            htm += ' value="/item/' + d.data[i].id + '/preview"';
+                            htm += ' data-item-id="' + d.data[i].id + '"';
+                            htm += ' data-toggle="modal" data-target="#dataModal">';
+                            htm += '<i class="fas fa-eye"></i>';
+                            htm += '</button>';
+                            htm += '</td>';
+                            htm += '<td> ' + d.data[i].id + '</td>';
+                            htm += '<td> ' + d.data[i].name + '</td>';
+                            htm += '<td> ' + d.data[i].correct_answer + '</td>';
+                            htm += '<td> ' + d.data[i].grade + '</td>';
+                            htm += '<td> ' + d.data[i].subject + '</td>';
+                            htm += '<td> ' + d.data[i].level + '</td>';
+                            htm += '<td> ' + d.data[i].category + '</td>';
+                            htm += '<td> ' + d.data[i].subcategory + '</td>';
+                            htm += '<td> ' + d.data[i].active + '</td>';
+                            htm += '</tr>';
+                        }
+                    }else{
+                        $('#export').hide();
+                        htm = '<tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>';
+                    }
+                    $('#items tbody').html(htm);
+                });
+            });
+
+        });
+    </script>
+{% endblock scripts %}

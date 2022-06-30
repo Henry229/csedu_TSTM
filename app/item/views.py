@@ -353,6 +353,24 @@ def item_assessment_list():
         flash('Found {} item(s)'.format(len(items)))
     return render_template('item/item_assessment_list.html', form=search_form, items=items)
 
+
+@item.route('/assessment/answer/update', methods=['GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def item_assessment_update_answer():
+    search_form = ItemAssessmentSearchForm()
+    search_form.test_type.data = Codebook.get_code_id('Naplan')
+    # default setting value into test_center list
+    branch_id = current_user.get_branch_id()
+    if branch_id and current_user.username != 'All':
+        search_form.test_center.data = branch_id
+    else:
+        search_form.test_center.data = None
+    search_form.year.data = None
+
+    return render_template('item/item_assessment_answer.html', form=search_form)
+
+
 @item.route('/assessment/list', methods=['POST'])
 @login_required
 @permission_required(Permission.ITEM_MANAGE)
