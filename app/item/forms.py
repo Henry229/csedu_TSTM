@@ -65,6 +65,26 @@ class ItemAssessmentSearchForm(FlaskForm):
         self.test_center.choices = get_test_center()
         self.assessment.choices = [(0, '')]
 
+class ItemAssessmentAnswerSearchForm(FlaskForm):
+    class Meta:
+        csrf = False
+
+    year = SelectField('Year', validators=[DataRequired()])
+    test_type = SelectField('Test Type', coerce=int, validators=[DataRequired()])
+    test_center = SelectField('CSEdu Branch', coerce=int, validators=[DataRequired()])
+    assessment = SelectField('Assessment', coerce=int, validators=[DataRequired()])
+    testset = SelectField('Testset', coerce=int, validators=[DataRequired()])
+
+    def __init__(self, *args, **kwargs):
+        super(ItemAssessmentSearchForm, self).__init__(*args, **kwargs)
+        self.year.choices = [(ts.year, ts.year)
+                             for ts in
+                             db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
+        self.test_type.choices = Choices.get_codes('test_type')
+        self.test_center.choices = get_test_center()
+        self.assessment.choices = [(0, '')]
+        self.testset.choices = [(0, '')]
+
 class FileLoadForm(FlaskForm):
     # Item Import: Step 1 SelectBox and File for Load
     supported_exts = ['zip', 'xls', 'xlsx', 'xml']

@@ -24,7 +24,7 @@ from qti.itemservice.itemservice import ItemService
 from qti.loader.itemloader import ItemLoader
 from . import item
 from .forms import ItemSearchForm, ItemLoadForm, ItemListForm, FileLoadForm, ItemEditForm, \
-    ItemEditSubForm, ItemEditExplanationForm, ItemAssessmentSearchForm
+    ItemEditSubForm, ItemEditExplanationForm, ItemAssessmentSearchForm, ItemAssessmentAnswerSearchForm
 from .. import db
 from ..api.response import success
 from ..decorators import permission_required, permission_required_or_multiple
@@ -358,7 +358,7 @@ def item_assessment_list():
 @login_required
 @permission_required(Permission.ADMIN)
 def item_assessment_update_answer():
-    search_form = ItemAssessmentSearchForm()
+    search_form = ItemAssessmentAnswerSearchForm()
     search_form.test_type.data = Codebook.get_code_id('Naplan')
     # default setting value into test_center list
     branch_id = current_user.get_branch_id()
