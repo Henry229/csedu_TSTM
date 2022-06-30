@@ -121,6 +121,8 @@
                           texts += '<option value="'+assessments[i].code+'">'+assessments[i].name+'</option>';
                       }
                       $('#assessment').html(texts);
+
+                      $('#assessment').change();
                   }
               }
             });
