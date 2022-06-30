@@ -107,13 +107,10 @@
                       for(let i=0;i<options.length; i++){
                           let names = $(options.get(i)).text().split(' : ');
                           let codes = $(options.get(i)).val().split('_');
-                          if(assessment_id=='' || assessment_id == codes[0]){
-                              testsets.push({"code":codes[1], "name":names[1]});
+                          if(assessment_id == codes[0]){
+                              assessments[assessments.length-1].testset.push({"code":codes[1], "name":names[1]});
                           }else{
-                              if(testsets.length > 0){
-                                assessments.push({"code":codes[0], "name":names[0], "testset":testsets});
-                                testsets = [];
-                              }
+                                assessments.push({"code":codes[0], "name":names[0], "testset":[{"code":codes[1], "name":names[1]}]});
                           }
                           assessment_id = codes[0];
                       }
