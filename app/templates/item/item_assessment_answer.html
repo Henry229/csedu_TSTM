@@ -101,6 +101,7 @@
               if(settings.url.indexOf('search_assessment')>-1){
                   $('#testset').find('option').remove();
                   if($('#assessment option').length > 0){
+                      let assessments = [];
                       let options = $('#assessment option');
                       for(let i=0;i<options.length; i++){
                           let names = $(options.get(i)).text().split(' : ');
@@ -109,8 +110,22 @@
                                 value: codes[1],
                                 text : names[1]
                           }));
-                      }
 
+                          let exist = false;
+                          for(let j=0; j<assessments.length; j++){
+                              if(assessments[j].code==codes[0]){
+                                  exist = true;
+                              }
+                          }
+                          if(exist==false){
+                              assessments.push({"code":codes[0], "name":names[0]});
+                          }
+                      }
+                      let texts = '';
+                      for(let i=0; i<assessments.length; i++){
+                          texts += '<option value="'+assessments[i].code+'">'+assessments[i].name+'</option>';
+                      }
+                      $('#assessment').html(texts);
                   }
               }
             });
