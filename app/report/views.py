@@ -147,7 +147,7 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
         i+=1
 
     template_file = 'report/my_report_graph.html'
-    return render_template(template_file, assessment_name=assessment_name, grade=grade, 
+    return render_template(template_file, assessment_name=assessment_name, grade=grade,
                            subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, subject1=subject1,
                            percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3, percent3=percent3,
                            subject4=subject4, percent4=percent4)

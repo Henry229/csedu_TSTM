@@ -13,7 +13,7 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm, EditProfileA
     ResetPasswordRequestForm, ResetPasswordForm
 from .. import db
 from ..decorators import permission_required, admin_required
-from ..email import send_email, send_password_reset_email
+from ..my_email import send_email, send_password_reset_email
 from ..models import User, Permission, Role, Codebook, MarkerBranch
 
 

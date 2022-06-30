@@ -27,7 +27,7 @@ from common.logger import log
 from qti.itemservice.itemservice import ItemService
 from .response import success, bad_request, TEST_SESSION_ERROR
 from .. import db, mail
-from ..email import common_send_email, send_email
+from ..my_email import common_send_email, send_email
 from ..models import Item, Codebook
 from ..writing.views import text_to_images
 from flask_mail import Message

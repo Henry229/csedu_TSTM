@@ -97,6 +97,10 @@
     <script src="/static/report/js/report_center.js"></script>
     <script>
         $(document).ready(function () {
+            $('#assessment').change(function(){
+                alert(1);
+            });
+
             $('#btn_search').click(function(){
                if($('select[name="assessment"]').val()==undefined || $('select[name="assessment"]').val()==null || $('select[name="assessment"]').val()=='0') return false;
                return true;
