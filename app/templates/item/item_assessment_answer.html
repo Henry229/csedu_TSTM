@@ -126,7 +126,9 @@
                   }
               }
             });
-
+            $('#year, #test_type, #test_center').change(function(event) {
+                $('select[name="testset"]').empty();
+            });
             $('#assessment').change(function(){
                 $('#testset').find('option').remove();
                 for(let i=0; i<assessments.length; i++){
