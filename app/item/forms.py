@@ -76,7 +76,7 @@ class ItemAssessmentAnswerSearchForm(FlaskForm):
     testset = SelectField('Testset', coerce=int, validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
-        super(ItemAssessmentSearchForm, self).__init__(*args, **kwargs)
+        super(ItemAssessmentAnswerSearchForm, self).__init__(*args, **kwargs)
         self.year.choices = [(ts.year, ts.year)
                              for ts in
                              db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
