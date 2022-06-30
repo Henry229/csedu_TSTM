@@ -97,6 +97,11 @@
     <script src="/static/report/js/report_center.js"></script>
     <script>
         $(document).ready(function () {
+            $( document ).ajaxSuccess(function( event, xhr, settings ) {
+              alert(1);
+              debugger
+            });
+
             $('#assessment').change(function(){
                 alert(1);
             });
