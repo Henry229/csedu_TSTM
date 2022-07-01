@@ -370,6 +370,13 @@ def item_assessment_update_answer():
 
     return render_template('item/item_assessment_answer.html', form=search_form)
 
+@item.route('/assessment/answer/update', methods=['POST'])
+@login_required
+@permission_required(Permission.ADMIN)
+def item_assessment_update_answer_list():
+    result = []
+    return success(result)
+
 
 @item.route('/assessment/list', methods=['POST'])
 @login_required

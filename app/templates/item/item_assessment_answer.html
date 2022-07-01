@@ -48,13 +48,13 @@
                             <th></th>
                             <th>ID</th>
                             <th>Item Name</th>
-                            <th>Correct Answers</th>
                             <th>Grade</th>
                             <th>Subject</th>
                             <th>Level</th>
                             <th>Category</th>
                             <th>Sub Category</th>
-                            <th>Active</th>
+                            <th>Correct Answers</th>
+                            <th>Answer to Edit</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -143,33 +143,11 @@
             });
 
             $('#btn_search').click(function(){
-               if($('select[name="assessment"]').val()==undefined || $('select[name="assessment"]').val()==null || $('select[name="assessment"]').val()=='0') return false;
-               return true;
-            });
-
-            ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
-            $('#dataModal').on('hidden.bs.modal', function (e) {
-                $('#dataModal .modal-content').empty();
-            });
-            $('#export').on('click', function () {
-                let setid= $('#assessment').val().split('_')[1];
-                var url = '/item/assessment/export?export=1' + '&testset_id=' + setid;
-                window.location = url;
-            });
-            $(".tab > input").change(function() {
-                if(this.id=='tab2') return false;
-                if(this.checked) {
-                    window.location = '/item/list';
-                }
-            });
-            $('#export').hide();
-            $('#btn_search').click(function(){
-                if($('#assessment').val()==null || $('#assessment').val()=='' || $('#assessment').val()=='0') return false;
-                let setid= $('#assessment').val().split('_')[1];
+                if($('#assessment option').length==0 || $('#assessment').val()=='0' || $('#testset option').length==0) return false;
+                let setid= $('#testset').val();
                 $.post('/item/assessment/list', {'testset_id':setid},function(d){
                     let htm = '';
                     if(d.data.length > 0) {
-                        $('#export').show();
                         for (let i = 0; i < d.data.length; i++) {
                             htm += '<tr>';
                             htm += '<td>';
@@ -182,17 +160,20 @@
                             htm += '</td>';
                             htm += '<td> ' + d.data[i].id + '</td>';
                             htm += '<td> ' + d.data[i].name + '</td>';
-                            htm += '<td> ' + d.data[i].correct_answer + '</td>';
                             htm += '<td> ' + d.data[i].grade + '</td>';
                             htm += '<td> ' + d.data[i].subject + '</td>';
                             htm += '<td> ' + d.data[i].level + '</td>';
                             htm += '<td> ' + d.data[i].category + '</td>';
                             htm += '<td> ' + d.data[i].subcategory + '</td>';
-                            htm += '<td> ' + d.data[i].active + '</td>';
+                            htm += '<td> ' + d.data[i].correct_answer + '</td>';
+                            if(d.data[i].correct_answer.trim().length==1){
+                                htm += '<td><input type="text"></td>';
+                            }else{
+                                htm += '<td></td>';
+                            }
                             htm += '</tr>';
                         }
                     }else{
-                        $('#export').hide();
                         htm = '<tr class="border-bottom"><td colspan="10" class="text-center">No data found.</td></tr>';
                     }
                     $('#items tbody').html(htm);
