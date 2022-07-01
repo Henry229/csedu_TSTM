@@ -152,7 +152,7 @@
                     $(this).prev().focus();
                     return false;
                 }
-               alert(1);
+               alert($(this).closest('tr').find('td:eq(1)').text());
             });
 
             $('#btn_search').click(function(){
