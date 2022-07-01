@@ -126,6 +126,10 @@
                   }
               }
             });
+            ItemRunner.init($('#dataModal .modal-content'), {mode: 'preview'});
+            $('#dataModal').on('hidden.bs.modal', function (e) {
+                $('#dataModal .modal-content').empty();
+            });
             $('#year, #test_type, #test_center').change(function(event) {
                 $('select[name="testset"]').empty();
             });
