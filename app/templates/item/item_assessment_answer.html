@@ -152,6 +152,7 @@
                     $(this).prev().focus();
                     return false;
                 }
+                if(!confirm('Are you sure you want to update?')) return false;
                 alert($('#assessment').val());
                 alert($('#testset').val());
                alert($(this).closest('tr').find('td:eq(1)').text());
@@ -182,7 +183,7 @@
                             htm += '<td> ' + d.data[i].subcategory + '</td>';
                             htm += '<td> ' + d.data[i].correct_answer + '</td>';
                             if(d.data[i].correct_answer.trim().length==1){
-                                htm += '<td><input type="text" style="width: 60px;float:left"><button type="button" class="btn btn-primary btn-block btn-sm" style="width: 50px;float:left;margin-left:5px;padding:0.25rem 0">update</button></td>';
+                                htm += '<td><input type="text" maxlength="1" style="width: 60px;float:left"><button type="button" class="btn btn-primary btn-block btn-sm" style="width: 50px;float:left;margin-left:5px;padding:0.25rem 0">update</button></td>';
                             }else{
                                 htm += '<td></td>';
                             }
