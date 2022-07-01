@@ -147,7 +147,10 @@
             });
 
             $('main').on('click', 'tr > td:last-child > button', function(){
-
+                if($(this).prev().val().trim()=='') {
+                    alert('Please input the value');
+                    return false;
+                }
                alert(1);
             });
 
