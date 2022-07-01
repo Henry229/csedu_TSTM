@@ -6,7 +6,7 @@
     <link href="/static/ui/css/tab.css" rel="stylesheet">
 {%- endblock styles %}
 {% block app_content %}
-    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Item Search </h3>
+    <h3><i class="nav-icon icons cui-list font-2xl" style="color: #339af0;"></i> Update Answer </h3>
     <br>
     <div class="accordion" id="accordion">
         <div class="card card-accent-success">
@@ -140,6 +140,10 @@
                       $('#testset').html(texts);
                   }
                 }
+            });
+
+            $('main').on('click', 'button[value="update"]', function(){
+               alert(1);
             });
 
             $('#btn_search').click(function(){
