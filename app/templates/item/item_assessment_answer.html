@@ -149,6 +149,7 @@
             $('main').on('click', 'tr > td:last-child > button', function(){
                 if($(this).prev().val().trim()=='') {
                     alert('Please input the value');
+                    $(this).prev().focus();
                     return false;
                 }
                alert(1);
