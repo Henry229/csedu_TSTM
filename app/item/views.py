@@ -392,7 +392,7 @@ def item_assessment_update_answer_list():
     for e in assessment_enrolls:
         e.synced = False
         e.synced_time = None
-        marking = Marking.query.filter(Marking.assessment_enroll_id == e.assessment_enroll_id,
+        marking = Marking.query.filter(Marking.assessment_enroll_id == e.id,
                                         Marking.item_id == item_id).first()
         if marking is not None:
             appliedCount += 1
