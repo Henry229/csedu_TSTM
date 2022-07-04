@@ -153,9 +153,15 @@
                     return false;
                 }
                 if(!confirm('Are you sure you want to update?')) return false;
-                alert($('#assessment').val());
-                alert($('#testset').val());
-               alert($(this).closest('tr').find('td:eq(1)').text());
+                let assessment_id = $('#assessment').val();
+                let testset_id = $('#testset').val();
+                let item_id = $(this).closest('tr').find('td:eq(1)').text();
+                let answer = $(this).prev().val().trim();
+                let data = {'assessment_id':assessment_id, 'testset_id':testset_id, 'item_id':item_id, 'answer':answer};
+                alert(data);
+                $.post('/item/assessment/answer/update', data,function(d){
+                    debugger
+                });
             });
 
             $('#btn_search').click(function(){

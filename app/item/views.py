@@ -28,7 +28,8 @@ from .forms import ItemSearchForm, ItemLoadForm, ItemListForm, FileLoadForm, Ite
 from .. import db
 from ..api.response import success
 from ..decorators import permission_required, permission_required_or_multiple
-from ..models import Codebook, Item, Permission, Choices, ItemExplanation, Testset, TestletHasItem
+from ..models import Codebook, Item, Permission, Choices, ItemExplanation, Testset, TestletHasItem, \
+    AssessmentEnroll, Marking
 from app.api.jwplayer import get_signed_player, jwt_signed_url
 from app.api.errors import bad_request
 import re
@@ -374,8 +375,38 @@ def item_assessment_update_answer():
 @login_required
 @permission_required(Permission.ADMIN)
 def item_assessment_update_answer_list():
-    result = []
-    return success(result)
+    assessment_id = request.form.get('assessment_id')
+    testset_id = request.form.get('testset_id')
+    item_id = request.form.get('item_id')
+    answer = request.form.get('answer')
+    if assessment_id is None or testset_id is None or item_id is None:
+        return bad_request()
+
+    item = Item.query.filter_by(id=item_id).first()
+    if item is not None:
+        item.correct_answer = answer
+        item.correct_r_value = "\"" + answer + "\""
+
+    assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, testset_id=testset_id).all()
+    appliedCount = 0
+    for e in assessment_enrolls:
+        e.synced = False
+        e.synced_time = None
+        marking = Marking.query.filter(Marking.assessment_enroll_id == e.assessment_enroll_id,
+                                        Marking.item_id == item_id).first()
+        if marking is not None:
+            appliedCount += 1
+            marking.correct_r_value = "\"" + answer + "\""
+            if marking.candidate_r_value == marking.correct_r_value:
+                marking.is_correct = True
+                marking.candidate_mark = 1
+            else:
+                marking.is_correct = False
+                marking.candidate_mark = 0
+    db.session.commit()
+
+    data = {'count': appliedCount}
+    return success(data)
 
 
 @item.route('/assessment/list', methods=['POST'])
