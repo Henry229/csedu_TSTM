@@ -146,7 +146,7 @@
                 }
             });
 
-            $('main').on('click', 'tr > td:last-child > button', function(){
+            $('main').on('click', 'tr > td:last-child > button', function(e){
                 if($(this).prev().val().trim()=='') {
                     alert('Please input the value');
                     $(this).prev().focus();
@@ -159,7 +159,7 @@
                 let answer = $(this).prev().val().trim().toUpperCase();
                 let data = {'assessment_id':assessment_id, 'testset_id':testset_id, 'item_id':item_id, 'answer':answer};
                 $.post('/item/assessment/answer/update', data,function(d){
-                    $(this).closest('tr').find('td:eq(8)').text(answer);
+                    $(e).closest('tr').find('td:eq(8)').text(answer);
                     alert('Your changes have been successfully updated.(' + d.data.count + ' rows)');
                 }).fail(function(e) {
                     alert('An error occurred.');
