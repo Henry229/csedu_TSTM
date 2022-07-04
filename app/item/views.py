@@ -385,7 +385,7 @@ def item_assessment_update_answer_list():
     item = Item.query.filter_by(id=item_id).first()
     if item is not None:
         item.correct_answer = answer
-        item.correct_r_value = "\"" + answer + "\""
+        item.correct_r_value = answer
 
     assessment_enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id, testset_id=testset_id).all()
     appliedCount = 0
@@ -396,7 +396,7 @@ def item_assessment_update_answer_list():
                                         Marking.item_id == item_id).first()
         if marking is not None:
             appliedCount += 1
-            marking.correct_r_value = "\"" + answer + "\""
+            marking.correct_r_value = answer
             if marking.candidate_r_value == marking.correct_r_value:
                 marking.is_correct = True
                 marking.candidate_mark = 1
