@@ -164,6 +164,8 @@
                 alert(answer);
                 $.post('/item/assessment/answer/update', data,function(d){
                     debugger
+                }).fail(function(e, xhr, settings, exception) {
+                    debugger
                 });
 
                 return false;
