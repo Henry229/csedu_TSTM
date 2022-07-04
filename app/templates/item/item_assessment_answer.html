@@ -158,10 +158,15 @@
                 let item_id = $(this).closest('tr').find('td:eq(1)').text();
                 let answer = $(this).prev().val().trim();
                 let data = {'assessment_id':assessment_id, 'testset_id':testset_id, 'item_id':item_id, 'answer':answer};
-                alert(data);
+                alert(assessment_id);
+                alert(testset_id);
+                alert(item_id);
+                alert(answer);
                 $.post('/item/assessment/answer/update', data,function(d){
                     debugger
                 });
+
+                return false;
             });
 
             $('#btn_search').click(function(){
