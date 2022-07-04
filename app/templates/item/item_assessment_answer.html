@@ -146,20 +146,21 @@
                 }
             });
 
-            $('main').on('click', 'tr > td:last-child > button', function(e){
+            $('main').on('click', 'tr > td:last-child > button', function(){
                 if($(this).prev().val().trim()=='') {
                     alert('Please input the value');
                     $(this).prev().focus();
                     return false;
                 }
                 if(!confirm('Are you sure you want to update?')) return false;
+                let obj = $(this);
                 let assessment_id = $('#assessment').val();
                 let testset_id = $('#testset').val();
                 let item_id = $(this).closest('tr').find('td:eq(1)').text();
                 let answer = $(this).prev().val().trim().toUpperCase();
                 let data = {'assessment_id':assessment_id, 'testset_id':testset_id, 'item_id':item_id, 'answer':answer};
                 $.post('/item/assessment/answer/update', data,function(d){
-                    $(e).closest('tr').find('td:eq(8)').text(answer);
+                    obj.closest('tr').find('td:eq(8)').text(answer);
                     alert('Your changes have been successfully updated.(' + d.data.count + ' rows)');
                 }).fail(function(e) {
                     alert('An error occurred.');
