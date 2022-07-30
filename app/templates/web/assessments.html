@@ -112,7 +112,7 @@
                                           {% for sub in assessment.subjects %}
                                               <tr>
                                                   {% for ts in sub['testsets'] %}
-                                                    {% if loop.index < assessment['header_count'] %}
+                                                    {% if loop.index <= assessment['header_count'] %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
