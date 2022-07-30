@@ -122,7 +122,7 @@
                                                             {% set isExists = True %}
                                                         {% endif %}
                                                     {% endfor %}
-
+                                                    {% if isExists %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
@@ -241,7 +241,7 @@
                                                           {% endif %}
                                                         {% endif %}
                                                       </td>
-
+                                                    {% endif %}
                                                   {% endfor %}
                                               </tr>
                                           {% endfor %}
