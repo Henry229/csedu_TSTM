@@ -111,10 +111,17 @@
                                           <tbody>
                                           {% for sub in assessment.subjects %}
                                               <tr>
-                                                  <td>333
+                                                  <td>
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
+                                                  {% set isExists = False %}
                                                   {% for ts in sub['testsets'] %}
+
+                                                    {% for tmp in assessment.testsets %}
+                                                        {% if ts.id == tmp.id %}
+                                                            {% set isExists = True %}
+                                                        {% endif %}
+                                                    {% endfor %}
 
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
