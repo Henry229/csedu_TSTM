@@ -111,6 +111,9 @@
                                           <tbody>
                                           {% for sub in assessment.subjects %}
                                               <tr>
+                                                    <td>
+                                                      {{ Codebook.get_code_name(sub['name']) }}
+                                                  </td>
                                                   {% for ts in sub['testsets'] %}
                                                     {% if loop.index <= assessment['header_count'] %}
                                                   <td class="testset">
