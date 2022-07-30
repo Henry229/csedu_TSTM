@@ -112,7 +112,7 @@
                                           {% for sub in assessment.subjects %}
                                               <tr>
                                                   <td>
-                                                      {{ Codebook.get_code_name(sub['name']) }}
+                                                      {{ assessment['header_count'] }}
                                                   </td>
                                                 <td>{{ range(assessment.testsets) }}</td>
                                                   {% set isExists = False %}
