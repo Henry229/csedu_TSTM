@@ -114,6 +114,7 @@
                                                   {% set isExists = 0 %}
                                                   {% for ts in sub['testsets'] %}
                                                         {% set isExists = isExists + 1 %}
+                                                      <td>{{ isExists }}</td>
                                                     {% if isExists <= assessment['header_count'] %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
