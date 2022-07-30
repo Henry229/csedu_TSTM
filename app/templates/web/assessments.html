@@ -111,20 +111,10 @@
                                           <tbody>
                                           {% for sub in assessment.subjects %}
                                               <tr>
-                                                  <td>
-                                                      {{ assessment['header_count'] }}
-                                                  </td>
-                                              
-                                                  {% set isExists = False %}
+                                                  {% set isExists = 0 %}
                                                   {% for ts in sub['testsets'] %}
-
-                                                    {% for tmp in assessment.testsets %}
-
-                                                        {% if ts.id == tmp.id %}
-                                                            {% set isExists = True %}
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                    {% if isExists == False %}
+                                                        {% set isExists = isExists + 1 %}
+                                                    {% if isExists <= assessment['header_count'] %}
                                                   <td class="testset">
                                                       {% if ts.enrolled and not ts.resumable %}
                                                           <input type="button" class="btn btn-light btn-block"
