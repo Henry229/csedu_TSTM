@@ -118,6 +118,7 @@
                                                   {% for ts in sub['testsets'] %}
 
                                                     {% for tmp in assessment.testsets %}
+                                                        <td>{{ ts.id }}</td>
                                                         {% if ts.id == tmp.id %}
                                                             {% set isExists = True %}
                                                         {% endif %}
