@@ -114,11 +114,12 @@
                                                   <td>
                                                       {{ Codebook.get_code_name(sub['name']) }}
                                                   </td>
+                                                <td>{{ range(assessment.testsets) }}</td>
                                                   {% set isExists = False %}
                                                   {% for ts in sub['testsets'] %}
 
                                                     {% for tmp in assessment.testsets %}
-                                                        <td>{{ ts.id }}</td>
+
                                                         {% if ts.id == tmp.id %}
                                                             {% set isExists = True %}
                                                         {% endif %}
