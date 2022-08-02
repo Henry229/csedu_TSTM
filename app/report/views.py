@@ -326,7 +326,6 @@ def my_report(assessment_id, ts_id, student_user_id):
     now1 = datetime.now()
     start = str(now1)
 
-
     now2 = datetime.now()
     end = str(now2)
 
