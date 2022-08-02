@@ -323,11 +323,12 @@ def my_report(assessment_id, ts_id, student_user_id):
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def my_report(assessment_id, ts_id, student_user_id):
-    start = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+    now1 = datetime.now()
+    start = str(now1)
 
-   
 
-    end = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+    now2 = datetime.now()
+    end = str(now2)
 
     '''start 
 
