@@ -388,13 +388,11 @@ def my_report1(assessment_id, ts_id, student_user_id):
 
 
 
-    now = datetime.now()
-    start = str(now)
+
 
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
 
-    now = datetime.now()
-    end = str(now)
+
 
     if ts_header is None:
         url = request.referrer
@@ -411,7 +409,14 @@ def my_report1(assessment_id, ts_id, student_user_id):
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
+    now = datetime.now()
+    start = str(now)
+
     markings = query_my_report_body(assessment_enroll_id, ts_id)
+
+    now = datetime.now()
+    end = str(now)
+    
     explanation_link = {}
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
