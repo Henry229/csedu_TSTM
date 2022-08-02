@@ -322,9 +322,13 @@ def my_report(assessment_id, ts_id, student_user_id):
 @login_required
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
-def my_report(assessment_id, ts_id, student_user_id):
+def my_report1(assessment_id, ts_id, student_user_id):
     now1 = datetime.now()
-    
+    start = str(now1)
+
+    now2 = datetime.now()
+    end = str(now2)
+
     '''start 
 
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
