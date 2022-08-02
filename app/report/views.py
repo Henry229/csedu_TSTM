@@ -323,11 +323,73 @@ def my_report(assessment_id, ts_id, student_user_id):
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def my_report1(assessment_id, ts_id, student_user_id):
-    now1 = datetime.now()
-    start = str(now1)
+    now = datetime.now()
+    start = str(now)
 
-    now2 = datetime.now()
-    end = str(now2)
+    # in the case that subject is Vocabulary, the source is separated
+
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
+    if testset is None:
+        url = request.referrer
+        flash('testset data is not available')
+        return redirect(url)
+
+    test_subject_string = Codebook.get_code_name(testset.subject)
+    # if test_subject_string.lower() == 'vocabulary':
+    #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
+
+    grade = Codebook.get_code_name(testset.grade)
+    test_type = testset.test_type
+
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+        filter_by(assessment_id=assessment_id). \
+        filter_by(testset_id=ts_id). \
+        filter_by(student_user_id=student_user_id)
+    row = query.order_by(AssessmentEnroll.id.desc()).first()
+    if row is None:
+        url = request.referrer
+        flash('Assessment Enroll data not available')
+        return redirect(url)
+
+    assessment_enroll_id = row.id
+
+    finish_time = row.finish_time
+    if finish_time is None: finish_time = row.start_time
+
+    is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
+    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+
+    # setting review period for Holiday course
+    enable_holiday = False
+    period_holiday_review = 0
+    test_type_additional_info = Codebook.get_additional_info(test_type)
+
+    # show video to only incorrect queston
+    video_for_incorrect = True
+    if test_type_additional_info is not None:
+        if test_type_additional_info.get('video_for_incorrect'):
+            if test_type_additional_info['video_for_incorrect'] == "false":
+                video_for_incorrect = False
+
+    if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
+        if test_type_additional_info['enable_holiday'] == "true":
+            enable_holiday = True
+            # change review time for Holiday course's incorrect questions and videos
+            if test_type_additional_info['period_holiday_review']:
+                period_holiday_review = test_type_additional_info['period_holiday_review']
+                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(
+                    days=period_holiday_review)) >= datetime.now(pytz.utc)
+
+    # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
+
+    now = datetime.now()
+    end = str(now)
 
     '''start 
 
