@@ -323,8 +323,6 @@ def my_report(assessment_id, ts_id, student_user_id):
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
 def my_report1(assessment_id, ts_id, student_user_id):
-    now = datetime.now()
-    start = str(now)
 
     # in the case that subject is Vocabulary, the source is separated
 
@@ -388,12 +386,16 @@ def my_report1(assessment_id, ts_id, student_user_id):
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
+
+
+    now = datetime.now()
+    start = str(now)
+
+    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
+
     now = datetime.now()
     end = str(now)
 
-    '''start 
-
-    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
     if ts_header is None:
         url = request.referrer
         flash('Marking data not available')
@@ -428,7 +430,7 @@ def my_report1(assessment_id, ts_id, student_user_id):
                         student_user_id=student_user_id, marking_writing_id=marking_writing_id)
         return redirect(url_i)
 
-    end '''
+
 
     template_file = 'report/my_report1.html'
 
