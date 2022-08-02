@@ -315,6 +315,126 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
+
+@report.route('/ts1/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@login_required
+# @permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
+def my_report(assessment_id, ts_id, student_user_id):
+
+
+    start = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+    #in the case that subject is Vocabulary, the source is separated
+
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
+    if testset is None:
+        url = request.referrer
+        flash('testset data is not available')
+        return redirect(url)
+
+    test_subject_string = Codebook.get_code_name(testset.subject)
+    #if test_subject_string.lower() == 'vocabulary':
+    #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
+
+    grade = Codebook.get_code_name(testset.grade)
+    test_type = testset.test_type
+
+    pdf = False
+    pdf_url = "%s?type=pdf" % request.url
+    if 'type' in request.args.keys():
+        pdf = request.args['type'] == 'pdf'
+
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+        filter_by(assessment_id=assessment_id). \
+        filter_by(testset_id=ts_id). \
+        filter_by(student_user_id=student_user_id)
+    row = query.order_by(AssessmentEnroll.id.desc()).first()
+    if row is None:
+        url = request.referrer
+        flash('Assessment Enroll data not available')
+        return redirect(url)
+
+    assessment_enroll_id = row.id
+
+    finish_time = row.finish_time
+    if finish_time is None: finish_time = row.start_time
+
+
+    is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
+    assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+
+
+    # setting review period for Holiday course
+    enable_holiday = False
+    period_holiday_review = 0
+    test_type_additional_info = Codebook.get_additional_info(test_type)
+
+    #show video to only incorrect queston
+    video_for_incorrect = True
+    if test_type_additional_info is not None:
+        if test_type_additional_info.get('video_for_incorrect'):
+            if test_type_additional_info['video_for_incorrect'] == "false":
+                video_for_incorrect = False
+
+    if test_type_additional_info is not None and 'enable_holiday' in test_type_additional_info:
+        if test_type_additional_info['enable_holiday'] == "true":
+            enable_holiday = True
+            # change review time for Holiday course's incorrect questions and videos
+            if test_type_additional_info['period_holiday_review']:
+                period_holiday_review = test_type_additional_info['period_holiday_review']
+                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=period_holiday_review)) >= datetime.now(pytz.utc)
+
+    # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
+
+    end = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+    '''start 
+
+    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
+    if ts_header is None:
+        url = request.referrer
+        flash('Marking data not available')
+        # refresh materialized view takes 5 minutes
+        #flash('Please wait. It will take about 5 minutes to get the test results.')
+        return redirect(url)
+
+    score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+    if ts_header.student_rank1 is None:
+        rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
+    else:
+        rank = '{} out of {}'.format(ts_header.student_rank1, ts_header.total_students1)
+    # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
+    #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
+    #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
+    markings = query_my_report_body(assessment_enroll_id, ts_id)
+    explanation_link = {}
+    for marking in markings:
+        explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
+        
+
+    # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
+    #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
+    # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
+    #       so it need to be discussed to branch out in "test analysed report"
+    # ts_by_category = None
+    ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
+
+    if test_subject_string == 'Writing':
+        marking_writing_id = 0
+        url_i = url_for('writing.w_report', assessment_enroll_id=assessment_enroll_id,
+                        student_user_id=student_user_id, marking_writing_id=marking_writing_id)
+        return redirect(url_i)
+    
+    end '''
+
+    template_file = 'report/my_report1.html'
+
+    rendered_template_pdf = render_template(template_file, start=start, end=end)
+    return rendered_template_pdf
+
+
+
 def modifying_r_value(value):
     if value is None:
         return value
