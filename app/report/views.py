@@ -409,19 +409,19 @@ def my_report1(assessment_id, ts_id, student_user_id):
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
-    now = datetime.now()
-    start = str(now)
+
 
     markings = query_my_report_body(assessment_enroll_id, ts_id)
 
-    now = datetime.now()
-    end = str(now)
-    
+
+
     explanation_link = {}
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
 
 
+    now = datetime.now()
+    start = str(now)
     # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
     #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
@@ -429,6 +429,9 @@ def my_report1(assessment_id, ts_id, student_user_id):
     # ts_by_category = None
     ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
 
+    now = datetime.now()
+    end = str(now)
+    
     if test_subject_string == 'Writing':
         marking_writing_id = 0
         url_i = url_for('writing.w_report', assessment_enroll_id=assessment_enroll_id,
