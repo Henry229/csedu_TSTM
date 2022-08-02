@@ -144,12 +144,14 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
         elif i == 3:
             subject4 = row.subject
             percent4 = row.my_pecent
-        i+=1
+        i += 1
 
     template_file = 'report/my_report_graph.html'
     return render_template(template_file, assessment_name=assessment_name, grade=grade,
-                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, subject1=subject1,
-                           percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3, percent3=percent3,
+                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id,
+                           subject1=subject1,
+                           percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3,
+                           percent3=percent3,
                            subject4=subject4, percent4=percent4)
 
 
@@ -166,8 +168,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     # Todo: Check accessibility to get report
     # refresh_mviews()
 
-
-    #in the case that subject is Vocabulary, the source is separated
+    # in the case that subject is Vocabulary, the source is separated
 
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
     if testset is None:
@@ -176,7 +177,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         return redirect(url)
 
     test_subject_string = Codebook.get_code_name(testset.subject)
-    #if test_subject_string.lower() == 'vocabulary':
+    # if test_subject_string.lower() == 'vocabulary':
     #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
 
     grade = Codebook.get_code_name(testset.grade)
@@ -187,7 +188,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -202,17 +204,15 @@ def my_report(assessment_id, ts_id, student_user_id):
     finish_time = row.finish_time
     if finish_time is None: finish_time = row.start_time
 
-
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-
 
     # setting review period for Holiday course
     enable_holiday = False
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
 
-    #show video to only incorrect queston
+    # show video to only incorrect queston
     video_for_incorrect = True
     if test_type_additional_info is not None:
         if test_type_additional_info.get('video_for_incorrect'):
@@ -225,7 +225,8 @@ def my_report(assessment_id, ts_id, student_user_id):
             # change review time for Holiday course's incorrect questions and videos
             if test_type_additional_info['period_holiday_review']:
                 period_holiday_review = test_type_additional_info['period_holiday_review']
-                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=period_holiday_review)) >= datetime.now(pytz.utc)
+                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(
+                    days=period_holiday_review)) >= datetime.now(pytz.utc)
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
@@ -234,7 +235,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         url = request.referrer
         flash('Marking data not available')
         # refresh materialized view takes 5 minutes
-        #flash('Please wait. It will take about 5 minutes to get the test results.')
+        # flash('Please wait. It will take about 5 minutes to get the test results.')
         return redirect(url)
 
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
@@ -286,7 +287,8 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade, video_for_incorrect=video_for_incorrect,
-                                            explanation_link=explanation_link, test_type=test_type,r_value=modifying_r_value)
+                                            explanation_link=explanation_link, test_type=test_type,
+                                            r_value=modifying_r_value)
     if not pdf:
         return rendered_template_pdf
     # PDF download
@@ -315,6 +317,63 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
+
+@report.route('/ts1/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
+@login_required
+# @permission_required(Permission.ITEM_EXEC)
+@permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
+def my_report(assessment_id, ts_id, student_user_id):
+    start = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+   
+
+    end = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+    '''start 
+
+    ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
+    if ts_header is None:
+        url = request.referrer
+        flash('Marking data not available')
+        # refresh materialized view takes 5 minutes
+        #flash('Please wait. It will take about 5 minutes to get the test results.')
+        return redirect(url)
+
+    score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+    if ts_header.student_rank1 is None:
+        rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
+    else:
+        rank = '{} out of {}'.format(ts_header.student_rank1, ts_header.total_students1)
+    # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
+    #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
+    #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
+    markings = query_my_report_body(assessment_enroll_id, ts_id)
+    explanation_link = {}
+    for marking in markings:
+        explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
+
+
+    # My Report : Footer - Candidate Avg Score / Total Avg Score by Item Category
+    #                       'code_name as category', 'score', 'total_score', 'avg_score', 'percentile_score'
+    # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
+    #       so it need to be discussed to branch out in "test analysed report"
+    # ts_by_category = None
+    ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
+
+    if test_subject_string == 'Writing':
+        marking_writing_id = 0
+        url_i = url_for('writing.w_report', assessment_enroll_id=assessment_enroll_id,
+                        student_user_id=student_user_id, marking_writing_id=marking_writing_id)
+        return redirect(url_i)
+
+    end '''
+
+    template_file = 'report/my_report1.html'
+
+    rendered_template_pdf = render_template(template_file, start=start, end=end)
+    return rendered_template_pdf
+
+
 def modifying_r_value(value):
     if value is None:
         return value
@@ -323,7 +382,7 @@ def modifying_r_value(value):
             result = []
             for v in value:
                 if " gap_" in v:
-                    result.append( v[v.rfind("_")+1:] + '. ' + v[:v.rfind(" gap_")])
+                    result.append(v[v.rfind("_") + 1:] + '. ' + v[:v.rfind(" gap_")])
                 else:
                     result.append(v)
             return result
@@ -331,6 +390,7 @@ def modifying_r_value(value):
             return value
     else:
         return value
+
 
 def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string):
     grade = Codebook.get_code_name(testset.grade)
@@ -341,7 +401,8 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -378,7 +439,8 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
           'left join ' \
           '(select row_number() over() as id, value from json_array_elements(:candidate_r_value)) b ' \
           'on a.id = b.id'
-    cursor_1 = db.engine.execute(text(sql), {'correct_r_value': json.dumps(marking.correct_r_value), 'candidate_r_value': json.dumps(marking.candidate_r_value)})
+    cursor_1 = db.engine.execute(text(sql), {'correct_r_value': json.dumps(marking.correct_r_value),
+                                             'candidate_r_value': json.dumps(marking.candidate_r_value)})
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
 
@@ -394,7 +456,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         for r in rows:
             if r.candidate_r_value:
                 student_value = json.dumps(r.candidate_r_value)
-                if student_value[student_value.rfind('_')+1:] == value_num:
+                if student_value[student_value.rfind('_') + 1:] == value_num:
                     end = student_value.index(" gap_")
                     candidate_r_value = student_value[1:end]
 
@@ -449,6 +511,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         attachment_filename=pdf_file_path)
     return rsp
 
+
 @report.route('/ts_v2/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
 # @permission_required(Permission.ITEM_EXEC)
@@ -460,7 +523,7 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
         - Execute: Provide link to Subject Report
     '''
     # Todo: Check accessibility to get report
-    #refresh_mviews()
+    # refresh_mviews()
     # url = request.referrer
     # flash('refresh_mviews')
     # return redirect(url)
@@ -482,7 +545,8 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
+        id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
@@ -837,7 +901,8 @@ def center():
     assessments = search_assessment()
     assessments_codesets = []
     for d in assessments.json['data']:
-        code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
+        code = (str(d['assessment_id']) + '_' + str(d['testset_id']),
+                d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
         assessments_codesets.append(code)
     search_form.assessment.choices = assessments_codesets
     search_form.assessment.data = assessment
@@ -889,7 +954,7 @@ def center():
     '''
     score_query = '{' + testset_name_list + '}'  # candidate score by testset
 
-    #tuning
+    # tuning
     '''
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
@@ -1524,6 +1589,7 @@ def marking_info(id):
 def test_results():
     return render_template('report/test_results.html', year=Choices.get_ty_choices())
 
+
 @report.route('/test_results_plans', methods=['POST'])
 @permission_required(Permission.ADMIN)
 def test_results_plans():
@@ -1534,6 +1600,7 @@ def test_results_plans():
         rows = [(p.id, p.name) for p in plan]
     return jsonify(rows)
 
+
 @report.route('/test_results', methods=['POST'])
 @permission_required(Permission.ADMIN)
 def test_results_post():
@@ -1543,7 +1610,8 @@ def test_results_post():
     rows = [], []
 
     sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id, :p_test_detail)'
-    cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id, 'p_test_detail': p_test_detail})
+    cursor = db.session.execute(sql_stmt_sub,
+                                {'p_year': p_year, 'p_plan_id': p_plan_id, 'p_test_detail': p_test_detail})
     if cursor is not None:
         rows = [(r.student_user_id, r.username, r.subject_name1, r.subject_name2,
                  r.subject_name3, r.subject_name4, r.subject_name5, r.subject_name6,
@@ -1552,6 +1620,7 @@ def test_results_post():
                  ) for r in cursor.fetchall()]
 
     return jsonify(rows)
+
 
 @report.route('/test_results_detail', methods=['POST'])
 @permission_required(Permission.ADMIN)
