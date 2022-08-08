@@ -209,7 +209,7 @@ def process_inward():
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
-        authorised, errors = is_authorised(member, session_timeout)
+        #authorised, errors = is_authorised(member, session_timeout)
     if authorised:
         # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         # ilike can't find exact matching student id e.g. ethan_H
