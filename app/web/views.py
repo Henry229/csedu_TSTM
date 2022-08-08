@@ -205,6 +205,7 @@ def process_inward():
         }
     else:
         try:
+            log.debug("Hong: %s , %s ", state, student_id)
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
