@@ -106,8 +106,7 @@ def list_writing_marking():
     if not assessment:
         log.debug("hongseok: %s" % test[0])
         assessment = test[0]
-        common_writing_search_assessment(year, branch_ids, writing_code_id,
-                                         test_type)
+
 
     if assessment is not None and assessment != '0':
         search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
