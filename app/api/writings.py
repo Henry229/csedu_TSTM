@@ -107,7 +107,7 @@ def common_writing_search_assessment(year, branch_ids, writing_code_id, test_typ
         join(Testset, Testset.id == AssessmentEnroll.testset_id). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
-        filter(Assessment.year == year). \
+        filter(Assessment.year == str(year)). \
         filter(AssessmentEnroll.test_center.in_(branch_ids)). \
         filter(Testset.subject == writing_code_id)
     # filter(AssessmentEnroll.start_time_client > datetime(int(year), 1, 1)). \
