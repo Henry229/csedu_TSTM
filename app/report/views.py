@@ -1511,7 +1511,7 @@ def enroll_info():
                                  AssessmentEnroll.student_user_id).all()
         '''
     else:
-        enrolls = query.order_by(AssessmentEnroll.id.desc()).all().limit(50)
+        enrolls = query.order_by(AssessmentEnroll.id.desc()).limit(50).all()
     # Default set date as today
     if not search_student_id and not search_date:
         search_date = date.today().strftime('%Y-%m-%d')
