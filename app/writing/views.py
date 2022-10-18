@@ -103,7 +103,8 @@ def list_writing_marking():
 
     test = [(str(row.id) + '_' + str(row.testset_id), row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in common_writing_search_assessment(str(year), branch_ids, writing_code_id, '0')]
 
-
+    if not assessment:
+        assessment = test[0][0]
 
     if assessment is not None and assessment != '0':
         search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
