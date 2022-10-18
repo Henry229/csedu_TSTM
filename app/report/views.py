@@ -1505,11 +1505,9 @@ def enroll_info():
     #query.filter(AssessmentEnroll.start_time >= todays_datetime)
 
     if not search_date:
-        enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
-                                 AssessmentEnroll.student_user_id).limit(50).order_by(AssessmentEnroll.id.desc()).all()
+        enrolls = query.order_by(AssessmentEnroll.id.desc()).limit(50).all()
     else:
-        enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
-                                 AssessmentEnroll.student_user_id).order_by(AssessmentEnroll.id.desc()).all()
+        enrolls = query.order_by(AssessmentEnroll.id.desc()).all()
     # Default set date as today
     if not search_student_id and not search_date:
         search_date = date.today().strftime('%Y-%m-%d')
