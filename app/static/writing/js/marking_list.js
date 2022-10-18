@@ -130,3 +130,8 @@ $(function(){
         $(this).parent().find('input[type="file"]').click();
     });
 });
+
+function validateForm(){
+    return false;
+
+}

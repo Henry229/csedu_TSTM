@@ -39,8 +39,8 @@
                 <div class="card-header">
                     <h5 class="card-title">Test List</h5>
                 </div>
-                <form method="GET" class="form inline" role="form" style="padding:1rem">
-                <div class="tab">
+                <form method="GET" class="form inline" role="form" style="padding:1rem" onsubmit="return validateForm()">
+                <div class="tab" style="display:none">
                     <input id="tab1" type="radio" name="tabs" value="1"{% if tabs=='1' %} checked{% endif %}> <!--디폴트 메뉴-->
                     <label for="tab1">the Search by Assessment Info.</label>
                     <input id="tab2" type="radio" name="tabs" value="2"{% if tabs=='2' %} checked{% endif %}>
@@ -49,7 +49,7 @@
                 </div>
                 {% if current_user.is_administrator() %}<div class="marker-area form-check">{{ form.marker_name.label }} {{ form.marker_name }}</div>{% endif %}
                 <div class="card-body">
-                    <div id="tab1-contents" style="display:none" class="callout callout-info b-t-1 b-r-1 b-b-1"{% if tabs=='2' %} hidden="hidden"{% endif %}>
+                    <div id="tab1-contents" class="callout callout-info b-t-1 b-r-1 b-b-1"{% if tabs=='2' %} hidden="hidden"{% endif %}>
                             {{ form.assessment_name.label }}
                             {{ form.assessment_name }}
                             {{ form.grade.label }}
