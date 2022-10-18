@@ -46,7 +46,7 @@ def list_writing_marking():
     #marker = 0
     #if request.args.get("marker") is not None: marker = request.args.get("marker")
 
-    test_type = request.args.get("test_type")
+    test_type = request.args.get("test_type", "0")
     marker_name = request.args.get("marker_name")
     tabs = '2'
     if request.args.get("tabs") is not None: tabs = request.args.get("tabs")
