@@ -130,10 +130,7 @@ $(function(){
         $(this).parent().find('input[type="file"]').click();
     });
 
-    $('body').on('click', '#btn_search1', function(){
-       alert(1);
-       return false;
-    });
+   
 });
 
 function validateForm(){
