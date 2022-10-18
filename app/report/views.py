@@ -1504,7 +1504,7 @@ def enroll_info():
     #todays_datetime = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
     #query.filter(AssessmentEnroll.start_time >= todays_datetime)
 
-    if not search_date:
+    if search_date:
         enrolls = query.order_by(AssessmentEnroll.id.desc()).all()
         '''
         enrolls = query.order_by(AssessmentEnroll.assessment_id, AssessmentEnroll.testset_id,
