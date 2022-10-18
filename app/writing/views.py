@@ -164,7 +164,7 @@ def list_writing_marking():
             query = query.filter(MarkingForWriting.candidate_mark_detail != None)
         elif marked == '0':
             query = query.filter(MarkingForWriting.candidate_mark_detail == None)
-    marking_writings = query.all()
+    marking_writings = query.order_by(AssessmentEnroll.id.desc()).all()
     #marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
