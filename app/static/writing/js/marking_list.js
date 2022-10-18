@@ -130,10 +130,11 @@ $(function(){
         $(this).parent().find('input[type="file"]').click();
     });
 
-   
+
 });
 
 function validateForm(){
-    return false;
+    if($('#assessment').find(':selected').val()=='') return false;
+    return true;
 }
 
