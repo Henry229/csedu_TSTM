@@ -133,5 +133,4 @@ $(function(){
 
 function validateForm(){
     return false;
-
 }
