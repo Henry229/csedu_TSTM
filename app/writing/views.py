@@ -69,6 +69,7 @@ def list_writing_marking():
     max_year = db.session.query(func.max(Assessment.year)).scalar()
 
     #default assessment
+    '''
     query = db.session.query(Assessment.id, Assessment.name, Testset.id.label('testset_id'),
                              Testset.version, Testset.name.label('testset_name')). \
         join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
@@ -80,8 +81,8 @@ def list_writing_marking():
         filter(Testset.subject == writing_code_id)
     row = query.distinct().order_by(Assessment.id.desc()).one()
     assessment_default = str(row.id) + '_' + str(row.testset_id)
-
-    assessment = request.args.get("assessment", assessment_default)
+    '''
+    assessment = request.args.get("assessment")
     year = request.args.get("year", max_year, type=int)
 
 
