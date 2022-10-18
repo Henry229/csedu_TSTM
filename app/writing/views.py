@@ -85,10 +85,10 @@ def list_writing_marking():
 
 
 
-    if assessment is not None and assessment != '0':
-        search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
+    #if assessment is not None and assessment != '0':
+    search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
                                    row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in common_writing_search_assessment(year, branch_ids, writing_code_id, test_type)]
-        search_form.assessment.data = assessment
+    search_form.assessment.data = assessment
 
     query = db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
