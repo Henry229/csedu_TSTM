@@ -130,7 +130,7 @@ class MarkingListSearchForm(FlaskForm):
         self.grade.choices = grades
         self.year.choices = [(ts.year, ts.year)
                              for ts in
-                             db.session.query(Assessment.year).distinct().order_by(Assessment.year).all()]
+                             db.session.query(Assessment.year).filter(Assessment.year.isnot(None)).distinct().order_by(Assessment.year).all()]
         self.test_type.choices = Choices.get_codes('test_type')
         self.assessment.choices = [(0, '')]
 

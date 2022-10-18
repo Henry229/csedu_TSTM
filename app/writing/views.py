@@ -100,13 +100,10 @@ def list_writing_marking():
             search_form.marker_name.data = marker_name
 
 
-
+    #get first assessment
     test = [(str(row.id) + '_' + str(row.testset_id)) for row in common_writing_search_assessment(str(year), branch_ids, writing_code_id, '0')]
-
     if not assessment:
-        log.debug("hongseok: %s" % test[0])
         assessment = test[0]
-
 
     if assessment is not None and assessment != '0':
         search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
