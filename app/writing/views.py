@@ -65,12 +65,23 @@ def list_writing_marking():
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
 
-
-
+    #default year
     max_year = db.session.query(func.max(Assessment.year)).scalar()
 
+    #default assessment
+    query = db.session.query(Assessment.id, Assessment.name, Testset.id.label('testset_id'),
+                             Testset.version, Testset.name.label('testset_name')). \
+        join(AssessmentEnroll, Assessment.id == AssessmentEnroll.assessment_id). \
+        join(Testset, Testset.id == AssessmentEnroll.testset_id). \
+        join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
+        join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
+        filter(Assessment.year == str(max_year)). \
+        filter(AssessmentEnroll.test_center.in_(branch_ids)). \
+        filter(Testset.subject == writing_code_id)
+    row = query.distinct().order_by(Assessment.id.desc()).one()
+    assessment_default = str(row.id) + '_' + str(row.testset_id)
 
-    assessment = request.args.get("assessment")
+    assessment = request.args.get("assessment", assessment_default)
     year = request.args.get("year", max_year, type=int)
 
 
