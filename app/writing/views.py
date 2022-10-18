@@ -46,29 +46,11 @@ def list_writing_marking():
     #marker = 0
     #if request.args.get("marker") is not None: marker = request.args.get("marker")
 
-    #if not request.args.get("year"):
-    max_year = db.session.query(func.max(Assessment.year)).scalar()
-
-    assessment = request.args.get("assessment")
-    year = request.args.get("year", max_year, type=int)
     test_type = request.args.get("test_type")
     marker_name = request.args.get("marker_name")
-
     tabs = '2'
     if request.args.get("tabs") is not None: tabs = request.args.get("tabs")
     search_form = MarkingListSearchForm()
-    search_form.assessment_name.data = assessment_name
-    search_form.grade.data = grade
-    search_form.marked.data = marked
-
-    search_form.year.data = str(year)
-    if test_type is not None:
-        search_form.test_type.data = int(test_type)
-    if current_user.is_administrator():
-        if marker_name is None:
-            search_form.marker_name.data = search_form.marker_name.choices[0][0]
-        else:
-            search_form.marker_name.data = marker_name
 
     marker_id = None
     if current_user.is_administrator():
@@ -85,10 +67,36 @@ def list_writing_marking():
 
 
 
-    #if assessment is not None and assessment != '0':
-    search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
+    max_year = db.session.query(func.max(Assessment.year)).scalar()
+
+
+    assessment = request.args.get("assessment")
+    year = request.args.get("year", max_year, type=int)
+
+
+    search_form.assessment_name.data = assessment_name
+    search_form.grade.data = grade
+    search_form.marked.data = marked
+
+    search_form.year.data = str(year)
+    if test_type is not None:
+        search_form.test_type.data = int(test_type)
+    if current_user.is_administrator():
+        if marker_name is None:
+            search_form.marker_name.data = search_form.marker_name.choices[0][0]
+        else:
+            search_form.marker_name.data = marker_name
+
+
+
+
+
+
+
+    if assessment is not None and assessment != '0':
+        search_form.assessment.choices = [(str(row.id) + '_' + str(row.testset_id),
                                    row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in common_writing_search_assessment(year, branch_ids, writing_code_id, test_type)]
-    #search_form.assessment.data = assessment
+        search_form.assessment.data = assessment
 
     query = db.session.query(AssessmentEnroll.id).join(Testset). \
         filter(AssessmentEnroll.testset_id == Testset.id). \
