@@ -101,8 +101,7 @@ def list_writing_marking():
 
 
 
-    test = [(str(row.id) + '_' + str(row.testset_id), row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in
-                                      common_writing_search_assessment(year, branch_ids, writing_code_id, test_type)]
+    test = [(str(row.id) + '_' + str(row.testset_id), row.name + ' : ' + row.testset_name + ' v.' + str(row.version)) for row in common_writing_search_assessment(str(year), branch_ids, writing_code_id, test_type)]
 
 
 
