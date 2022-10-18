@@ -11,6 +11,7 @@ from pytz import timezone, utc
 
 import pytz
 from PIL import ImageFile, Image, ImageDraw, ImageFont
+from sqlalchemy import func
 from werkzeug.utils import secure_filename
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -45,8 +46,11 @@ def list_writing_marking():
     #marker = 0
     #if request.args.get("marker") is not None: marker = request.args.get("marker")
 
+    #if not request.args.get("year"):
+    max_year = db.session.query(func.max(Assessment.year)).scalar()
+
     assessment = request.args.get("assessment")
-    year = request.args.get("year", 2022, type=int)
+    year = request.args.get("year", max_year, type=int)
     test_type = request.args.get("test_type")
     marker_name = request.args.get("marker_name")
 
