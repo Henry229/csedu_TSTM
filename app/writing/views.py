@@ -46,7 +46,7 @@ def list_writing_marking():
     #if request.args.get("marker") is not None: marker = request.args.get("marker")
 
     assessment = request.args.get("assessment")
-    year = request.args.get("year", 0, type=int)
+    year = request.args.get("year", 2022, type=int)
     test_type = request.args.get("test_type")
     marker_name = request.args.get("marker_name")
 
