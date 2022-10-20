@@ -129,7 +129,8 @@
             } );
             */
             $('#table_info').DataTable( {
-                "pageLength": 50
+                "pageLength": 50,
+                "order": [[ 0, 'desc' ]]
             } );
 
             $('.btn-reset-test').on('click', function () {
