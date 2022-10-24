@@ -28,6 +28,7 @@ login_manager.login_message = ''
 
 def create_app(config_name):
     app = Flask(__name__)
+    app.config['JSON_SORT_KEYS'] = False
     if type(config_name) != str:
         config_name = os.getenv('FLASK_CONFIG') or 'default'
     app.config.from_object(config[config_name])
