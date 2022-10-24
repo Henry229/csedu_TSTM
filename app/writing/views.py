@@ -3,7 +3,6 @@ import os
 import random
 import string
 import time
-import calendar
 import urllib
 from datetime import datetime
 
@@ -155,11 +154,8 @@ def list_writing_marking():
 
     #############
 
-    today = datetime.date.today()
-    standard_month = add_months(today, -3)
-
     current_time = datetime.datetime.utcnow()
-    ten_weeks_ago = current_time - datetime.timedelta(weeks=12)
+    some_weeks_ago = current_time - datetime.timedelta(weeks=12)
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
@@ -167,13 +163,15 @@ def list_writing_marking():
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
     if tabs == '1':
 
-        query = query.filter(AssessmentEnroll.start_time > ten_weeks_ago)
+        query = query.filter(AssessmentEnroll.start_time > some_weeks_ago)
 
         if marked == '1':
             query = query.filter(MarkingForWriting.candidate_mark_detail != None)
         elif marked == '0':
             query = query.filter(MarkingForWriting.candidate_mark_detail == None)
-    marking_writings = query.order_by(AssessmentEnroll.id.desc()).all()
+    #marking_writings = query.order_by(AssessmentEnroll.id.desc()).all()
+    marking_writings = query.order_by(AssessmentEnroll.start_time.desc()).all()
+
     #marking_writings = query.order_by(AssessmentEnroll.assessment_id.desc(), AssessmentEnroll.student_user_id).all()
 
     marking_writing_list = []
@@ -232,12 +230,6 @@ def list_writing_marking():
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list, tabs=tabs)
 
-def add_months(sourcedate, months):
-    month = sourcedate.month - 1 + months
-    year = sourcedate.year + month // 12
-    month = month % 12 + 1
-    day = min(sourcedate.day, calendar.monthrange(year,month)[1])
-    return datetime.date(year, month, day)
 
 def save_writing_data(student_user_id, marking_id, writing_files=None, writing_text=None, has_files=False):
     if writing_files is None:
