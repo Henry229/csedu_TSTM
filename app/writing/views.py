@@ -3,6 +3,7 @@ import os
 import random
 import string
 import time
+import calendar
 import urllib
 from datetime import datetime
 
@@ -30,7 +31,6 @@ from ..api.writings import common_writing_search_assessment
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Permission, Assessment, Codebook, Student, AssessmentEnroll, Marking, MarkingForWriting, \
     AssessmentHasTestset, Testset, MarkerAssigned, Item, MarkerBranch, User
-
 
 
 @writing.route('/writing_marking_list', methods=['GET'])
@@ -155,6 +155,9 @@ def list_writing_marking():
 
     #############
 
+    today = datetime.date.today()
+    standard_month = add_months(today, -3)
+
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
         join(MarkingForWriting, Marking.id == MarkingForWriting.marking_id). \
@@ -222,6 +225,13 @@ def list_writing_marking():
                         }
             marking_writing_list.append(json_str)
     return render_template('writing/list.html', form=search_form, marking_writing_list=marking_writing_list, tabs=tabs)
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+    return datetime.date(year, month, day)
 
 def save_writing_data(student_user_id, marking_id, writing_files=None, writing_text=None, has_files=False):
     if writing_files is None:
