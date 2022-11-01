@@ -1000,7 +1000,7 @@ def center():
     '''
     return render_template('report/report_center.html', form=search_form, report_list=report_list, \
                            columns_list=columns_list, testset_dic=testset_dic, review_items=review_items, \
-                           test_type=test_type, assessment=assessment)
+                           test_type=test_type, assessment=assessment,test=add_query_str)
 
 
 @report.route('/center_old', methods=['GET'])
