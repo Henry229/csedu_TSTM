@@ -940,7 +940,7 @@ def center():
         " + columns_query + ");")
     '''
 
-    #if homework, only data in 4months
+    #if homework, only data in 4months because the assessment used again and again every year.
     if str(test_type) == '307':
         add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
 
