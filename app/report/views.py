@@ -942,10 +942,7 @@ def center():
 
     #if homework, only data in 4months
     if str(test_type) == '307':
-        current_time = datetime.utcnow()
-        some_weeks_ago = current_time - datetime.datetime.timedelta(weeks=16)
-        #from_time = some_weeks_ago.strftime('%Y-%m-%d')
-        #add_query_str = add_query_str + " and ae.start_time>\'\'" + str(from_time) + "\'\' "
+        add_query_str = add_query_str + " and ae.start_time >= start_time >= NOW()::DATE - 120 "
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
