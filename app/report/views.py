@@ -942,7 +942,7 @@ def center():
 
     #if homework, only data in 4months
     if str(test_type) == '307':
-        add_query_str = add_query_str + " and ae.start_time >= start_time >= NOW()::DATE - 120 "
+        add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
