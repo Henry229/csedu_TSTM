@@ -944,7 +944,7 @@ def center():
     if str(test_type) == '307':
         current_time = datetime.utcnow()
         some_weeks_ago = current_time - datetime.timedelta(weeks=16)
-        from_time = some_weeks_ago.strftime('%Y-%m-%d')
+        #from_time = some_weeks_ago.strftime('%Y-%m-%d')
         #add_query_str = add_query_str + " and ae.start_time>\'\'" + str(from_time) + "\'\' "
 
     new_query = text("SELECT  * FROM CROSSTAB \
