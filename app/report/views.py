@@ -943,7 +943,7 @@ def center():
     #if homework, only data in 4months
     if test_type == 307:
         current_time = datetime.datetime.utcnow()
-        some_weeks_ago = current_time - datetime.timedelta(weeks=16)
+        #some_weeks_ago = current_time - datetime.timedelta(weeks=16)
         #from_time = some_weeks_ago.strftime('%Y-%m-%d')
         #add_query_str = add_query_str + " and ae.start_time>\'\'" + str(from_time) + "\'\' "
 
