@@ -945,7 +945,7 @@ def center():
         current_time = datetime.datetime.utcnow()
         some_weeks_ago = current_time - datetime.timedelta(weeks=16)
         from_time = some_weeks_ago.strftime('%Y-%m-%d')
-        add_query_str = add_query_str + " and ae.start_time>\'\'" + from_time + "\'\' "
+        add_query_str = add_query_str + " and ae.start_time>\'\'" + str(from_time) + "\'\' "
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
@@ -960,7 +960,7 @@ def center():
         join assessment_testsets at2 on a2.id = at2.assessment_id \
         join testset t2 on ae.testset_id = t2.id \
         join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
-        where a2.id = " + assessment_id + "" + add_query_str + " \
+        where a2.id = " + assessment_id + " " + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
         t2.name \
         order by s.student_id',\
