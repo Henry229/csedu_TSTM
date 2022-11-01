@@ -846,6 +846,7 @@ def center():
     #    filter_by(testset_id=testset_id)
 
     assessment_name = Assessment.query.filter_by(id=assessment_id).first().name
+
     add_query_str = ''
     # Query current_user's test center
     # If test_center 'All', query all
@@ -938,6 +939,13 @@ def center():
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
     '''
+
+    #if homework, only data in 4months
+    if test_type == 307:
+        current_time = datetime.datetime.utcnow()
+        some_weeks_ago = current_time - datetime.timedelta(weeks=16)
+        from_time = some_weeks_ago.strftime('%Y-%m-%d')
+        add_query_str = add_query_str + " and ae.start_time>\'\'" + from_time + "\'\' "
 
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
