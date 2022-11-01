@@ -914,6 +914,8 @@ def center():
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
     '''
+
+    '''
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
         a2.id,t2.name, \
@@ -928,6 +930,29 @@ def center():
         join testset t2 on ae.testset_id = t2.id \
         join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
         where a2.name = \'\'" + assessment_name + "\'\'" + add_query_str + " \
+        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
+        t2.name \
+        order by s.student_id',\
+        $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
+        AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
+        assessment_name VARCHAR, assessment_id integer, \
+        " + columns_query + ");")
+    '''
+
+    new_query = text("SELECT  * FROM CROSSTAB \
+        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
+        a2.id,t2.name, \
+        CONCAT( CASE WHEN sum(m.outcome_score) <> 0 THEN round(sum(m.candidate_mark)/sum(m.outcome_score) * 100) \
+        ELSE 0 END, ''('', (select Max(rank_v) from test_summary_mview where assessment_enroll_id = max(m.assessment_enroll_id)), '')'')  score \
+        from marking m \
+        join assessment_enroll ae ON m.assessment_enroll_id = ae.id \
+        join student s on ae.student_user_id = s.user_id \
+        join users u on s.user_id = u.id \
+        join assessment a2 on ae.assessment_id = a2.id \
+        join assessment_testsets at2 on a2.id = at2.assessment_id \
+        join testset t2 on ae.testset_id = t2.id \
+        join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
+        where a2.id = \'" + assessment_id + "\'" + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
         t2.name \
         order by s.student_id',\
