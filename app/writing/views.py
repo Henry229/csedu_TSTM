@@ -106,7 +106,7 @@ def list_writing_marking():
     if not assessment:
         test = [(str(row.id) + '_' + str(row.testset_id)) for row in
                 common_writing_search_assessment(str(year), branch_ids, writing_code_id, '0')]
-        if not test:
+        if len(test) > 0:
             assessment = test[0]
 
     if assessment is not None and assessment != '0':
