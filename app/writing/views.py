@@ -52,6 +52,7 @@ def list_writing_marking():
     search_form = MarkingListSearchForm()
 
     marker_id = None
+    '''
     if current_user.is_administrator():
         if tabs == '1':
             #marker_id = current_user.id
@@ -60,6 +61,8 @@ def list_writing_marking():
             marker_id = int(search_form.marker_name.data) if marker_name is None else int(marker_name)
     else:
         marker_id = current_user.id
+    '''
+    marker_id = current_user.id
 
     branch_ids = getBranchIds(marker_id)
     writing_code_id = Codebook.get_code_id('Writing')
