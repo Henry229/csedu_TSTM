@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import os
 import pytz
 import requests
 from flask import render_template, redirect, request, url_for, flash
@@ -39,6 +39,8 @@ def unconfirmed():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     log.info("Logging in")
+    log.info("chs :%s" % os.environ.get('CS_API_URL'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
