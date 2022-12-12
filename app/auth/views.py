@@ -40,11 +40,6 @@ def unconfirmed():
 def login():
     log.info("Logging in")
 
-    log.info("CS_API_URL : %s" % os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool')
-    log.info("CS_API_USER : %s" % os.environ.get('CS_API_USER'))
-    log.info("CS_API_PASSWORD : %s" % os.environ.get('CS_API_PASSWORD'))
-    log.info("CS_API_DISABLE : %s" % True if os.environ.get('CS_API_DISABLE') else False)
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
