@@ -39,7 +39,6 @@ def unconfirmed():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     log.info("Logging in")
-    log.info("chs : %s" % os.environ.get('CS_API_URL'))
 
     form = LoginForm()
     if form.validate_on_submit():
