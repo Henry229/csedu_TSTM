@@ -186,6 +186,12 @@ def process_inward():
     if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
+    log.info("1.CS_API_URL : %s" % os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool')
+    log.info("1.CS_API_USER : %s" % os.environ.get('CS_API_USER'))
+    log.info("1.CS_API_PASSWORD : %s" % os.environ.get('CS_API_PASSWORD'))
+    log.info("1.CS_API_DISABLE : %s" % True if os.environ.get('CS_API_DISABLE') else False)
+
+
     if test_type == 'stresstest':
         try:
             if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:

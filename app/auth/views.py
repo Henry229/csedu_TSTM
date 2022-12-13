@@ -314,6 +314,11 @@ def get_student_info(state, stud_id):
     :param stud_id: csonlineschool student id
     :return: a member info
     """
+    log.info("2.CS_API_URL : %s" % os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool')
+    log.info("2.CS_API_USER : %s" % os.environ.get('CS_API_USER'))
+    log.info("2.CS_API_PASSWORD : %s" % os.environ.get('CS_API_PASSWORD'))
+    log.info("2.CS_API_DISABLE : %s" % True if os.environ.get('CS_API_DISABLE') else False)
+
     print(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id))
     info = requests.get(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id),
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()
