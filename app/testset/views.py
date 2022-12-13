@@ -14,6 +14,9 @@ from .. import db
 from ..decorators import permission_required
 from ..models import Testset, Codebook, Permission, Testlet, Item, TestletHasItem, TestsetBinding
 
+import os
+from common.logger import log
+
 '''Testset Info Page - rendering template'''
 
 
@@ -39,6 +42,13 @@ def info(id):
 @login_required
 @permission_required(Permission.TESTSET_MANAGE)
 def new():
+
+    log.info("CS_API_URL : %s" % os.environ.get('CS_API_URL') or 'http://127.0.0.1:8000/csonlineschool')
+    log.info("CS_API_USER : %s" % os.environ.get('CS_API_USER'))
+    log.info("CS_API_PASSWORD : %s" % os.environ.get('CS_API_PASSWORD'))
+    log.info("CS_API_DISABLE : %s" % True if os.environ.get('CS_API_DISABLE') else False)
+
+
     testset_id = request.args.get('id')
     error = request.args.get('error')
 
