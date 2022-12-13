@@ -125,6 +125,7 @@ def is_authorised(student, timeout=120):
             session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
             session_age = datetime.now(pytz.utc) - session_time
             return True, errors
+            # temprory blocking becuae of moving aws->linux
             #if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
             #    return True, errors
             #else:

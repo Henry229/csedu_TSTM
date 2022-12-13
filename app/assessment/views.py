@@ -470,6 +470,7 @@ def virtual_omr_resync(assessment_id):
     Re-Sync marking data to csonlineschool through CS_API
     :return: Sync status page
     '''
+    log.info("sysytest1")
     vomr_logger.info("Manual re-sync triggered. Initiate sync retry for %s" % assessment_id)
     enrolls = AssessmentEnroll.query.filter_by(assessment_id=assessment_id).all()
     for enroll in enrolls:
@@ -489,6 +490,8 @@ def virtual_omr_sync(assessment_id=None, duration=3, assessment_enroll_id=None, 
     '''
     process = False
     result = {}
+
+    log.info("sysytest2")
 
     sync_hash = uuid.uuid4().hex
     start_day = datetime.now(pytz.utc) - timedelta(days=duration * 2)
