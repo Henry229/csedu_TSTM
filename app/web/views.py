@@ -205,10 +205,11 @@ def process_inward():
         }
     else:
         try:
-            log.info("chs1 : %s" % state)
-            log.info("chs2 : %s" % student_id)
             member = get_student_info(state, student_id)
-        except:
+        #except:
+        except Exception as e:
+            log.info("chs test title :")
+            log.info("chs test : %s" % str(e))
             return forbidden("Invalid Request")
         authorised, errors = is_authorised(member, session_timeout)
     if authorised:
