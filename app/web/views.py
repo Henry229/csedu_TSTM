@@ -124,10 +124,11 @@ def is_authorised(student, timeout=120):
             REG_DT = datetime.strptime(student_session['REG_DT'], "%a, %d %b %Y %H:%M:%S %Z")
             session_time = pytz.utc.localize(REG_DT)  # Change to UTC. %Z doesn't work due to a bug
             session_age = datetime.now(pytz.utc) - session_time
-            if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
-                return True, errors
-            else:
-                errors.append("Student's CSOnlineSchool session has been expired")
+            return True, errors
+            #if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
+            #    return True, errors
+            #else:
+            #    errors.append("Student's CSOnlineSchool session has been expired")
         else:
             errors.append("Student logged in different IP address from CSOnlineSchool")
     else:
