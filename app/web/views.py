@@ -205,6 +205,8 @@ def process_inward():
         }
     else:
         try:
+            log.info("chs1 : %s" % state)
+            log.info("chs2 : %s" % student_id)
             member = get_student_info(state, student_id)
         except:
             return forbidden("Invalid Request")
