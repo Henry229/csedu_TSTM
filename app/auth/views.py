@@ -314,11 +314,6 @@ def get_student_info(state, stud_id):
     :param stud_id: csonlineschool student id
     :return: a member info
     """
-    log.info("4.Config.CS_API_URL : %s" % Config.CS_API_URL)
-    log.info("4.CS_API_USER : %s" % Config.CS_API_USER)
-    log.info("4.CS_API_PASSWORD : %s" % Config.CS_API_PASSWORD)
-    log.info("4.CS_API_DISABLE : %s" % Config.CS_API_DISABLE)
-
     print(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id))
     info = requests.get(Config.CS_API_URL + "/member/%s/%s" % (state, stud_id),
                         auth=HTTPBasicAuth(Config.CS_API_USER, Config.CS_API_PASSWORD), verify=False).json()

@@ -186,12 +186,6 @@ def process_inward():
     if test_type != "homework" and test_type != "stresstest":
         test_type = None
 
-    log.info("3.Config.CS_API_URL : %s" % Config.CS_API_URL)
-    log.info("3.CS_API_USER : %s" % Config.CS_API_USER)
-    log.info("3.CS_API_PASSWORD : %s" % Config.CS_API_PASSWORD)
-    log.info("3.CS_API_DISABLE : %s" % Config.CS_API_DISABLE)
-
-
     if test_type == 'stresstest':
         try:
             if args["stresstest_token"] != Config.STRESS_TEST_TOKEN:
