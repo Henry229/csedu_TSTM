@@ -832,7 +832,8 @@ def center():
     search_form.year.data = year
 
     if assessment_id == 0:
-
+        search_form.assessment.choices = []
+        search_form.assessment.data = None
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
 
     assessments = search_assessment()
