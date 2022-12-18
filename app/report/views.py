@@ -842,10 +842,6 @@ def center():
         code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
         assessments_codesets.append(code)
 
-    log.info("cho")
-    log.info(assessments_codesets)
-    log.info(assessment)
-
     search_form.assessment.choices = assessments_codesets
     search_form.assessment.data = assessment
 
