@@ -5,3 +5,148 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="/static/csedu_style.css">
 {% endblock %}
+{% block app_content %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
+   {% set enable_video = True %}
+{% else %}
+   {% set enable_video = None %}
+{% endif %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
+   {% set enable_report = True %}
+{% else %}
+   {% set enable_report = None %}
+{% endif %}
+    <h3><i class="icons cui-envelope-letter font-2xl" style="color: #339af0;"></i> Report Centre </h3>
+    <div class="accordion" id="accordion">
+        <div class="card card-accent-success">
+            <div class="card-header" id="headingOne">
+                <i class="icons cui-magnifying-glass"></i> Search Condition
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <i class="icon-arrow-up"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+                <i class="icons cui-list"></i> Search Result: Assessment Enroll Information
+                <div class="card-header-actions">
+                    <a class="card-header-action btn-minimize" data-toggle="collapse" data-target="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseTwo">
+                        <i class="icons cui-list"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    {% if report_list %}
+                        <table id="table_info" class="table table-bordered table-hover">
+                        <thead>
+                            <tr bgcolor="#f5f5dc">
+                                <th>No.</th>
+                                <th>Student</th>
+                                <th>Assessment</th>
+                                {% for column in columns_list %}
+                                    <th>{{ column }}</th>
+                                {% endfor %}
+                                <th>Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rl in report_list %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ rl.username }}</td>
+                                    <td>{{ rl.assessment_name }}</td>
+                                    {% for tsset in testset_dic %}
+                                        <td>
+                                        {% if rl[testset_dic[tsset]["name"]]: %}
+                                            {% if testset_dic[tsset]["subject"] != 'Writing' %}
+                                                {{ rl[testset_dic[tsset]["name"]] }}
+                                            {% endif %}
+                                            {#% if testset_dic[tsset]["subject"] != 'Writing' and enable_report: %#}
+
+
+                                            {% if enable_report: %}
+                                                {% if Codebook.get_code_name(test_type) == 'Naplan' or Codebook.get_code_name(test_type) == 'OnNAPLAN' %}
+                                                <!--<a class="badge badge-warning" href="{{ url_for('report.my_student_set_report', assessment_id=rl.assessment_id, student_user_id=rl.user_id) }}" name="btnAssessmentReport" target="_blank"> Assessment Report</a>-->
+                                                {% endif %}
+                                                {% if Codebook.get_code_name(test_type) == 'Homework' %}
+                                                <a class="badge badge-danger" href="{{ url_for('errornote.error_note_homework',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                                {% else %}
+                                                <a class="badge badge-danger" href="{{ url_for('report.my_report',assessment_id=rl.assessment_id, ts_id=tsset, student_user_id=rl.user_id) }}" name="btnTestReport" target="_blank"> Test Report</a>
+                                                {% endif %}
+                                            {% else %}
+                                                <!--<span class="badge badge-secondary" name="btnTestReport" target="_blank"> Test Report</span>-->
+                                            {% endif %}
+                                        {% else: %}
+                                        {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    <td>{{ Codebook.get_code_name(rl.test_center) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr bgcolor="#f5f5dc">
+                                <th>No.</th>
+                                <th>Student</th>
+                                <th>Assessment</th>
+                                {% for column in columns_list %}
+                                    <th>{{ column }}</th>
+                                {% endfor %}
+                                <th>Branch</th>
+                            </tr>
+                        </tfoot>
+                        </table>
+                {% else %}
+                    There is no enrollment information.
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock app_content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/common/js/csedu_common.js"></script>
+    {#    <script src="/static/report/js/manage.js"></script>#}
+    <script src="/static/report/js/report_center.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            $("#status").hide();
+            $('#table_info').DataTable( {
+                "pageLength": 100,
+                "order": [[ 1, 'asc' ],[ 2, 'asc' ],[ 3, 'asc' ], [ 4, 'asc' ]]
+            } );
+
+            $('#btn_search_assessment').click(function (event) {
+                event.preventDefault();
+                var year = $('SELECT[name="year"] option:selected').val();
+                var test_type = $('SELECT[name="test_type"] option:selected').val();
+                var test_center = $('SELECT[name="test_center"] option:selected').val();
+
+                if(year==''){
+                    $('SELECT[name="year"]').focus();
+                    return false;
+                }
+                search_assessment(year, test_type, test_center);
+            });
+
+            $("#review-qn").click(function (event) {
+               var review_item_id = $('SELECT[id="review_item_id"] option:selected').val();
+               if(review_item_id ==''){
+                    alert('Please select a question number.');
+               }else {
+                   var link = "/item/"+review_item_id+"/review/{{ test_type }}";
+                   window.open(link, '_blank','width=700,height=768,scrollbars=yes,location=no');
+               }
+           });
+        });
+
+    </script>
+{% endblock scripts %}
