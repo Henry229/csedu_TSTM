@@ -831,9 +831,7 @@ def center():
         search_form.test_center.data = test_center
     search_form.year.data = year
 
-    log.info("chs1")
     if assessment_id == 0:
-        log.info("chs2")
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
 
     assessments = search_assessment()
