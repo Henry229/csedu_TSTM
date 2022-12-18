@@ -853,7 +853,7 @@ def center():
     # If test_center 'Administrator', query all
     if not current_user.is_administrator() and \
             (current_user.username != 'All' and current_user.get_branch_id() != test_center):
-        query = query.filter(1 == 0)
+        #query = query.filter(1 == 0)
         # new_query = query.filter(1 == 0)
         flash("Forbidden branch data!")
     else:
