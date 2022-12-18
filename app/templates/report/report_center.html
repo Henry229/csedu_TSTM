@@ -43,7 +43,8 @@
                             {{ form.test_type.label }}
                             {{ form.test_type }}
                             {{ form.test_center.label }}
-                         
+                            {% if current_user.is_administrator() %}{{ form.test_center }}{% else %}{{ form.test_center(read_only=True) }}{% endif %}
+                            
                             </div>
                             <br>
                             <small>* Click Search assessment List and select Test Type to retrieve assessment and review questions</small>
