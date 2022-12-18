@@ -29,6 +29,30 @@
                 </div>
             </div>
 
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    This page provides [Test Result by Year/TestType]. <br>
+                    <div class="callout callout-success b-t-1 b-r-1 b-b-1">
+                        <p id="search_panel">
+                        <h5>Enter you search condition. Click on the Search button. Choose report.</h5>
+                        <small class="text-muted">Report Search</small>
+                        <br>
+                        <form method="GET" class="form inline" role="form" id="report_form">
+                            {{ form.year.label }}
+                            {{ form.year }}
+                            {{ form.test_type.label }}
+                            {{ form.test_type }}
+                            {{ form.test_center.label }}
+                         
+                            </div>
+                            <br>
+                            <small>* Click Search assessment List and select Test Type to retrieve assessment and review questions</small>
+                        </form>
+                        <p/>
+                        <div id="status" class="alert alert-success" role="alert"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card">
             <div class="card-header" id="headingTwo">
