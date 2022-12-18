@@ -832,6 +832,7 @@ def center():
     search_form.year.data = year
 
     if assessment_id == 0:
+
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
 
     assessments = search_assessment()
@@ -839,6 +840,11 @@ def center():
     for d in assessments.json['data']:
         code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
         assessments_codesets.append(code)
+
+    log.info("cho")
+    log.info(assessments_codesets)
+    log.info(assessment)
+
     search_form.assessment.choices = assessments_codesets
     search_form.assessment.data = assessment
 
