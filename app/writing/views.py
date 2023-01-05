@@ -47,7 +47,7 @@ def list_writing_marking():
 
     test_type = request.args.get("test_type", "0")
     marker_name = request.args.get("marker_name")
-    tabs = '1'
+    tabs = '2'
     if request.args.get("tabs") is not None: tabs = request.args.get("tabs")
     search_form = MarkingListSearchForm()
 
