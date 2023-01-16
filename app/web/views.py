@@ -167,9 +167,11 @@ def process_inward():
     if error:
         flash(error)
 
+    log.info("TOKEN TEST START")
     try:
         token = base64.urlsafe_b64decode(request.args.get("token"))
     except:
+        log.info("TOKEN TEST")
         return internal_server_error('Wrong token')
 
     args = json.loads(token.decode('UTF-8'))
