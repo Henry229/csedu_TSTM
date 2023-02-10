@@ -395,6 +395,8 @@ def assessment_list():
         #    assessment.sort(key=lambda x: x.version, reverse=True)
             assessment = assessment[0]
 
+        log.debug("HONG: %s" % assessment.GUID)
+
         if assessment.test_type_kind == 'Homework':
             if homework_year is not None:
                 if assessment.year is None:
