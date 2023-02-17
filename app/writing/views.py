@@ -788,16 +788,10 @@ def marking(marking_writing_id, student_user_id):
     if marking_writing:
         item = Marking.query.filter_by(id=marking_writing.marking_id).first()
 
-    log.debug("hong1: %s" % marking_writing)
-    log.debug("hong2: %s" % canMarking(current_user, marking_writing.marking_id))
-    log.debug("hong3: %s" % item)
-
     if marking_writing and canMarking(current_user, marking_writing.marking_id) and item:
         item_id = item.item_id
         web_img_links = marking_onscreen_load(marking_writing_id, student_user_id)
 
-        log.debug("hong4: %s" % web_img_links.keys())
-        log.debug("hong5: %s" % len(web_img_links.keys()))
         if len(web_img_links.keys()):
             if marking_writing.candidate_mark_detail:
                 populate_criteria_form(form, marking_writing_id,
