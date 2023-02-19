@@ -168,9 +168,7 @@ def list_writing_marking():
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
     if tabs == '1':
 
-        '''
         query = query.filter(AssessmentEnroll.start_time > some_weeks_ago)
-        '''
 
         if marked == '1':
             query = query.filter(MarkingForWriting.candidate_mark_detail != None)
