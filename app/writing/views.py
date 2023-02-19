@@ -160,7 +160,7 @@ def list_writing_marking():
     #############
 
     current_time = datetime.datetime.utcnow()
-    some_weeks_ago = current_time - datetime.timedelta(weeks=112)
+    some_weeks_ago = current_time - datetime.timedelta(weeks=12)
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
@@ -168,7 +168,9 @@ def list_writing_marking():
         filter(Marking.assessment_enroll_id.in_(assessment_enroll_ids))
     if tabs == '1':
 
+        '''
         query = query.filter(AssessmentEnroll.start_time > some_weeks_ago)
+        '''
 
         if marked == '1':
             query = query.filter(MarkingForWriting.candidate_mark_detail != None)
