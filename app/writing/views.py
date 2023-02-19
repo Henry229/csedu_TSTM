@@ -160,7 +160,7 @@ def list_writing_marking():
     #############
 
     current_time = datetime.datetime.utcnow()
-    some_weeks_ago = current_time - datetime.timedelta(weeks=12)
+    some_weeks_ago = current_time - datetime.timedelta(weeks=112)
 
     query = db.session.query(AssessmentEnroll, Marking, MarkingForWriting). \
         join(Marking, AssessmentEnroll.id == Marking.assessment_enroll_id). \
