@@ -1334,7 +1334,7 @@ def get_stage_items():
 # Assessment > Testsets loading
 @api.route('/testsets/questions/')
 @permission_required(Permission.ASSESSMENT_MANAGE)
-def _get_testsets():
+def _get_testsetsQues():
     id = request.args.get('id', 0, int)
 
     assessment = Assessment.query.filter_by(id=id).first()
