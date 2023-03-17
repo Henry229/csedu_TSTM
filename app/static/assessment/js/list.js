@@ -29,7 +29,7 @@ function invokeTestsetList(obj) {
                 data.forEach(function (item) {
                     str = '<tr><td><button class="btn btn-sm btn-outline-info" type="button" name="modalButton"' +
                         ' data-toggle="modal" data-target="#dataModal" onclick=invokeModalTestset(' + item[0] + ')><i class="fas fa-eye"></i></button>';
-                    str = str + '<button class="btn btn-sm btn-outline-info" type="button" onclick=makeTestQeustions(this,' + item[0] + ')><i class="fas fa-plus"></i></button>';
+                    str = str + '<button class="btn btn-sm btn-outline-info" type="button" onclick=makeTestQeustions(' + item[0] + ')><i class="fas fa-plus"></i></button>';
                     str = str + '</td>';
                     str = str + '<td class="search_item" id="item_id">' + item[0] + '</td>';
                     str = str + '<td class="search_item" id="item_name">' + item[1] + '</td>';
