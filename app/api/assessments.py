@@ -1331,3 +1331,21 @@ def get_stage_items():
     return jsonify(rows)
 '''
 
+# Assessment > Testsets loading
+@api.route('/testsets/questions/')
+@permission_required(Permission.ASSESSMENT_MANAGE)
+def _get_testsets():
+    id = request.args.get('id', 0, int)
+
+    assessment = Assessment.query.filter_by(id=id).first()
+    rows, testset_list = [], []
+    if assessment is not None:
+        for testset in assessment.testsets:
+            if testset.delete == True:
+                continue
+            else:
+                testset_list.append(testset)
+    if assessment is not None:
+        rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
+                row in testset_list]
+    return jsonify(rows)
