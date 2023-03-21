@@ -1337,7 +1337,6 @@ def get_stage_items():
 def _get_testsetsQues():
     id = request.args.get('id', 0, int)
 
-    total = 0
     testset = Testset.query.filter_by(id=id).first()
     if testset:
         branching = json.dumps(testset.branching)
@@ -1358,5 +1357,4 @@ def _get_testsetsQues():
 
                 qti_item_obj.html = qti_item.to_html()
                 db.session.commit()
-                total = total + 1
-    return total
+    return success()
