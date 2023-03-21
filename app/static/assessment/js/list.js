@@ -67,6 +67,11 @@ function makeTestQeustions(o, id){
         success: function (data) {
 
         },
+        error: function (xhr, ajaxOptions, thrownError) {
+            debugger
+            alert(xhr.status);
+            alert(thrownError);
+        },
         complete : function () {
             $btn.attr('disabled', false);
         }
