@@ -1337,15 +1337,26 @@ def get_stage_items():
 def _get_testsetsQues():
     id = request.args.get('id', 0, int)
 
-    assessment = Assessment.query.filter_by(id=id).first()
-    rows, testset_list = [], []
-    if assessment is not None:
-        for testset in assessment.testsets:
-            if testset.delete == True:
-                continue
-            else:
-                testset_list.append(testset)
-    if assessment is not None:
-        rows = [(row.id, row.name, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
-                row in testset_list]
-    return jsonify(rows)
+    i = 0
+    testset = Testset.query.filter_by(id=id).first()
+    if testset:
+        branching = json.dumps(testset.branching)
+        ends = [m.end() for m in re.finditer('"id":', branching)]
+        for end in ends:
+            comma = branching.find(',', end)
+            testlet_id = int(branching[end:comma])
+
+            items = db.session.query(*Item.__table__.columns). \
+                select_from(Item). \
+                join(TestletHasItem, Item.id == TestletHasItem.item_id). \
+                filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
+
+            for i in items:
+                qti_item_obj = Item.query.filter_by(id=i.id).first()
+                item_service = ItemService(qti_item_obj.file_link)
+                qti_item = item_service.get_item()
+
+                qti_item_obj.html = qti_item.to_html()
+                db.session.commit()
+                i = i + 1
+    return i

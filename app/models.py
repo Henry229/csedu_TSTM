@@ -314,6 +314,7 @@ class Item(db.Model):
     imported_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     modified_by = db.Column(db.Integer)
     modified_time = db.Column(db.DateTime, default=datetime.now(pytz.utc))
+    html = db.Column(db.String)
 
     marking = db.relationship('Marking', back_populates="item")
     explanation = db.relationship('ItemExplanation', back_populates="item")

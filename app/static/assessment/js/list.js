@@ -57,6 +57,19 @@ function makeTestQeustions(o, id){
     var data = {
         id: id
     };
+    $.ajax({
+        method: 'GET',
+        url: '/api/testsets/questions/',
+        data: data,
+        beforeSend: function () {
+            $btn.attr('disabled', true);
+        },
+        success: function (data) {
 
+        },
+        complete : function () {
+            $btn.attr('disabled', false);
+        }
+    });
 
 }
