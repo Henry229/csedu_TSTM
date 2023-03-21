@@ -65,12 +65,10 @@ function makeTestQeustions(o, id){
             $btn.attr('disabled', true);
         },
         success: function (data) {
-
+            alert('The questions are generated')
         },
-        error: function (xhr, ajaxOptions, thrownError) {
-            debugger
-            alert(xhr.status);
-            alert(thrownError);
+        error: function (xhr) {
+            alert('A system error occurred');
         },
         complete : function () {
             $btn.attr('disabled', false);
