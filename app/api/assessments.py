@@ -1382,7 +1382,6 @@ def _get_testsetsQues():
                     rendered_template = rendered_template.replace('rendered_html', rendered_item)
                 response['html'] = rendered_template
 
-                qti_item_obj.html = response
-        db.session.commit()
+
 
     return success()
