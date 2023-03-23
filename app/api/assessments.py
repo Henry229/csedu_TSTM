@@ -810,6 +810,11 @@ def parse_processed_response(candidate_response):
 def rendered(item_id, assessment_session=None):
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
 
+    qti_item_obj = Item.query.filter_by(id=item_id).first()
+
+    response = qti_item_obj.html
+
+    '''
     # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
     # 없다면 새로 만들어서 캐시에 저장해 둔다.
     rendered_template_key = "item-{id:08d}-rendered".format(id=item_id)
@@ -819,6 +824,9 @@ def rendered(item_id, assessment_session=None):
         response = rendered_cache.get(rendered_template_key)
     else:
         response = None
+
+
+
     if response is None:
         rendered_item = ''
         response = {}
@@ -847,6 +855,7 @@ def rendered(item_id, assessment_session=None):
         # timeout ==> defined in config.py as API_RENDERED_CACHE_TIMEOUT
         if cache_enabled:
             rendered_cache.set(rendered_template_key, response)
+    '''
 
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
     # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.
