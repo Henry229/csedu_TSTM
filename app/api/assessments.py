@@ -1351,10 +1351,39 @@ def _get_testsetsQues():
                 filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
 
             for i in items:
+                '''
                 qti_item_obj = Item.query.filter_by(id=i.id).first()
                 item_service = ItemService(qti_item_obj.file_link)
                 qti_item = item_service.get_item()
 
                 qti_item_obj.html = qti_item.to_html()
                 db.session.commit()
+                '''
+
+                rendered_item = ''
+                response = {}
+                qti_item_obj = Item.query.filter_by(id=i.id).first()
+                item_subject = Codebook.get_code_name(qti_item_obj.subject)
+                try:
+                    item_service = ItemService(qti_item_obj.file_link)
+                    qti_item = item_service.get_item()
+                    rendered_item = qti_item.to_html()
+                    response['type'] = qti_item.get_interaction_type()
+                    response['cardinality'] = qti_item.get_cardinality()
+                    response['object_variables'] = qti_item.get_interaction_object_variables()
+                    response['interactions'] = qti_item.get_interaction_info()
+                    response['subject'] = item_subject
+                except Exception as e:
+                    print(e)
+
+                # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
+                debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
+                rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
+                if rendered_item:
+                    rendered_template = rendered_template.replace('rendered_html', rendered_item)
+                response['html'] = rendered_template
+
+                qti_item_obj.html = response
+                db.session.commit()
+
     return success()
