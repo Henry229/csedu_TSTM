@@ -250,6 +250,7 @@ def create_session():
             + 시험 시간이 남지 않은 경우는 시험이 끝났다고 알려준다.
     :return:
     """
+    log.debug("1 CHS : %s" % datetime.now())
     assessment_guid = request.json.get('assessment_guid')
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
@@ -335,6 +336,7 @@ def create_session():
     data = {
         'session': assessment_session.key,
     }
+    log.debug("2 CHS : %s" % datetime.now())
     return success(data)
 
 
@@ -364,7 +366,7 @@ def test_start(assessment_session):
     # status = assessment_session.get_value('status')
     # if status == AssessmentSession.STATUS_TEST_SUBMITTED:
     #     return bad_request(message="Test session finished already!")
-
+    log.debug("3 CHS : %s" % datetime.now())
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
@@ -381,6 +383,7 @@ def test_start(assessment_session):
     question_loaded = False
     # build test_items
     test_items = []
+    log.debug("4 CHS : %s" % datetime.now())
     for m in markings:
         info = {'question_no': m.question_no, 'item_id': m.item_id,
                 'marking_id': m.id, 'is_flagged': m.is_flagged,
@@ -392,11 +395,13 @@ def test_start(assessment_session):
             question_loaded = True
     assessment_session.set_value('test_items', test_items)
     if len(test_items) == 0 and question_no == 1:
+        log.debug("5 CHS : %s" % datetime.now())
         load_next_testlet(assessment_session)
+        log.debug("6 CHS : %s" % datetime.now())
     else:
         if question_loaded is False:
             return bad_request(message="Question No requested is not correct.")
-
+    log.debug("5 CHS : %s" % datetime.now())
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
     # Load test_items from session. It has items already before load_next_testlet
     new_questions = assessment_session.get_value('test_items')
@@ -418,7 +423,7 @@ def test_start(assessment_session):
             if n_q['marking_id'] == next_marking_id:
                 n_q['is_read'] = True
                 break
-
+    log.debug("7 CHS : %s" % datetime.now())
     data.update({
         'status': assessment_session.get_status(),
         'session': assessment_session.key,
