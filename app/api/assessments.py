@@ -1123,6 +1123,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     sum_score = 0
     percentile = 0
     last_question_no = 0
+    log.debug("11. CHS : %s" % datetime.now())
     if testlet_id != 0:
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
@@ -1133,6 +1134,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             db.session.expunge(marking)
         outcome_total = Marking.getTotalOutcomeScore(assessment_enroll_id, testset_id, testlet_id)
         percentile = sum_score / outcome_total * 100  # Student's marked percentile
+    log.debug("12. CHS : %s" % datetime.now())
 
     next_branch_json = get_next_testlet(stage_data, testset_id, testlet_id, percentile)
     new_questions = []
@@ -1148,6 +1150,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         db.session.add(assessment_enroll)
         # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
+        log.debug("13. CHS : %s" % datetime.now())
         marking_objects = []
         for item in items:
             if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
@@ -1161,8 +1164,10 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                 db.session.expunge(item)
         # higher performing “executemany” operations
         # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
+        log.debug("14. CHS : %s" % datetime.now())
         db.session.bulk_save_objects(marking_objects, return_defaults=False)
         db.session.commit()
+        log.debug("15. CHS : %s" % datetime.now())
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
             .order_by(Marking.question_no).all()
@@ -1173,7 +1178,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                          }
             test_items.append(item_info)
             new_questions.append(item_info)
-
+        log.debug("16. CHS : %s" % datetime.now())
         assessment_session.set_value('test_items', test_items)
     return new_questions
 
