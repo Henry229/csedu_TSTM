@@ -1351,14 +1351,13 @@ def _get_testsetsQues():
                 filter(TestletHasItem.testlet_id == testlet_id).order_by(TestletHasItem.order).all()
 
             for i in items:
-
+                '''
                 qti_item_obj = Item.query.filter_by(id=i.id).first()
                 item_service = ItemService(qti_item_obj.file_link)
                 qti_item = item_service.get_item()
 
                 qti_item_obj.html = qti_item.to_html()
                 db.session.commit()
-
                 '''
                 rendered_item = ''
                 response = {}
@@ -1384,6 +1383,6 @@ def _get_testsetsQues():
                 response['html'] = rendered_template
 
                 qti_item_obj.html = response
-                db.session.commit()
-                '''
+        db.session.commit()
+
     return success()
