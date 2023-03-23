@@ -812,50 +812,50 @@ def rendered(item_id, assessment_session=None):
 
     qti_item_obj = Item.query.filter_by(id=item_id).first()
 
-    response = qti_item_obj.html
-
-    '''
-    # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
-    # 없다면 새로 만들어서 캐시에 저장해 둔다.
-    rendered_template_key = "item-{id:08d}-rendered".format(id=item_id)
-    rendered_cache = ApiCache()
-    cache_enabled = current_app.config['API_RENDERED_CACHE'] == 'enabled'
-    if cache_enabled:
-        response = rendered_cache.get(rendered_template_key)
+    if qti_item_obj.html:
+        response = qti_item_obj.html
     else:
-        response = None
-
-
-
-    if response is None:
-        rendered_item = ''
-        response = {}
-        qti_item_obj = Item.query.filter_by(id=item_id).first()
-        item_subject = Codebook.get_code_name(qti_item_obj.subject)
-        try:
-            item_service = ItemService(qti_item_obj.file_link)
-            qti_item = item_service.get_item()
-            rendered_item = qti_item.to_html()
-            response['type'] = qti_item.get_interaction_type()
-            response['cardinality'] = qti_item.get_cardinality()
-            response['object_variables'] = qti_item.get_interaction_object_variables()
-            response['interactions'] = qti_item.get_interaction_info()
-            response['subject'] = item_subject
-        except Exception as e:
-            print(e)
-
-        # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
-        debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
-        rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
-        if rendered_item:
-            rendered_template = rendered_template.replace('rendered_html', rendered_item)
-        response['html'] = rendered_template
-
-        # 캐시에 저장한다.
-        # timeout ==> defined in config.py as API_RENDERED_CACHE_TIMEOUT
+        # 이미 캐시에 저장된 rendering 된 html 이 있다면 그걸 사용한다.
+        # 없다면 새로 만들어서 캐시에 저장해 둔다.
+        rendered_template_key = "item-{id:08d}-rendered".format(id=item_id)
+        rendered_cache = ApiCache()
+        cache_enabled = current_app.config['API_RENDERED_CACHE'] == 'enabled'
         if cache_enabled:
-            rendered_cache.set(rendered_template_key, response)
-    '''
+            response = rendered_cache.get(rendered_template_key)
+        else:
+            response = None
+
+
+
+        if response is None:
+            rendered_item = ''
+            response = {}
+            #qti_item_obj = Item.query.filter_by(id=item_id).first()
+            item_subject = Codebook.get_code_name(qti_item_obj.subject)
+            try:
+                item_service = ItemService(qti_item_obj.file_link)
+                qti_item = item_service.get_item()
+                rendered_item = qti_item.to_html()
+                response['type'] = qti_item.get_interaction_type()
+                response['cardinality'] = qti_item.get_cardinality()
+                response['object_variables'] = qti_item.get_interaction_object_variables()
+                response['interactions'] = qti_item.get_interaction_info()
+                response['subject'] = item_subject
+            except Exception as e:
+                print(e)
+
+            # debug mode 일 때만 정답을 표시할 수 있도록 하기위해
+            debug_rendering = os.environ.get('DEBUG_RENDERING') == 'true'
+            rendered_template = render_template("runner/test_item.html", item=qti_item_obj, debug_rendering=debug_rendering)
+            if rendered_item:
+                rendered_template = rendered_template.replace('rendered_html', rendered_item)
+            response['html'] = rendered_template
+
+            # 캐시에 저장한다.
+            # timeout ==> defined in config.py as API_RENDERED_CACHE_TIMEOUT
+            if cache_enabled:
+                rendered_cache.set(rendered_template_key, response)
+
 
     # 문제를 앞뒤로 왔다 갔다 하는 경우에 대해서도 read time 을 기록해 준다.
     # 브라우저를 refresh 하거나 다른 브라우저에서 로그인한 경우 어떤 item 을 보여줄 지 결정할 때 사용한다.
