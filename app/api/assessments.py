@@ -1150,26 +1150,30 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         db.session.add(assessment_enroll)
         # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
-        log.debug("23. CHS : %s" % datetime.now())
+        log.debug("33. CHS : %s" % datetime.now())
         marking_objects = []
-        '''
+
+
         for item in items:
-            if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
-                last_question_no += 1
-                marking = Marking(testset_id=testset_id,
-                                  testlet_id=testlet_id,
-                                  item_id=item.item_id, question_no=last_question_no,
-                                  weight=item.weight,
-                                  assessment_enroll_id=assessment_enroll_id)
-                marking_objects.append(marking)
-                db.session.expunge(item)
+            #if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
+            last_question_no += 1
+            marking = Marking(testset_id=testset_id,
+                              testlet_id=testlet_id,
+                              item_id=item.item_id, question_no=last_question_no,
+                              weight=item.weight,
+                              assessment_enroll_id=assessment_enroll_id)
+            marking_objects.append(marking)
+            db.session.expunge(item)
         # higher performing “executemany” operations
         # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
         log.debug("14. CHS : %s" % datetime.now())
         db.session.bulk_save_objects(marking_objects, return_defaults=False)
         db.session.commit()
-        '''
 
+
+        '''
+        ' 2 TEST
+        
         changed = False
         for item in items:
             #if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
@@ -1184,7 +1188,12 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             changed = True
         if changed:
             db.session.commit()
-        log.debug("24. CHS : %s" % datetime.now())
+        '''
+
+
+
+
+        log.debug("34. CHS : %s" % datetime.now())
 
         log.debug("15. CHS : %s" % datetime.now())
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
