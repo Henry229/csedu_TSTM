@@ -1154,6 +1154,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         marking_objects = []
 
 
+
         for item in items:
             #if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
             last_question_no += 1
