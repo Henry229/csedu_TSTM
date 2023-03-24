@@ -1172,16 +1172,16 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
 
         changed = False
         for item in items:
-            if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
-                                       testlet_id=testlet_id, item_id=item.item_id).count() == 0:
-                last_question_no += 1
-                marking = Marking(testset_id=testset_id,
-                                  testlet_id=testlet_id,
-                                  item_id=item.item_id, question_no=last_question_no,
-                                  weight=item.weight,
-                                  assessment_enroll_id=assessment_enroll_id)
-                db.session.add(marking)
-                changed = True
+            #if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
+            #                           testlet_id=testlet_id, item_id=item.item_id).count() == 0:
+            last_question_no += 1
+            marking = Marking(testset_id=testset_id,
+                              testlet_id=testlet_id,
+                              item_id=item.item_id, question_no=last_question_no,
+                              weight=item.weight,
+                              assessment_enroll_id=assessment_enroll_id)
+            db.session.add(marking)
+            changed = True
         if changed:
             db.session.commit()
         log.debug("24. CHS : %s" % datetime.now())
