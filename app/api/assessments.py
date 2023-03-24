@@ -250,7 +250,6 @@ def create_session():
             + 시험 시간이 남지 않은 경우는 시험이 끝났다고 알려준다.
     :return:
     """
-    log.debug("1 CHS : %s" % datetime.now())
     assessment_guid = request.json.get('assessment_guid')
     testset_id = request.json.get('testset_id')
     start_time = request.json.get('start_time')
@@ -336,7 +335,6 @@ def create_session():
     data = {
         'session': assessment_session.key,
     }
-    log.debug("2 CHS : %s" % datetime.now())
     return success(data)
 
 
@@ -366,7 +364,7 @@ def test_start(assessment_session):
     # status = assessment_session.get_value('status')
     # if status == AssessmentSession.STATUS_TEST_SUBMITTED:
     #     return bad_request(message="Test session finished already!")
-    log.debug("3 CHS : %s" % datetime.now())
+
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
@@ -383,7 +381,6 @@ def test_start(assessment_session):
     question_loaded = False
     # build test_items
     test_items = []
-    log.debug("4 CHS : %s" % datetime.now())
     for m in markings:
         info = {'question_no': m.question_no, 'item_id': m.item_id,
                 'marking_id': m.id, 'is_flagged': m.is_flagged,
@@ -395,13 +392,11 @@ def test_start(assessment_session):
             question_loaded = True
     assessment_session.set_value('test_items', test_items)
     if len(test_items) == 0 and question_no == 1:
-        log.debug("5 CHS : %s" % datetime.now())
         load_next_testlet(assessment_session)
-        log.debug("6 CHS : %s" % datetime.now())
     else:
         if question_loaded is False:
             return bad_request(message="Question No requested is not correct.")
-    log.debug("5 CHS : %s" % datetime.now())
+
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
     # Load test_items from session. It has items already before load_next_testlet
     new_questions = assessment_session.get_value('test_items')
@@ -423,7 +418,7 @@ def test_start(assessment_session):
             if n_q['marking_id'] == next_marking_id:
                 n_q['is_read'] = True
                 break
-    log.debug("7 CHS : %s" % datetime.now())
+
     data.update({
         'status': assessment_session.get_status(),
         'session': assessment_session.key,
@@ -1123,7 +1118,6 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     sum_score = 0
     percentile = 0
     last_question_no = 0
-    log.debug("11. CHS : %s" % datetime.now())
     if testlet_id != 0:
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
@@ -1134,7 +1128,6 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             db.session.expunge(marking)
         outcome_total = Marking.getTotalOutcomeScore(assessment_enroll_id, testset_id, testlet_id)
         percentile = sum_score / outcome_total * 100  # Student's marked percentile
-    log.debug("12. CHS : %s" % datetime.now())
 
     next_branch_json = get_next_testlet(stage_data, testset_id, testlet_id, percentile)
     new_questions = []
@@ -1151,12 +1144,12 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
         log.debug("43. CHS : %s" % datetime.now())
-        marking_objects = []
 
         if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
                                    testlet_id=testlet_id).count() == 0:
+            marking_objects = []
             for item in items:
-                #if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
+                # if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
                 last_question_no += 1
                 marking = Marking(testset_id=testset_id,
                                   testlet_id=testlet_id,
@@ -1170,7 +1163,6 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             db.session.bulk_save_objects(marking_objects, return_defaults=False)
         db.session.commit()
 
-        log.debug("44. CHS : %s" % datetime.now())
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
             .order_by(Marking.question_no).all()
@@ -1181,7 +1173,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                          }
             test_items.append(item_info)
             new_questions.append(item_info)
-        log.debug("16. CHS : %s" % datetime.now())
+
         assessment_session.set_value('test_items', test_items)
     return new_questions
 
