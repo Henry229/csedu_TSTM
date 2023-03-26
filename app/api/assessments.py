@@ -1161,11 +1161,10 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
             db.session.bulk_save_objects(marking_objects, return_defaults=False)
         db.session.commit()
-        log.debug("65. CHS : %s" % datetime.now())
+
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
                                            testset_id=testset_id, testlet_id=testlet_id) \
             .order_by(Marking.question_no).all()
-        log.debug("66. CHS : %s" % datetime.now())
         for marking in markings:
             item_info = {'question_no': marking.question_no, 'item_id': marking.item_id,
                          'marking_id': marking.id, 'is_flagged': marking.is_flagged, 'is_read': marking.is_read,
@@ -1173,7 +1172,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                          }
             test_items.append(item_info)
             new_questions.append(item_info)
-        log.debug("67. CHS : %s" % datetime.now())
+
         assessment_session.set_value('test_items', test_items)
     return new_questions
 
