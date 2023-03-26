@@ -1143,10 +1143,9 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         db.session.add(assessment_enroll)
         # db.session.commit()
         items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
-        log.debug("53. CHS : %s" % datetime.now())
+
         if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
                                    testlet_id=testlet_id).count() == 0:
-            log.debug("55. CHS : %s" % datetime.now())
             marking_objects = []
             for item in items:
                 # if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
