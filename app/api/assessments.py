@@ -260,11 +260,15 @@ def create_session():
         return bad_request()
 
     # 1. check if there is an assessment with the guid and get the latest one.
+    log.debug("1 .HONG: %s" % datetime.utcnow())
     assessment = Assessment.query.filter_by(GUID=assessment_guid).order_by(Assessment.version.desc()).first()
+    log.debug("1e .HONG: %s" % datetime.utcnow())
     if assessment is None:
         return bad_request()
 
+    log.debug("2 .HONG: %s" % datetime.utcnow())
     student = Student.query.filter_by(user_id=current_user.id).first()
+    log.debug("2e .HONG: %s" % datetime.utcnow())
     if student is None:
         return bad_request()
     student_user_id = student.user_id
@@ -279,9 +283,11 @@ def create_session():
     #                                                     student_user_id=student_user_id).count()
 
     # 3. Find out the test attempt count. ==> 시험은 1회만 허용한다. 단 homework 는 정해진 기간 안에 무제한 가능하다.
+    log.debug("3 .HONG: %s" % datetime.utcnow())
     last_attempt = AssessmentEnroll.query.filter_by(assessment_guid=assessment_guid, student_user_id=student_user_id,
                                                     testset_id=testset_id)\
         .order_by(desc(AssessmentEnroll.attempt_count)).first()
+    log.debug("3e .HONG: %s" % datetime.utcnow())
 
     attempt_count = 1
     if last_attempt is not None:
@@ -297,22 +303,27 @@ def create_session():
     assessment_type_name = assessment.test_type_name
     if assessment.is_homework:
         au_tz = pytz.timezone('Australia/Sydney')
+        log.debug("4 .HONG: %s" % datetime.utcnow())
         session_date = datetime(assessment.session_valid_until.year, assessment.session_valid_until.month,
                                 assessment.session_valid_until.day, tzinfo=au_tz) + timedelta(days=1)
+        log.debug("4e .HONG: %s" % datetime.utcnow())
         now = datetime.now(tz=au_tz)
         remaining = session_date - now
         test_duration = int(remaining.total_seconds() / 60)
     else:
         test_duration = testset.test_duration or 70
+    log.debug("5 .HONG: %s" % datetime.utcnow())
     enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.id, testset_id=testset_id,
                                 student_user_id=student_user_id, attempt_count=attempt_count,
                                 test_duration=test_duration, assessment_type=assessment_type_name)
+    log.debug("5e .HONG: %s" % datetime.utcnow())
     if student_ip:
         enrolled.start_ip = student_ip
     elif 'HTTP_X_FORWARDED_FOR' in request.headers.environ:
         enrolled.start_ip = request.headers.environ['HTTP_X_FORWARDED_FOR']
     else:
         enrolled.start_ip = request.headers.environ['REMOTE_ADDR']
+    log.debug("6 .HONG: %s" % datetime.utcnow())
     test_center = Codebook.get_testcenter_of_current_user()
     if test_center:
         enrolled.test_center = test_center.id
@@ -325,6 +336,7 @@ def create_session():
     assessment_session = new_assessment_session(current_user.id, assessment_enroll_id,
                                                 testset_id, test_duration, attempt_count)
     assessment_session.set_value('start_time', int(time()))
+    log.debug("6e .HONG: %s" % datetime.utcnow())
 
     # Start a new assessment session.
     assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
@@ -368,6 +380,7 @@ def test_start(assessment_session):
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
+    log.debug("7 .HONG: %s" % datetime.utcnow())
     last_read_marking = Marking.query.filter_by(is_read=True, assessment_enroll_id=assessment_enroll_id)\
         .order_by(desc(Marking.read_time)).first()
     if last_read_marking is None:
@@ -378,6 +391,7 @@ def test_start(assessment_session):
     # Find markings.
     markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id) \
         .order_by(Marking.question_no).all()
+    log.debug("7e .HONG: %s" % datetime.utcnow())
     question_loaded = False
     # build test_items
     test_items = []
@@ -392,7 +406,9 @@ def test_start(assessment_session):
             question_loaded = True
     assessment_session.set_value('test_items', test_items)
     if len(test_items) == 0 and question_no == 1:
+        log.debug("8 .HONG: %s" % datetime.utcnow())
         load_next_testlet(assessment_session)
+        log.debug("8e .HONG: %s" % datetime.utcnow())
     else:
         if question_loaded is False:
             return bad_request(message="Question No requested is not correct.")
@@ -405,6 +421,7 @@ def test_start(assessment_session):
     data = {'is_read': False, 'is_flagged': False}
     if next_item is not None:
         # next_item_id = next_item.get('item_id')
+        log.debug("9 .HONG: %s" % datetime.utcnow())
         next_question_no = question_no
         next_marking_id = next_item.get('marking_id')
         marking = Marking.query.filter_by(id=next_marking_id).first()
@@ -418,7 +435,7 @@ def test_start(assessment_session):
             if n_q['marking_id'] == next_marking_id:
                 n_q['is_read'] = True
                 break
-
+        log.debug("9e .HONG: %s" % datetime.utcnow())
     data.update({
         'status': assessment_session.get_status(),
         'session': assessment_session.key,
@@ -485,7 +502,9 @@ def response_process(item_id, assessment_session=None):
     # check session status
     # if assessment_session.get_status() == AssessmentSession.STATUS_READY:
     #     return bad_request(error_code=TEST_SESSION_ERROR, message='Session status is wrong.')
+    log.debug("10 .HONG: %s" % datetime.utcnow())
     student = Student.query.filter_by(user_id=current_user.id).first()
+    log.debug("10e .HONG: %s" % datetime.utcnow())
     if student is None:
         return bad_request(message='Student id is not valid!')
     # remove from the db session
@@ -514,6 +533,7 @@ def response_process(item_id, assessment_session=None):
     processed = None
     # correct_response = ''
     try:
+        log.debug("11 .HONG: %s" % datetime.utcnow())
         item_service = ItemService(qti_item_obj.file_link)
         # correct_response = item_service.get_item().get_correct_response()
         qti_xml = item_service.get_qti_xml_path()
@@ -525,6 +545,7 @@ def response_process(item_id, assessment_session=None):
             processed = json.loads(processed)
         except Exception as e:
             response['processed'] = "Not implemented."
+        log.debug("11e .HONG: %s" % datetime.utcnow())
     except Exception as e:
         print(e)
     if processed is None:
@@ -549,6 +570,7 @@ def response_process(item_id, assessment_session=None):
         candidate_r_value = candidate_response
 
     # Get the last marking of this question.
+    log.debug("12 .HONG: %s" % datetime.utcnow())
     last_marking = Marking.query.filter_by(id=marking_id).first()
     # We don't need to read back the changes.
     db.session.expunge(last_marking)
@@ -560,7 +582,7 @@ def response_process(item_id, assessment_session=None):
     correct_r_value = parse_correct_response(processed.get('correctResponses'))
     last_r_value = last_marking.candidate_r_value
     last_is_correct = last_marking.is_correct
-
+    log.debug("12e .HONG: %s" % datetime.utcnow())
     # Update changes
     marking_updated = {
         "candidate_r_value": candidate_r_value,
@@ -573,17 +595,20 @@ def response_process(item_id, assessment_session=None):
         marking_updated["last_r_value"] = last_r_value
     if last_is_correct is not None:
         marking_updated["last_is_correct"] = last_is_correct
+    log.debug("13 .HONG: %s" % datetime.utcnow())
     db.session.query(Marking).filter(Marking.id == marking_id).update(marking_updated)
     db.session.commit()
-
+    log.debug("13e .HONG: %s" % datetime.utcnow())
     assessment_session.set_saved_answer(marking_id, candidate_r_value)
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = None
+    log.debug("14 .HONG: %s" % datetime.utcnow())
     if direction == 'back':
         next_item = get_previous_item(assessment_session, question_no)
     else:
         next_item = get_next_item(assessment_session, question_no)
+    log.debug("14e .HONG: %s" % datetime.utcnow())
     data = None
     if direction == 'back':
         data = {'is_read': True, 'is_flagged': False}
@@ -593,6 +618,7 @@ def response_process(item_id, assessment_session=None):
         # There is 2 cases where next_item is None
         #   1. It consumed all of the current testlet items. ==> Ask to proceed to a next testlet.
         #   2. It consumed all of the current testset items.  ==> Ask to submit the testset.
+        log.debug("15 .HONG: %s" % datetime.utcnow())
         if can_load_next_testlet(assessment_session, marking_testlet_id):
             assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
             testset_id = assessment_session.get_value('testset_id')
@@ -611,7 +637,9 @@ def response_process(item_id, assessment_session=None):
             test_type = testset.test_type
             assessment_session.set_status(AssessmentSession.STATUS_TEST_FINISHED)
             data['html'] = render_template("runner/test_finished.html", test_type=test_type)
+        log.debug("15e .HONG: %s" % datetime.utcnow())
     else:
+        log.debug("16 .HONG: %s" % datetime.utcnow())
         next_item_id = next_item.get('item_id')
         next_question_no = None
         if direction == 'back':
@@ -627,7 +655,7 @@ def response_process(item_id, assessment_session=None):
         # marking.is_read = True
         # marking.read_time = datetime.utcnow()
         # db.session.commit()
-
+        log.debug("16e .HONG: %s" % datetime.utcnow())
     if direction == 'back':
         assessment_session.set_status(AssessmentSession.STATUS_IN_TESTING)
 
@@ -888,6 +916,7 @@ def rendered(item_id, assessment_session=None):
 @permission_required(Permission.ITEM_EXEC)
 @validate_session
 def next_stage(assessment_session):
+    log.debug("18 .HONG: %s" % datetime.utcnow())
     session_key = request.json.get('session')
     testlet_id = request.json.get('testlet_id')
     question_no = request.json.get('question_no')
@@ -929,6 +958,7 @@ def next_stage(assessment_session):
         'start_time': assessment_session.get_value('start_time'),
         'new_questions': new_questions
     })
+    log.debug("18e .HONG: %s" % datetime.utcnow())
     return success(data)
 
 
@@ -1101,14 +1131,17 @@ def can_load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
     :param testlet_id:
     :return:
     """
+    log.debug("20 .HONG: %s" % datetime.utcnow())
     testset_id = assessment_session.get_value('testset_id')
     stage_data = assessment_session.get_value('stage_data')
     percentile = 0
     next_branch_json = get_next_testlet(stage_data, testset_id, testlet_id, percentile)
+    log.debug("20e .HONG: %s" % datetime.utcnow())
     return next_branch_json is not None
 
 
 def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
+    log.debug("21 .HONG: %s" % datetime.utcnow())
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     stage_data = assessment_session.get_value('stage_data')
@@ -1174,10 +1207,12 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             new_questions.append(item_info)
 
         assessment_session.set_value('test_items', test_items)
+    log.debug("21e .HONG: %s" % datetime.utcnow())
     return new_questions
 
 
 def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
+    log.debug("22 .HONG: %s" % datetime.utcnow())
     testset = Testset.query.filter_by(id=testset_id).first()
     first_branch = testset.branching.get('data')[0]
 
@@ -1215,22 +1250,26 @@ def get_next_testlet(stage_data, testset_id, testlet_id, percentile):
                 # for stage 1..n
                 next_branches = curr_branch.get('next')
             i = i + 1
+    log.debug("22e .HONG: %s" % datetime.utcnow())
     return next_branch
 
 
 @api.route('/get_item/', methods=['GET'])
 @permission_required(Permission.ITEM_EXEC)
 def get_item_from_marking():
+    log.debug("23 .HONG: %s" % datetime.utcnow())
     id = request.args.get('marking_id')
     item = Marking.query.options(load_only("item_id")).filter_by(id=id).first()
     rows = [(row.id, row.correct_answer) for
             row in item]
+    log.debug("23e .HONG: %s" % datetime.utcnow())
     return jsonify(rows)
 
 
 @api.route('/set_student_marking/', methods=['POST'])
 @permission_required(Permission.ITEM_EXEC)
 def set_student_marking():
+    log.debug("24 .HONG: %s" % datetime.utcnow())
     marking_id = request.form.get('marking_id')
     item_id = request.form.get('item_id')
     candidate_r_value = request.form.get('candidate_r_value')
@@ -1253,6 +1292,7 @@ def set_student_marking():
         db.session.commit()
     else:
         candidate_mark = 0
+    log.debug("24e .HONG: %s" % datetime.utcnow())
     return candidate_mark
 
 
