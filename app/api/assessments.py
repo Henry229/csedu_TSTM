@@ -368,39 +368,30 @@ def test_start(assessment_session):
     assessment_enroll_id = assessment_session.get_value('assessment_enroll_id')
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
-    log.debug("88 .HONG: %s" % datetime.utcnow())
     '''
+    # tuning
     last_read_marking = Marking.query.filter_by(is_read=True, assessment_enroll_id=assessment_enroll_id)\
         .order_by(desc(Marking.read_time)).first()
     if last_read_marking is None:
         question_no = 1
     else:
         question_no = last_read_marking.question_no
-    log.debug("ques .HONG: %s" % question_no)
-    log.debug("88e .HONG: %s" % datetime.utcnow())
     '''
     # Find markings.
-    log.debug("99 .HONG: %s" % datetime.utcnow())
     markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id) \
         .order_by(Marking.question_no).all()
-    log.debug("99e .HONG: %s" % datetime.utcnow())
 
-    log.debug("100 .HONG: %s" % datetime.utcnow())
-
+    # tuning
     reads = []
     for m in markings:
         if m.is_read is True:
             info = {'question_no': m.question_no, 'read_time': m.read_time}
             reads.append(info)
-
     if len(reads) == 0:
-        log.debug("no .HONG: %s" % "0")
         question_no = 1
     else:
         reads.sort(key=lambda x: x["read_time"], reverse=True)
         question_no = reads[0]['question_no']
-    log.debug("quest no .HONG: %s" % question_no)
-    log.debug("100e .HONG: %s" % datetime.utcnow())
 
     question_loaded = False
     # build test_items
