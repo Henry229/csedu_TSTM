@@ -397,7 +397,7 @@ def test_start(assessment_session):
         question_no = 1
     else:
         sorted(temps, key=lambda x: x['read_time'], reverse=True)
-        question_no = temps.question_no
+        question_no = temps[0].question_no
     log.debug("quest no .HONG: %s" % question_no)
     log.debug("100e .HONG: %s" % datetime.utcnow())
 
