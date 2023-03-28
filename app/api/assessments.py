@@ -394,8 +394,10 @@ def test_start(assessment_session):
             temps.append(info)
 
     if len(temps) == 0:
+        log.debug("no .HONG: %s" % "0")
         question_no = 1
     else:
+        log.debug("no .HONG: %s" % len(temps))
         sorted(temps, key=lambda x: x['read_time'], reverse=True)
         question_no = temps[0]['question_no']
     log.debug("quest no .HONG: %s" % question_no)
