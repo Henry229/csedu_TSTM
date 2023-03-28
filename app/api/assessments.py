@@ -386,13 +386,19 @@ def test_start(assessment_session):
     log.debug("99e .HONG: %s" % datetime.utcnow())
 
     log.debug("100 .HONG: %s" % datetime.utcnow())
-    output_dict = [x for x in markings if x['is_read'] is True]
-    if output_dict is None:
+
+    temps = []
+    for m in markings:
+        if m.is_read is True:
+            info = {'question_no': m.question_no, 'read_time': m.read_time}
+            temps.append(info)
+
+    if len(temps) == 0:
         question_no = 1
     else:
-        output_dict.sort(key=output_dict.read_time, reverse=True)
-        question_no = output_dict.question_no
-    log.debug("quest .HONG: %s" % question_no)
+        temps.sort(key=temps.read_time, reverse=True)
+        question_no = temps.question_no
+    log.debug("quest no .HONG: %s" % question_no)
     log.debug("100e .HONG: %s" % datetime.utcnow())
 
     question_loaded = False
