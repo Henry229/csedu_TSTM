@@ -397,7 +397,7 @@ def test_start(assessment_session):
         log.debug("no .HONG: %s" % "0")
         question_no = 1
     else:
-        reads.sort(key=lambda x: x["brand"], reverse=True)
+        reads.sort(key=lambda x: x["read_time"], reverse=True)
         question_no = reads[0]['question_no']
     log.debug("quest no .HONG: %s" % question_no)
     log.debug("100e .HONG: %s" % datetime.utcnow())
