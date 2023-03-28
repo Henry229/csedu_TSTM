@@ -387,19 +387,18 @@ def test_start(assessment_session):
 
     log.debug("100 .HONG: %s" % datetime.utcnow())
 
-    temps = []
+    reads = []
     for m in markings:
         if m.is_read is True:
             info = {'question_no': m.question_no, 'read_time': m.read_time}
-            temps.append(info)
+            reads.append(info)
 
-    if len(temps) == 0:
+    if len(reads) == 0:
         log.debug("no .HONG: %s" % "0")
         question_no = 1
     else:
-        log.debug("no .HONG: %s" % len(temps))
-        sorted(temps, key=lambda x: x['read_time'], reverse=True)
-        question_no = temps[0]['question_no']
+        sorted_reads = sorted(reads, key=lambda x: x['read_time'], reverse=True)
+        question_no = sorted_reads[0]['question_no']
     log.debug("quest no .HONG: %s" % question_no)
     log.debug("100e .HONG: %s" % datetime.utcnow())
 
