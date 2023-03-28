@@ -375,6 +375,7 @@ def test_start(assessment_session):
         question_no = 1
     else:
         question_no = last_read_marking.question_no
+    log.debug("ques .HONG: %s" % question_no)
     log.debug("88e .HONG: %s" % datetime.utcnow())
     # Find markings.
     log.debug("99 .HONG: %s" % datetime.utcnow())
