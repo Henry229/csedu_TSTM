@@ -369,6 +369,7 @@ def test_start(assessment_session):
     testset_id = assessment_session.get_value('testset_id')
     attempt_count = assessment_session.get_value('attempt_count')
     log.debug("88 .HONG: %s" % datetime.utcnow())
+    '''
     last_read_marking = Marking.query.filter_by(is_read=True, assessment_enroll_id=assessment_enroll_id)\
         .order_by(desc(Marking.read_time)).first()
     if last_read_marking is None:
@@ -377,11 +378,23 @@ def test_start(assessment_session):
         question_no = last_read_marking.question_no
     log.debug("ques .HONG: %s" % question_no)
     log.debug("88e .HONG: %s" % datetime.utcnow())
+    '''
     # Find markings.
     log.debug("99 .HONG: %s" % datetime.utcnow())
     markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id) \
         .order_by(Marking.question_no).all()
     log.debug("99e .HONG: %s" % datetime.utcnow())
+
+    log.debug("100 .HONG: %s" % datetime.utcnow())
+    output_dict = [x for x in markings if x['is_read'] is True]
+    if output_dict is None:
+        question_no = 1
+    else:
+        output_dict.sort(key=output_dict.read_time, reverse=True)
+        question_no = output_dict.question_no
+    log.debug("quest .HONG: %s" % question_no)
+    log.debug("100e .HONG: %s" % datetime.utcnow())
+
     question_loaded = False
     # build test_items
     test_items = []
