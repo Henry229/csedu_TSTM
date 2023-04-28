@@ -75,7 +75,7 @@ def _search_testsets():
         query = query.filter_by(test_type=search_test_type)
     query = query.filter_by(active=True)
     query = query.filter(or_(Testset.delete.is_(False), Testset.delete.is_(None)))
-    testsets = query.order_by(Testset.modified_time.desc()).all()
+    testsets = query.order_by(Testset.id.desc()).all()
     rows = [(row.id, row.name, row.version, Codebook.get_code_name(row.grade), Codebook.get_code_name(row.subject)) for
             row in testsets]
     return jsonify(rows)
