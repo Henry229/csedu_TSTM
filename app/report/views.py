@@ -817,8 +817,9 @@ def center():
         test_type = int(test_type)
     if test_center:
         test_center = int(test_center)
-
+    log.debug("CHO 1: %s" % datetime.now(pytz.utc))
     search_form = ReportSearchForm()
+    log.debug("CHO 2: %s" % datetime.now(pytz.utc))
     if test_type is None:
         search_form.test_type.data = Codebook.get_code_id('Naplan')
     else:
@@ -830,26 +831,27 @@ def center():
     else:
         search_form.test_center.data = test_center
     search_form.year.data = year
-
+    log.debug("CHO 3: %s" % datetime.now(pytz.utc))
     if assessment_id == 0:
         search_form.assessment.choices = []
         search_form.assessment.data = None
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
-
+    log.debug("CHO 4: %s" % datetime.now(pytz.utc))
     assessments = search_assessment()
+    log.debug("CHO 5: %s" % datetime.now(pytz.utc))
     assessments_codesets = []
     for d in assessments.json['data']:
         code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
         assessments_codesets.append(code)
-
+    log.debug("CHO 6: %s" % datetime.now(pytz.utc))
     search_form.assessment.choices = assessments_codesets
     search_form.assessment.data = assessment
-
+    log.debug("CHO 7: %s" % datetime.now(pytz.utc))
     # query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
     #    filter_by(testset_id=testset_id)
 
     assessment_name = Assessment.query.filter_by(id=assessment_id).first().name
-
+    log.debug("CHO 8: %s" % datetime.now(pytz.utc))
     add_query_str = ''
     # Query current_user's test center
     # If test_center 'All', query all
@@ -865,8 +867,9 @@ def center():
             s_branch = Codebook.query.filter_by(id=test_center).first()
             campus_prefix = s_branch.additional_info['campus_prefix']
             add_query_str = " and s.branch=\'\'" + str(campus_prefix) + "\'\' "
-
+    log.debug("CHO 9: %s" % datetime.now(pytz.utc))
     t_items = AssessmentHasTestset.query.filter_by(assessment_id=assessment_id).all()
+    log.debug("CHO 10: %s" % datetime.now(pytz.utc))
     testset_name_list = ''
     columns_query = ''
     columns_list = []
@@ -884,7 +887,7 @@ def center():
         if len(t_items) > t_items_count:
             testset_name_list += ','
             columns_query += ','
-
+    log.debug("CHO 11: %s" % datetime.now(pytz.utc))
     '''
     codebook.code_type = test_type 
     Naplan, OC, Selective, Naplan-P, Homework, V_Y5 Scholarshop, V_Y7 Scholarship, V_Selective
@@ -942,7 +945,7 @@ def center():
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
     '''
-
+    log.debug("CHO 12: %s" % datetime.now(pytz.utc))
     #if homework, only data in 4months because the assessment used again and again every year.
     if str(test_type) == '307':
         add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
@@ -971,14 +974,17 @@ def center():
 
     cursor = db.session.execute(new_query)
     report_list = list(cursor.fetchall())
-
+    log.debug("CHO 13: %s" % datetime.now(pytz.utc))
     if int(testset_id) > 0:
         testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.branching).filter_by(
             id=testset_id).first()
+        log.debug("CHO 14: %s" % datetime.now(pytz.utc))
         branching = testset.branching.get("data")
         testlet_id = branching[0].get("id")
         # testlet_id = 426
+        log.debug("CHO 15: %s" % datetime.now(pytz.utc))
         review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
+        log.debug("CHO 16: %s" % datetime.now(pytz.utc))
         # flash(review_items)
 
     # for tsset in testset_dic:
