@@ -973,6 +973,7 @@ def center():
         " + columns_query + ");")
 
     cursor = db.session.execute(new_query)
+    log.debug("CHO 12-1: %s" % new_query)
     report_list = list(cursor.fetchall())
     log.debug("CHO 13: %s" % datetime.now(pytz.utc))
     if int(testset_id) > 0:
