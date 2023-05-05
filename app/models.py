@@ -781,6 +781,8 @@ class AssessmentEnroll(db.Model):
     start_ip = db.Column(db.String(32))
     synced = db.Column(db.Boolean, default=False)
     synced_time = db.Column(db.DateTime)
+    score = db.Column(db.Float, default=0)
+    total_score = db.Column(db.Float, default=0)
 
     assessment = db.relationship('Assessment', back_populates="enroll")
     testset = db.relationship('Testset')
