@@ -591,8 +591,8 @@ def response_process(item_id, assessment_session=None):
     marking = db.session.query(Marking).filter(Marking.id == marking_id)
     enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
     if last_marking.is_correct:
-        enroll.score = enroll.score - last_marking.candidate_mark
-    enroll.score = enroll.score + candidate_mark
+        enroll.score = enroll.score - (last_marking.candidate_mark * last_marking.weight)
+    enroll.score = enroll.score + (candidate_mark * last_marking.weight)
     marking.update(marking_updated)
     db.session.commit()
 
