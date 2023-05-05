@@ -1178,8 +1178,8 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                                   assessment_enroll_id=assessment_enroll_id)
                 marking_objects.append(marking)
                 db.session.expunge(item)
-                if item.outcome_score:
-                    total_score = total_score + (item.weight * item.outcome_score)
+                if Marking.outcome_score:
+                    total_score = total_score + (item.weight * Marking.outcome_score)
                 else:
                     total_score = total_score + (item.weight * 1)
             # higher performing “executemany” operations
