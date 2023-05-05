@@ -1167,6 +1167,7 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
         if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id,
                                    testlet_id=testlet_id).count() == 0:
             marking_objects = []
+            total_score = 0
             for item in items:
                 # if Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id, testset_id=testset_id, testlet_id=testlet_id, item_id=item.item_id).count()==0:
                 last_question_no += 1
@@ -1177,9 +1178,14 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
                                   assessment_enroll_id=assessment_enroll_id)
                 marking_objects.append(marking)
                 db.session.expunge(item)
+                if item.outcome_score:
+                    total_score += item.weight * item.outcome_score
+                else:
+                    total_score += item.weight * 1
             # higher performing “executemany” operations
             # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
             db.session.bulk_save_objects(marking_objects, return_defaults=False)
+            assessment_enroll.total_score = assessment_enroll.total_score + total_score
         db.session.commit()
 
         markings = Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id,
