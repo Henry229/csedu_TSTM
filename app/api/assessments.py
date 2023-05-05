@@ -589,11 +589,12 @@ def response_process(item_id, assessment_session=None):
     if last_is_correct is not None:
         marking_updated["last_is_correct"] = last_is_correct
     marking = db.session.query(Marking).filter(Marking.id == marking_id)
-    marking.update(marking_updated)
-
     enroll = AssessmentEnroll.query.filter_by(id=assessment_session.get_value('assessment_enroll_id')).first()
+    if marking.is_correct:
+        enroll.score = enroll.score - marking.candidate_mark
     enroll.score = enroll.score + candidate_mark
 
+    marking.update(marking_updated)
     db.session.commit()
 
     assessment_session.set_saved_answer(marking_id, candidate_r_value)
