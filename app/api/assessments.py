@@ -591,7 +591,11 @@ def response_process(item_id, assessment_session=None):
     db.session.query(Marking).filter(Marking.id == marking_id).update(marking_updated)
     db.session.commit()
 
+    log.debug("CHO ID 1 : %s" % assessment_session.get_value('assessment_enroll_id'))
+
     assessment_session.set_saved_answer(marking_id, candidate_r_value)
+
+    log.debug("CHO ID 2 : %s" % assessment_session.get_value('assessment_enroll_id'))
 
     next_question_no, next_item_id, next_marking_id = 0, 0, 0
     next_item = None
