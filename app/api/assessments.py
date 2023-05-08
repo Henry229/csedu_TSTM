@@ -593,9 +593,6 @@ def response_process(item_id, assessment_session=None):
     if last_marking.is_correct:
         enroll.score -= last_marking.candidate_mark * last_marking.weight
 
-    log.debug("chs candidate_mark: %s" % candidate_mark)
-    log.debug("chs last_marking: %s" % last_marking.weight)
-
     if enroll.score is None:
         enroll.score = 0
     enroll.score += candidate_mark * last_marking.weight
