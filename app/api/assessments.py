@@ -596,9 +596,9 @@ def response_process(item_id, assessment_session=None):
     log.debug("chs candidate_mark: %s" % candidate_mark)
     log.debug("chs last_marking: %s" % last_marking.weight)
 
-    enroll.score = 1 * 1.0
-
-    #enroll.score += candidate_mark * last_marking.weight
+    if enroll.score is None:
+        enroll.score = 0
+    enroll.score += candidate_mark * last_marking.weight
     marking.update(marking_updated)
     db.session.commit()
 
