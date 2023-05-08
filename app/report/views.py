@@ -144,12 +144,14 @@ def my_graph_report(assessment_id, ts_id, student_user_id):
         elif i == 3:
             subject4 = row.subject
             percent4 = row.my_pecent
-        i+=1
+        i += 1
 
     template_file = 'report/my_report_graph.html'
     return render_template(template_file, assessment_name=assessment_name, grade=grade,
-                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id, subject1=subject1,
-                           percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3, percent3=percent3,
+                           subject=test_subject_string, test_type=test_type, student_user_id=student_user_id,
+                           subject1=subject1,
+                           percent1=percent1, subject2=subject2, percent2=percent2, subject3=subject3,
+                           percent3=percent3,
                            subject4=subject4, percent4=percent4)
 
 
@@ -166,8 +168,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     # Todo: Check accessibility to get report
     # refresh_mviews()
 
-
-    #in the case that subject is Vocabulary, the source is separated
+    # in the case that subject is Vocabulary, the source is separated
 
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
     if testset is None:
@@ -176,7 +177,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         return redirect(url)
 
     test_subject_string = Codebook.get_code_name(testset.subject)
-    #if test_subject_string.lower() == 'vocabulary':
+    # if test_subject_string.lower() == 'vocabulary':
     #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
 
     grade = Codebook.get_code_name(testset.grade)
@@ -187,7 +188,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -202,17 +204,15 @@ def my_report(assessment_id, ts_id, student_user_id):
     finish_time = row.finish_time
     if finish_time is None: finish_time = row.start_time
 
-
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-
 
     # setting review period for Holiday course
     enable_holiday = False
     period_holiday_review = 0
     test_type_additional_info = Codebook.get_additional_info(test_type)
 
-    #show video to only incorrect queston
+    # show video to only incorrect queston
     video_for_incorrect = True
     if test_type_additional_info is not None:
         if test_type_additional_info.get('video_for_incorrect'):
@@ -225,7 +225,8 @@ def my_report(assessment_id, ts_id, student_user_id):
             # change review time for Holiday course's incorrect questions and videos
             if test_type_additional_info['period_holiday_review']:
                 period_holiday_review = test_type_additional_info['period_holiday_review']
-                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=period_holiday_review)) >= datetime.now(pytz.utc)
+                is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(
+                    days=period_holiday_review)) >= datetime.now(pytz.utc)
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
@@ -234,7 +235,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         url = request.referrer
         flash('Marking data not available')
         # refresh materialized view takes 5 minutes
-        #flash('Please wait. It will take about 5 minutes to get the test results.')
+        # flash('Please wait. It will take about 5 minutes to get the test results.')
         return redirect(url)
 
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
@@ -286,7 +287,8 @@ def my_report(assessment_id, ts_id, student_user_id):
                                             score=score, markings=markings, ts_by_category=ts_by_category,
                                             student_user_id=student_user_id, static_folder=current_app.static_folder,
                                             pdf_url=pdf_url, grade=grade, video_for_incorrect=video_for_incorrect,
-                                            explanation_link=explanation_link, test_type=test_type,r_value=modifying_r_value)
+                                            explanation_link=explanation_link, test_type=test_type,
+                                            r_value=modifying_r_value)
     if not pdf:
         return rendered_template_pdf
     # PDF download
@@ -315,6 +317,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         attachment_filename=pdf_file_path)
     return rsp
 
+
 def modifying_r_value(value):
     if value is None:
         return value
@@ -323,7 +326,7 @@ def modifying_r_value(value):
             result = []
             for v in value:
                 if " gap_" in v:
-                    result.append( v[v.rfind("_")+1:] + '. ' + v[:v.rfind(" gap_")])
+                    result.append(v[v.rfind("_") + 1:] + '. ' + v[:v.rfind(" gap_")])
                 else:
                     result.append(v)
             return result
@@ -331,6 +334,7 @@ def modifying_r_value(value):
             return value
     else:
         return value
+
 
 def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string):
     grade = Codebook.get_code_name(testset.grade)
@@ -341,7 +345,8 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
-    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id, AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
+    query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
+                                                 AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
@@ -378,7 +383,8 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
           'left join ' \
           '(select row_number() over() as id, value from json_array_elements(:candidate_r_value)) b ' \
           'on a.id = b.id'
-    cursor_1 = db.engine.execute(text(sql), {'correct_r_value': json.dumps(marking.correct_r_value), 'candidate_r_value': json.dumps(marking.candidate_r_value)})
+    cursor_1 = db.engine.execute(text(sql), {'correct_r_value': json.dumps(marking.correct_r_value),
+                                             'candidate_r_value': json.dumps(marking.candidate_r_value)})
     Record = namedtuple('Record', cursor_1.keys())
     rows = [Record(*r) for r in cursor_1.fetchall()]
 
@@ -394,7 +400,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         for r in rows:
             if r.candidate_r_value:
                 student_value = json.dumps(r.candidate_r_value)
-                if student_value[student_value.rfind('_')+1:] == value_num:
+                if student_value[student_value.rfind('_') + 1:] == value_num:
                     end = student_value.index(" gap_")
                     candidate_r_value = student_value[1:end]
 
@@ -449,6 +455,7 @@ def vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, t
         attachment_filename=pdf_file_path)
     return rsp
 
+
 @report.route('/ts_v2/<int:assessment_id>/<int:ts_id>/<student_user_id>', methods=['GET'])
 @login_required
 # @permission_required(Permission.ITEM_EXEC)
@@ -460,7 +467,7 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
         - Execute: Provide link to Subject Report
     '''
     # Todo: Check accessibility to get report
-    #refresh_mviews()
+    # refresh_mviews()
     # url = request.referrer
     # flash('refresh_mviews')
     # return redirect(url)
@@ -482,7 +489,8 @@ def my_report_v2(assessment_id, ts_id, student_user_id):
 
     assessment_enroll_id = row.id
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
-    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=row.testset_id).first()
+    testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(
+        id=row.testset_id).first()
     test_subject_string = Codebook.get_code_name(testset.subject)
     grade = Codebook.get_code_name(testset.grade)
     test_type = testset.test_type
@@ -817,9 +825,8 @@ def center():
         test_type = int(test_type)
     if test_center:
         test_center = int(test_center)
-    log.debug("CHO 1: %s" % datetime.now(pytz.utc))
+
     search_form = ReportSearchForm()
-    log.debug("CHO 2: %s" % datetime.now(pytz.utc))
     if test_type is None:
         search_form.test_type.data = Codebook.get_code_id('Naplan')
     else:
@@ -831,27 +838,27 @@ def center():
     else:
         search_form.test_center.data = test_center
     search_form.year.data = year
-    log.debug("CHO 3: %s" % datetime.now(pytz.utc))
+
     if assessment_id == 0:
         search_form.assessment.choices = []
         search_form.assessment.data = None
         return render_template('report/report_center.html', form=search_form, report_list='', columns_list='')
-    log.debug("CHO 4: %s" % datetime.now(pytz.utc))
+
     assessments = search_assessment()
-    log.debug("CHO 5: %s" % datetime.now(pytz.utc))
     assessments_codesets = []
     for d in assessments.json['data']:
-        code = (str(d['assessment_id']) + '_' + str(d['testset_id']), d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
+        code = (str(d['assessment_id']) + '_' + str(d['testset_id']),
+                d['assessment_name'] + ' : ' + d['testset_name'] + ' v.' + str(d['testset_version']))
         assessments_codesets.append(code)
-    log.debug("CHO 6: %s" % datetime.now(pytz.utc))
+
     search_form.assessment.choices = assessments_codesets
     search_form.assessment.data = assessment
-    log.debug("CHO 7: %s" % datetime.now(pytz.utc))
+
     # query = AssessmentEnroll.query.filter_by(assessment_id=assessment_id). \
     #    filter_by(testset_id=testset_id)
 
     assessment_name = Assessment.query.filter_by(id=assessment_id).first().name
-    log.debug("CHO 8: %s" % datetime.now(pytz.utc))
+
     add_query_str = ''
     # Query current_user's test center
     # If test_center 'All', query all
@@ -867,9 +874,8 @@ def center():
             s_branch = Codebook.query.filter_by(id=test_center).first()
             campus_prefix = s_branch.additional_info['campus_prefix']
             add_query_str = " and s.branch=\'\'" + str(campus_prefix) + "\'\' "
-    log.debug("CHO 9: %s" % datetime.now(pytz.utc))
+
     t_items = AssessmentHasTestset.query.filter_by(assessment_id=assessment_id).all()
-    log.debug("CHO 10: %s" % datetime.now(pytz.utc))
     testset_name_list = ''
     columns_query = ''
     columns_list = []
@@ -887,7 +893,7 @@ def center():
         if len(t_items) > t_items_count:
             testset_name_list += ','
             columns_query += ','
-    log.debug("CHO 11: %s" % datetime.now(pytz.utc))
+
     '''
     codebook.code_type = test_type 
     Naplan, OC, Selective, Naplan-P, Homework, V_Y5 Scholarshop, V_Y7 Scholarship, V_Selective
@@ -896,7 +902,7 @@ def center():
     '''
     score_query = '{' + testset_name_list + '}'  # candidate score by testset
 
-    #tuning
+    # tuning
     '''
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
@@ -945,8 +951,8 @@ def center():
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
     '''
-    log.debug("CHO 12: %s" % datetime.now(pytz.utc))
-    #if homework, only data in 4months because the assessment used again and again every year.
+
+    # if homework, only data in 4months because the assessment used again and again every year.
     if str(test_type) == '307':
         add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
 
@@ -973,19 +979,15 @@ def center():
         " + columns_query + ");")
 
     cursor = db.session.execute(new_query)
-    log.debug("CHO 12-1: %s" % new_query)
     report_list = list(cursor.fetchall())
-    log.debug("CHO 13: %s" % datetime.now(pytz.utc))
+
     if int(testset_id) > 0:
         testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.branching).filter_by(
             id=testset_id).first()
-        log.debug("CHO 14: %s" % datetime.now(pytz.utc))
         branching = testset.branching.get("data")
         testlet_id = branching[0].get("id")
         # testlet_id = 426
-        log.debug("CHO 15: %s" % datetime.now(pytz.utc))
         review_items = TestletHasItem.query.filter_by(testlet_id=testlet_id).order_by(TestletHasItem.order.asc()).all()
-        log.debug("CHO 16: %s" % datetime.now(pytz.utc))
         # flash(review_items)
 
     # for tsset in testset_dic:
@@ -1541,8 +1543,8 @@ def enroll_info():
     elif search_date:
         query = query.filter(func.date(AssessmentEnroll.start_time) == search_date)
 
-    #todays_datetime = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
-    #query.filter(AssessmentEnroll.start_time >= todays_datetime)
+    # todays_datetime = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
+    # query.filter(AssessmentEnroll.start_time >= todays_datetime)
 
     if search_date:
         enrolls = query.order_by(AssessmentEnroll.id.desc()).all()
@@ -1574,6 +1576,7 @@ def marking_info(id):
 def test_results():
     return render_template('report/test_results.html', year=Choices.get_ty_choices())
 
+
 @report.route('/test_results_plans', methods=['POST'])
 @permission_required(Permission.ADMIN)
 def test_results_plans():
@@ -1584,6 +1587,7 @@ def test_results_plans():
         rows = [(p.id, p.name) for p in plan]
     return jsonify(rows)
 
+
 @report.route('/test_results', methods=['POST'])
 @permission_required(Permission.ADMIN)
 def test_results_post():
@@ -1593,7 +1597,8 @@ def test_results_post():
     rows = [], []
 
     sql_stmt_sub = 'SELECT * FROM test_results(:p_year, :p_plan_id, :p_test_detail)'
-    cursor = db.session.execute(sql_stmt_sub, {'p_year': p_year, 'p_plan_id': p_plan_id, 'p_test_detail': p_test_detail})
+    cursor = db.session.execute(sql_stmt_sub,
+                                {'p_year': p_year, 'p_plan_id': p_plan_id, 'p_test_detail': p_test_detail})
     if cursor is not None:
         rows = [(r.student_user_id, r.username, r.subject_name1, r.subject_name2,
                  r.subject_name3, r.subject_name4, r.subject_name5, r.subject_name6,
@@ -1602,6 +1607,7 @@ def test_results_post():
                  ) for r in cursor.fetchall()]
 
     return jsonify(rows)
+
 
 @report.route('/test_results_detail', methods=['POST'])
 @permission_required(Permission.ADMIN)
