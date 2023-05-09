@@ -1186,6 +1186,8 @@ def load_next_testlet(assessment_session: AssessmentSession, testlet_id=0):
             # higher performing “executemany” operations
             # https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session.bulk_save_objects
             db.session.bulk_save_objects(marking_objects, return_defaults=False)
+            if assessment_enroll.total_score is None:
+                assessment_enroll.total_score = 0
             assessment_enroll.total_score = assessment_enroll.total_score + total_score
         db.session.commit()
 
