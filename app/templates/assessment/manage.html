@@ -171,7 +171,7 @@
                                                     id="{{ assessment.branch_id }}"> {{ Codebook.get_code_name(assessment.branch_id) }}</td>
                                                 <td class="assessment_review_period" id="{{ assessment.review_period }}">
                                                     {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
-                                                <td>{{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                                                {#<td>{{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }}</td>#}
                                                 {% if current_user.is_administrator() %}
                                                 <td>
                                                     <a href="{{ url_for('assessment.virtual_omr', assessment_id=assessment.id) }}" target="_blank"><button class="text-primary">Status</button></a>
