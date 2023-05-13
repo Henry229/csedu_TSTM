@@ -62,38 +62,6 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-8">
-                            <div class="row">
-                                <div class="col">
-                                </div>
-                                <div class="col">
-                                </div>
-                                <div class="col-md-auto">
-                                    <form method="POST" class="form inline" role="form" action="manage/clone">
-                                        <button class="btn btn-warning btn-square btn-sm" type="button"
-                                                name="modalButtonNew"
-                                                value="manage/new" data-toggle="modal" data-target="#dataModalMedium">
-                                            New
-                                        </button>
-                                        {% if is_rows %}
-                                            <button class="btn btn-danger btn-square btn-sm" type="button"
-                                                    name="modalButtonClone"
-                                                    value="manage/clone" data-toggle="modal"
-                                                    data-target="#confirm-clone"> Clone
-                                            </button>
-                                            <button class="btn btn-primary btn-square btn-sm" type="button"
-                                                    name="modalButtonEdit"
-                                                    value="manage/update" data-toggle="modal"
-                                                    data-target="#dataModalMedium"> Edit
-                                            </button>
-                                            <button class="btn btn-outline-success btn-square btn-sm" type="button"
-                                                    name="modalButtonDelete"
-                                                    value="manage/delete" data-toggle="modal"
-                                                    data-target="#confirm-delete"> Delete
-                                            </button>
-                                        {% endif %}
-                                    </form>
-                                </div>
-                            </div>
                             <small class="text-muted">Click an assessment to list up testsets. </small>
                             <table id="assessments" class="display table table-hover" style="width:100%">
                                 <thead>
@@ -183,6 +151,38 @@
 {#                                                <td class="assessment_date"> {{ assessment.session_date }}</td>#}
 {#                                                <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
                                             {% endif %}
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="9">
+
+                                                <div class="col-md-auto">
+                                                    <form method="POST" class="form inline" role="form" action="manage/clone">
+                                                        <button class="btn btn-warning btn-square btn-sm" type="button"
+                                                                name="modalButtonNew"
+                                                                value="manage/new" data-toggle="modal" data-target="#dataModalMedium">
+                                                            New
+                                                        </button>
+                                                        {% if is_rows %}
+                                                            <button class="btn btn-danger btn-square btn-sm" type="button"
+                                                                    name="modalButtonClone"
+                                                                    value="manage/clone" data-toggle="modal"
+                                                                    data-target="#confirm-clone"> Clone
+                                                            </button>
+                                                            <button class="btn btn-primary btn-square btn-sm" type="button"
+                                                                    name="modalButtonEdit"
+                                                                    value="manage/update" data-toggle="modal"
+                                                                    data-target="#dataModalMedium"> Edit
+                                                            </button>
+                                                            <button class="btn btn-outline-success btn-square btn-sm" type="button"
+                                                                    name="modalButtonDelete"
+                                                                    value="manage/delete" data-toggle="modal"
+                                                                    data-target="#confirm-delete"> Delete
+                                                            </button>
+                                                        {% endif %}
+                                                    </form>
+                                                </div>
+
+                                            </td>
                                         </tr>
                                         <div class="modal fade" id="confirm-recover{{ assessment.id }}" tabindex="-1"
                                              role="dialog">
