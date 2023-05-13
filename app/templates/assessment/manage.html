@@ -147,6 +147,7 @@
                                                 <td class="assessment_review_period" id="{{ assessment.review_period }}">
                                                     <del> {{ assessment.review_period }} </del>
                                                 </td>
+                                                <td></td>
 {#                                                <td>#}
 {#                                                    <del> {{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }} </del>#}
 {#                                                </td>#}
@@ -173,7 +174,7 @@
                                                     {% if assessment.review_period %}{{ assessment.review_period }}{% else %}0{% endif %} Days</td>
                                                 {#<td>{{ assessment.created_time.strftime('%Y-%m-%d %I:%M %p') }}</td>#}
                                                 {% if current_user.is_administrator() %}
-                                                <td>
+                                                <td style="padding:0.75rem 0">
                                                     <a href="{{ url_for('assessment.virtual_omr', assessment_id=assessment.id) }}" target="_blank"><button class="text-primary">Status</button></a>
                                                     <a href="{{ url_for('assessment.virtual_omr_resync', assessment_id=assessment.id) }}" target="_blank"><button class="text-danger">Sync</button></a>
                                                 </td>
