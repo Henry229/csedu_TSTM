@@ -85,6 +85,9 @@ $(document).ready(function () {
 
     // <Edit> button click
     $('button[name="modalButtonEdit"]').click(function () {
+        if($(this).closest('tr').prev().find('td:eq(0) > input').length > 0){
+			$(this).closest('tr').prev().find('td:eq(0) > input').prop('checked', true);
+		}
         renderUrlDocument(this, 'dataModalMedium');
     });
 
