@@ -85,11 +85,14 @@ $(document).ready(function () {
 
     // <Edit> button click
     $('button[name="modalButtonEdit"]').click(function () {
+        /*
         if($(this).closest('tr').prev().find('td:eq(0) > input').length > 0){
             if(!$(this).closest('tr').prev().find('td:eq(0) > input').is(':checked')){
 			    $(this).closest('tr').prev().find('td:eq(0) > input').prop('checked', true).trigger("click");
             }
 		}
+		*/
+		checkMyID(this);
         renderUrlDocument(this, 'dataModalMedium');
     });
 
@@ -248,6 +251,9 @@ $(document).ready(function () {
 });
 
 function checkMyID(obj) {
-    debugger
-    alert(2);
+    if($(obj).closest('tr').prev().find('td:eq(0) > input').length > 0){
+        if(!$(obj).closest('tr').prev().find('td:eq(0) > input').is(':checked')){
+            $(obj).closest('tr').prev().find('td:eq(0) > input').prop('checked', true).trigger("click");
+        }
+    }
 }
