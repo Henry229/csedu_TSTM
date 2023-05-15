@@ -93,6 +93,10 @@ $(document).ready(function () {
         renderUrlDocument(this, 'dataModalMedium');
     });
 
+    function checkMyID(obj) {
+        alert(1);
+    }
+
     /**
      * Modal dataModalSub: rendering search details page
      * Set relevant data to share between parent and modal windows
