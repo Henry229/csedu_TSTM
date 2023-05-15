@@ -165,7 +165,7 @@
                                                         {% if is_rows %}
                                                             <button class="btn btn-danger btn-square btn-sm" type="button"
                                                                     name="modalButtonClone"
-                                                                    value="manage/clone" data-toggle="modal"
+                                                                    value="manage/clone" data-toggle="modal" onclick="alert(1)"
                                                                     data-target="#confirm-clone"> Clone
                                                             </button>
                                                             <button class="btn btn-primary btn-square btn-sm" type="button"
@@ -281,7 +281,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button class="btn btn-danger danger"
-                                onclick="checkMyID(this);renderUrlDocument(this,'dataModalMedium',null,'confirm-clone')"
+                                onclick="renderUrlDocument(this,'dataModalMedium',null,'confirm-clone')"
                                 data-toggle="modal" data-target="#dataModalMedium" value="manage/clone">Clone
                         </button>
                     </div>
