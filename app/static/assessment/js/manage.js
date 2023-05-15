@@ -247,6 +247,7 @@ $(document).ready(function () {
     }
 });
 
-    function checkMyID() {
-        alert(2);
-    }
+function checkMyID(obj) {
+    debugger
+    alert(2);
+}
