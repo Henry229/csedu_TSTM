@@ -85,9 +85,11 @@ $(document).ready(function () {
 
     // <Edit> button click
     $('button[name="modalButtonEdit"]').click(function () {
-        alert(1);
         if($(this).closest('tr').prev().find('td:eq(0) > input').length > 0){
-			$(this).closest('tr').prev().find('td:eq(0) > input').prop('checked', true).trigger("click");
+            if(!$(this).closest('tr').prev().find('td:eq(0) > input').is(':checked')){
+                alert(1);
+			    $(this).closest('tr').prev().find('td:eq(0) > input').prop('checked', true).trigger("click");
+            }
 		}
         renderUrlDocument(this, 'dataModalMedium');
     });
@@ -97,7 +99,6 @@ $(document).ready(function () {
      * Set relevant data to share between parent and modal windows
      */
     $("#dataModalSub").on("hidden.bs.modal", function () {
-        alert(2);
         ids = window.ids;
         names = window.names;
         grade = window.grade;
