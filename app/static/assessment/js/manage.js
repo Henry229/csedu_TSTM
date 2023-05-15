@@ -93,8 +93,8 @@ $(document).ready(function () {
         renderUrlDocument(this, 'dataModalMedium');
     });
 
-    function checkMyID(obj) {
-        alert(1);
+    function checkMyID() {
+        alert(2);
     }
 
     /**
