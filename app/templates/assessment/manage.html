@@ -152,7 +152,7 @@
 {#                                                <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
                                             {% endif %}
                                         </tr>
-                                        {% if assessment.delete is sameas False %}
+                                        {% if not assessment.delete is sameas True %}
                                         <tr>
                                             <td colspan="9" style="text-align:right;padding:0 0 0.75rem 0;border-top:none">
 
