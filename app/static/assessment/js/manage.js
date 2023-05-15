@@ -93,9 +93,7 @@ $(document).ready(function () {
         renderUrlDocument(this, 'dataModalMedium');
     });
 
-    function checkMyID() {
-        alert(2);
-    }
+
 
     /**
      * Modal dataModalSub: rendering search details page
@@ -249,4 +247,6 @@ $(document).ready(function () {
     }
 });
 
-
+    function checkMyID() {
+        alert(2);
+    }
