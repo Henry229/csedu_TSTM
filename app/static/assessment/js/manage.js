@@ -36,7 +36,9 @@ $(document).ready(function () {
 			$("#testcontainer").css({'top': '80px'});
 		}
 	});
-
+    window.onresize = function(event){
+		$("#testcontainer").width($("#testcontainer").parent().width());
+	}
 
     /**
      * Initial setup processing:
