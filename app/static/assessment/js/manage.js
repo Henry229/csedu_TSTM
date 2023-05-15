@@ -24,6 +24,20 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 $(document).ready(function () {
+    $("#testcontainer").width($("#testcontainer").parent().width());
+	$("#testcontainer").css({'top': $($('.accordion').get(1)).position().top + 85 + 'px'});
+	$(window).scroll(function() {
+		var standtop = $($('.accordion').get(1)).position().top;
+		var windowtop = $(window).scrollTop();
+
+		if(standtop > windowtop) {
+			$("#testcontainer").css({'top': $($('.accordion').get(1)).position().top - (windowtop - 85)});
+		}else{
+			$("#testcontainer").css({'top': '80px'});
+		}
+	});
+
+
     /**
      * Initial setup processing:
      *  Set checked attr on the first radio object
