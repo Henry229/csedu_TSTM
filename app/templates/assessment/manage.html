@@ -152,6 +152,7 @@
 {#                                                <td class="assessment_time"> {{ assessment.session_start_time }}~{{ assessment.session_end_time }}</td>#}
                                             {% endif %}
                                         </tr>
+                                        {% if assessment.delete is sameas False %}
                                         <tr>
                                             <td colspan="9" style="text-align:right;padding:0 0 0.75rem 0;border-top:none">
 
@@ -183,6 +184,7 @@
 
                                             </td>
                                         </tr>
+                                        {% endif %}
                                         <div class="modal fade" id="confirm-recover{{ assessment.id }}" tabindex="-1"
                                              role="dialog">
                                             <div class="modal-dialog modal-sm">
