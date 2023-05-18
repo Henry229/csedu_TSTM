@@ -957,7 +957,7 @@ def center():
     if str(test_type) == '307':
         add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
 
-
+    '''
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
         a2.id,t2.name, \
@@ -979,8 +979,8 @@ def center():
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
-
     '''
+
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
         a2.id,t2.name, \
@@ -1000,7 +1000,7 @@ def center():
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
-    '''
+
 
     cursor = db.session.execute(new_query)
     report_list = list(cursor.fetchall())
