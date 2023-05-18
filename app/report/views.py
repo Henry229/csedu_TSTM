@@ -803,7 +803,7 @@ def manage():
 @login_required
 @permission_required(Permission.ASSESSMENT_READ)
 def center():
-    log.debug("chs start: %s " % (datetime.utcnow()))
+    log.debug("chs1 start: %s " % (datetime.utcnow()))
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
     year = request.args.get("year")
@@ -957,6 +957,7 @@ def center():
     if str(test_type) == '307':
         add_query_str = add_query_str + " and ae.start_time >= NOW()::DATE - 120 "
 
+    '''
     new_query = text("SELECT  * FROM CROSSTAB \
         ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
         a2.id,t2.name, \
@@ -971,6 +972,29 @@ def center():
         join testset t2 on ae.testset_id = t2.id \
         join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
         where a2.id = " + assessment_id + " " + add_query_str + " \
+        group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
+        t2.name \
+        order by s.student_id',\
+        $$SELECT unnest(\'" + score_query + "\'::varchar[])$$) \
+        AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
+        assessment_name VARCHAR, assessment_id integer, \
+        " + columns_query + ");")
+    '''
+
+    new_query = text("SELECT  * FROM CROSSTAB \
+        ('select s.student_id, s.user_id, u.username, s.branch, ae.test_center, a2.name, \
+        a2.id,t2.name, \
+        CONCAT( CASE WHEN MAX(ae.total_score) is null or MAX(ae.total_score)=0 then 0 else round((MAX(ae.score)/MAX(ae.total_score)) * 100) end,  \
+        ''('', (select rnk from (select id, RANK () OVER (order by score desc) as rnk from assessment_enroll where assessment_id = a2.id and testset_id = max(t2.id)) tt \
+	    where id = max(ae.id)), '')'') as score \
+        from  (select * from assessment where id = " + assessment_id + ") a2 \
+        join assessment_enroll ae ON a2.id = ae.assessment_id \
+        join student s on ae.student_user_id = s.user_id \
+        join users u on s.user_id = u.id \
+        join assessment_testsets at2 on a2.id = at2.assessment_id \
+        join testset t2 on ae.testset_id = t2.id \
+        join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
+        where 1 = 1 " + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
         t2.name \
         order by s.student_id',\
@@ -1011,7 +1035,7 @@ def center():
                 if not enroll.enable_writing_report:
                     break
     '''
-    log.debug("chs end: %s " % (datetime.utcnow()))
+    log.debug("chs1 end: %s " % (datetime.utcnow()))
     return render_template('report/report_center.html', form=search_form, report_list=report_list, \
                            columns_list=columns_list, testset_dic=testset_dic, review_items=review_items, \
                            test_type=test_type, assessment=assessment)
