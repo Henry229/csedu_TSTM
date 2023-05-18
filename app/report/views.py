@@ -169,7 +169,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     # refresh_mviews()
 
     # in the case that subject is Vocabulary, the source is separated
-
+    log.debug("chs3 start: %s " % (datetime.utcnow()))
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
     if testset is None:
         url = request.referrer
@@ -271,6 +271,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     # ts_by_category = None
     ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
 
+    log.debug("chs3 end: %s " % (datetime.utcnow()))
     if test_subject_string == 'Writing':
         marking_writing_id = 0
         url_i = url_for('writing.w_report', assessment_enroll_id=assessment_enroll_id,
@@ -280,7 +281,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     template_file = 'report/my_report.html'
     if pdf:
         template_file = 'report/my_report_pdf.html',
-
+    log.debug("chs3 end: %s " % (datetime.utcnow()))
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
                                             is_7days_after_finished=is_7days_after_finished,
@@ -308,6 +309,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     os.chdir(str(student_user_id))
     if not os.path.exists("report"):
         os.makedirs("report")
+    log.debug("chs3 end: %s " % (datetime.utcnow()))
 
     html.write_pdf(target=pdf_file_path, presentational_hints=True)
     rsp = send_file(
@@ -315,6 +317,7 @@ def my_report(assessment_id, ts_id, student_user_id):
         mimetype='application/pdf',
         as_attachment=True,
         attachment_filename=pdf_file_path)
+    log.debug("chs3 end: %s " % (datetime.utcnow()))
     return rsp
 
 
@@ -999,7 +1002,6 @@ def center():
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
-
 
     cursor = db.session.execute(new_query)
     report_list = list(cursor.fetchall())
