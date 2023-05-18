@@ -991,9 +991,7 @@ def center():
         join assessment_enroll ae ON a2.id = ae.assessment_id \
         join student s on ae.student_user_id = s.user_id \
         join users u on s.user_id = u.id \
-        join assessment_testsets at2 on a2.id = at2.assessment_id \
         join testset t2 on ae.testset_id = t2.id \
-        join codebook c2 on t2.subject = c2.id and c2.code_type = \'\'subject\'\' \
         where 1 = 1 " + add_query_str + " \
         group by s.student_id, s.user_id, u.username, a2.name, a2.id, s.branch, ae.test_center, \
         t2.name \
