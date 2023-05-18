@@ -169,18 +169,21 @@ def my_report(assessment_id, ts_id, student_user_id):
     # refresh_mviews()
 
     # in the case that subject is Vocabulary, the source is separated
-    log.debug("chs3 start: %s " % (datetime.utcnow()))
+    log.debug("chs 1: %s " % (datetime.utcnow()))
     testset = Testset.query.with_entities(Testset.subject, Testset.grade, Testset.test_type).filter_by(id=ts_id).first()
+    log.debug("chs 2: %s " % (datetime.utcnow()))
     if testset is None:
         url = request.referrer
         flash('testset data is not available')
         return redirect(url)
-
+    log.debug("chs 3: %s " % (datetime.utcnow()))
     test_subject_string = Codebook.get_code_name(testset.subject)
+    log.debug("chs 4: %s " % (datetime.utcnow()))
     # if test_subject_string.lower() == 'vocabulary':
     #    return vocabulary_report(request, assessment_id, ts_id, student_user_id, testset, test_subject_string)
-
+    log.debug("chs 5: %s " % (datetime.utcnow()))
     grade = Codebook.get_code_name(testset.grade)
+    log.debug("chs 6: %s " % (datetime.utcnow()))
     test_type = testset.test_type
 
     pdf = False
@@ -188,12 +191,14 @@ def my_report(assessment_id, ts_id, student_user_id):
     if 'type' in request.args.keys():
         pdf = request.args['type'] == 'pdf'
 
+    log.debug("chs 7: %s " % (datetime.utcnow()))
     query = AssessmentEnroll.query.with_entities(AssessmentEnroll.id, AssessmentEnroll.testset_id,
                                                  AssessmentEnroll.finish_time, AssessmentEnroll.start_time). \
         filter_by(assessment_id=assessment_id). \
         filter_by(testset_id=ts_id). \
         filter_by(student_user_id=student_user_id)
     row = query.order_by(AssessmentEnroll.id.desc()).first()
+    log.debug("chs 8: %s " % (datetime.utcnow()))
     if row is None:
         url = request.referrer
         flash('Assessment Enroll data not available')
@@ -204,13 +209,17 @@ def my_report(assessment_id, ts_id, student_user_id):
     finish_time = row.finish_time
     if finish_time is None: finish_time = row.start_time
 
+    log.debug("chs 9: %s " % (datetime.utcnow()))
     is_7days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=7)) >= datetime.now(pytz.utc)
     assessment_name = (Assessment.query.with_entities(Assessment.name).filter_by(id=assessment_id).first()).name
+    log.debug("chs 10: %s " % (datetime.utcnow()))
 
     # setting review period for Holiday course
     enable_holiday = False
     period_holiday_review = 0
+    log.debug("chs 11: %s " % (datetime.utcnow()))
     test_type_additional_info = Codebook.get_additional_info(test_type)
+    log.debug("chs 12: %s " % (datetime.utcnow()))
 
     # show video to only incorrect queston
     video_for_incorrect = True
@@ -230,7 +239,9 @@ def my_report(assessment_id, ts_id, student_user_id):
 
     # My Report : Header - 'total_students', 'student_rank', 'score', 'total_score', 'percentile_score'
 
+    log.debug("chs 13: %s " % (datetime.utcnow()))
     ts_header = query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id)
+    log.debug("chs 14: %s " % (datetime.utcnow()))
     if ts_header is None:
         url = request.referrer
         flash('Marking data not available')
@@ -246,7 +257,9 @@ def my_report(assessment_id, ts_id, student_user_id):
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
+    log.debug("chs 15: %s " % (datetime.utcnow()))
     markings = query_my_report_body(assessment_enroll_id, ts_id)
+    log.debug("chs 16: %s " % (datetime.utcnow()))
     explanation_link = {}
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
@@ -269,9 +282,10 @@ def my_report(assessment_id, ts_id, student_user_id):
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
     #       so it need to be discussed to branch out in "test analysed report"
     # ts_by_category = None
+    log.debug("chs 17: %s " % (datetime.utcnow()))
     ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
+    log.debug("chs 18: %s " % (datetime.utcnow()))
 
-    log.debug("chs3 end: %s " % (datetime.utcnow()))
     if test_subject_string == 'Writing':
         marking_writing_id = 0
         url_i = url_for('writing.w_report', assessment_enroll_id=assessment_enroll_id,
@@ -281,7 +295,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     template_file = 'report/my_report.html'
     if pdf:
         template_file = 'report/my_report_pdf.html',
-    log.debug("chs3 end: %s " % (datetime.utcnow()))
+
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
                                             is_7days_after_finished=is_7days_after_finished,
@@ -296,7 +310,7 @@ def my_report(assessment_id, ts_id, student_user_id):
     from weasyprint import HTML
 
     html = HTML(string=rendered_template_pdf)
-
+    log.debug("chs 19: %s " % (datetime.utcnow()))
     pdf_file_path = os.path.join(current_app.config['USER_DATA_FOLDER'],
                                  str(student_user_id),
                                  "report",
@@ -309,7 +323,8 @@ def my_report(assessment_id, ts_id, student_user_id):
     os.chdir(str(student_user_id))
     if not os.path.exists("report"):
         os.makedirs("report")
-    log.debug("chs3 end: %s " % (datetime.utcnow()))
+
+    log.debug("chs 20: %s " % (datetime.utcnow()))
 
     html.write_pdf(target=pdf_file_path, presentational_hints=True)
     rsp = send_file(
@@ -317,7 +332,6 @@ def my_report(assessment_id, ts_id, student_user_id):
         mimetype='application/pdf',
         as_attachment=True,
         attachment_filename=pdf_file_path)
-    log.debug("chs3 end: %s " % (datetime.utcnow()))
     return rsp
 
 
@@ -1002,6 +1016,7 @@ def center():
         AS ct(student_id VARCHAR ,user_id VARCHAR, username VARCHAR, branch VARCHAR, test_center VARCHAR, \
         assessment_name VARCHAR, assessment_id integer, \
         " + columns_query + ");")
+
 
     cursor = db.session.execute(new_query)
     report_list = list(cursor.fetchall())
