@@ -803,7 +803,7 @@ def manage():
 @login_required
 @permission_required(Permission.ASSESSMENT_READ)
 def center():
-    log.debug("chs1 start: %s " % (datetime.utcnow()))
+    log.debug("chs2 start: %s " % (datetime.utcnow()))
     test_type = request.args.get("test_type")
     test_center = request.args.get("test_center")
     year = request.args.get("year")
@@ -1033,7 +1033,7 @@ def center():
                 if not enroll.enable_writing_report:
                     break
     '''
-    log.debug("chs1 end: %s " % (datetime.utcnow()))
+    log.debug("chs2 end: %s " % (datetime.utcnow()))
     return render_template('report/report_center.html', form=search_form, report_list=report_list, \
                            columns_list=columns_list, testset_dic=testset_dic, review_items=review_items, \
                            test_type=test_type, assessment=assessment)
