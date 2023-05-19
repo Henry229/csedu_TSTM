@@ -239,10 +239,14 @@ def my_report(assessment_id, ts_id, student_user_id):
         return redirect(url)
 
     score = '{} out of {} ({}%)'.format(ts_header.score, ts_header.total_score, ts_header.percentile_score)
+    '''
     if ts_header.student_rank1 is None:
         rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
     else:
         rank = '{} out of {}'.format(ts_header.student_rank1, ts_header.total_students1)
+    '''
+    rank = '{} out of {}'.format(ts_header.student_rank, ts_header.total_students)
+
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
