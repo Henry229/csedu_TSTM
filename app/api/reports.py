@@ -487,7 +487,7 @@ def query_my_report_body_1(assessment_enroll_id, ts_id, assessment_id):
                  "select m.item_id, " \
                  "100*COALESCE(sum(case when m.is_correct then 1 else 0 end),0)/count(DISTINCT ae.id) " \
                  "AS correct_percentile " \
-                 "from (select * from assessment_enroll where assessment_id = :assessment_id and testset_id = :ts_id) " \
+                 "from (select * from assessment_enroll where assessment_id = :assessment_id and testset_id = :testset_id) " \
                  "as ae " \
                  "join  marking m on ae.id = m.assessment_enroll_id " \
                  "group by item_id " \
