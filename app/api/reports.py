@@ -316,29 +316,29 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                ") bbb " \
                "where exists(select 1 from marking where assessment_enroll_id = bbb.id and student_user_id = bbb.student_user_id) " \
                ") AS total_students1, " \
-    "( " \
-    "    select student_rank " \
-    "    from ( " \
-    "        select student_user_id, rank() OVER(ORDER by score desc) as student_rank " \
-    "        from ( " \
-    "            select aaa.student_user_id, " \
-    "                case when sum(bbb.outcome_score * bbb.weight) = 0 then 0 else " \
-    "                    sum(bbb.candidate_mark * bbb.weight) * 100::double precision / sum(bbb.outcome_score * bbb.weight) end as score " \
-    "            from (select student_user_id, assessment_id, max(id) as id from assessment_enroll " \
-    "                    where assessment_id in ( " \
-    "                        select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
-    "                            and test_detail = (select test_detail from assessment where id =:assessment_id) " \
-    "                           ) " \
-    "                   group by student_user_id, assessment_id " \
-    "                ) aaa " \
-    "            join marking bbb " \
-    "                on aaa.id = bbb.assessment_enroll_id " \
-    "            group by aaa.student_user_id " \
-    "        ) rnk " \
-    "    ) tt " \
-    "    where student_user_id = test_summary_mview.student_user_id " \
-    ") as student_rank1 " \
-"FROM test_summary_mview " \
+               "( " \
+               "    select student_rank " \
+               "    from ( " \
+               "        select student_user_id, rank() OVER(ORDER by score desc) as student_rank " \
+               "        from ( " \
+               "            select aaa.student_user_id, " \
+               "                case when sum(bbb.outcome_score * bbb.weight) = 0 then 0 else " \
+               "                    sum(bbb.candidate_mark * bbb.weight) * 100::double precision / sum(bbb.outcome_score * bbb.weight) end as score " \
+               "            from (select student_user_id, assessment_id, max(id) as id from assessment_enroll " \
+               "                    where assessment_id in ( " \
+               "                        select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id = test_summary_mview.plan_id) " \
+               "                            and test_detail = (select test_detail from assessment where id =:assessment_id) " \
+               "                           ) " \
+               "                   group by student_user_id, assessment_id " \
+               "                ) aaa " \
+               "            join marking bbb " \
+               "                on aaa.id = bbb.assessment_enroll_id " \
+               "            group by aaa.student_user_id " \
+               "        ) rnk " \
+               "    ) tt " \
+               "    where student_user_id = test_summary_mview.student_user_id " \
+               ") as student_rank1 " \
+               "FROM test_summary_mview " \
                "WHERE assessment_enroll_id=:assessment_enroll_id " \
                "and assessment_id=:assessment_id and testset_id=:testset_id " \
                "and student_user_id=:student_user_id"
@@ -545,6 +545,143 @@ def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
                  "ORDER BY part desc, category"
     cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id,
                                                'assessment_enroll_id': assessment_enroll_id})
+    Record = namedtuple('Record', cursor_2.keys())
+    rows = [Record(*r) for r in cursor_2.fetchall()]
+    return rows
+
+
+def query_my_report_footer_1(assessment_id, student_user_id, assessment_enroll_id, ts_id):
+    column_names_2 = ['code_name as category',
+                      "to_char(score,'999.99') as score",
+                      "to_char(total_score,'999.99') as total_score",
+                      "to_char(avg_score,'999.99') as avg_score",
+                      "to_char(percentile_score,'999.99') as percentile_score"
+                      ]
+    '''
+    sql_stmt_2 = "SELECT 1 as part," \
+                 "code_name as category, " \
+                 "to_char(score,'999.99') as score, " \
+                 "to_char(total_score,'999.99') as total_score, " \
+                 "to_char(avg_score,'999.99') as avg_score, " \
+                 "to_char(percentile_score,'999.99') as percentile_score, " \
+                 "(" \
+                 "    select to_char(avg(score),'999.99')" \
+                 "    from (" \
+                 "       select code_name," \
+                 "               case when sum(outcome_score * weight) = 0 then 0 else " \
+                 "                   sum(candidate_mark * weight) * 100::double precision / sum(outcome_score * weight) end as score" \
+                 "       from (" \
+                 "               select aaa.student_user_id, bbb.outcome_score, bbb.weight, bbb.candidate_mark," \
+                 "               (" \
+                 "                   SELECT c.code_name" \
+                 "                   FROM codebook c," \
+                 "                       item i" \
+                 "                   WHERE c.id = i.category" \
+                 "                     and i.id = bbb.item_id" \
+                 "               ) as code_name" \
+                 "               from (select student_user_id, assessment_id, testset_id, max(id) as id from assessment_enroll" \
+                 "              where assessment_id in (" \
+                 "                       select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id =" \
+                 "                       (SELECT plan_id FROM education_plan_details WHERE assessment_id = test_summary_by_category_v.assessment_id)" \
+                 "                       and test_detail = (select test_detail from assessment where id =test_summary_by_category_v.assessment_id)" \
+                 "               ))" \
+                 "        and testset_id = test_summary_by_category_v.testset_id" \
+                 "        and student_user_id =:student_user_id" \
+                 "        group by student_user_id, assessment_id, testset_id" \
+                 "    ) aaa" \
+                 "   join marking bbb" \
+                 "     on aaa.id = bbb.assessment_enroll_id" \
+                 "   ) aa" \
+                 "   group by code_name" \
+                 "   ) t" \
+                 "   where code_name = test_summary_by_category_v.code_name" \
+                 ") as avg_score1 " \
+                 ", '' as total_avg " \
+                 "FROM test_summary_by_category_v " \
+                 "WHERE student_user_id = :student_user_id " \
+                 "AND assessment_enroll_id = :assessment_enroll_id " \
+                 "AND assessment_id = :assessment_id " \
+                 "UNION ALL " \
+                 "SELECT 0 as part," \
+                 "       'Total' as category, " \
+                 "       '' as score, " \
+                 "       '' as total_score, " \
+                 "       '' as avg_score, " \
+                 "       '' as percentile_score, " \
+                 "       student_avg as avg_score1, " \
+                 "       total_avg " \
+                 "from (" \
+                 "    select to_char(avg(student_score),'999.99') as student_avg, to_char(avg(score),'999.99') as total_avg" \
+                 "    from (" \
+                 "       select case when sum(case when student_user_id = :student_user_id then outcome_score * weight else 0 end) = 0 then 0 else " \
+                 "                   sum(case when student_user_id = :student_user_id then candidate_mark * weight else 0 end) * 100::double precision / sum(case when student_user_id = :student_user_id then outcome_score * weight else 0 end) end as student_score, " \
+                 "case when sum(outcome_score * weight) = 0 then 0 else " \
+                 "                   sum(candidate_mark * weight) * 100::double precision / sum(outcome_score * weight) end as score" \
+                 "       from (" \
+                 "               select aaa.student_user_id, bbb.outcome_score, bbb.weight, bbb.candidate_mark" \
+                 "               from (select student_user_id, assessment_id, testset_id, max(id) as id from assessment_enroll" \
+                 "              where assessment_id in (" \
+                 "                       select :assessment_id as id " \
+                 "                       union all " \
+                 "                       select id from assessment where id in (select assessment_id from education_plan_details aaaa where plan_id =" \
+                 "                       (SELECT plan_id FROM education_plan_details WHERE assessment_id = :assessment_id)" \
+                 "                       and test_detail = (select test_detail from assessment where id = :assessment_id)" \
+                 "               ))" \
+                 "        and testset_id = (select testset_id from assessment_enroll where id = :assessment_enroll_id) " \
+                 "        group by student_user_id, assessment_id, testset_id" \
+                 "    ) aaa" \
+                 "   join marking bbb" \
+                 "     on aaa.id = bbb.assessment_enroll_id" \
+                 "   ) aa" \
+                 "   ) a" \
+                 ") t " \
+                 "ORDER BY part desc, category"
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id, 'student_user_id': student_user_id,
+                                               'assessment_enroll_id': assessment_enroll_id})
+    Record = namedtuple('Record', cursor_2.keys())
+    rows = [Record(*r) for r in cursor_2.fetchall()]
+    return rows
+    '''
+
+    sql_stmt_2 = "with t_all_marking as ( " \
+                 "select category, sum(candidate_mark * weight) as candidate_mark, " \
+                 "       sum(outcome_score * weight) as outcome_score, " \
+                 "       sum(my_candidate_mark) as my_candidate_mark, sum(my_outcome_score) as my_outcome_score " \
+                 "from ( " \
+                 "  select ae.id as assessment_enroll_id, m.*, " \
+                 "    (select category from item where id = m.item_id) as category, " \
+                 "    case when ae.id = :assessment_enroll_id then candidate_mark * weight else 0 end as my_candidate_mark, " \
+                 "    case when ae.id = :assessment_enroll_id then outcome_score * weight else 0 end as my_outcome_score " \
+                 "  from (select * from assessment_enroll where assessment_id = :assessment_id and testset_id = :ts_id) ae " \
+                 "  join  marking m on ae.id = m.assessment_enroll_id " \
+                 "  ) all_marking " \
+                 "group by category " \
+                 ") " \
+                 "select 0 as part, " \
+                 "  category as category_id, " \
+                 "  (select code_name from codebook where id = t.category) as category, " \
+                 "  to_char(my_candidate_mark,'999.99') AS score, " \
+                 "  to_char(my_outcome_score,'999.99') AS total_score, " \
+                 "  to_char(case when my_outcome_score = 0 then 0 else " \
+                 "  my_candidate_mark * 100::double precision / my_outcome_score end,'999.99') as  percentile_score, " \
+                 "  to_char(case when outcome_score = 0 then 0 else " \
+                 "  candidate_mark * 100::double precision / outcome_score end,'999.99') as avg_score " \
+                 "from t_all_marking t " \
+                 "union all " \
+                 "select 1 as part, " \
+                 "null as category_id, " \
+                 "'Total' as category, " \
+                 "null as score, " \
+                 "null as total_score, " \
+                 "to_char(case when sum(my_outcome_score) = 0 then 0 else " \
+                 "  sum(my_candidate_mark) * 100::double precision / sum(my_outcome_score) end,'999.99')" \
+                 "  as percentile_score, " \
+                 "to_char(case when sum(outcome_score) = 0 then 0 else " \
+                 "sum(candidate_mark) * 100::double precision / sum(outcome_score) end,'999.99') as  avg_score " \
+                 "from t_all_marking " \
+                 "order by part, category"
+    cursor_2 = db.session.execute(sql_stmt_2, {'assessment_id': assessment_id,
+                                               'assessment_enroll_id': assessment_enroll_id, 'ts_id': ts_id})
     Record = namedtuple('Record', cursor_2.keys())
     rows = [Record(*r) for r in cursor_2.fetchall()]
     return rows

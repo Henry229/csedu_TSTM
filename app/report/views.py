@@ -23,7 +23,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer, search_assessment, \
-    query_my_report_header_1
+    query_my_report_header_1, query_my_report_footer_1
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \
@@ -444,7 +444,7 @@ def my_report_1(assessment_id, ts_id, student_user_id):
     # ToDo: ts_by_category unavailable until finalise all student's mark and calculate average data
     #       so it need to be discussed to branch out in "test analysed report"
     # ts_by_category = None
-    ts_by_category = query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id)
+    ts_by_category = query_my_report_footer_1(assessment_id, student_user_id, assessment_enroll_id, ts_id)
 
     log.debug("chs4 end: %s " % (datetime.utcnow()))
     if test_subject_string == 'Writing':
@@ -453,7 +453,7 @@ def my_report_1(assessment_id, ts_id, student_user_id):
                         student_user_id=student_user_id, marking_writing_id=marking_writing_id)
         return redirect(url_i)
 
-    template_file = 'report/my_report.html'
+    template_file = 'report/my_report_1.html'
     if pdf:
         template_file = 'report/my_report_pdf.html',
     log.debug("chs4 end: %s " % (datetime.utcnow()))

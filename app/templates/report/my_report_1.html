@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>CS Education</title>
+    <!-- Icons-->
+    <link href="/static/ui/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="/static/ui/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+    <!-- Main styles for this application-->
+    <link href="/static/runner/css/test_runner.css" rel="stylesheet">
+    <link href="/static/ui/css/style.css" rel="stylesheet">
+    <link href="/static/ui/vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+    <style>
+        #t_header th {
+            width: 85%;
+            text-align: center;
+        }
+
+        #t_header td {
+            width: 15%;
+            text-align: right;
+        }
+
+        #t_student_info th {
+            width: 15%;
+            text-align: center;
+            border: 1px solid #0f0f0f;
+        }
+
+        #t_student_info td {
+            width: 35%;
+            text-align: left;
+            border: 1px solid #0f0f0f;
+            padding: 5px;
+        }
+
+        #t_mark_info th {
+            padding: 3px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        #t_mark_info td {
+            border: 0px black;
+            padding: 0px;
+        }
+
+        #t_assessment_info {
+            table-layout: auto;
+            width: 100%;
+            border: 1px solid #c8ced3;
+            padding: 10px;
+        }
+
+        #t_assessment_info th, td {
+            vertical-align: middle;
+            text-align: center;
+            border: 0px solid #c8ced3;
+        }
+
+        #t_assessment_info th {
+            background-color: #f0f3f5;
+        }
+
+        #t_graph {
+            table-layout: auto;
+            width: 100%;
+            border: 5px solid white;
+        }
+
+        #t_graph td {
+            vertical-align: middle;
+            border: 0px solid white;
+        }
+    </style>
+</head>
+<body>
+<h4 class="ml-3 mt-3"><a href="/" class="text-decoration-none"><i class="icon-arrow-left-circle mr-3"></i>Back to
+    list</a></h4>
+{% if markings %}
+    {% set marking_rep = markings[0] %}
+{% else %}
+    {% set marking_rep = None %}
+{% endif %}
+
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_video"] == 'true' %}
+    {% set enable_video = True %}
+{% else %}
+    {% set enable_video = None %}
+{% endif %}
+{% if test_type and Codebook.get_additional_info(test_type) and Codebook.get_additional_info(test_type)["enable_report"] == 'true' %}
+    {% set enable_report = True %}
+{% else %}
+    {% set enable_report = None %}
+{% endif %}
+<div class="container">
+    <br><br>
+    <div class="card">
+        <div class="card-header">
+            <table style="width:100%" id="t_header">
+                <tr>
+                    <td>
+                        <img src="/static/ui/img/CSEducation.png" width="150" height="20" alt="CSEdu Logo">
+                    </td>
+                    <th colspan="2">
+                        <h3 style="color:#397e38"> {{ assessment_name }} ({{ subject }}) </h3>
+                    </th>
+                    <td>
+                        {% if pdf_url and enable_report %}
+                            <a class="badge badge-primary" href="{{ pdf_url }}">Download Result (PDF)</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% if enable_report %}
+        <div class="card-body">
+            <table style="width:100%" id="t_student_info">
+                <tr>
+                    <th> Student Name:{{current_time}}</th>
+                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentName(student_user_id) }} </td>
+                    {% if subject != 'Vocabulary' %}
+                    <th> Rank:</th>
+                    <td> {{ rank }} </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th> Student ID:</th>
+                    <td{% if subject == 'Vocabulary' %} colspan="3"{% endif %}> {{ Student.getCSStudentId(student_user_id) }}</td>
+                    {% if subject != 'Vocabulary' %}
+                    <th> Score:</th>
+                    <td> {{ score }} </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th> Grade:</th>
+                    <td> {{ grade }}</td>
+                    <th> Test Date:</th>
+                    <td> {{ marking_rep.read_time }}.</td>
+                </tr>
+            </table>
+            <br><br>
+            {% if markings %}
+                <div class="row">
+                    <div class="col">
+                        <table class="table" style="width:100%" id="t_mark_info">
+                            <thead>
+                            <tr>
+                                <th align="center" colspan="5">Mark</th>
+                                <th align="center">Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for marking in markings %}
+                                {% if loop.index<=20 %}
+                                    <tr>
+                                        <td>
+                                            {% if ((not marking.is_correct) and is_7days_after_finished) %}
+                                                <button class="btn btn-sm btn-outline-info" type="button"
+                                                        name="previewButton"
+                                                        data-toggle="modal" data-target="#dataModal"
+                                                        data-item-id="{{ marking.item_id }}">
+                                                    {{ marking.question_no }}
+                                                </button>
+                                            {% else %}
+                                                {{ marking.question_no }}
+
+                                            {% endif %}
+                                            {% if ((not video_for_incorrect) and is_7days_after_finished) or (video_for_incorrect and (not marking.is_correct) and is_7days_after_finished) %}
+                                            {% if enable_video and explanation_link.get(marking.question_no) %}
+                                                <span
+                                                       id="view_explanation_window"
+                                                       name="view_explanation_window"
+                                                       data-toggle="modal" data-target="#videoModal"
+                                                       data-link="{{ explanation_link.get(marking.question_no) }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </span>
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>{% if marking.candidate_r_value %}{{ r_value(marking.candidate_r_value)     }}{% else %}
+                                            answer_unsubmission{% endif %}</td>
+                                        <td>{% if marking.is_correct %}
+                                            <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                                            <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
+                                            {{ r_value(marking.correct_r_value) }}{% endif %}</td>
+                                        <td>{{ marking.item_percentile }}%</td>
+                                        <td>{{ Codebook.get_code_name(marking.subcategory) }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <table class="table" style="width:100%" id="t_mark_info">
+                            <thead>
+                            <tr>
+                                <th align="center" colspan="5">Mark</th>
+                                <th align="center">Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for marking in markings %}
+                                {% if loop.index>20 %}
+                                    <tr>
+                                        <td>
+                                            {% if ((not marking.is_correct) and is_7days_after_finished) %}
+                                                <button class="btn btn-sm btn-outline-info" type="button"
+                                                        name="previewButton"
+                                                        data-toggle="modal" data-target="#dataModal"
+                                                        data-item-id="{{ marking.item_id }}">
+                                                    {{ marking.question_no }}
+                                                </button>
+                                            {% else %}
+                                                {{ marking.question_no }}
+                                            {% endif %}
+                                            {% if ((not video_for_incorrect) and is_7days_after_finished) or (video_for_incorrect and (not marking.is_correct) and is_7days_after_finished) %}
+                                            {% if enable_video and explanation_link.get(marking.question_no) %}
+                                                <span
+                                                       id="view_explanation_window"
+                                                       name="view_explanation_window"
+                                                       data-toggle="modal" data-target="#videoModal"
+                                                       data-link="{{ explanation_link.get(marking.question_no) }}">
+                                                <i class="fa fa-play-circle" style="color: #c0a16b"></i>
+                                                </span>
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
+                                            {% else %}
+                                                <i class="fa fa-play-circle" style="color: lightgrey"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>{% if marking.candidate_r_value %}{{ marking.candidate_r_value }}{% else %}
+                                            answer_unsubmission{% endif %}</td>
+                                        <td>{% if marking.is_correct %}
+                                            <i class="fa fa-check" style="color: #4dbd74"></i>{% else %}
+                                            <i class="fa fa-times" style="color: #f86c6b"></i>{% endif %}</td>
+                                        <td>{% if not marking.is_correct and marking.correct_r_value %}
+                                            {{ marking.correct_r_value }}{% endif %}</td>
+                                        <td>{{ marking.item_percentile }}%</td>
+                                        <td>{{ Codebook.get_code_name(marking.subcategory) }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% if ts_by_category %}
+            <table id="t_assessment_info">
+                <tr>
+                    <th align="center"> Category</th>
+                    <th align="center"> Weaker &nbsp;&nbsp;<i class="icons cui-arrow-left"></i> &nbsp;&nbsp;Average
+                        &nbsp;&nbsp;<i class="icons cui-arrow-right"></i>&nbsp;&nbsp; Stronger
+                    </th>
+                </tr>
+                {% for ts in ts_by_category %}
+                    <tr>
+                        <td><strong>{{ ts.category }}</strong></td>
+                        <td>
+                            <table id="t_graph">
+                                <tr>
+                                    <td width="15%"><small>My Score</small></td>
+                                    <td width="75%">
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar bg-warning" role="progressbar"
+                                                 style="width: {{ ts.percentile_score }}%"
+                                                 aria-valuenow="{{ ts.percentile_score }}" aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td width="10%"><small> {{ ts.percentile_score }} </small></td>
+                                </tr>
+                                <tr>
+                                    <td width="15%"><small>Average</small></td>
+                                    <td width="75%">
+                                        <div class="progress progress-xs">
+                                        <div class="progress-bar bg-danger" role="progressbar"
+                                             style="width:{{ ts.avg_score }}%" aria-valuenow="{{ ts.avg_score }}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                    <td width="10%"><small> {{ ts.avg_score }} </small></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="card-body">
+            <table style="width:100%">
+                <tr><td>This report is not available</td></tr>
+            </table>
+    </div>
+    {% endif %}
+    <br>
+    <br>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Loading... Try again if the contents not shown
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <!-- 16:9 aspect ratio -->
+        <!--<div class="embed-responsive embed-responsive-16by9">-->
+          <iframe class="embed-responsive-item" src="" id="video"  width="1050" height="700" frameborder="0"></iframe>
+        <!--</div>-->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Javascripts-->
+<script src="/static/ui/vendors/jquery/js/jquery.min.js"></script>
+<script src="/static/ui/vendors/js.cookie/js.cookie.js"></script>
+<script src="/static/ui/vendors/popper.js/js/popper.min.js"></script>
+<script src="/static/ui/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/static/ui/vendors/pace-progress/js/pace.min.js"></script>
+<script src="/static/ui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+<script src="/static/ui/vendors/@coreui/coreui/js/coreui.min.js"></script>
+<script src="/static/ui/vendors/DataTables/datatables.min.js" type="text/javascript"></script>
+<script src="/static/ui/js/main.js"></script>
+<script src="/static/ui/vendors/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<script src="/static/common/js/csedu_common.js"></script>
+<script src="/static/item/js/item_edit.js"></script>
+<script src="/static/runner/js/item_runner.js"></script>
+<script src="/static/runner/js/item_handlers.js"></script>
+<script src="/static/ui/vendors/mathjax/mml-chtml.js"></script>
+<script src="/static/ui/vendors/svg.js-2.7.1/svg.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        ItemRunner.init($('#dataModal .modal-content'), {mode: 'peek'});
+        $('#dataModal').on('hidden.bs.modal', function (e) {
+            $('#dataModal .modal-content').empty();
+        });
+    });
+    $("#videoModal").on("show.bs.modal", function (event) {
+        //var explanation_link = $('#view_explanation_window').data('link');
+        var explanation_link = $(event.relatedTarget).data('link');
+        $('#video').attr('src', explanation_link);
+    });
+   $("#videoModal").on("hidden.bs.modal", function (event) {
+        $('#video').attr('src', "");
+    });
+</script>
+</body>
+</html>
