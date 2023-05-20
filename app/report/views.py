@@ -455,7 +455,7 @@ def my_report_1(assessment_id, ts_id, student_user_id):
 
     template_file = 'report/my_report_1.html'
     if pdf:
-        template_file = 'report/my_report_pdf.html',
+        template_file = 'report/my_report_pdf_1.html',
     log.debug("chs4 end: %s " % (datetime.utcnow()))
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
