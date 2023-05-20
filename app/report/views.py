@@ -330,7 +330,7 @@ def my_report(assessment_id, ts_id, student_user_id):
 @login_required
 # @permission_required(Permission.ITEM_EXEC)
 @permission_required_or_multiple(Permission.ITEM_EXEC, Permission.ASSESSMENT_READ)
-def my_report(assessment_id, ts_id, student_user_id):
+def my_report_1(assessment_id, ts_id, student_user_id):
     '''
      @report.route('/ts/<int:assessment_id>/<int:ts_id>/<int:student_user_id>', methods=['GET'])
      my_report() : Student Login > My Report > Report

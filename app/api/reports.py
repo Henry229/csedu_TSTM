@@ -342,7 +342,6 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
                "WHERE assessment_enroll_id=:assessment_enroll_id " \
                "and assessment_id=:assessment_id and testset_id=:testset_id " \
                "and student_user_id=:student_user_id"
-
     cursor = db.session.execute(sql_stmt,
                                 {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
                                  'testset_id': ts_id, 'student_user_id': student_user_id})
