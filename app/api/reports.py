@@ -501,7 +501,7 @@ def query_my_report_body_1(assessment_enroll_id, ts_id, assessment_id):
                  "  m.candidate_r_value, " \
                  "  m.is_correct, " \
                  "  m.correct_r_value, " \
-                 "  t.correct_percentile, " \
+                 "  t.correct_percentile as item_percentile, " \
                  "  m.question_no, " \
                  "  m.item_id, " \
                  "  i.category, " \
