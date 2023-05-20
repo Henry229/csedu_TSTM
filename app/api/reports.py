@@ -454,6 +454,74 @@ def query_my_report_body(assessment_enroll_id, ts_id):
     return rows
 
 
+def query_my_report_body_1(assessment_enroll_id, ts_id, assessment_id):
+    """
+    column_names_1 = ['question_no',
+                      'assessment_enroll_id',
+                      'testset_id',
+                      'testlet_id',
+                      'candidate_r_value',
+                      'student_user_id',
+                      'grade',
+                      "to_char(created_time,'YYYY-MM-DD Dy') as created_time",
+                      "to_char(read_time,'YYYY-MM-DD Dy') as read_time",
+                      'is_correct',
+                      'correct_r_value',
+                      'item_percentile',
+                      'item_id',
+                      'category',
+                      'subcategory'
+                      ]
+    sql_stmt_1 = 'SELECT {columns} ' \
+                 'FROM my_report_body_v ' \
+                 'WHERE assessment_enroll_id=:assessment_enroll_id and testset_id=:testset_id ' \
+                 'ORDER BY question_no asc'.format(
+        columns=','.join(column_names_1))
+    cursor_1 = db.session.execute(sql_stmt_1, {'assessment_enroll_id': assessment_enroll_id, 'testset_id': ts_id})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+    return rows
+    """
+
+    sql_stmt_1 = "with t_correct_percentile as ( " \
+                 "select m.item_id, " \
+                 "100*COALESCE(sum(case when m.is_correct then 1 else 0 end),0)/count(DISTINCT ae.id) " \
+                 "AS correct_percentile " \
+                 "from (select * from assessment_enroll where assessment_id = :assessment_id and testset_id = :ts_id) " \
+                 "as ae " \
+                 "join  marking m on ae.id = m.assessment_enroll_id " \
+                 "group by item_id " \
+                 ") " \
+                 "select m.assessment_enroll_id, " \
+                 "  m.testset_id, " \
+                 "  m.testlet_id, " \
+                 "  e.student_user_id, " \
+                 "  e.grade, " \
+                 "  to_char(m.created_time,'YYYY-MM-DD Dy') as created_time, " \
+                 "  m.candidate_r_value, " \
+                 "  m.is_correct, " \
+                 "  m.correct_r_value, " \
+                 "  t.correct_percentile, " \
+                 "  m.question_no, " \
+                 "  m.item_id, " \
+                 "  i.category, " \
+                 "  i.subcategory, " \
+                 "  to_char(m.read_time,'YYYY-MM-DD Dy') as read_time " \
+                 "from marking m, " \
+                 "assessment_enroll e, " \
+                 "item i, " \
+                 "t_correct_percentile t " \
+                 "where e.id = m.assessment_enroll_id and i.id = m.item_id and i.id = t.item_id " \
+                 "and e.id = :assessment_enroll_id " \
+                 "order by m.question_no"
+
+    cursor_1 = db.session.execute(sql_stmt_1, {'assessment_enroll_id': assessment_enroll_id, 'testset_id': ts_id,
+                                               'assessment_id': assessment_id})
+    Record = namedtuple('Record', cursor_1.keys())
+    rows = [Record(*r) for r in cursor_1.fetchall()]
+    return rows
+
+
 '''Student UI: Query My Report (subject) Footer for each Student'''
 
 

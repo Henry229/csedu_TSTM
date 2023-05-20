@@ -23,7 +23,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
     draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer, search_assessment, \
-    query_my_report_header_1, query_my_report_footer_1
+    query_my_report_header_1, query_my_report_footer_1, query_my_report_body_1
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \
@@ -421,7 +421,7 @@ def my_report_1(assessment_id, ts_id, student_user_id):
     # My Report : Body - Item ID/Candidate Value/IsCorrect/Correct_Value, Correct_percentile, Item Category
     #                       'assessment_enroll_id', 'testset_id', 'candidate_r_value', 'student_user_id', 'grade',
     #                       "created_time", 'is_correct', 'correct_r_value', 'item_percentile', 'item_id', 'category'
-    markings = query_my_report_body(assessment_enroll_id, ts_id)
+    markings = query_my_report_body_1(assessment_enroll_id, ts_id, assessment_id)
     explanation_link = {}
     for marking in markings:
         explanation_link[marking.question_no] = view_explanation(testset_id=ts_id, item_id=marking.item_id)
