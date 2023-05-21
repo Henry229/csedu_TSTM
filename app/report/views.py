@@ -457,6 +457,7 @@ def my_report_1(assessment_id, ts_id, student_user_id):
     if pdf:
         template_file = 'report/my_report_pdf_1.html',
     log.debug("chs4 end: %s " % (datetime.utcnow()))
+    log.debug("chs 4 end: %s " % pdf_url)
     rendered_template_pdf = render_template(template_file, assessment_name=assessment_name,
                                             subject=test_subject_string, rank=rank,
                                             is_7days_after_finished=is_7days_after_finished,
