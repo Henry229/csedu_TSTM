@@ -22,8 +22,7 @@ from ..api.reports import query_my_report_list_v, query_my_report_header, query_
     query_individual_progress_summary_by_subject_v, query_individual_progress_summary_by_plan_v, \
     build_test_results_pdf_response, build_test_results_zipper, \
     build_individual_progress_pdf_response, build_individual_progress_zipper, \
-    draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer, search_assessment, \
-    query_my_report_header_1, query_my_report_footer_1, query_my_report_body_1
+    draw_individual_progress_by_subject, draw_individual_progress_by_set, query_my_report_footer, search_assessment
 from ..decorators import permission_required, permission_required_or_multiple
 from ..models import Codebook, Permission, AssessmentEnroll, Assessment, EducationPlanDetail, \
     Item, Marking, EducationPlan, Student, Testset, AssessmentHasTestset, refresh_mviews, User, MarkingForWriting, \

@@ -289,6 +289,7 @@ def query_my_report_list_v(student_user_id):
 
 '''Student UI: Query My Report (subject) Header for each Student'''
 
+
 def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id):
     column_names = ['rank_v as student_rank',
                     'total_students',
@@ -365,6 +366,7 @@ def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_u
 
 '''Student UI: Query My Report (subject) Body for each Student'''
 
+
 def query_my_report_body(assessment_enroll_id, ts_id, assessment_id):
     """
     column_names_1 = ['question_no',
@@ -434,6 +436,7 @@ def query_my_report_body(assessment_enroll_id, ts_id, assessment_id):
 
 
 '''Student UI: Query My Report (subject) Footer for each Student'''
+
 
 def query_my_report_footer(assessment_id, student_user_id, assessment_enroll_id, ts_id):
     column_names_2 = ['code_name as category',
