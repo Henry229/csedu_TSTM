@@ -248,6 +248,9 @@
                       {% endfor %}
 
                   {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <button class="btn btn-warning" type="button" aria-pressed="true" >Selective Trial Test Summary Report</button>
+                        </div>
                       {% for assessment in assessments %}
                           <div class="card-body {{ assessment.assessment_type_class }}">
                               <div>

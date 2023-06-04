@@ -126,9 +126,9 @@ def is_authorised(student, timeout=120):
             session_age = datetime.now(pytz.utc) - session_time
             return True, errors
             # temprory blocking becuae of moving aws->linux
-            #if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
+            # if timedelta(minutes=0) < session_age < timedelta(minutes=timeout):
             #    return True, errors
-            #else:
+            # else:
             #    errors.append("Student's CSOnlineSchool session has been expired")
         else:
             errors.append("Student logged in different IP address from CSOnlineSchool")
@@ -208,7 +208,7 @@ def process_inward():
     else:
         try:
             member = get_student_info(state, student_id)
-        #except:
+        # except:
         except Exception as e:
             log.info("Invalid Request : %s" % str(e))
             return forbidden("Invalid Request")
@@ -216,7 +216,8 @@ def process_inward():
     if authorised:
         # registered_student = Student.query.filter(Student.student_id.ilike(student_id), Student.state == state).first()
         # ilike can't find exact matching student id e.g. ethan_H
-        registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(), Student.state == state).first()
+        registered_student = Student.query.filter(func.lower(Student.student_id) == student_id.lower(),
+                                                  Student.state == state).first()
         if registered_student:
             student_user = User.query.filter_by(id=registered_student.user_id).first()
             # Update username and branch for every login to be used in display and report
@@ -347,17 +348,17 @@ def assessment_list():
     if student is None:
         return page_not_found(e="Login user not registered as student")
 
-
     class_assessments, homeworks, trial_assessments = [], [], []
     assessments_list = {}
     class_count, homework_count, trial_count = 0, 0, 0
 
-    #assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)). \
+    # assessment_all = Assessment.query.filter(Assessment.GUID.in_(guid_list)). \
     #    order_by(Assessment.created_time.desc()).all()
-    #assessment_array = Assessment.query.filter(Assessment.GUID.in_(guid_list)).all()
+    # assessment_array = Assessment.query.filter(Assessment.GUID.in_(guid_list)).all()
 
-    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if x.is_last_version==True]
-    #assessment_all.sort(key=lambda x: x.all_enroll_finished(current_user.id), reverse=True)
+    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if
+                      x.is_last_version == True]
+    # assessment_all.sort(key=lambda x: x.all_enroll_finished(current_user.id), reverse=True)
 
     code_id = Codebook.get_code_id_by_code_type('homework_active')
     additional_info = Codebook.get_additional_info(code_id)
@@ -388,11 +389,11 @@ def assessment_list():
         # Check if there is an assessment with the guid
         assessment = [a for a in assessment_all if a.GUID == assessment_guid]
 
-        if len(assessment)==0:
+        if len(assessment) == 0:
             continue
             # return page_not_found(e="Invalid request - assessment enroll information")
         else:
-        #    assessment.sort(key=lambda x: x.version, reverse=True)
+            #    assessment.sort(key=lambda x: x.version, reverse=True)
             assessment = assessment[0]
 
         if assessment.test_type_kind == 'Homework':
@@ -428,11 +429,11 @@ def assessment_list():
         # assessment_type_name = assessment.test_type_name
         homework_type_assessment = assessment.is_homework
 
-        if assessment.test_type_kind=='Class Test':
+        if assessment.test_type_kind == 'Class Test':
             assesment_kind = assesment_kinds(1)
-        elif assessment.test_type_kind=='Trial Test':
+        elif assessment.test_type_kind == 'Trial Test':
             assesment_kind = assesment_kinds(2)
-        elif assessment.test_type_kind=='Homework':
+        elif assessment.test_type_kind == 'Homework':
             assesment_kind = assesment_kinds(3)
 
         homework_session_finished = False
@@ -481,7 +482,7 @@ def assessment_list():
             student_testsets.append(enrolled_testsets[ts_id])
         new_test_sets = []
         flag_finish_assessment = True
-        #if homework_type_assessment:
+        # if homework_type_assessment:
         if assesment_kind.value == 3:
             homework_count += 1
             assessment.assessment_type_name = 'Homework'
@@ -509,11 +510,11 @@ def assessment_list():
                     tset.finish_time = result[0].finish_time
                     tset.start_time = result[0].start_time
                     tset.test_duration = result[0].test_duration
-                    #if tset.finish_time is not None:
+                    # if tset.finish_time is not None:
                     #    is_after_minutes = (pytz.utc.localize(tset.finish_time) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
                     #    if is_after_minutes is True:
                     #        tset.finish_time_after_minutes = True
-                    #else:
+                    # else:
                     #    if tset.test_duration is not None:
                     #        is_after_minutes = (pytz.utc.localize(tset.start_time) + timedelta(minutes=tset.test_duration) + timedelta(minutes=5)) <= datetime.now(pytz.utc)
                     #        if is_after_minutes is True:
@@ -545,7 +546,7 @@ def assessment_list():
 
             if test_type_additional_info is not None and test_type_additional_info['enable_video']:
                 if test_type_additional_info['enable_video'] == 'true':
-                    #checking subject
+                    # checking subject
                     is_subject = False
                     if test_type_additional_info.get('subject'):
                         if tset.subject in test_type_additional_info['subject']:
@@ -555,10 +556,11 @@ def assessment_list():
                         # if tset.finish_time is not None:
                         if hasattr(tset, 'finish_time') and tset.finish_time is not None:
                             finish_time = tset.finish_time
-                            days = 7  #defalut value
+                            days = 7  # defalut value
                             if test_type_additional_info['enable_video_days']:
                                 days = int(test_type_additional_info['enable_video_days'])
-                            is_days_after_finished = (pytz.utc.localize(finish_time) + timedelta(days=days)) >= datetime.now(pytz.utc)
+                            is_days_after_finished = (pytz.utc.localize(finish_time) + timedelta(
+                                days=days)) >= datetime.now(pytz.utc)
                             if is_days_after_finished is True:
                                 tset.enable_video = True
                         else:
@@ -608,7 +610,8 @@ def assessment_list():
                             AssessmentEnroll.testset_id == tset.id) \
                     .order_by(asc(AssessmentEnroll.attempt_count)).first()
                 if enrolled_q:
-                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
+                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id,
+                                                       current_user.id)
                     if ts_header:
                         tset.score = float(ts_header.percentile_score)
                     if subject == 'Writing' and tset.enable_report:
@@ -627,8 +630,6 @@ def assessment_list():
         elif assesment_kind.value == 2:
             trial_assessments.append(assessment)
 
-
-
     if class_count > 0:
         for x in class_assessments:
             all_finished = 1
@@ -646,8 +647,8 @@ def assessment_list():
 
             x.finished = all_finished
         class_assessments.sort(key=lambda x: x.created_time, reverse=True)
-        #class_assessments.sort(key=lambda x: x.active, reverse=True)
-        #class_assessments.sort(key=lambda x: x.finished)
+        # class_assessments.sort(key=lambda x: x.active, reverse=True)
+        # class_assessments.sort(key=lambda x: x.finished)
 
     if trial_count > 0:
         for x in trial_assessments:
@@ -666,8 +667,8 @@ def assessment_list():
 
             x.finished = all_finished
         trial_assessments.sort(key=lambda x: x.created_time, reverse=True)
-        #trial_assessments.sort(key=lambda x: x.active, reverse=True)
-        #trial_assessments.sort(key=lambda x: x.finished)
+        # trial_assessments.sort(key=lambda x: x.active, reverse=True)
+        # trial_assessments.sort(key=lambda x: x.finished)
 
     if homework_count > 0:
         for x in homeworks:
@@ -686,13 +687,13 @@ def assessment_list():
 
             x.finished = all_finished
         homeworks.sort(key=lambda x: x.created_time, reverse=True)
-        #homeworks.sort(key=lambda x: x.active, reverse=True)
-        #homeworks.sort(key=lambda x: x.finished)
+        # homeworks.sort(key=lambda x: x.active, reverse=True)
+        # homeworks.sort(key=lambda x: x.finished)
 
     homeworks_grouped = []
     sorted_grouped = sorted(homeworks, key=lambda x: x.name)
     for key, group in groupby(sorted_grouped, lambda x: x.name):
-        assessment_grouped = {'name': key, 'first_assessment': None, 'subjects':[]}
+        assessment_grouped = {'name': key, 'first_assessment': None, 'subjects': []}
         testsets = []
 
         for thing in group:
@@ -702,7 +703,7 @@ def assessment_list():
 
         testsets_grouped = sorted(testsets, key=lambda x: x.subject)
         for key1, group1 in groupby(testsets_grouped, lambda x: x.subject):
-            grouped1 = {'name': key1, 'list':[]}
+            grouped1 = {'name': key1, 'list': []}
             for thing1 in group1:
                 grouped1['list'].append(thing1)
 
@@ -710,7 +711,7 @@ def assessment_list():
 
         homeworks_grouped.append(assessment_grouped)
 
-        #the duplicate on each testsets of list. so creating new json item.
+        # the duplicate on each testsets of list. so creating new json item.
         for homework in homeworks_grouped:
             for _subjects in homework['subjects']:
                 temp_testsets = []
@@ -723,8 +724,8 @@ def assessment_list():
                                     if ts.id == _set.id:
                                         exits = True
                                 if not exits:
-                                    #ts.assessment_guid = ts.assessments[0].GUID
-                                    #ts.assessment_id = ts.assessments[0].id
+                                    # ts.assessment_guid = ts.assessments[0].GUID
+                                    # ts.assessment_id = ts.assessments[0].id
                                     ts.assessment_guid = homework["first_assessment"].GUID
                                     ts.assessment_id = homework["first_assessment"].id
                                     temp_testsets.append(ts)
@@ -733,10 +734,9 @@ def assessment_list():
         for homework in homeworks_grouped:
             homework['header_count'] = 0
             for _subjects in homework['subjects']:
-                #if len(_subjects['list']) > homework['header_count']:
+                # if len(_subjects['list']) > homework['header_count']:
                 if len(_subjects['testsets']) > homework['header_count']:
                     homework['header_count'] = len(_subjects['list'])
-
 
     assessments_list = {"Class Test": class_assessments, "Trial Test": trial_assessments, "Homework": homeworks_grouped}
     log.debug("Student report: %s" % Config.ENABLE_STUDENT_REPORT)
@@ -778,9 +778,17 @@ def assessment_list():
             runner_version = f.readline().strip()
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
+
+    stt_count = db.session.query(Assessment, AssessmentEnroll). \
+        filter(Assessment.id == AssessmentEnroll.assessment_id). \
+        filter(Assessment.test_type == 1334,
+               Assessment.name.ilike('{}%'.format('Selective No')),
+               AssessmentEnroll.student_user_id == current_user.id).count()
+
     return render_template('web/assessments.html', student_user_id=current_user.id, assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_class=btn_class, btn_trial=btn_trial,
-                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=homeworks_grouped)
+                           btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=homeworks_grouped,
+                           stt_count=stt_count)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
@@ -794,16 +802,16 @@ def assessment_list_for_report():
     enrols = AssessmentEnroll.query.filter_by(student_user_id=current_user.id).all()
     guid_list = list({e.assessment_guid for e in enrols})
 
-
     class_assessments, homeworks, trial_assessments = [], [], []
 
-    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if x.is_last_version==True]
+    assessment_all = [x for x in Assessment.query.filter(Assessment.GUID.in_(guid_list)).all() if
+                      x.is_last_version == True]
 
     for assessment_guid in guid_list:
         # Check if there is an assessment with the guid
         assessment = [a for a in assessment_all if a.GUID == assessment_guid]
 
-        if len(assessment)==0:
+        if len(assessment) == 0:
             continue
         else:
             assessment = assessment[0]
@@ -817,7 +825,6 @@ def assessment_list_for_report():
                 continue
 
         # assessment_type_name = assessment.test_type_name
-
 
         # Get all assessment enroll to get testsets the student enrolled in already.
         # 시험을 여러번 볼 수 있어서 전체 enrol 을 받아온 후에 가장 최근에 본 것만 모은다.
@@ -839,21 +846,20 @@ def assessment_list_for_report():
         new_test_sets = []
         for tset in student_testsets:
             new_test_sets.append(tset)
-            #test_type = Codebook.get_code_name(tset.test_type)
-            #subject = Codebook.get_code_name(tset.subject)
+            # test_type = Codebook.get_code_name(tset.test_type)
+            # subject = Codebook.get_code_name(tset.subject)
             additional_info = Codebook.get_additional_info(tset.subject)
             tset.sort_key = additional_info['subject_order'] if additional_info else 1
 
         sorted_testsets = sorted(new_test_sets, key=lambda x: x.sort_key)
         assessment.testsets = sorted_testsets
 
-        if assessment.test_type_kind=='Homework':
+        if assessment.test_type_kind == 'Homework':
             homeworks.append(assessment)
-        elif assessment.test_type_kind=='Class Test':
+        elif assessment.test_type_kind == 'Class Test':
             class_assessments.append(assessment)
-        elif assessment.test_type_kind=='Trial Test':
+        elif assessment.test_type_kind == 'Trial Test':
             trial_assessments.append(assessment)
-
 
     if len(class_assessments) > 0:
         class_assessments.sort(key=lambda x: x.active, reverse=True)
@@ -1074,7 +1080,8 @@ def assessment_list_sampletest():
                             AssessmentEnroll.testset_id == tset.id) \
                     .order_by(asc(AssessmentEnroll.attempt_count)).first()
                 if enrolled_q:
-                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id, current_user.id)
+                    ts_header = query_my_report_header(enrolled_q.id, enrolled_q.assessment_id, tset.id,
+                                                       current_user.id)
                     if ts_header:
                         tset.score = float(ts_header.percentile_score)
                     if subject == 'Writing' and tset.enable_report:
@@ -1124,7 +1131,8 @@ def assessment_list_sampletest():
             runner_version = f.readline().strip()
     except FileNotFoundError:
         runner_version = str(int(datetime.utcnow().timestamp()))
-    return render_template('web/assessments_sampletest.html', student_user_id=current_user.id, assessments_list=assessments_list,
+    return render_template('web/assessments_sampletest.html', student_user_id=current_user.id,
+                           assessments_list=assessments_list,
                            runner_version=runner_version, btn_all=btn_all, btn_exam=btn_exam,
                            btn_homework=btn_homework, btn_group=btn_group)
 
@@ -1174,7 +1182,7 @@ def testing():
         if testset is None:
             return redirect(url_for('web.testset_list', error="Invalid testset requested!"))
         context['testset'] = testset
-        #checking grade for instruction
+        # checking grade for instruction
         codebook = Codebook.query.filter_by(id=testset.grade).first()
         if codebook:
             if codebook.additional_info:
@@ -1306,22 +1314,22 @@ def mp4_testing():
 
 
 def query_my_report_header(assessment_enroll_id, assessment_id, ts_id, student_user_id):
-   column_names = ['rank_v as student_rank',
-                   'total_students',
-                   "to_char(score,'999.99') as score",
-                   "to_char(total_score,'999.99') as total_score",
-                   "to_char(percentile_score,'999.99') as percentile_score"
-                   ]
-   sql_stmt = 'SELECT {columns} ' \
-              'FROM test_summary_mview ' \
-              'WHERE assessment_enroll_id=:assessment_enroll_id ' \
-              'and assessment_id=:assessment_id and testset_id=:testset_id ' \
-              'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
-   cursor = db.session.execute(sql_stmt,
-                               {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
-                                'testset_id': ts_id, 'student_user_id': student_user_id})
-   ts_header = cursor.fetchone()
-   return ts_header
+    column_names = ['rank_v as student_rank',
+                    'total_students',
+                    "to_char(score,'999.99') as score",
+                    "to_char(total_score,'999.99') as total_score",
+                    "to_char(percentile_score,'999.99') as percentile_score"
+                    ]
+    sql_stmt = 'SELECT {columns} ' \
+               'FROM test_summary_mview ' \
+               'WHERE assessment_enroll_id=:assessment_enroll_id ' \
+               'and assessment_id=:assessment_id and testset_id=:testset_id ' \
+               'and student_user_id=:student_user_id'.format(columns=','.join(column_names))
+    cursor = db.session.execute(sql_stmt,
+                                {'assessment_enroll_id': assessment_enroll_id, 'assessment_id': assessment_id,
+                                 'testset_id': ts_id, 'student_user_id': student_user_id})
+    ts_header = cursor.fetchone()
+    return ts_header
 
 
 def get_writing_report_score(candidate_mark_detail):
