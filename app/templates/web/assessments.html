@@ -248,9 +248,11 @@
                       {% endfor %}
 
                   {% else %}
-                        <div class="alert alert-warning" role="alert">
+                        {% if key == 'Trial Test' %}
+                        <div class="alert alert-warning" role="alert" {{ stt_count }}>
                             <button class="btn btn-warning" type="button" aria-pressed="true" >Selective Trial Test Summary Report</button>
                         </div>
+                        {% endif %}
                       {% for assessment in assessments %}
                           <div class="card-body {{ assessment.assessment_type_class }}">
                               <div>
