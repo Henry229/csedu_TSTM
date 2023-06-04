@@ -248,8 +248,8 @@
                       {% endfor %}
 
                   {% else %}
-                        {% if key == 'Trial Test' %}
-                        <div class="alert alert-warning" role="alert" {{ stt_count }}>
+                        {% if key == 'Trial Test' and stt_count > 0 %}
+                        <div class="alert alert-warning assessment-trial" role="alert">
                             <button class="btn btn-warning" type="button" aria-pressed="true" >Selective Trial Test Summary Report</button>
                         </div>
                         {% endif %}
