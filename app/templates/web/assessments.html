@@ -506,6 +506,31 @@
                 html += '</table>';
                 $('#dataModal .modal-body').html(html);
                 $('#dataModal').modal('show');
+
+                $.ajax({
+                    method: 'GET',
+                    url: '/api/stt/summaryreport/',
+                    beforeSend: function () {
+                        parent.is_leave = false;
+                        $btn.attr('disabled', true);
+                        var body = $('#testsets_searched > tbody');
+                        body.empty();
+                    },
+                    error: function(){
+                        $('#dataModal .modal-body tbody').empty();
+                    },
+                    success: function (d) {
+                        $('#dataModal .modal-body tbody').empty();
+                        debugger
+                        d.forEach(function (item) {
+                            debugger
+                                // item[0]:id, item[1]:name, item[2]:version, item[3]:grade, item[4]:subject
+                                //drawTestsetListModal(item[0], item[1], item[2], item[3], item[4]);
+                        });
+                    }
+                });
+
+
             });
 
             $('#testsets input.start').on('click', function () {
