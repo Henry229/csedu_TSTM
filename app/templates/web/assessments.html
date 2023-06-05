@@ -512,12 +512,10 @@
                 $.ajax({
                     method: 'GET',
                     url: '/api/stt/summaryreport',
-                    error: function(a, b, c, d){
-                        debugger
+                    error: function(){
                         $('#dataModal .modal-body tbody').empty();
                     },
                     success: function (d) {
-                        debugger
                         $('#dataModal .modal-body tbody').empty();
                         d.forEach(function (item) {
                             let tr = '<tr>';
