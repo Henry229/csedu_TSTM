@@ -65,7 +65,7 @@ def get_stt_summaryreport():
                "group by test_detail, student_user_id " \
                ") t " \
                ") " \
-               "select test_detail, math, thinking, reading, writing, total, rnk, cnt " \
+               "select test_detail, math, thinking, reading, writing, to_char(total, '999.99') as total, rnk, cnt " \
                "from cte " \
                "where student_user_id = :student_user_id " \
                "order by test_detail desc"
