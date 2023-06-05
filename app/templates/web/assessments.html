@@ -487,6 +487,23 @@
     <script>
         $(document).ready(function () {
             $('#report_sst').click(function(){
+                $('#dataModalLabel').text('Selective Trial Test Summary Report');
+                let html = '<table class="table table-hover">';
+                html += '<thead>';
+                html += '<tr>';
+                html += '<th scope="col">Title (Test No.)</th>';
+                html += '<th scope="col">Maths R.</th>';
+                html += '<th scope="col">Thinking</th>';
+                html += '<th scope="col">Reading</th>';
+                html += '<th scope="col">Writing</th>';
+                html += '<th scope="col">Total</th>';
+                html += '<th scope="col">Rank</th>';
+                html += '</tr>';
+                html += '</thead>';
+                html += '<tbody class="table-group-divider">';
+                html += '</tbody>';
+                html += '</table>';
+                $('#dataModal .modal-body').html(html);
                 $('#dataModal').modal('show');
             });
 
