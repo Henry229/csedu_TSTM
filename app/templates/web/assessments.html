@@ -507,6 +507,7 @@
                 html += '<small class="float-right">Total = Maths R. Skills (25%) + Thinking Skills (35%) + Reading Skills (25%) + Essay Writing (15%)</small>';
                 $('#dataModal .modal-body').html(html).addClass('h5 text-center');
                 $('#dataModal .modal-header').addClass('text-white').css("background-color", "#929fab");
+                $('#dataModal .modal-dialog').removeClass('modal-lg').addClass('modal-xl');
 
                 $('#dataModal').modal('show');
 
@@ -520,7 +521,7 @@
                         $('#dataModal .modal-body tbody').empty();
                         d.forEach(function (item) {
                             let tr = '<tr>';
-                            tr += '<th scope="row">'+item[0]+'</th>';
+                            tr += '<th scope="row">Selective Trial Test ('+item[0]+')</th>';
                             tr += '<td>'+(item[1]==null?'':item[1].trim())+'</td>';
                             tr += '<td>'+(item[2]==null?'':item[2].trim())+'</td>';
                             tr += '<td>'+(item[3]==null?'':item[3].trim())+'</td>';
