@@ -515,12 +515,18 @@
                         $('#dataModal .modal-body tbody').empty();
                     },
                     success: function (d) {
-                        debugger
                         $('#dataModal .modal-body tbody').empty();
                         d.forEach(function (item) {
-                            debugger
-                                // item[0]:id, item[1]:name, item[2]:version, item[3]:grade, item[4]:subject
-                                //drawTestsetListModal(item[0], item[1], item[2], item[3], item[4]);
+                            let tr = '<tr>';
+                            tr += '<th scope="row">'+item[0]+'</th>';
+                            tr += '<td>'+(item[1]==null?'':item[1])+'</td>';
+                            tr += '<td>'+(item[2]==null?'':item[2])+'</td>';
+                            tr += '<td>'+(item[3]==null?'':item[3])+'</td>';
+                            tr += '<td>'+(item[4]==null?'':item[4])+'</td>';
+                            tr += '<td>'+(item[5]==null?'':item[5])+'</td>';
+                            tr += '<td>'+item[6]+'/'+item[7]+'</td>';
+                            tr += '</tr>';
+                            $('#dataModal .modal-body tbody').append(tr);
                         });
                     }
                 });
