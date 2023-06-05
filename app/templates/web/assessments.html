@@ -505,7 +505,7 @@
                 html += '</tbody>';
                 html += '</table>';
                 html += '<small class="float-right">Total = Maths R. Skills (25%) + Thinking Skills (35%) + Reading Skills (25%) + Essay Writing (15%)</small>';
-                $('#dataModal .modal-body').html(html).addClass('h5');
+                $('#dataModal .modal-body').html(html).addClass('h5 text-center');
                 $('#dataModal .modal-header').addClass('bg-secondary text-white');
                 $('#dataModal').modal('show');
 
@@ -522,12 +522,12 @@
                         d.forEach(function (item) {
                             let tr = '<tr>';
                             tr += '<th scope="row">'+item[0]+'</th>';
-                            tr += '<td>'+(item[1]==null?'':item[1])+'</td>';
-                            tr += '<td>'+(item[2]==null?'':item[2])+'</td>';
-                            tr += '<td>'+(item[3]==null?'':item[3])+'</td>';
-                            tr += '<td>'+(item[4]==null?'':item[4])+'</td>';
-                            tr += '<td>'+(item[5]==null?'':item[5])+'</td>';
-                            tr += '<td>'+item[6]+'/'+item[7]+'</td>';
+                            tr += '<td>'+(item[1]==null?'':item[1].trim())+'</td>';
+                            tr += '<td>'+(item[2]==null?'':item[2].trim())+'</td>';
+                            tr += '<td>'+(item[3]==null?'':item[3].trim())+'</td>';
+                            tr += '<td>'+(item[4]==null?'':item[4].trim())+'</td>';
+                            tr += '<td>'+(item[5]==null?'':item[5].trim())+'</td>';
+                            tr += '<td>'+item[6].trim()+'/'+item[7].trim()+'</td>';
                             tr += '</tr>';
                             $('#dataModal .modal-body tbody').append(tr);
                         });
