@@ -507,6 +507,7 @@
                 $('#dataModal .modal-body').html(html);
                 $('#dataModal').modal('show');
 
+                debugger
                 $.ajax({
                     method: 'GET',
                     url: '/api/stt/summaryreport',
@@ -516,7 +517,7 @@
                         var body = $('#testsets_searched > tbody');
                         body.empty();
                     },
-                    error: function(){
+                    error: function(a, b, c, d){
                         $('#dataModal .modal-body tbody').empty();
                     },
                     success: function (d) {
