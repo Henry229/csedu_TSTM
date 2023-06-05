@@ -249,8 +249,8 @@
 
                   {% else %}
                         {% if key == 'Trial Test' and stt_count > 0 %}
-                        <div class="alert alert-warning assessment-trial d-none" role="alert">
-                            <button class="btn btn-warning" type="button" aria-pressed="true" >Selective Trial Test Summary Report</button>
+                        <div class="alert alert-warning assessment-trial col-5 mt-3 ml-3 d-none">
+                            <button id="report_sst" class="btn btn-warning" type="button" aria-pressed="true" >Selective Trial Test Summary Report</button>
                         </div>
                         {% endif %}
                       {% for assessment in assessments %}
@@ -486,6 +486,10 @@
     <script src="/static/common/js/csedu_common.js"></script>
     <script>
         $(document).ready(function () {
+            $('#report_sst').click(function(){
+                $('#dataModal').modal('show');
+            });
+
             $('#testsets input.start').on('click', function () {
                 var assessment_guid = $(this).data('assessment-guid');
                 var testset_id = $(this).data('testset-id');
