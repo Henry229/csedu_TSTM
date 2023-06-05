@@ -488,7 +488,7 @@
         $(document).ready(function () {
             $('#report_sst').click(function(){
                 $('#dataModalLabel').text('Selective Trial Test Summary Report');
-                let html = '<h6>Student: {{ Student.getCSStudentName(current_user.id) }}</h6>';
+                let html = '<h6>Student Name : {{ Student.getCSStudentName(current_user.id) }}</h6>';
                 html += '<table class="table table-hover text-center">';
                 html += '<thead>';
                 html += '<tr style="background-color:lightyellow">';
