@@ -511,6 +511,7 @@
                     method: 'GET',
                     url: '/api/stt/summaryreport',
                     error: function(a, b, c, d){
+                        debugger
                         $('#dataModal .modal-body tbody').empty();
                     },
                     success: function (d) {
