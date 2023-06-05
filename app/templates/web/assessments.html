@@ -511,12 +511,6 @@
                 $.ajax({
                     method: 'GET',
                     url: '/api/stt/summaryreport',
-                    beforeSend: function () {
-                        parent.is_leave = false;
-                        $btn.attr('disabled', true);
-                        var body = $('#testsets_searched > tbody');
-                        body.empty();
-                    },
                     error: function(a, b, c, d){
                         $('#dataModal .modal-body tbody').empty();
                     },
