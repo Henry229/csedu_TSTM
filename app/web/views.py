@@ -790,6 +790,12 @@ def assessment_list():
                            btn_homework=btn_homework, btn_group=btn_group, unit=homework_days, test=homeworks_grouped,
                            stt_count=stt_count)
 
+@web.route('/report/stt_performance', methods=['GET'])
+@login_required
+@permission_required(Permission.ITEM_EXEC)
+def stt_performance_report():
+    return render_template('web/stt_performance_report.html')
+
 
 @web.route('/tests/assessments/report', methods=['GET'])
 @login_required
