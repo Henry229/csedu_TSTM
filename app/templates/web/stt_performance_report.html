@@ -1,19 +1,201 @@
 {% extends "ui/assessments_base.html" %}
 {% block title %}CSEdu Assessment System - Testset Management{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="/static/ui/css/stt_performance_report.css">
+{% endblock %}
 {% block app_content %}
-<div class="col-xs-12 text-right" style="font-size: 13px;">
-		Student Number 22805127
+<div class="stt_performance_report">
+	<div class="col-xs-12 text-right" style="font-size: 13px;">
+			Application Number 22805127
+	</div>
+	<div class="pl20 tit-contents">
+		<h1><span></span>Performance Report</h1>
+		<h4 class="mt20"><img src="https://tstm.csonlineschool.com.au/static/ui/img/user.png"/> <span>David Anwar</span></h4>
+	</div>
+	<ul class="disp-flex pt10">
+		<li class="float-l">
+			<img src="https://tstm.csonlineschool.com.au/static/ui/img/performance-report.png" style="width: 60px;">
+		</li>
+		<li class="float-l" style="margin:10px 0 10px 25px">
+			This performance report shows how David Anwar performed compared to all students who completed the Selective High School Placement Trial Test Set 33 (Test #64, 65)
+		</li>
+	</ul>
+	<div>
+		<ul class="graph-body disp-flex" style="flex-wrap:wrap">
+			<li style="Width:11%"></li>
+			<li style="Width:89%">
+				<ul class="border-l h30"></ul>
+			</li>
+			<li class="tit" style="Width:11%">Reading ─</li>
+			<li style="Width:89%">
+				<ul class="stick stick-first" style="display:flex; flex-wrap:wrap;background-color:#666">
+					<li class="dash-r" style="Width:50%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>50%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r my-range" style="Width:25%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>25%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r" style="Width:15%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>15%</strong> of<br>
+							students<br>who sat the test
+						<div>
+					</li>
+					<li style="Width:10%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<span><strong>15%</strong> of<br>
+							students who<br>sat the test</span>
+						<div>
+					</li>
+				</ul>
+			</li>
+			<li style="Width:11%"></li>
+			<li style="Width:89%">
+				<ul class="border-l h60">
+					<li class="font-w-5 pl6 pt2">In the Reading test Example Student performed in the top 10% of students who sat the test.</li>
+				</ul>
+			</li>
+			<li class="tit" style="Width:11%">Writing ─</li>
+			<li style="Width:89%">
+				<ul class="stick stick-second disp-flex" style="flex-wrap:wrap;background-color:#666">
+					<li class="dash-r" style="Width:50%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>50%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r my-range" style="Width:25%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>25%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r" style="Width:15%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>15%</strong> of<br>
+							students<br>who sat the test
+						<div>
+					</li>
+					<li style="Width:10%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<span><strong>15%</strong> of<br>
+							students who<br>sat the test</span>
+						<div>
+					</li>
+				</ul>
+			</li>
+			<li style="Width:11%"></li>
+			<li style="Width:89%">
+				<ul class="border-l h60">
+					<li class="font-w-5 pl6 pt2">In the Reading test Example Student performed in the top 10% of students who sat the test.</li>
+				</ul>
+			</li>
+			<li class="tit" style="Width:11%">
+				<div>
+					<div style="line-height:40px;float:right">─</div>
+					<div class="pr5" style="float:right">Mathematical<br>Reasoning</div>
+				</div>
+			<li style="Width:89%">
+				<ul class="stick stick-third disp-flex" style="flex-wrap:wrap;background-color:#666">
+					<li class="dash-r" style="Width:50%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>50%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r my-range" style="Width:25%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>25%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r" style="Width:15%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>15%</strong> of<br>
+							students<br>who sat the test
+						<div>
+					</li>
+					<li style="Width:10%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<span><strong>15%</strong> of<br>
+							students who<br>sat the test</span>
+						<div>
+					</li>
+				</ul>
+			</li>
+			<li style="Width:11%"></li>
+			<li style="Width:89%">
+				<ul class="border-l h60">
+					<li class="font-w-5 pl6 pt2">In the Reading test Example Student performed in the top 10% of students who sat the test.</li>
+				</ul>
+			</li>
+			<li class="tit" style="Width:11%">
+				<div>
+					<div style="line-height:40px;float:right">─</div>
+					<div class="pr5" style="float:right">Thinking<br>Skills</div>
+				</div>
+			<li style="Width:89%">
+				<ul class="stick stick-fourth disp-flex" style="flex-wrap:wrap;background-color:#666">
+					<li class="dash-r" style="Width:50%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>50%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r my-range" style="Width:25%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>25%</strong> of<br>
+							students who sat the test
+						<div>
+					</li>
+					<li class="dash-r" style="Width:15%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<strong>15%</strong> of<br>
+							students<br>who sat the test
+						<div>
+					</li>
+					<li style="Width:10%">
+						<div class="range">
+							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
+							<span><strong>15%</strong> of<br>
+							students who<br>sat the test</span>
+						<div>
+					</li>
+				</ul>
+			</li>
+			<li style="Width:11%"></li>
+			<li style="Width:89%">
+				<ul class="border-l border-b h60">
+					<li class="font-w-5 pl6 pt2">In the Reading test Example Student performed in the top 10% of students who sat the test.</li>
+				</ul>
+			</li>
+			<li style="Width:11%"></li>
+			<li style="Width:89%" class="text-align-c">
+				<div class="pt5">Student’s performance<div>
+            </li>
+		</ul>
+		<div class="text-align-r logocontainer" style=""><img src="/static/ui/img/CSEducation.png"></div>
+	</div>
 </div>
-<div style="padding-left: 20px;">
-    <h1><span style="background-color: #C44; width: 10px; height: 31px; vertical-align: top; margin-top: 3px;border-radius:6px;display:inline-block;float:left;margin-top:4px;margin-right:3px"></span>Performance Report</h1>
-    <h4 style="margin-top:20px"><img src="/static/ui/img/user.png"/> <span style="color:#185990;padding-left: 10px;">David Anwar</span></h4>
-</div>
-<ul>
-    <li>
-        <img src="/static/ui/img/performance-report.png" style="width: 60px;">
-    </li>
-    <li>
-        This performance report shows how David Anwar performed compared to all students who completed the Selective High School Placement Trial Test Set 33 (Test #64, 65)
-    </li>
-</ul>
 {% endblock %}

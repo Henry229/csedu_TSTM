@@ -1,0 +1,35 @@
+.stt_performance_report .font-w-5 {font-weight:500}
+.stt_performance_report .float-l {float:left}
+.stt_performance_report .mt20 {margin-top:20px}
+.stt_performance_report .pl6 {padding-left:6px}
+.stt_performance_report .pl20 {padding-left:20px}
+.stt_performance_report .pr5 {padding-right:5px}
+.stt_performance_report .pt2 {padding-top:2px}
+.stt_performance_report .pt5 {padding-top:5px}
+.stt_performance_report .pt10 {padding-top:10px}
+.stt_performance_report .h30 {height: 30px}
+.stt_performance_report .h60 {height:60px}
+.stt_performance_report .border-l {border-left: 3px solid #000}
+.stt_performance_report .border-b {border-bottom:3px solid #000}
+.stt_performance_report .text-align-c {text-align:center}
+.stt_performance_report .text-align-r {text-align:right}
+.stt_performance_report ul {list-style-type: none; padding-left: 0}
+.stt_performance_report .tit {display: grid; align-items:center;text-align:right; font-size: 0.825rem; font-weight: 500;}
+.stt_performance_report .tit-contents > h1 > span {background-color: #C44; width: 10px; height: 31px; border-radius:6px;display:inline-block;float:left;margin-top:8px;margin-right:3px}
+.stt_performance_report .tit-contents > h4 > span {color:#185990;padding-left: 10px;}
+.stt_performance_report .dash-r {border-right:1px dotted #fff}
+.stt_performance_report .stick {height: 100px; text-align: center; border: 3px solid #000}
+.stt_performance_report .stick > li {display: grid; align-items:center}
+.stt_performance_report .disp-flex {display: flex}
+.stt_performance_report .stick .range {font-size:0.8em; color:#fff}
+.stt_performance_report .stick .range > i {display:block;padding-bottom:9px;padding-top:8px}
+.stt_performance_report .stick li:not(.my-range) strong {font-weight: unset}
+.stt_performance_report .stick li:not(.my-range) i {display: none}
+.stt_performance_report .stick .my-range {background-color:#fff}
+.stt_performance_report .stick .my-range > div {color:#000}
+.stt_performance_report .stick-first .range > i {color:#c90e0e}
+.stt_performance_report .stick-second .range > i {color:#e95e5e}
+.stt_performance_report .stick-third .range > i {color:#205c92}
+.stt_performance_report .stick-fourth .range > i {color:#76addf}
+.stt_performance_report .logocontainer {padding: 10px 0 40px 0}
+.stt_performance_report .logocontainer > img {width:170px;filter: grayscale(100%)}
