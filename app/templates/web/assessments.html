@@ -538,6 +538,8 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
+                $('#dataModalSub div.modal-body').load('/report/stt_performance', function () {
+                });
                 $('#dataModalSub').modal('show');
             });
 
