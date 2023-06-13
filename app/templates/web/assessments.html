@@ -499,9 +499,10 @@
                 html += '<th scope="col">Writing</th>';
                 html += '<th scope="col">Total</th>';
                 html += '<th scope="col">Rank</th>';
+                html += '<th scope="col">Report</th>';
                 html += '</tr>';
                 html += '</thead>';
-                html += '<tbody class="table-group-divider"><tr><td colspan="7" class="text-center">';
+                html += '<tbody class="table-group-divider"><tr><td colspan="8" class="text-center">';
                 html += '<div class="spinner-border mt-4" role="status"></div>';
                 html += '</tbody>';
                 html += '</table>';
@@ -529,6 +530,7 @@
                             tr += '<td>'+(item[4]==null?'':item[4].trim())+'</td>';
                             tr += '<td>'+(item[5]==null?'':item[5].trim())+'</td>';
                             tr += '<td>'+item[6].trim()+'/'+item[7].trim()+'</td>';
+                            tr += '<td><button type="button" class="btn btn-light">Performance</button></td>';
                             tr += '</tr>';
                             $('#dataModal .modal-body tbody').append(tr);
                         });
