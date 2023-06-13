@@ -536,9 +536,12 @@
                         });
                     }
                 });
-
-
             });
+            $('body').on('click', '#dataModal td > button', function () {
+                alert(1);
+            });
+
+            $('#report_sst').click(function(){
 
             $('#testsets input.start').on('click', function () {
                 var assessment_guid = $(this).data('assessment-guid');
