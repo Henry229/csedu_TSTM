@@ -538,7 +538,7 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
-                $('dataModalSub > div').css('maxWidth', '1200px');
+                $('#dataModalSub > div').css('maxWidth', '1200px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
                 $('#dataModalSub div.modal-body').load('/report/stt_performance', function () {
                 });
