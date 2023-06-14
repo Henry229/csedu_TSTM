@@ -795,7 +795,164 @@ def assessment_list():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def stt_performance_report():
-    return render_template('web/stt_performance_report.html')
+    math_enroll_id = request.args.get("math_assessment_enroll_id")
+    thinking_enroll_id = request.args.get("thinking_assessment_enroll_id")
+    reading_enroll_id = request.args.get("reading_assessment_enroll_id")
+    writing_enroll_id = request.args.get("writing_assessment_enroll_id")
+
+    sql_stmt = "with criteria as ( " \
+               "select * from codebook c where code_type = 'criteria' and parent_code = 1334 " \
+               ") " \
+               ", reading_cte as ( " \
+               "select student_user_id, score " \
+               "	,row_number() over (order by score desc) as rownum " \
+               "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :reading_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
+               ") " \
+               ", maths_cte as ( " \
+               "select student_user_id, score " \
+               "	,row_number() over (order by score desc) as rownum " \
+               "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :math_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
+               ") " \
+               ", thinking_cte as ( " \
+               "select student_user_id, score " \
+               "	,row_number() over (order by score desc) as rownum " \
+               "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :thinking_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
+               ") " \
+               ", writing_cte as ( " \
+               "select student_user_id, " \
+               "(select sum(cast(mw.candidate_mark_detail->>code_name as integer)) * 100 / sum(cast(additional_info->>'max_score' as integer)) from criteria) as score " \
+               "	,row_number() over (order by (select sum(cast(mw.candidate_mark_detail->>code_name as integer)) * 100 / sum(cast(additional_info->>'max_score' as integer)) from criteria) desc) as rownum " \
+               "from (select * from assessment_enroll a where exists(select 1 from assessment_enroll where id = :writing_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id)) a " \
+               "join marking m on m.assessment_enroll_id = a.id " \
+               "join marking_writing mw on mw.marking_id = m.id " \
+               "where candidate_mark_detail is not null " \
+               ") " \
+               ", cte1 as ( " \
+               "select 'Reading Skills' as subject " \
+               "    , count(1) * 10 / 100 as top10 " \
+               "    , count(1) * 25 / 100 as top25 " \
+               "    , count(1) * 50 / 100 as top50 " \
+               "from reading_cte " \
+               "union all " \
+               "select 'Maths R. Skills' as subject " \
+               "    , count(1) * 10 / 100 as top10 " \
+               "    , count(1) * 25 / 100 as top25 " \
+               "    , count(1) * 50 / 100 as top50 " \
+               "from maths_cte " \
+               "union all " \
+               "select 'Thinking Skills' as subject " \
+               "    , count(1) * 10 / 100 as top10 " \
+               "    , count(1) * 25 / 100 as top25 " \
+               "    , count(1) * 50 / 100 as top50 " \
+               "from thinking_cte " \
+               "union all " \
+               "select 'Essay Writing' as subject " \
+               "    , count(1) * 10 / 100 as top10 " \
+               "    , count(1) * 25 / 100 as top25 " \
+               "    , count(1) * 50 / 100 as top50 " \
+               "from writing_cte " \
+               ") " \
+               ", reading_cte2 as ( " \
+               "	select max(top10score) as top10score, " \
+               "		   max(top25score) as top25score, " \
+               "		   max(top50score) as top50score, " \
+               "    	   :user_id as student_user_id " \
+               "	from ( " \
+               "	select " \
+               "	case when rownum = (select top10 from cte1 where subject = 'Reading Skills') then score else null end top10score, " \
+               "	case when rownum = (select top25 from cte1 where subject = 'Reading Skills') then score else null end top25score, " \
+               "	case when rownum = (select top50 from cte1 where subject = 'Reading Skills') then score else null end top50score " \
+               "	from reading_cte " \
+               "	) t " \
+               ") " \
+               ", maths_cte2 as ( " \
+               "	select max(top10score) as top10score, " \
+               "		   max(top25score) as top25score, " \
+               "		   max(top50score) as top50score, " \
+               "   	       :user_id as student_user_id " \
+               "	from ( " \
+               "	select " \
+               "	case when rownum = (select top10 from cte1 where subject = 'Maths R. Skills') then score else null end top10score, " \
+               "	case when rownum = (select top25 from cte1 where subject = 'Maths R. Skills') then score else null end top25score, " \
+               "	case when rownum = (select top50 from cte1 where subject = 'Maths R. Skills') then score else null end top50score " \
+               "	from maths_cte " \
+               "	) t " \
+               ") " \
+               ", thinking_cte2 as ( " \
+               "	select max(top10score) as top10score, " \
+               "		   max(top25score) as top25score, " \
+               "		   max(top50score) as top50score, " \
+               "    	   :user_id as student_user_id " \
+               "	from ( " \
+               "	select " \
+               "	case when rownum = (select top10 from cte1 where subject = 'Thinking Skills') then score else null end top10score, " \
+               "	case when rownum = (select top25 from cte1 where subject = 'Thinking Skills') then score else null end top25score, " \
+               "	case when rownum = (select top50 from cte1 where subject = 'Thinking Skills') then score else null end top50score " \
+               "	from thinking_cte " \
+               "	) t " \
+               ") " \
+               ", writing_cte2 as ( " \
+               "	select max(top10score) as top10score, " \
+               "		   max(top25score) as top25score, " \
+               "		   max(top50score) as top50score, " \
+               "    	   :user_id as student_user_id " \
+               "	from ( " \
+               "	select " \
+               "	case when rownum = (select top10 from cte1 where subject = 'Essay Writing') then score else null end top10score, " \
+               "	case when rownum = (select top25 from cte1 where subject = 'Essay Writing') then score else null end top25score, " \
+               "	case when rownum = (select top50 from cte1 where subject = 'Essay Writing') then score else null end top50score " \
+               "	from writing_cte " \
+               "	) t " \
+               ") " \
+               "select case when strpos(t.username, '(') > 0 then trim(substr(t.username, 0, strpos(t.username, '('))) else t.username end as username, " \
+               "       case when a.student_user_id is null then '0' " \
+               "	        when a.score >= a1.top10score then '1' " \
+               "			when a.score >= a1.top25score then '2' " \
+               "			when a.score >= a1.top50score then '3' " \
+               "		    else '4' " \
+               "	   end reading_range, " \
+               "	   case when b.student_user_id is null then '0' " \
+               "		    when b.score >= b1.top10score then '1' " \
+               "			when b.score >= b1.top25score then '2' " \
+               "			when b.score >= b1.top50score then '3' " \
+               "		    else '4' " \
+               "	   end maths_range, " \
+               "	   case when c.student_user_id is null then '0' " \
+               "		    when c.score >= c1.top10score then '1' " \
+               "			when c.score >= c1.top25score then '2' " \
+               "			when c.score >= c1.top50score then '3' " \
+               "		    else '4' " \
+               "	   end thinking_range, " \
+               "	   case when d.student_user_id is null then '0' " \
+               "		    when d.score >= d1.top10score then '1' " \
+               "			when d.score >= d1.top25score then '2' " \
+               "			when d.score >= d1.top50score then '3' " \
+               "		    else '4' " \
+               "	   end writing_range " \
+               "from (select id as student_user_id, username from users where id = :user_id) t " \
+               "full join (select * from reading_cte where student_user_id = :user_id) a on t.student_user_id = a.student_user_id " \
+               "full join reading_cte2 a1 on t.student_user_id = a1.student_user_id " \
+               "full join (select * from maths_cte where student_user_id = :user_id) b on t.student_user_id = b.student_user_id " \
+               "full join maths_cte2 b1 on t.student_user_id = b1.student_user_id " \
+               "full join (select * from thinking_cte where student_user_id = :user_id) c on t.student_user_id = c.student_user_id " \
+               "full join thinking_cte2 c1 on t.student_user_id = c1.student_user_id " \
+               "full join (select * from writing_cte where student_user_id = :user_id) d on t.student_user_id = d.student_user_id " \
+               "full join writing_cte2 d1 on t.student_user_id = d1.student_user_id "
+
+    cursor = db.session.execute(sql_stmt, {'user_id': current_user.id, 'math_enroll_id': math_enroll_id,
+                                           'thinking_enroll_id': thinking_enroll_id, 'reading_enroll_id': reading_enroll_id,
+                                           'writing_enroll_id': writing_enroll_id})
+
+    row = cursor.fetchone()
+    username = row[0]
+    reading_range = row[1]
+    maths_range = row[2]
+    thinking_range = row[3]
+    writing_range = row[4]
+
+    return render_template('web/stt_performance_report.html', reading_range=reading_range,maths_range=maths_range
+                                                            , thinking_range=thinking_range, writing_range=writing_range
+                                                            , username=username)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
