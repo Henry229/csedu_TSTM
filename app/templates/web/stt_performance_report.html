@@ -41,7 +41,7 @@
 {% endif %}
 <div class="stt_performance_report">
 	<div class="col-xs-12 text-right" style="font-size: 13px;">
-			Application Number 22805127
+			Application Number {{no1}}-{{no2}}
 	</div>
 	<div class="pl20 tit-contents">
 		<h1><span></span>Performance Report</h1>
@@ -52,7 +52,8 @@
 			<img src="/static/ui/img/performance-report.png" style="width: 60px;">
 		</li>
 		<li class="float-l" style="margin:10px 0 10px 25px">
-			This performance report shows how {{username}} performed compared to all students who completed the Selective Trial Test (Test #64, 65)
+			This performance report shows how {{username}} performed compared to all students who completed the Selective Trial Test (Test #{{ no1 }},
+			{{ no2 }})
 		</li>
 	</ul>
 	<div>

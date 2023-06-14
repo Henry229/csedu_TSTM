@@ -538,7 +538,18 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
-                debugger
+                let no1 = '', no2 = '';
+                let tit = $(this).closest('tr').find('th').text();
+                if(tit.indexOf('(') != -1){
+                    tit = tit.substring(txt.indexOf('(')+1, tit.indexOf(')'));
+                    let tits = tit.split('-');
+                    if(tits.length==2){
+                        no1 = tits[0].trim();
+                        no2 = tits[1].trim();
+                    }else{
+                        no1 = tits[0].trim();
+                    }
+                }
                 let math_enroll_id = $(this).closest('tr').find('td:eq(0)').data('math');
                 let thinking_enroll_id = $(this).closest('tr').find('td:eq(1)').data('thinking');
                 let reading_enroll_id = $(this).closest('tr').find('td:eq(2)').data('reading');
@@ -547,6 +558,8 @@
                 param += '&thinking_enroll_id=' + thinking_enroll_id;
                 param += '&reading_enroll_id=' + reading_enroll_id;
                 param += '&writing_enroll_id=' + writing_enroll_id;
+                param += '&no1=' + no1;
+                param += '&no2=' + no2;
                 $('#dataModalSub > div').css('maxWidth', '1200px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
                 $('#dataModalSub div.modal-body').load('/report/stt_performance?'+param, function () {
