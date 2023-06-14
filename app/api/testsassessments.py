@@ -38,6 +38,10 @@ def get_stt_summaryreport():
                "max(percentile_score) filter (where subject = 'Thinking Skills') as Thinking, " \
                "max(percentile_score) filter (where subject = 'Reading Skills') as Reading, " \
                "max(percentile_score) filter (where subject = 'Writing') as Writing, " \
+               "max(assessment_enroll_id) filter (where subject = 'Mathematical Reasoning') as math_assessment_enroll_id, " \
+               "max(assessment_enroll_id) filter (where subject = 'Thinking Skills') as thinking_assessment_enroll_id, " \
+               "max(assessment_enroll_id) filter (where subject = 'Reading Skills') as reading_assessment_enroll_id, " \
+               "max(assessment_enroll_id) filter (where subject = 'Writing') as writing_assessment_enroll_id, " \
                "(coalesce((max(percentile_score) filter (where subject = 'Mathematical Reasoning') * 0.25), 0) + " \
                "coalesce((max(percentile_score) filter (where subject = 'Thinking Skills') * 0.35), 0) + " \
                "coalesce((max(percentile_score) filter (where subject = 'Reading Skills') * 0.25), 0) + " \
