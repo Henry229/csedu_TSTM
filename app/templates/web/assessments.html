@@ -541,7 +541,7 @@
                 let no1 = '', no2 = '';
                 let tit = $(this).closest('tr').find('th').text();
                 if(tit.indexOf('(') != -1){
-                    tit = tit.substring(txt.indexOf('(')+1, tit.indexOf(')'));
+                    tit = tit.substring(tit.indexOf('(')+1, tit.indexOf(')'));
                     let tits = tit.split('-');
                     if(tits.length==2){
                         no1 = tits[0].trim();
