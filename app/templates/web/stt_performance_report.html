@@ -16,7 +16,7 @@
 			<img src="/static/ui/img/performance-report.png" style="width: 60px;">
 		</li>
 		<li class="float-l" style="margin:10px 0 10px 25px">
-			This performance report shows how David Anwar performed compared to all students who completed the Selective High School Placement Trial Test Set 33 (Test #64, 65)
+			This performance report shows how {{username}} performed compared to all students who completed the Selective Trial Test (Test #64, 65)
 		</li>
 	</ul>
 	<div>
@@ -28,28 +28,28 @@
 			<li class="tit" style="Width:11%">Reading ─</li>
 			<li style="Width:89%">
 				<ul class="stick stick-first disp-flex" style="background-color:#666">
-					<li class="dash-r" style="Width:50%">
+					<li class="dash-r{% if reading_range == 4 %} my-range{% endif %}" style="Width:50%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>50%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r my-range" style="Width:25%">
+					<li class="dash-r{% if reading_range == 3 %} my-range{% endif %}" style="Width:25%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>25%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r" style="Width:15%">
+					<li class="dash-r{% if reading_range == 2 %} my-range{% endif %}" style="Width:15%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>15%</strong> of<br>
 							students<br>who sat the test
 						<div>
 					</li>
-					<li style="Width:10%">
+					<li {% if reading_range == 1 %}class="my-range" {% endif %}style="Width:10%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<span><strong>15%</strong> of<br>
@@ -67,28 +67,28 @@
 			<li class="tit" style="Width:11%">Writing ─</li>
 			<li style="Width:89%">
 				<ul class="stick stick-second disp-flex" style="background-color:#666">
-					<li class="dash-r" style="Width:50%">
+					<li class="dash-r{% if writing_range == 4 %} my-range{% endif %}" style="Width:50%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>50%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r my-range" style="Width:25%">
+					<li class="dash-r{% if writing_range == 3 %} my-range{% endif %}" style="Width:25%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>25%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r" style="Width:15%">
+					<li class="dash-r{% if writing_range == 2 %} my-range{% endif %}" style="Width:15%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>15%</strong> of<br>
 							students<br>who sat the test
 						<div>
 					</li>
-					<li style="Width:10%">
+					<li {% if writing_range == 1 %}class="my-range" {% endif %}style="Width:10%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<span><strong>15%</strong> of<br>
@@ -110,28 +110,28 @@
 				</div>
 			<li style="Width:89%">
 				<ul class="stick stick-third disp-flex" style="background-color:#666">
-					<li class="dash-r" style="Width:50%">
+					<li class="dash-r{% if maths_range == 4 %} my-range{% endif %}" style="Width:50%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>50%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r my-range" style="Width:25%">
+					<li class="dash-r{% if maths_range == 3 %} my-range{% endif %}" style="Width:25%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>25%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r" style="Width:15%">
+					<li class="dash-r{% if maths_range == 2 %} my-range{% endif %}" style="Width:15%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>15%</strong> of<br>
 							students<br>who sat the test
 						<div>
 					</li>
-					<li style="Width:10%">
+					<li {% if maths_range == 1 %}class="my-range" {% endif %}style="Width:10%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<span><strong>15%</strong> of<br>
@@ -153,28 +153,28 @@
 				</div>
 			<li style="Width:89%">
 				<ul class="stick stick-fourth disp-flex" style="background-color:#666">
-					<li class="dash-r" style="Width:50%">
+					<li class="dash-r{% if thinking_range == 4 %} my-range{% endif %}" style="Width:50%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>50%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r my-range" style="Width:25%">
+					<li class="dash-r{% if thinking_range == 3 %} my-range{% endif %}" style="Width:25%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>25%</strong> of<br>
 							students who sat the test
 						<div>
 					</li>
-					<li class="dash-r" style="Width:15%">
+					<li class="dash-r{% if thinking_range == 2 %} my-range{% endif %}" style="Width:15%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<strong>15%</strong> of<br>
 							students<br>who sat the test
 						<div>
 					</li>
-					<li style="Width:10%">
+					<li {% if thinking_range == 1 %}class="my-range" {% endif %}style="Width:10%">
 						<div class="range">
 							<i class="fa fa-user-circle fa-lg" aria-hidden="true"></i>
 							<span><strong>15%</strong> of<br>
