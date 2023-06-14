@@ -802,12 +802,6 @@ def stt_performance_report():
     no1 = request.args.get('no1')
     no2 = request.args.get('no2')
 
-    log.debug("chschs math_enroll_id: %s" % math_enroll_id)
-    log.debug("chschs thinking_enroll_id: %s" % thinking_enroll_id)
-    log.debug("chschs reading_enroll_id: %s" % reading_enroll_id)
-    log.debug("chschs no1: %s" % no1)
-    log.debug("chschs no2: %s" % no2)
-
     sql_stmt = "with criteria as ( " \
                "select * from codebook c where code_type = 'criteria' and parent_code = 1334 " \
                ") " \
@@ -958,9 +952,14 @@ def stt_performance_report():
     thinking_range = row[3]
     writing_range = row[4]
 
+    log.debug("chs reading_range : %s" % reading_range)
+    log.debug("chs maths_range : %s" % maths_range)
+    log.debug("chs thinking_range : %s" % thinking_range)
+    log.debug("chs writing_range : %s" % writing_range)
+
     return render_template('web/stt_performance_report.html', reading_range=reading_range,maths_range=maths_range
                                                             , thinking_range=thinking_range, writing_range=writing_range
-                                                            , username=username)
+                                                            , username=username, no1=no1, no2=no2)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
