@@ -802,6 +802,12 @@ def stt_performance_report():
     no1 = request.args.get('no1')
     no2 = request.args.get('no2')
 
+    log.debug("chschs math_enroll_id: %s" % math_enroll_id)
+    log.debug("chschs thinking_enroll_id: %s" % thinking_enroll_id)
+    log.debug("chschs reading_enroll_id: %s" % reading_enroll_id)
+    log.debug("chschs no1: %s" % no1)
+    log.debug("chschs no2: %s" % no2)
+
     sql_stmt = "with criteria as ( " \
                "select * from codebook c where code_type = 'criteria' and parent_code = 1334 " \
                ") " \
