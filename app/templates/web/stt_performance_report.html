@@ -3,13 +3,13 @@
     <link rel="stylesheet" href="/static/ui/css/stt_performance_report.css">
 {% endblock %}
 {% block app_content %}
-{% if reading_range|int == 4 %}
+{% if reading_range == 4 %}
 	{% set reading_txt = "In the Thinking Skills test Example Student performed in the lowest 50% of students who sat the test. Half of all students who took the test performed in this range." %}
-{% elif reading_range|int == 3 %}
+{% elif reading_range == 3 %}
 	{% set reading_txt = "In the Writing test Example Student performed as well as, or better than, 50% of students who sat the test." %}
-{% elif reading_range|int == 2 %}
+{% elif reading_range == 2 %}
 	{% set reading_txt = "In the Mathematical Reasoning test Example Student performed in the top 25% of students who sat the test." %}
-{% elif reading_range|int == 1 %}
+{% elif reading_range == 1 %}
 	{% set reading_txt = "In the Reading test Example Student performed in the top 10% of students who sat the test." %}
 {% endif %}
 <div class="stt_performance_report">
