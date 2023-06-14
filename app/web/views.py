@@ -806,22 +806,22 @@ def stt_performance_report():
                "select * from codebook c where code_type = 'criteria' and parent_code = 1334 " \
                ") " \
                ", reading_cte as ( " \
-               "select student_user_id, score " \
+               "select student_user_id, score, assessment_id " \
                "	,row_number() over (order by score desc) as rownum " \
                "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :reading_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
                ") " \
                ", maths_cte as ( " \
-               "select student_user_id, score " \
+               "select student_user_id, score, assessment_id " \
                "	,row_number() over (order by score desc) as rownum " \
                "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :math_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
                ") " \
                ", thinking_cte as ( " \
-               "select student_user_id, score " \
+               "select student_user_id, score, assessment_id " \
                "	,row_number() over (order by score desc) as rownum " \
                "from assessment_enroll a where exists(select 1 from assessment_enroll where id = :thinking_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id) " \
                ") " \
                ", writing_cte as ( " \
-               "select student_user_id, " \
+               "select student_user_id, assessment_id, " \
                "(select sum(cast(mw.candidate_mark_detail->>code_name as integer)) * 100 / sum(cast(additional_info->>'max_score' as integer)) from criteria) as score " \
                "	,row_number() over (order by (select sum(cast(mw.candidate_mark_detail->>code_name as integer)) * 100 / sum(cast(additional_info->>'max_score' as integer)) from criteria) desc) as rownum " \
                "from (select * from assessment_enroll a where exists(select 1 from assessment_enroll where id = :writing_enroll_id and assessment_id = a.assessment_id and testset_id = a.testset_id)) a " \
@@ -930,7 +930,12 @@ def stt_performance_report():
                "			when d.score >= d1.top25score then '2' " \
                "			when d.score >= d1.top50score then '3' " \
                "		    else '4' " \
-               "	   end writing_range " \
+               "	   end writing_range, " \
+               "       case when a.assessment_id is not null then a.assessment_id " \
+               "            when b.assessment_id is not null then b.assessment_id " \
+               "            when c.assessment_id is not null then c.assessment_id " \
+               "            when d.assessment_id is not null then d.assessment_id " \
+               "       else null end as assessment_id " \
                "from (select id as student_user_id, username from users where id = :user_id) t " \
                "full join (select * from reading_cte where student_user_id = :user_id) a on t.student_user_id = a.student_user_id " \
                "full join reading_cte2 a1 on t.student_user_id = a1.student_user_id " \
@@ -951,15 +956,11 @@ def stt_performance_report():
     maths_range = row[2]
     thinking_range = row[3]
     writing_range = row[4]
-
-    log.debug("chs reading_range : %s" % reading_range)
-    log.debug("chs maths_range : %s" % maths_range)
-    log.debug("chs thinking_range : %s" % thinking_range)
-    log.debug("chs writing_range : %s" % writing_range)
+    assessment_id = row[5]
 
     return render_template('web/stt_performance_report.html', reading_range=reading_range,maths_range=maths_range
                                                             , thinking_range=thinking_range, writing_range=writing_range
-                                                            , username=username, no1=no1, no2=no2)
+                                                            , username=username, no1=no1, no2=no2, assessment_id=assessment_id)
 
 
 @web.route('/tests/assessments/report', methods=['GET'])
