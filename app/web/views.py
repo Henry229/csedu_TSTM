@@ -795,12 +795,12 @@ def assessment_list():
 @login_required
 @permission_required(Permission.ITEM_EXEC)
 def stt_performance_report():
-    math_enroll_id = request.args.get("math_enroll_id", 0, type=int)
-    thinking_enroll_id = request.args.get("thinking_enroll_id", 0, type=int)
-    reading_enroll_id = request.args.get("reading_enroll_id", 0, type=int)
-    writing_enroll_id = request.args.get("writing_enroll_id", 0, type=int)
-    no1 = request.args.get("no1")
-    no2 = request.args.get("no2")
+    math_enroll_id = request.args.get('math_enroll_id', 0, type=int)
+    thinking_enroll_id = request.args.get('thinking_enroll_id', 0, type=int)
+    reading_enroll_id = request.args.get('reading_enroll_id', 0, type=int)
+    writing_enroll_id = request.args.get('writing_enroll_id', 0, type=int)
+    no1 = request.args.get('no1')
+    no2 = request.args.get('no2')
 
     sql_stmt = "with criteria as ( " \
                "select * from codebook c where code_type = 'criteria' and parent_code = 1334 " \
