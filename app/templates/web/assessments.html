@@ -538,6 +538,7 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
+                debugger
                 let math_enroll_id = $(this).closest('tr').find('td:eq(0)').data('math');
                 let thinking_enroll_id = $(this).closest('tr').find('td:eq(1)').data('thinking');
                 let reading_enroll_id = $(this).closest('tr').find('td:eq(2)').data('reading');
