@@ -524,10 +524,10 @@
                         d.forEach(function (item) {
                             let tr = '<tr>';
                             tr += '<th scope="row">Selective Trial Test ('+item[0]+')</th>';
-                            tr += '<td>'+(item[1]==null?'':item[1].trim())+'</td>';
-                            tr += '<td>'+(item[2]==null?'':item[2].trim())+'</td>';
-                            tr += '<td>'+(item[3]==null?'':item[3].trim())+'</td>';
-                            tr += '<td>'+(item[4]==null?'':item[4].trim())+'</td>';
+                            tr += '<td data-math="'+item[8]+'">'+(item[1]==null?'':item[1].trim())+'</td>';
+                            tr += '<td data-thinking="'+item[9]+'">'+(item[2]==null?'':item[2].trim())+'</td>';
+                            tr += '<td data-reading="'+item[10]+'">'+(item[3]==null?'':item[3].trim())+'</td>';
+                            tr += '<td data-writing="'+item[11]+'">'+(item[4]==null?'':item[4].trim())+'</td>';
                             tr += '<td>'+(item[5]==null?'':item[5].trim())+'</td>';
                             tr += '<td>'+item[6].trim()+'/'+item[7].trim()+'</td>';
                             tr += '<td><button type="button" class="btn btn-light">Performance</button></td>';
@@ -538,6 +538,7 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
+                debugger
                 $('#dataModalSub > div').css('maxWidth', '1200px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
                 $('#dataModalSub div.modal-body').load('/report/stt_performance?', function () {
