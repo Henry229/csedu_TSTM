@@ -71,7 +71,8 @@ def get_stt_summaryreport():
                ") " \
                "select test_detail, to_char(math, '999') as math, to_char(thinking, '999') as thinking, " \
                "to_char(reading, '999') as reading, to_char(writing, '999') as writing, " \
-               "to_char(total, '999.99') as total, to_char(rnk, '999') as rnk, to_char(cnt, '999') as cnt " \
+               "to_char(total, '999.99') as total, to_char(rnk, '999') as rnk, to_char(cnt, '999') as cnt, " \
+               "math_assessment_enroll_id, thinking_assessment_enroll_id, reading_assessment_enroll_id, writing_assessment_enroll_id " \
                "from cte " \
                "where student_user_id = :student_user_id " \
                "order by test_detail desc"
