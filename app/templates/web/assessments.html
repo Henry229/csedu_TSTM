@@ -538,10 +538,17 @@
                 });
             });
             $('body').on('click', '#dataModal td > button', function () {
-                debugger
+                let math_enroll_id = $(this).closest('tr').find('td:eq(0)').data('math');
+                let thinking_enroll_id = $(this).closest('tr').find('td:eq(1)').data('thinking');
+                let reading_enroll_id = $(this).closest('tr').find('td:eq(2)').data('reading');
+                let writing_enroll_id = $(this).closest('tr').find('td:eq(2)').data('writing');
+                let param = 'math_enroll_id=' + math_enroll_id;
+                param += '&thinking_enroll_id=' + thinking_enroll_id;
+                param += '&reading_enroll_id=' + reading_enroll_id;
+                param += '&writing_enroll_id=' + writing_enroll_id;
                 $('#dataModalSub > div').css('maxWidth', '1200px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
-                $('#dataModalSub div.modal-body').load('/report/stt_performance?', function () {
+                $('#dataModalSub div.modal-body').load('/report/stt_performance?'+param, function () {
                 });
                 $('#dataModalSub').modal('show');
             });
