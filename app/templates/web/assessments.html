@@ -563,8 +563,9 @@
                 $('#dataModalSub > div').css('maxWidth', '1200px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
                 $('#dataModalSub div.modal-body').load('/report/stt_performance?'+param, function () {
+                    $('#dataModalSub').modal('show');
                 });
-                $('#dataModalSub').modal('show');
+
             });
 
             $('#testsets input.start').on('click', function () {
