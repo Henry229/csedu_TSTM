@@ -560,7 +560,7 @@
                 param += '&writing_enroll_id=' + (writing_enroll_id==null?'':writing_enroll_id);
                 param += '&no1=' + no1;
                 param += '&no2=' + no2;
-                $('#dataModalSub > div').css('maxWidth', '1200px');
+                $('#dataModalSub > div').css('maxWidth', '1160px');
                 $('#dataModalSub #dataModalLabelSub').text('Selective Performance report');
                 $('#dataModalSub div.modal-body').load('/report/stt_performance?'+param, function () {
                     $('#dataModalSub').modal('show');
