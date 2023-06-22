@@ -14,6 +14,7 @@ from flask import jsonify, request, current_app
 from app.api.errors import bad_request
 from app.models import AssessmentEnroll, Assessment, Codebook, Student, Marking, Item, Testset, AssessmentHasTestset, \
     TestletHasItem, Role, User
+from common.logger import log
 from config import Config
 from qti.itemservice.itemservice import ItemService
 from .assessments import parse_processed_response, parse_correct_response, allowed_file, save_writing_data
@@ -23,6 +24,7 @@ from .. import db
 
 @api.route('/omr/marking', methods=['POST', 'GET'])
 def omr_marking():
+    log.debug("chschs: %s" % "11")
     if request.headers['Authorization'] is None:
         return bad_request(message="The Authorization is not correct.")
     authorization = request.headers['Authorization'].split(' ')
