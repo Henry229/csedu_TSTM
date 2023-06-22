@@ -166,6 +166,8 @@ def omr_marking():
                      }
                 item_list.append(i)
 
+        total_candidate_mark = 0
+        total_outcome_score = 0
         for item in item_list:
             score = list(filter(lambda x: (x["QuestionNo"] == str(item.get('order'))), scores))
 
@@ -215,6 +217,9 @@ def omr_marking():
             is_correct = candidate_mark >= outcome_score
             correct_r_value = parse_correct_response(processed.get('correctResponses'))
 
+            total_candidate_mark += candidate_mark
+            total_outcome_score += outcome_score
+
             marking = Marking(testset_id=testset_id,
                               testlet_id=testlet_id,
                               item_id=item.get('item_id'),
@@ -229,6 +234,10 @@ def omr_marking():
                               is_flagged=False,
                               assessment_enroll_id=assessment_enroll_id)
             db.session.add(marking)
+        db.session.commit()
+
+        db.session.query(AssessmentEnroll).filter(AssessmentEnroll.id == assessment_enroll_id).update(
+            {"score": total_candidate_mark, "total_score": total_outcome_score})
         db.session.commit()
 
     return success({"result": "success"})
