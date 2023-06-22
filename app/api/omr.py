@@ -60,7 +60,7 @@ def omr_marking():
             random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
         student_user.password = temp_password
         db.session.add(student_user)
-        db.session.commit()  # Commit to get the student_user.id
+        #db.session.commit()  # Commit to get the student_user.id
 
         student = Student(student_id=info[0].get("student_id"),
                           user_id=student_user.id,
@@ -77,7 +77,7 @@ def omr_marking():
                     student.state = info_test_center.additional_info["branch_state"]
 
         db.session.add(student)
-        db.session.commit()
+        #db.session.commit()
 
     test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
                                         Codebook.additional_info.contains(
@@ -133,7 +133,7 @@ def omr_marking():
                                         student_user_id=student_user_id, attempt_count=attempt_count,
                                         start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id)
             db.session.add(enrolled)
-            db.session.commit()
+            #db.session.commit()
             assessment_enroll_id = enrolled.id
         else:
             assessment_enroll_id = assessment_enroll.id
@@ -143,7 +143,7 @@ def omr_marking():
         '''
         if assessment_enroll is not None:
             Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id).delete()
-            db.session.commit()
+            #db.session.commit()
 
         item_list = []
         branching = json.dumps(assessment.branching)
