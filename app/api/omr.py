@@ -376,8 +376,8 @@ def omr_writing():
                             if bool(y):
                                 is_subject_of_test_type = True
 
-            if not is_subject_of_test_type:
-                return bad_request(message="The test type is not the subject of OMR System.")
+            #if not is_subject_of_test_type:
+            #    return bad_request(message="The test type is not the subject of OMR System.")
 
             dt = datetime.utcnow()
             start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
