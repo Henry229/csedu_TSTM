@@ -395,6 +395,7 @@ def omr_writing():
         '''
         Marking
         '''
+        log.debug("chs_test1")
         if assessment_enroll is not None:
             old_marking = Marking.query.with_entities(Marking.id).filter_by(assessment_enroll_id=assessment_enroll_id).all()
             for m in old_marking:
@@ -402,6 +403,7 @@ def omr_writing():
 
             Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id).delete()
             db.session.commit()
+        log.debug("chs_test2")
 
         item_list = []
         branching = json.dumps(assessment.branching)
@@ -409,7 +411,7 @@ def omr_writing():
         for end in ends:
             comma = branching.find(',', end)
             testlet_id = int(branching[end:comma])
-
+            log.debug("chs_test3")
             items = db.session.query(*Item.__table__.columns,TestletHasItem.weight, TestletHasItem.order). \
                 select_from(Item). \
                 join(TestletHasItem, Item.id == TestletHasItem.item_id). \
@@ -426,7 +428,7 @@ def omr_writing():
                 item_list.append(i)
 
         writing_text = json.dumps({"writing_text": ""})
-
+        log.debug("chs_test4")
         for item in item_list:
             marking = Marking(testset_id=testset_id,
                               testlet_id=testlet_id,
