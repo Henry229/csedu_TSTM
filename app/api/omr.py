@@ -478,8 +478,8 @@ def omr_writing():
             log.debug("chs8 %s" % questionNo)
             marking_writing.candidate_mark_detail = candidate_mark_detail
             log.debug("chs8 %s" % questionNo)
-            marking_writing.created_time = datetime.datetime.utcnow()
-            log.debug("chs8 %s" % questionNo)
+            #marking_writing.created_time = datetime.datetime.utcnow()
+            #log.debug("chs8 %s" % questionNo)
             marking_writing.modified_time = datetime.datetime.utcnow()
             log.debug("chs8 %s" % questionNo)
             db.session.add(marking_writing)
