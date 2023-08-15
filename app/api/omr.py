@@ -472,16 +472,18 @@ def omr_writing():
                 log.debug("chs7 %s" % questionNo)
                 candidate_mark_detail["%s" % questionNo] = score.get("Answer")
 
-            log.debug("chs8 %s" % marking.id)
-            log.debug("chs8 %s" % marker_branch.marker_id)
-            log.debug("chs8 %s" % candidate_file_link_json)
-            log.debug("chs8 %s" % candidate_mark_detail)
             marking_writing = MarkingForWriting(marking_id=marking.id, marker_id=marker_branch.marker_id)
+            log.debug("chs8 %s" % questionNo)
             marking_writing.candidate_file_link = candidate_file_link_json
+            log.debug("chs8 %s" % questionNo)
             marking_writing.candidate_mark_detail = candidate_mark_detail
+            log.debug("chs8 %s" % questionNo)
             marking_writing.created_time = datetime.datetime.utcnow()
+            log.debug("chs8 %s" % questionNo)
             marking_writing.modified_time = datetime.datetime.utcnow()
+            log.debug("chs8 %s" % questionNo)
             db.session.add(marking_writing)
+            log.debug("chs8 %s" % questionNo)
             db.session.commit()
             log.debug("chs9")
 
