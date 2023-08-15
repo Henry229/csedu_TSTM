@@ -385,8 +385,8 @@ def omr_writing():
             ends = [m.end() for m in re.finditer('"id":', branching)]
             log.debug("chs2")
             for end in ends:
-                '''
                 comma = branching.find(',', end)
+                '''
                 writing_text["%d" % "stage"] = 1
                 writing_text["%d" % "percentile"] = 0
                 writing_text["%d" % "testlet_id"] = int(branching[end:comma])
