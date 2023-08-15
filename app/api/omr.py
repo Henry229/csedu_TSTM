@@ -425,7 +425,9 @@ def omr_writing():
                      }
                 item_list.append(i)
 
-        writing_text = json.dumps({"writing_text": ""})
+        #writing_text = json.dumps({"writing_text": ""})
+        writing_text = {}
+        writing_text["%s" % "writing_text"] = ""
 
         for item in item_list:
 
@@ -441,8 +443,6 @@ def omr_writing():
                               assessment_enroll_id=assessment_enroll_id)
             db.session.add(marking)
 
-            log.debug("chs3")
-
             '''
             MarkingForWriting
             '''
@@ -453,41 +453,24 @@ def omr_writing():
             if test_center:
                 test_center_id = test_center.id
 
-            log.debug("chs4")
-
-
-            index = 1
             candidate_file_link_json = {}
-
             candidate_mark_detail = {}
 
-            log.debug("chs5")
             for score in scores_list:
-                log.debug("chs6")
                 questionNo = score.get("QuestionNo")
                 questionNo = questionNo.replace("LANG_", "").replace("_LANG", "")
                 questionNo = questionNo.replace("_ORGANIZATION", "")
                 questionNo = questionNo[3:]
                 questionNo = questionNo.title()
-                log.debug("chs7 %s" % questionNo)
                 candidate_mark_detail["%s" % questionNo] = score.get("Answer")
 
             marking_writing = MarkingForWriting(marking_id=marking.id, marker_id=marker_branch.marker_id)
-            log.debug("chs8 %s" % questionNo)
             marking_writing.candidate_file_link = candidate_file_link_json
-            log.debug("chs8 %s" % questionNo)
             marking_writing.candidate_mark_detail = candidate_mark_detail
-            log.debug("chs8 %s" % questionNo)
             marking_writing.created_time = datetime.utcnow()
-            log.debug("chs8 %s" % questionNo)
             marking_writing.modified_time = datetime.utcnow()
-            log.debug("chs8 %s" % questionNo)
             db.session.add(marking_writing)
-            log.debug("chs8 %s" % questionNo)
             db.session.commit()
-            log.debug("chs9")
-
-
 
     return success({"result": "success"})
 
