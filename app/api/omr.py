@@ -260,32 +260,6 @@ def omr_writing():
     scores_list = request.json[0]
     info = request.json[1]
 
-    '''
-    "Answer" "4"
-    "QuestionNo" "0. CONTENT"
-                 "1. CREATIVITY"
-                 "2. STRUCTURE_ORGANIZATION"
-                 "3. EXPRESSION_LANG"
-    ----------
-    "1. CREATIVITY"
-    "2. STRUCTURE_ORGANIZATION"
-    "3. EXPRESSION_LANG"
-    "4. LANG_SPELLING"
-    "5. LANG_GRAMMAR"
-    "6. LANG_PUNCTUATION"
-
-    {[student_id, temuulen1701]}
-    {[testset_guid, a354c758 - ce87 - 4c9b - 9dd5 - 272845dcb63b]}
-    {[subject, MARKING GUIDE]}
-    {[stud_first_name, Temuulen]}
-    {[stud_last_name, Tsend - Ayush]}
-    {[branch, 73]}
-    {[test_level, Year4]}
-    {[test_no, 01]}
-    {[test_type, Class_Test]}
-    {[total_score, 20]}
-    '''
-
     if len(scores_list) != 7:
         return bad_request(message="The scores size is not correct.")
 
@@ -340,11 +314,7 @@ def omr_writing():
         return bad_request(message="The branch is not correct.")
 
     for _info in info:
-        #scores = list(filter(lambda x: (x["Subject"] == _info["subject"]), scores_list))
-
         #_info['testset_guid'] = '3b1a9db6-3be2-4e67-b566-2a44f3675539'
-        #_info['testset_guid'] = '8b5b575c-7219-48ea-98d4-8fead8ef55bf'
-
         assessment = Assessment.query.with_entities(Assessment.id.label('assessment_id'), Assessment.test_type, Testset.test_duration,
                           Assessment.GUID.label('assessment_guid'), Testset.id.label('testset_id'),
                         Testset.branching).\
@@ -385,11 +355,6 @@ def omr_writing():
 
             for end in ends:
                 comma = branching.find(',', end)
-                '''
-                writing_text["%d" % "stage"] = 1
-                writing_text["%d" % "percentile"] = 0
-                writing_text["%d" % "testlet_id"] = int(branching[end:comma])
-                '''
                 stage = len(stage_data) + 1
                 stage_data.append({'stage': stage, 'testlet_id': int(branching[end:comma]), 'percentile': 0})
 
@@ -399,6 +364,7 @@ def omr_writing():
             enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.assessment_id, testset_id=testset_id,
                                         student_user_id=student_user_id, attempt_count=attempt_count, stage_data=stage_data,
                                         start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id,
+                                        test_duration=assessment.test_duration,
                                         score=0, total_score=1)
             db.session.add(enrolled)
             db.session.commit()
