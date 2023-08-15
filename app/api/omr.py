@@ -379,9 +379,11 @@ def omr_writing():
             #if not is_subject_of_test_type:
             #    return bad_request(message="The test type is not the subject of OMR System.")
 
+            log.debug("chs1")
             stage_data= []
             branching = json.dumps(assessment.branching)
             ends = [m.end() for m in re.finditer('"id":', branching)]
+            log.debug("chs2")
             for end in ends:
                 '''
                 comma = branching.find(',', end)
@@ -389,16 +391,21 @@ def omr_writing():
                 writing_text["%d" % "percentile"] = 0
                 writing_text["%d" % "testlet_id"] = int(branching[end:comma])
                 '''
+                log.debug("chs3")
                 stage = len(stage_data) + 1
+                log.debug("chs4")
                 stage_data.append({'stage': stage, 'testlet_id': int(branching[end:comma]), 'percentile': 0})
+                log.debug("chs5")
 
             dt = datetime.utcnow()
             start_time = dt + timedelta(minutes=(-1 * assessment.test_duration))
+            log.debug("chs6")
 
             enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.assessment_id, testset_id=testset_id,
                                         student_user_id=student_user_id, attempt_count=attempt_count, stage_data=stage_data,
                                         start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id,
                                         score=0, total_score=1)
+            log.debug("chs7")
             db.session.add(enrolled)
             db.session.commit()
             assessment_enroll_id = enrolled.id
