@@ -13,7 +13,7 @@ from flask import jsonify, request, current_app
 
 from app.api.errors import bad_request
 from app.models import AssessmentEnroll, Assessment, Codebook, Student, Marking, Item, Testset, AssessmentHasTestset, \
-    TestletHasItem, Role, User
+    TestletHasItem, Role, User, MarkingForWriting, MarkerBranch
 from common.logger import log
 from config import Config
 from qti.itemservice.itemservice import ItemService
@@ -263,6 +263,9 @@ def omr_writing():
     '''
     "Answer" "4"
     "QuestionNo" "0. CONTENT"
+                 "1. CREATIVITY"
+                 "2. STRUCTURE_ORGANIZATION"
+                 "3. EXPRESSION_LANG"
     ----------
     "1. CREATIVITY"
     "2. STRUCTURE_ORGANIZATION"
@@ -282,6 +285,9 @@ def omr_writing():
     {[test_type, Class_Test]}
     {[total_score, 20]}
     '''
+
+    if len(scores_list) != 7:
+        return bad_request(message="The scores size is not correct.")
 
     student = Student.query.filter_by(student_id=info[0].get("student_id")).first()
     if student is None:
@@ -328,6 +334,11 @@ def omr_writing():
     if test_center:
         test_center_id = test_center.id
 
+    marker_branch = MarkerBranch.query.filter_by(branch_id=test_center_id).filter(MarkerBranch.delete.isnot(True)).first()
+
+    if not marker_branch:
+        return bad_request(message="The branch is not correct.")
+
     for _info in info:
         #scores = list(filter(lambda x: (x["Subject"] == _info["subject"]), scores_list))
 
@@ -373,7 +384,8 @@ def omr_writing():
 
             enrolled = AssessmentEnroll(assessment_guid=assessment_guid, assessment_id=assessment.assessment_id, testset_id=testset_id,
                                         student_user_id=student_user_id, attempt_count=attempt_count,
-                                        start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id)
+                                        start_time=start_time, finish_time=dt, assessment_type=test_type_name, test_center=test_center_id,
+                                        score=0, total_score=1)
             db.session.add(enrolled)
             db.session.commit()
             assessment_enroll_id = enrolled.id
@@ -384,6 +396,10 @@ def omr_writing():
         Marking
         '''
         if assessment_enroll is not None:
+            old_marking = Marking.query.with_entities(Marking.id).filter_by(assessment_enroll_id=assessment_enroll_id).all()
+            for m in old_marking:
+                MarkingForWriting.query.filter_by(marking_id=m.id).delete()
+
             Marking.query.filter_by(assessment_enroll_id=assessment_enroll_id).delete()
             db.session.commit()
 
@@ -409,79 +425,55 @@ def omr_writing():
                      }
                 item_list.append(i)
 
-        total_candidate_mark = 0
-        total_outcome_score = 0
+        writing_text = json.dumps({"writing_text": ""})
+
         for item in item_list:
-            score = list(filter(lambda x: (x["QuestionNo"] == str(item.get('order'))), scores_list))
-
-            qti_item_obj = Item.query.filter_by(id=item.get('item_id')).first()
-            db.session.expunge(qti_item_obj)
-
-            processed = None
-            try:
-                item_service = ItemService(qti_item_obj.file_link)
-                qti_xml = item_service.get_qti_xml_path()
-                processing_php = current_app.config['QTI_RSP_PROCESSING_PHP']
-                identifier = None
-
-                answers = answer_to_value(score)
-                if len(answers) == 0:
-                    identifier = ''
-                elif len(answers) == 1:
-                    identifier = answers[0]
-                else:
-                    identifier = answers
-                response = {"RESPONSE": {
-                    "base": {
-                        "identifier": identifier
-                    }
-                }}
-                parameter = json.dumps({'response': response, 'qtiFilename': qti_xml})
-                try:
-                    result = subprocess.run(['php', processing_php, parameter], stdout=subprocess.PIPE)
-                    processed = result.stdout.decode("utf-8")
-                    processed = json.loads(processed)
-                except Exception as e:
-                    response['processed'] = "Not implemented."
-            except Exception as e:
-                print(e)
-            if processed is None:
-                return bad_request(message="Processing response error")
-
-            if response.get("RESPONSE") and response.get("RESPONSE").get("base") and response.get("RESPONSE").get(
-                    "base").get('file'):
-                candidate_response = response.get("RESPONSE").get("base")
-            else:
-                candidate_response = parse_processed_response(processed.get('RESPONSE'))
-
-            candidate_r_value = candidate_response
-            candidate_mark = processed.get('SCORE')
-            outcome_score = processed.get('maxScore')
-            is_correct = candidate_mark >= outcome_score
-            correct_r_value = parse_correct_response(processed.get('correctResponses'))
-
-            total_candidate_mark += candidate_mark
-            total_outcome_score += outcome_score
-
             marking = Marking(testset_id=testset_id,
                               testlet_id=testlet_id,
                               item_id=item.get('item_id'),
                               question_no=item.get('order'),
                               weight=item.get('weight'),
-                              candidate_r_value=candidate_r_value,
-                              candidate_mark=candidate_mark,
-                              outcome_score=outcome_score,
-                              is_correct=is_correct,
-                              correct_r_value=correct_r_value,
+                              candidate_r_value=writing_text,
+                              candidate_mark=0,
+                              outcome_score=1,
                               is_read=True,
-                              is_flagged=False,
                               assessment_enroll_id=assessment_enroll_id)
             db.session.add(marking)
-        db.session.commit()
 
-        db.session.query(AssessmentEnroll).filter(AssessmentEnroll.id == assessment_enroll_id).update(
-            {"score": total_candidate_mark, "total_score": total_outcome_score})
-        db.session.commit()
+            '''
+            MarkingForWriting
+            '''
+            test_center = Codebook.query.filter(Codebook.code_type == 'test_center',
+                                                Codebook.additional_info.contains(
+                                                    {"campus_prefix": student.branch.strip()})).first()
+            test_center_id = None
+            if test_center:
+                test_center_id = test_center.id
+
+            index = 1
+            candidate_file_link_json = {}
+
+            candidate_mark_detail = {}
+
+            for score in scores_list:
+                questionNo = score.get("QuestionNo")
+                questionNo = questionNo.replace("LANG_", "").replace("_LANG", "")
+                questionNo = questionNo.replace("_ORGANIZATION", "")
+                questionNo = questionNo[3:]
+                questionNo = questionNo.title()
+
+                candidate_mark_detail["%s" % questionNo] = score.get("Answer")
+
+            marking_writing = MarkingForWriting(marking_id=marking.id, marker_id=marker_branch.marker_id)
+            marking_writing.candidate_file_link = candidate_file_link_json
+            marking_writing.candidate_mark_detail = candidate_mark_detail
+            marking_writing.created_time = datetime.datetime.utcnow()
+            marking_writing.modified_time = datetime.datetime.utcnow()
+            db.session.add(marking_writing)
+            db.session.commit()
+
+
+
 
     return success({"result": "success"})
 
