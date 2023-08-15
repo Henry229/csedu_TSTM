@@ -427,9 +427,8 @@ def omr_writing():
 
         writing_text = json.dumps({"writing_text": ""})
 
-        log.debug("chs1: %s" % len(item_list))
         for item in item_list:
-            log.debug("chs2:")
+
             marking = Marking(testset_id=testset_id,
                               testlet_id=testlet_id,
                               item_id=item.get('item_id'),
@@ -442,6 +441,8 @@ def omr_writing():
                               assessment_enroll_id=assessment_enroll_id)
             db.session.add(marking)
 
+            log.debug("chs3")
+
             '''
             MarkingForWriting
             '''
@@ -452,20 +453,26 @@ def omr_writing():
             if test_center:
                 test_center_id = test_center.id
 
+            log.debug("chs4")
+
+
             index = 1
             candidate_file_link_json = {}
 
             candidate_mark_detail = {}
 
+            log.debug("chs5")
             for score in scores_list:
+                log.debug("chs6")
                 questionNo = score.get("QuestionNo")
                 questionNo = questionNo.replace("LANG_", "").replace("_LANG", "")
                 questionNo = questionNo.replace("_ORGANIZATION", "")
                 questionNo = questionNo[3:]
                 questionNo = questionNo.title()
-
+                log.debug("chs7 %s" % questionNo)
                 candidate_mark_detail["%s" % questionNo] = score.get("Answer")
 
+            log.debug("chs8")
             marking_writing = MarkingForWriting(marking_id=marking.id, marker_id=marker_branch.marker_id)
             marking_writing.candidate_file_link = candidate_file_link_json
             marking_writing.candidate_mark_detail = candidate_mark_detail
@@ -473,7 +480,7 @@ def omr_writing():
             marking_writing.modified_time = datetime.datetime.utcnow()
             db.session.add(marking_writing)
             db.session.commit()
-
+            log.debug("chs9")
 
 
 
