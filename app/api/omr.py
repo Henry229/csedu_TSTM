@@ -381,6 +381,7 @@ def omr_writing():
 
             log.debug("chs1")
             stage_data= []
+            log.debug("chs4 $s" % assessment.branching)
             branching = json.dumps(assessment.branching)
             ends = [m.end() for m in re.finditer('"id":', branching)]
             log.debug("chs2")
@@ -394,7 +395,7 @@ def omr_writing():
                 log.debug("chs3")
                 stage = len(stage_data) + 1
                 #log.debug("chs4 $d" % int(branching[end:comma]))
-                log.debug("chs4 $s" % branching)
+
 
                 stage_data.append({'stage': stage, 'testlet_id': int(branching[end:comma]), 'percentile': 0})
                 log.debug("chs5")
