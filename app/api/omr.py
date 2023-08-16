@@ -346,8 +346,10 @@ def omr_writing():
                             if bool(y):
                                 is_subject_of_test_type = True
 
+
             if not is_subject_of_test_type:
                 return bad_request(message="The test type is not the subject of OMR System.")
+
 
             stage_data= []
             branching = json.dumps(assessment.branching)
